@@ -10,9 +10,9 @@
 	background-color: var(--scrollbar_thumb_hover, #a6a6a6);
 }
 
-.scrollbar::-webkit-scrollbar-thumb,
-.group::-webkit-scrollbar-thumb,
-#pin_list::-webkit-scrollbar-thumb {
+.scrollbar::-webkit-scrollbar-track,
+.group::-webkit-scrollbar-track,
+#pin_list::-webkit-scrollbar-track {
 	background-color: var(--scrollbar_track, #e4e4e4);
 }
 
