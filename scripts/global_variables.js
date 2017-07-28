@@ -13,6 +13,7 @@ if (navigator.userAgent.match("Firefox") !== null) {
 
 var MouseHoverOver = "";
 var DragNode;
+var GroupDragNode;
 var DropTargetsInFront = false;
 var timeout = false;
 var menuTabId = 0;

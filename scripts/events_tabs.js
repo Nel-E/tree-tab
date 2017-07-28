@@ -17,14 +17,12 @@ function SetTabEvents() {
 
 	// double click to create tab
 	$(document).on("dblclick", ".group, #pin_list, .expand", function(event) {
-		if (event.button == 0 && $(this).parent().is(".n")) {
-			chrome.tabs.create({});
-		}
-		if (event.button == 0 && event.target.id == ".group") {
-			chrome.tabs.create({});
-		}
-		if (event.button == 0 && event.target.id == "pin_list") {
-			chrome.tabs.create({ pinned: true });
+		if (event.button == 0 && $(event.target).is(this)) {
+			if (event.target.id == "pin_list") {
+				chrome.tabs.create({ pinned: true });
+			} else {
+				chrome.tabs.create({});
+			}
 		}
 	});
 
@@ -295,6 +293,11 @@ function SetTabEvents() {
 
 	// SELECT OR CLOSE TAB/PIN
 	$(document).on("mousedown", ".tab, .pin", function(event) {
+		
+		if ($(".menu").is(":visible")) {
+			return;
+		}		
+		
 		DropTargetsSendToBack();
 		event.stopPropagation();
 		if (event.button == 0) {
@@ -380,6 +383,9 @@ function SetTabEvents() {
 
 	// SINGLE CLICK TO ACTIVATE TAB
 	$(document).on("click", ".tab_header", function(event) {
+		if ($(".menu").is(":visible")) {
+			return;
+		}
 		event.stopPropagation();
 		if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
 			SetActiveTab($(this).parent()[0].id);

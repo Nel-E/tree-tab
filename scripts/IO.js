@@ -110,7 +110,7 @@ function SetIOEvents() {
 			event.preventDefault();
 		}
 		if (event.button == 0 && !$(event.target).is(".menu_item")) {
-			$(".menu").hide(0);
+			$(".menu").hide(300);
 		}
 	};
 }

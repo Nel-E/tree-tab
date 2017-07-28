@@ -115,22 +115,9 @@ function Initialize() {
 					}
 				}
 			});
-			tabs.forEach(function(Tab) {
-				if ($("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n)[0]) {
-					if ($("#"+Tab.id).index() > bg.tabs[Tab.id].n) {
-						$("#"+Tab.id).insertBefore($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
-					} else {
-						$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
-					}
-				}
-			});
-			tabs.forEach(function(Tab) {
-				if ($("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n)[0]) {
-					if ($("#"+Tab.id).index() < bg.tabs[Tab.id].n) {
-						$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
-					}
-				}
-			});
+			
+			RearrangeTabs(tabs, 0);
+
 			delete theme;
 
 			SetIOEvents();

@@ -86,15 +86,15 @@ function SetMenu() {
 	});
 
 	// hide menu
-	$(document).on("mousedown", "body", function(event) {
-		if (event.button != 2) {
-			$(".menu").hide(300);
-		}
-	});
+	// $(document).on("mousedown", "body", function(event) {
+		// if (event.button != 2) {
+			// $(".menu").hide(300);
+		// }
+	// });
 
-	$(document).on("mouseleave", "body", function(event) {
-		$(".menu").hide(300);
-	});
+	// $(document).on("mouseleave", "body", function(event) {
+		// $(".menu").hide(300);
+	// });
 
 	// if the menu element is clicked
 	$(document).on("mousedown", "#tabs_menu li", function(event) {

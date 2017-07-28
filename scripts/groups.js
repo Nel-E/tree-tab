@@ -27,13 +27,24 @@ function AppendAllGroups() {
 			// groups[group].activetab = reference_tabs[groups[group].activetab];
 		// }
 	}
-
+	RearrangeGroups(0);
 	
 }
 
 
-function RearrangeGroups() {
-	
+function RearrangeGroups(stack) {
+	$(".group_button").each(function() {
+		if ($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0] && $(this).index() > bg.groups[(this.id).substr(1)].index) {
+			$(this).insertBefore($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0]);
+		} else {
+			if ($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0] && $(this).index() < bg.groups[(this.id).substr(1)].index) {
+				$(this).insertAfter($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0]);
+			}
+		}
+		if ($(this).index() != bg.groups[(this.id).substr(1)].index && stack < 10) {
+			RearrangeGroups(stack+1);
+		}
+	});
 }
 
 function AppendGroupToList(groupId, group_name, background_color, font_color) {
@@ -43,7 +54,7 @@ function AppendGroupToList(groupId, group_name, background_color, font_color) {
 	}
 	
 	if ($("#_"+groupId).length == 0) {
-		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
+		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
 		var gtc = document.createElement("div"); gtc.className = "group_title_container"; gbn.appendChild(gtc);
 		var gte = document.createElement("span"); gte.className = "group_title"; gte.textContent = group_name; gtc.appendChild(gte);
 		var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.textContent = " (0)"; gtc.appendChild(gtn);
@@ -75,72 +86,6 @@ function AddNewGroup(color) {
 
 
 function AppendTabsToGroup(p) {
-	// if (p.groupId == "at") {
-		// p.groupId = "ut";
-	// }
-	
-	// p.tabsIds.forEach(function(tabId) {
-		// $("#"+tabId).addClass("grouping");
-	// });
-	
-	// SetTabClass($(".grouping"), p.groupId == "0" ? true : false);
-
-	// if (p.RemoveClass != undefined) {
-		// $(".grouping:not(.active)").removeClass(p.RemoveClass);
-	// }
-	
-	// if (p.SwitchTabIfHasActive == true) {
-		// if ($(".grouping").hasClass("active")) {
-			// ActivateTabThatHasNoClass("grouping");
-		// }
-	// }
-
-	// if (p.insertAfter != undefined) {
-		// if (p.groupId == "0") {
-			// $(".grouping").appendTo(vt.PinList);
-		// } else {
-			// if (p.insertAfter) {
-				// $(".grouping").appendTo(vt.TabList);
-				// if ($(":not(.grouping).tab."+p.groupId).length > 0) {
-					// $(".grouping").insertAfter($(":not(.grouping).tab."+p.groupId+":last"));
-				// }
-			// } else {
-				// $(".grouping").prependTo(vt.TabList);
-			// }
-		// }
-	// }
-	
-	// if (p.tabId != undefined) {
-		// if ($("#"+p.tabId).length > 0) {
-			// if (p.insertAfter == true) {
-				// $(".grouping").insertAfter($("#"+p.tabId));
-			// }
-			// if (p.insertAfter == false) {
-				// $(".grouping").insertBefore($("#"+p.tabId));
-			// }
-		// }
-	// }
-	
-	// if (p.activateGroup == true) {
-		// SetActiveGroup(p.groupId, true, true);
-	// }
-	
-	// if (p.moveTabs != undefined) {
-		// MoveBrowserTabs(p.tabsIds, p.groupId == "0");
-	// }
-	// p.tabsIds.forEach(function(tabId) {
-		// $("#"+tabId).removeClass("grouping");
-		// if (bg.tabs[tabId]) {
-			// bg.tabs[tabId].g = p.groupId;
-		// } else {
-			// bg.tabs[tabId] = { g: p.groupId, h: 0 };
-		// }
-		// ReplaceGroupClassInTab(tabId, p.groupId);
-	// });
-	
-	// $(".grouping").removeClass("grouping");
-	// bg.schedule_save++;
-	// RefreshGUI();
 }
 
 
@@ -153,9 +98,6 @@ function GroupRemove(groupId, close_tabs) {
 
 	delete bg.groups[groupId];
 	chrome.runtime.sendMessage({command: "groups_save"});
-
-
-
 
 	$("#"+groupId).remove();
 	$("#_"+groupId).remove();
@@ -177,6 +119,11 @@ function GroupRemove(groupId, close_tabs) {
 }
 
 function UpdateBgGroupsOrder() {
+	$(".group_button").each(function() {
+		bg.groups[(this.id).substr(1)].index = $(this).index();
+	});
+	console.log(bg.groups);
+	chrome.runtime.sendMessage({command: "groups_save"});
 	// var new_groups = [];
 	// $(".group").each(function() {
 		// for (var group_index = 0; group_index < bg.groups.length; group_index++) {
@@ -212,8 +159,6 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 	// $("#"+groupId).css({"width": ""});
 	// $("#"+groupId).css({"top": "", "width": "", "height": ""});
 
-	
-	
 	active_group = groupId;
 	RefreshGUI();
 	
@@ -221,36 +166,6 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
 		ScrollToTab($("#"+groupId).find(".active")[0].id);
 	}
-
-	
-
-
-
-	
-	
-	// vt.ActiveGroup = groupId;
-	// $(".active_group").removeClass("active_group");
-	// $("#"+vt.ActiveGroup).addClass("active_group");
-	// RefreshGUI();
-	// if (switch_to_active_in_group) {
-		// if ($(".tab:visible").length != 0 && $(".tab.active:visible").length == 0) {
-			// var tabId = $(".tab:visible")[0].id;
-			// if (vt.ActiveGroup.match("at|ut") == null && $("#"+bg.groups[$("#"+vt.ActiveGroup).index()].i).is(":visible")) {
-				// tabId = bg.groups[$("#"+vt.ActiveGroup).index()].i;
-			// }
-			// if (vt.ActiveGroup == "ut" && $(".tab#"+vt.utActiveTab+":visible").length > 0) {
-				// tabId = vt.utActiveTab;
-			// }
-			// chrome.tabs.update(parseInt(tabId), {active:true});
-			// bg.schedule_save++;
-		// }	
-	// }	
-	// if (scroll_to_active && bg.opt.scroll_to_active) {
-		// if ($(".active").is(".tab:visible")) {
-			// ScrollTabList($(".tab.active:visible")[0].id);
-		// }
-	// }
-	// ScrollToGroup(vt.ActiveGroup);
 }
 
 function SetActiveTabInActiveGroup(tabId) {

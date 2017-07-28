@@ -44,6 +44,21 @@ async function UpdateData() {
 	},500);
 }
 
+function RearrangeTabs(tabs, stack) {
+	tabs.forEach(function(Tab) {
+		if ($("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n)[0]) {
+			if ($("#"+Tab.id).index() > bg.tabs[Tab.id].n) {
+				$("#"+Tab.id).insertBefore($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
+			} else {
+				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
+			}
+		}
+		if ($("#"+Tab.id).index() != bg.tabs[Tab.id].n && stack < 10) {
+			RearrangeTabs(tabs, stack+1);
+		}
+	});
+}
+
 // p - tuple object with paramenters: p.tab - tab object, p.ParentId - Parent tabId, p.InsertAfterId - insert tab after this tabId (on same level),
 // p.Append - if true Appends tab at the end of tree if false or prepends
 function AppendTab(p) {
