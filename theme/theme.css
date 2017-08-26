@@ -481,12 +481,28 @@ div {
 
 
 
+.toolbar_groups_button.on {
+	background-color: var(--toolbar_background, #f2f2f2);
+	border: 1px solid var(--toolbar_border_bottom, #cccccc);
+}
+
 .toolbar_groups_button:not(.on) {
+	background-color: var(--button_background, #f2f2f2);
+	border: 1px solid var(--button_hover_border, #bebebe);
+}
+.toolbar_groups_button:hover:not(.on) {
+	background-color: var(--button_hover_background, #dcdcdc);
 	border: 1px solid var(--button_hover_border, #bebebe);
 }
 
 #new_group {
 	background-image: url(../theme/toolbar_groups_new.svg);
+}
+#remove_group {
+	background-image: url(../theme/toolbar_groups_new.svg);
+}
+#remove_tabs_from_group {
+	background-image: url(../theme/toolbar_groups_ungroup_tabs.svg);
 }
 #ungrouped_tabs {
 	background-image: url(../theme/toolbar_groups_ungrouped.svg);

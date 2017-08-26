@@ -99,10 +99,10 @@ function VivaldiRefreshMediaIcons() {
 function GetFaviconAndTitle(tabId) {
 	if ($("#" + tabId).length > 0 && bg.tabs[tabId]) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
+			var title = tab.title ? tab.title : tab.url;
 
 			if (tab && tab.status == "complete") {
 				$("#" + tabId).removeClass("loading");
-				var title = tab.title ? tab.title : tab.url;
 				// change title
 				$("#tab_title" + tab.id)[0].textContent = title;
 				$("#tab_header" + tab.id).attr("title", title);
@@ -130,7 +130,7 @@ function GetFaviconAndTitle(tabId) {
 			if (tab && tab.status == "loading") {
 				$("#tab_header" + tab.id).css({ "background-image": "" });
 				$("#" + tabId).addClass("loading");
-				var title = tab.title ? tab.title : bg.caption_loading;
+				title = tab.title ? tab.title : bg.caption_loading;
 				$("#tab_title" + tab.id)[0].textContent = title;
 				$("#tab_header" + tab.id).attr("title", title);
 				setTimeout(function() {

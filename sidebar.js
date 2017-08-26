@@ -92,13 +92,7 @@ function Initialize() {
 
 			
 			tabs.forEach(function(Tab) {
-				AppendTab({
-					tab: Tab,
-					// ParentId: "tab_list",
-					// ParentId: bg.tabs[Tab.id].p,
-					// ParentId: "g_23y23hriouh",
-					Append: true
-				});
+				AppendTab({tab: Tab, Append: true});
 			});
 
 			tabs.forEach(function(Tab) {
@@ -116,7 +110,7 @@ function Initialize() {
 				}
 			});
 			
-			RearrangeTabs(tabs, 0);
+			RearrangeTabs(tabs, true);
 
 			delete theme;
 
@@ -128,10 +122,10 @@ function Initialize() {
 			SetMenu();
 			RefreshGUI();
 			RefreshExpandStates();
-			UpdateData();
+			SetActiveGroup("tab_list", true, true);
 			
-			// Scroll to active tab
-			setTimeout(function() { ScrollToTab($(".active:visible")[0].id); },100);
+			setTimeout(function() { UpdateData(); },5000);
+			setTimeout(function() { ScrollToTab($(".active:visible")[0].id); },100); // Scroll to active tab
 			
 			
 			

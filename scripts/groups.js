@@ -64,6 +64,11 @@ function AppendGroupToList(groupId, group_name, background_color, font_color) {
 	// $("#"+groupId+"_button> .group_title_container > .group_title").css({"color": "#"+font_color});
 	// $("#"+groupId+"_button> .group_title_container > .group_tab_count").css({"color": "#"+font_color});
 	// $("#"+groupId+"_button").css({"background-color": "#"+background_color});
+
+	if (bg.opt.switch_with_scroll) {
+		BindTabsSwitchingToMouseWheel();
+	}
+
 	// RefreshGUI();
 }
 
@@ -203,10 +208,10 @@ function ScrollToGroup(groupId) {
 
 // generate random group id
 function GetRandomID(){
-	var letters = "0123456789ABCDEFGHIKLMNOPRSTUVWYZ".split("");
+	var letters = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","R","S","T","Q","U","V","W","Y","Z","a","b","c","d","e","f","g","h","i","k","l","m","n","o","p","r","s","t","q","u","v","w","y","z"];
 	var random = "";
-	for (var i = 0; i < 16; i++ ) {
-	   random += letters[Math.floor(Math.random() * 33)];
+	for (var i = 0; i < 2; i++ ) {
+	   random += letters[Math.floor(Math.random() * letters.length)];
 	}
 	if ($("#"+random)[0]) {
 		GetRandomID();

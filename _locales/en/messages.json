@@ -435,6 +435,12 @@
 	"tabs_menu_close_tree": {
 		"message": "Close tree"
 	},
+	"options_syncro_tabbar_tabs_order": {
+		"message": "synchronise TabBar tabs order with Tree Tabs (with too many tabs, after moving tabs, Tree Tabs may be unresponsive for a second)"
+	},
+	"options_switch_with_scroll": {
+		"message": "switch tabs with mouse wheel"
+	},
 	"options_faster_scroll": {
 		"message": "Faster scrolling"
 	}

@@ -91,7 +91,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 				// orphan case
 				} else {
 					if (bg.opt.append_orphan_tab == "after_active") {
-						AppendTab({ tab: message.tab, InsertAfterId: $(".active:visible")[0].id, Append: false });
+						AppendTab({ tab: message.tab, InsertAfterId: $(".active:visible")[0] ? $(".active:visible")[0].id : undefined, Append: false });
 					}
 					if (bg.opt.append_orphan_tab == "top") {
 						AppendTab({ tab: message.tab, Append: false });

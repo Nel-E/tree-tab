@@ -44,7 +44,23 @@ async function UpdateData() {
 	},500);
 }
 
-function RearrangeTabs(tabs, stack) {
+async function RearrangeBrowserTabs() {
+	if (bg.opt.syncro_tabbar_tabs_order) {
+		var tabIds = $(".pin, .tab").map(   function(){   return parseInt(this.id);   }   ).toArray();
+		for (var i = 0; i < tabIds.length; i++) {
+			if ($(".pin, .tab")[i] && $($(".pin, .tab")[i]).is(":visible")) {
+				chrome.tabs.move(tabIds[i], {index: i});
+			}
+		}
+		for (var i = 0; i < $(".pin, .tab").length; i++) {
+			if ($(".pin, .tab")[i] && $($(".pin, .tab")[i]).is(":visible")) {
+				chrome.tabs.move(parseInt($(".pin, .tab")[i].id), {index: i});
+			}
+		}
+	}
+}
+
+function RearrangeTabs(tabs, first_run) {
 	tabs.forEach(function(Tab) {
 		if ($("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n)[0]) {
 			if ($("#"+Tab.id).index() > bg.tabs[Tab.id].n) {
@@ -53,8 +69,8 @@ function RearrangeTabs(tabs, stack) {
 				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bg.tabs[Tab.id].n));
 			}
 		}
-		if ($("#"+Tab.id).index() != bg.tabs[Tab.id].n && stack < 10) {
-			RearrangeTabs(tabs, stack+1);
+		if ($("#"+Tab.id).index() != bg.tabs[Tab.id].n && first_run) {
+			RearrangeTabs(tabs, false);
 		}
 	});
 }

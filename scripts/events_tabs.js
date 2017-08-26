@@ -248,6 +248,9 @@ function SetTabEvents() {
 			DropTargetsSendToBack();
 			RefreshGUI();
 		}, 500);
+		setTimeout(function() {
+			RearrangeBrowserTabs();
+		}, 5000);
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		$(".tab_header_hover").removeClass("tab_header_hover");
 		$(".frozen").addClass("selected").removeClass("frozen");
@@ -325,43 +328,6 @@ function SetTabEvents() {
 			($(this).is(".pin") && event.button == 1 && bg.opt.close_with_MMB == true && bg.opt.allow_pin_close == true)
 		) {
 			if ($(this).is(".active:visible") && bg.opt.after_closing_active_tab != "browser") {
-/* 				var tabId;
-				var Prev = $(this).prev();
-				var Next = $(this).next();
-
-				// if in root, seek for closest, in order set in options, first next then prev, or prev then next
-				if ($(this).parent().is("#pin_list, .group, .children")) {
-					if (bg.opt.after_closing_active_tab == "above") {
-						if (Prev[0]) {
-							tabId = Prev[0].id;
-						} else {
-							if (Next[0]) {
-								tabId = Next[0].id;
-							}
-						}
-					}
-					if (bg.opt.after_closing_active_tab == "below") {
-						if (Next[0]) {
-							tabId = Next[0].id;
-						} else {
-							if (Prev[0]) {
-								tabId = Prev[0].id;
-							}
-						}
-					}
-				}
-
-				// if no tabs left in the tree, go to parent
-				if (tabId == undefined && $(this).parent().parent().is(".tab")) {
-					tabId = $(this).parent().parent()[0].id;
-				}
-
-				// if found a matching condition a new tab will be activated
-				if (tabId) {
-					SetActiveTab(tabId);
-					chrome.tabs.update(parseInt(tabId), { active: true });
-				} */
-				
 				if (bg.opt.after_closing_active_tab == "above") {
 					ActivatePrevTab();
 				}

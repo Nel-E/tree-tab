@@ -4,27 +4,69 @@
 
 // **********      KEYBOARD AND MOUSE       ***************
 
+function BindTabsSwitchingToMouseWheel() {
+	// switch tabs with mouse scroll
+	$("#pin_list, .group").bind("mousewheel DOMMouseScroll", function(event) {
+		e = event.originalEvent;
+		var delta = e.wheelDelta > 0 || e.detail < 0 ? -1 : 1;
+		if (delta < 0) {
+			ActivatePrevTab();
+		} else {
+			if (delta > 0) {
+				ActivateNextTab();
+			}
+		}
+		event.preventDefault();
+	});
+}
+
 function SetIOEvents() {
 
-	// scroll horizontally on pin list
-	$("#pin_list").bind("mousewheel DOMMouseScroll", function(event) {
-		event = event.originalEvent;
-		var delta = event.wheelDelta > 0 || event.detail < 0 ? -1 : 1;
-		var multiplier = 1;
-		for (var t = 1; t < 20; t++) {
-			setTimeout(function() {
-				$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
-			}, t);
-			multiplier++;
+	if (bg.opt.switch_with_scroll) {
+		BindTabsSwitchingToMouseWheel();
+	} else {
+		// scroll horizontally on pin list
+		$("#pin_list").bind("mousewheel DOMMouseScroll", function(event) {
+			event = event.originalEvent;
+			var delta = event.wheelDelta > 0 || event.detail < 0 ? -1 : 1;
+			var multiplier = 1;
+			for (var t = 1; t < 20; t++) {
+				setTimeout(function() {
+					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
+				}, t);
+				multiplier++;
+			}
+			multiplier = 20;
+			for (var t = 21; t < 40; t++) {
+				setTimeout(function() {
+					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
+				}, t);
+				multiplier--;
+			}
+		});
+		
+		// this is for faster scrolling in firefox, for some reason its default scrolling is slow
+		if (bg.opt.faster_scroll) {
+			$(".group").bind("mousewheel DOMMouseScroll", function(event) {
+				event = event.originalEvent;
+				var delta = event.wheelDelta > 0 || event.detail < 0 ? -1.5 : 1.5;
+				var multiplier = 1;
+				for (var t = 1; t < 40; t++) {
+					setTimeout(function() {
+						$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
+					}, t);
+					multiplier++;
+				}
+				multiplier = 40;
+				for (var t = 41; t < 80; t++) {
+					setTimeout(function() {
+						$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
+					}, t);
+					multiplier--;
+				}
+			});
 		}
-		multiplier = 20;
-		for (var t = 21; t < 40; t++) {
-			setTimeout(function() {
-				$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
-			}, t);
-			multiplier--;
-		}
-	});
+	}
 	
 	// scroll groups list
 	// $("#group_list").bind("mousewheel DOMMouseScroll", function(event) {
@@ -47,27 +89,6 @@ function SetIOEvents() {
 		// }
 	// });
 	
-	// this is for faster scrolling in firefox, for some reason its default scrolling is slow
-	if (bg.opt.faster_scroll) {
-		$(".group").bind("mousewheel DOMMouseScroll", function(event) {
-			event = event.originalEvent;
-			var delta = event.wheelDelta > 0 || event.detail < 0 ? -1.5 : 1.5;
-			var multiplier = 1;
-			for (var t = 1; t < 40; t++) {
-				setTimeout(function() {
-					$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
-				}, t);
-				multiplier++;
-			}
-			multiplier = 40;
-			for (var t = 41; t < 80; t++) {
-				setTimeout(function() {
-					$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
-				}, t);
-				multiplier--;
-			}
-		});
-	}
 
 	// catch keyboard keys
 	$(document).keydown(function(event) {

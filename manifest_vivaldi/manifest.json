@@ -29,23 +29,9 @@
 			"description": "Go to tab below"
 		}
 	},
-	"sidebar_action": {
-		"default_icon": {
-			"19": "icons/16.png",
-			"38": "icons/38.png"
-		},
-		"default_panel": "sidebar.html",
-		"default_title": "Tree Tabs"
-	},
-	"applications": {
-		"gecko": {
-			"id": "TreeTabs@jagiello.it",
-			"strict_min_version": "54.0"
-		}
-	},
 	"options_ui": {
 		"page": "options.html",
-		"open_in_tab": true
+		"open_in_tab": false
 	},
 	"version": "0.0.16"
 }

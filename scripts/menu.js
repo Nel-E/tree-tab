@@ -11,11 +11,11 @@ function SetMenu() {
 	});
 
 	// trigger action when the contexmenu is about to be shown
-	$(document).bind("contextmenu", function(event) {
-		if (!event.ctrlKey) {
-			event.preventDefault();
-		}
-	});
+	// $(document).bind("contextmenu", function(event) {
+		// if (!event.ctrlKey) {
+			// event.preventDefault();
+		// }
+	// });
 
 	// show menu
 	$(document).on("mousedown", "#tabs_box, .tab, .pin", function(event) {
@@ -84,17 +84,6 @@ function SetMenu() {
 			$("#tabs_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
 		}
 	});
-
-	// hide menu
-	// $(document).on("mousedown", "body", function(event) {
-		// if (event.button != 2) {
-			// $(".menu").hide(300);
-		// }
-	// });
-
-	// $(document).on("mouseleave", "body", function(event) {
-		// $(".menu").hide(300);
-	// });
 
 	// if the menu element is clicked
 	$(document).on("mousedown", "#tabs_menu li", function(event) {
