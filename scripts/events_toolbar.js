@@ -4,69 +4,119 @@
 
 // **********             TOOLBAR           ***************
 
-function SaveToolbarOptions() {
-	chrome.runtime.sendMessage({command: "toolbar_options_save"});
+
+
+function SetToolbarSearchFilter() {
+	let filter_type = "url";
+	if (localStorage.getItem("filter_type") !== null) {
+		filter_type = localStorage["filter_type"];
+	}
+	if (filter_type == "url") {
+		$("#button_filter_type").addClass("url").removeClass("title");
+	} else {
+		$("#button_filter_type").addClass("title").removeClass("url");
+	}
+}	
+
+function SetToolbarShelfsEvents() {
+	let shelf = "";
+	if (localStorage.getItem("toolbar_active_shelf") !== null) {
+		shelf = localStorage["toolbar_active_shelf"];
+	}
+	
+	$(".button").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	});
+	
+	$("#filter_box").attr("placeholder", caption_searchbox);
+	$("#filter_box").css({"opacity": 1});
+	
+	$(".on").removeClass("on");
+	$(".toolbar_shelf").addClass("hidden");
+	if (shelf == "search" && $("#button_search").length != 0) {
+		$("#toolbar_search").removeClass("hidden");
+		$("#toolbar_shelf_tools, #toolbar_shelf_groups, #toolbar_shelf_folders").addClass("hidden");
+		$("#button_search").addClass("on");
+	}
+	if (shelf == "tools" && $("#button_tools").length != 0) {
+		$("#toolbar_shelf_tools").removeClass("hidden");
+		$("#toolbar_search, #toolbar_shelf_groups, #toolbar_shelf_folders").addClass("hidden");
+		$("#button_tools").addClass("on");
+	}
+	if (shelf == "groups" && $("#button_groups").length != 0) {
+		$("#toolbar_shelf_groups").removeClass("hidden");
+		$("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_folders").addClass("hidden");
+		$("#button_groups").addClass("on");
+	}
+	// if (shelf == "folders" && $(", #toolbar_shelf_folders").length != 0) {
+	if (shelf == "folders" && $("#button_folders").length != 0) {
+		$("#button_folders").removeClass("hidden");
+		$("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
+		$("#button_folders").addClass("on");
+	}
+	
+	$("#toolbar_separator").remove();
+	$("#toolbar_unused_buttons").remove();
 }
+
 
 function SetToolbarEvents() {
 	// tools and search buttons toggle
-	$(document).on("mousedown", "#button_tools, #button_search", function(event) {
+	$(document).on("mousedown", "#button_tools, #button_search, #button_groups", function(event) {
 		if (event.button != 0) {
 			return;
 		}
 		if ($(this).is(".on")) {
-			$("#button_tools, #button_search").removeClass("on");
-			$("#toolbar_tools, #toolbar_search").addClass("hidden");
-			bg.opt_toolbar.active_toolbar_tool = "";
+			$("#button_tools, #button_search, #button_groups").removeClass("on");
+			$(".toolbar_shelf").addClass("hidden");
+			// $("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
+			localStorage["toolbar_active_shelf"] = "";
 		} else {
-			$(this).addClass("on");
 			if ($(this).is("#button_tools")) {
-				$("#button_search").removeClass("on");
-				$("#toolbar_search").addClass("hidden");
-				$("#toolbar_tools").removeClass("hidden");
-				bg.opt_toolbar.active_toolbar_tool = "tools";
-			} else {
-				$("#button_tools").removeClass("on");
-				$("#toolbar_tools").addClass("hidden");
-				$("#toolbar_search").removeClass("hidden");
-				bg.opt_toolbar.active_toolbar_tool = "search";
+				$("#toolbar_search, #toolbar_shelf_groups").addClass("hidden");
+				$("#toolbar_shelf_tools").removeClass("hidden");
+				localStorage["toolbar_active_shelf"] = "tools";
 			}
+			if ($(this).is("#button_search")) {
+				$("#toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
+				$("#toolbar_search").removeClass("hidden");
+				localStorage["toolbar_active_shelf"] = "search";
+			}
+			if ($(this).is("#button_groups")) {
+				$("#toolbar_search, #toolbar_shelf_tools").addClass("hidden");
+				$("#toolbar_shelf_groups").removeClass("hidden");
+				localStorage["toolbar_active_shelf"] = "groups";
+			}
+			$(".button").removeClass("on");
+			$(this).addClass("on");
 		}
 		RefreshGUI();
-		SaveToolbarOptions();
 	});
 
 
-	// go to previous search result
-	$(document).on("mousedown", "#filter_search_go_prev", function(event) {
-		if (event.button != 0) {
+	// go to previous or next search result
+	$(document).on("mousedown", "#filter_search_go_prev, #filter_search_go_next", function(event) {
+		if (event.button != 0 || $(".tab.filtered").length == 0) {
 			return;
 		}
-		if (SearchIndex == 0) {
-			SearchIndex = $(".tab.filtered").length-1;
+		
+		if ($(this).is("#filter_search_go_prev")){
+			if (SearchIndex == 0) {
+				SearchIndex = $(".tab.filtered").length-1;
+			} else {
+				SearchIndex--;
+			}
 		} else {
-			SearchIndex--;
+			if (SearchIndex == $(".tab.filtered").length-1) {
+				SearchIndex = 0;
+			} else {
+				SearchIndex++;
+			}
 		}
 		$(".highlighted_search").removeClass("highlighted_search");
 		$($(".tab.filtered")[SearchIndex]).addClass("highlighted_search");
 		ScrollToTab($(".tab.filtered")[SearchIndex].id);
 	});
-
-	// go to next search result
-	$(document).on("mousedown", "#filter_search_go_next", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		if (SearchIndex == $(".tab.filtered").length-1) {
-			SearchIndex = 0;
-		} else {
-			SearchIndex++;
-		}
-		$(".highlighted_search").removeClass("highlighted_search");
-		$($(".tab.filtered")[SearchIndex]).addClass("highlighted_search");
-		ScrollToTab($(".tab.filtered")[SearchIndex].id);
-	});
-
 
 	// new tab
 	$(document).on("mousedown", "#button_new", function(event) {
@@ -86,9 +136,6 @@ function SetToolbarEvents() {
 		}
 		if (event.button == 2 && $(".active:visible")[0]) {
 			ScrollToTab($(".active:visible")[0].id);
-			// chrome.tabs.query({windowId: CurrentWindowId, active: true}, function(tabs) {
-				// ScrollToTab(tabs[0].id);
-			// });
 		}
 	});
 	// pin tab
@@ -140,7 +187,7 @@ function SetToolbarEvents() {
 			$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
 		} else {
 			$("#button_filter_clear").css({"opacity": "1"});
-			$("#button_filter_clear").attr("title", bg.caption_clear_filter);
+			$("#button_filter_clear").attr("title", caption_clear_filter);
 		}
 		FindTab($("#filter_box")[0].value);
 	});
@@ -150,13 +197,8 @@ function SetToolbarEvents() {
 			return;
 		}
 		$("#button_filter_type").toggleClass("url").toggleClass("title");
-		if (bg.opt_toolbar.filter_type == "url") {
-			bg.opt_toolbar.filter_type = "title";
-		} else {
-			bg.opt_toolbar.filter_type = "url";
-		}
 		FindTab($("#filter_box")[0].value);
-		SaveToolbarOptions();
+		localStorage["filter_type"] = $(this).is(".url") ? "url" : "title";
 	});
 	// clear filter button
 	$(document).on("mousedown", "#button_filter_clear", function(event) {

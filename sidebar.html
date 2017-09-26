@@ -28,32 +28,26 @@
 	<body>
 
 		<div id="DragImage" style="display: none; width:0px; height:0px;"></div>
+		
 		<div class="toolbar" id="toolbar">
 		</div>
+		
 		<div id="toolbar_groups">
-			<div class="toolbar_groups_buttons" id="toolbar_groups_buttons">
-				<div class="toolbar_groups_button" id="new_group">
-				</div>
-				<div class="toolbar_groups_button" id="remove_group">
-				</div>
-				<div class="toolbar_groups_button" id="remove_tabs_from_group">
-				</div>
-				<div class="toolbar_groups_button" id="ungrouped_tabs">
-				</div>
-			</div>
 			<div class="scroll_group" id="scroll_group_up">
 			</div>
+			
 			<div class="group_list" id="group_list">
 			</div>
 			<div class="scroll_group" id="scroll_group_down">
 			</div>
 		</div>
-		<div id="tabs_box">
-			<div class="pin_list" id="pin_list">
-			</div>
-			<div id="groups">
-				<div class="group" id="tab_list">
-				</div>
+		
+		
+		<div class="pin_list" id="pin_list">
+		</div>
+		
+		<div id="groups">
+			<div class="group" id="tab_list">
 			</div>
 		</div>
 		
@@ -118,15 +112,17 @@
 		
 		
 		
-		<script type="text/javascript" src="../scripts/global_variables.js"></script>
+		<script type="text/javascript" src="../scripts/global.js"></script>
 		
 		<script type="text/javascript" src="../scripts/events_toolbar.js"></script>
 		<script type="text/javascript" src="../scripts/events_chrome.js"></script>
 		<script type="text/javascript" src="../scripts/events_tabs.js"></script>
+		<script type="text/javascript" src="../scripts/events_drag_and_drop.js"></script>
 		<script type="text/javascript" src="../scripts/events_groups.js"></script>
 		<script type="text/javascript" src="../scripts/events_refresh.js"></script>
 		
 		<script type="text/javascript" src="../scripts/tabs.js"></script>
+		<script type="text/javascript" src="../scripts/folders.js"></script>
 		<script type="text/javascript" src="../scripts/groups.js"></script>
 		<script type="text/javascript" src="../scripts/IO.js"></script>
 		<script type="text/javascript" src="../scripts/menu.js"></script>

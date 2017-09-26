@@ -5,6 +5,8 @@
 // **********         GROUPS EVENTS         ***************
 
 function SetGroupEvents() {
+	$("#toolbar_groups").css({"display": "inline-block"});
+			
 	// activate group
 	$(document).on("mousedown", ".group_button", function(event) {
 		menuGroupId = (this.id).substr(1);
@@ -23,7 +25,8 @@ function SetGroupEvents() {
 	// new group button
 	$(document).on("mousedown", "#new_group", function(event) {
 		if (event.button == 0) {
-			AddNewGroup(GetRandomHexColor());
+			// AddNewGroup(GenerateRandomHexColor());
+			AddNewGroup();
 		}
 	});
 
@@ -37,12 +40,42 @@ function SetGroupEvents() {
 	});
 
 	// edit group
-	$(document).on("mousedown", ".group_button", function(event) {
-		if (event.button == 2) {
-			ShowGroupEditWindow();
+	// $(document).on("mousedown", ".group_button", function(event) {
+		// if (event.button == 2) {
+			// ShowGroupEditWindow();
+		// }
+	// });
+	
+	// EDIT GROUP
+	$(document).on("mousedown", "#edit_group", function(event) {
+		if (active_group != "tab_list") {
+			ShowGroupEditWindow(active_group);
 		}
 	});
 
+	$(document).on("mousedown", "#group_edit_discard", function(event) {
+		$("#group_edit").hide(0);
+	});
+	$("#group_edit_name").keyup(function(e) {
+		if (e.keyCode == 13) {
+			GroupEditConfirm();
+		}
+	});
+	$(document).on("mousedown", "#group_edit_confirm", function(event) {
+		GroupEditConfirm();
+	});
+
+	// show color picker
+	$(document).on("mousedown", "#group_edit_font, #group_edit_background", function(event) {
+		event.stopPropagation();
+		PickColor = this.id;
+		$("#color_picker")[0].value = "#"+rgbtoHex($(this).css("background-color"));
+		$("#color_picker").focus();
+		$("#color_picker").click();
+	});
+	
+	
+	
 
 	// scroll groups
 	// $(document).on("mousedown", "#scroll_group_up, #scroll_group_down", function(event) {

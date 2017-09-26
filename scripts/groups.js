@@ -9,10 +9,10 @@
 function AppendAllGroups() {
 	// var scroll = $("#group_list").scrollTop();
 	// $(".group").remove();
-	// if (bg.groups.length == 0) {
+	// if (bggroups.length == 0) {
 		// return;
 	// }
-	// bg.groups.forEach(function(group) {
+	// bggroups.forEach(function(group) {
 		// AppendGroupToList(group.g, group.n, group.c, group.f);
 	// });
 	// SetActiveGroup(vt.ActiveGroup, false, false);
@@ -21,9 +21,9 @@ function AppendAllGroups() {
 	
 		// groups["tab_list"] = { id: "g_23y23hriouh", index: 0, activetab: 0, name: "QPA", background: "#000000", font: "#FFFFFF"  };
 	
-	for (var group in bg.groups) {
+	for (var group in bggroups) {
 		// if (group != "tab_list") {
-		AppendGroupToList(bg.groups[group].id, bg.groups[group].name, bg.groups[group].background, bg.groups[group].font);
+		AppendGroupToList(bggroups[group].id, bggroups[group].name, bggroups[group].background, bggroups[group].font);
 			// groups[group].activetab = reference_tabs[groups[group].activetab];
 		// }
 	}
@@ -33,15 +33,15 @@ function AppendAllGroups() {
 
 
 function RearrangeGroups(stack) {
-	$(".group_button").each(function() {
-		if ($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0] && $(this).index() > bg.groups[(this.id).substr(1)].index) {
-			$(this).insertBefore($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0]);
+	$(".group_button:not(#_tab_list)").each(function() {
+		if ($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0] && $(this).index() > bggroups[(this.id).substr(1)].index) {
+			$(this).insertBefore($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0]);
 		} else {
-			if ($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0] && $(this).index() < bg.groups[(this.id).substr(1)].index) {
-				$(this).insertAfter($("#group_list").children().eq(bg.groups[(this.id).substr(1)].index)[0]);
+			if ($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0] && $(this).index() < bggroups[(this.id).substr(1)].index) {
+				$(this).insertAfter($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0]);
 			}
 		}
-		if ($(this).index() != bg.groups[(this.id).substr(1)].index && stack < 10) {
+		if ($(this).index() != bggroups[(this.id).substr(1)].index && stack < 10) {
 			RearrangeGroups(stack+1);
 		}
 	});
@@ -65,27 +65,36 @@ function AppendGroupToList(groupId, group_name, background_color, font_color) {
 	// $("#"+groupId+"_button> .group_title_container > .group_tab_count").css({"color": "#"+font_color});
 	// $("#"+groupId+"_button").css({"background-color": "#"+background_color});
 
-	if (bg.opt.switch_with_scroll) {
+	if (opt.switch_with_scroll) {
 		BindTabsSwitchingToMouseWheel();
 	}
 
 	// RefreshGUI();
 }
 
-function AddNewGroup(color) {
-	var newId = GetRandomID();
+
+function GenerateNewGroupID(){
+	var newID = "g_"+GenerateRandomID();
+	if ($("#"+newID)[0]) {
+		GenerateNewGroupID();
+	} else {
+		return newID;
+	}
+}
+function AddNewGroup() {
+	var newId = GenerateNewGroupID();
 	
-	bg.groups[newId] = { id: newId, index: 0, activetab: 0, name: "untitled", background: "#000000", font: "#FFFFFF"  };
+	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: "untitled", background: "#000000", font: "#FFFFFF"  };
 
 	
 	AppendGroupToList(newId, "untitled", "#000000", "#FFFFFF");
 	
-	// bg.groups.push({g: "g_"+newId, n:bg.caption_group, c: color, f: "d9d9d9", i: 0});
+	// bggroups.push({g: "g_"+newId, n:bg.caption_group, c: color, f: "d9d9d9", i: 0});
 	// AppendGroupToList("g_"+newId, bg.caption_group, color);
 	// $("#group_list").scrollTop($("#group_list")[0].scrollHeight);
 	// bg.schedule_save++;
-	chrome.runtime.sendMessage({command: "groups_reappend", windowId: CurrentWindowId});
-	chrome.runtime.sendMessage({command: "groups_save"});
+	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: CurrentWindowId});
+	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 	// return "g_"+newId;
 }
 
@@ -101,14 +110,25 @@ function GroupRemove(groupId, close_tabs) {
 		$("#tab_list").append(this);
 	});
 
-	delete bg.groups[groupId];
+	delete bggroups[groupId];
+
+	if ($("#_"+groupId).prev(".group_button")[0]) {
+		SetActiveGroup(($("#_"+groupId).prev(".group_button")[0].id).substr(1), true, true);
+	} else {
+		if ($("#_"+groupId).next(".group_button")[0]) {
+			SetActiveGroup(($("#_"+groupId).next(".group_button")[0].id).substr(1), true, true);
+		} else {
+			SetActiveGroup("tab_list", true, true);
+		}
+	}
+	
 	chrome.runtime.sendMessage({command: "groups_save"});
 
 	$("#"+groupId).remove();
 	$("#_"+groupId).remove();
 	
 	schedule_update_data++;
-	// bg.groups.splice($("#"+groupId).index(),1);
+	// bggroups.splice($("#"+groupId).index(),1);
 	// if (vt.ActiveGroup == groupId) {
 		// SetActiveGroup($("#"+groupId).prev()[0] ? $("#"+groupId).prev()[0].id : "ut", true, true);
 	// }
@@ -124,22 +144,22 @@ function GroupRemove(groupId, close_tabs) {
 }
 
 function UpdateBgGroupsOrder() {
-	$(".group_button").each(function() {
-		bg.groups[(this.id).substr(1)].index = $(this).index();
+	$(".group_button:not(#_tab_list)").each(function() {
+		bggroups[(this.id).substr(1)].index = $(this).index();
 	});
-	console.log(bg.groups);
+	// console.log(bggroups);
 	chrome.runtime.sendMessage({command: "groups_save"});
 	// var new_groups = [];
 	// $(".group").each(function() {
-		// for (var group_index = 0; group_index < bg.groups.length; group_index++) {
-			// if (bg.groups[group_index].g == this.id) {
-				// new_groups.push(bg.groups[group_index]);
+		// for (var group_index = 0; group_index < bggroups.length; group_index++) {
+			// if (bggroups[group_index].g == this.id) {
+				// new_groups.push(bggroups[group_index]);
 				// break;
 			// }
 		// }
 	// });
-	// bg.groups.splice(0, bg.groups.length);
-	// bg.groups = new_groups.slice();
+	// bggroups.splice(0, bggroups.length);
+	// bggroups = new_groups.slice();
 	// bg.schedule_save++;
 	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: vt.windowId});
 }
@@ -167,6 +187,8 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 	active_group = groupId;
 	RefreshGUI();
 	
+	$("#group_edit").hide(0);
+	
 	if ($("#"+groupId).find(".active")[0]){
 		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
 		ScrollToTab($("#"+groupId).find(".active")[0].id);
@@ -174,11 +196,19 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 }
 
 function SetActiveTabInActiveGroup(tabId) {
-	// if (vt.ActiveGroup == "ut") {
+	
+	
+	// if (vt.ActiveGroup == "tab_list") {
 		// vt.utActiveTab = tabId;
 	// }
+	if (bggroups[active_group] != undefined) {
+		bggroups[active_group].activetab = parseInt(tabId);
+		
+log(bggroups);
+
+	}
 	// if (vt.ActiveGroup.match("at|ut") == null && $("#"+tabId).length != 0 && $("#"+tabId).is(".tab")) {
-		// bg.groups[$("#"+vt.ActiveGroup).index()].i = tabId;
+		// bggroups[$("#"+vt.ActiveGroup).index()].i = tabId;
 		// bg.schedule_save++;
 	// }
 }
@@ -206,53 +236,25 @@ function ScrollToGroup(groupId) {
 	// }
 }
 
-// generate random group id
-function GetRandomID(){
-	var letters = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","R","S","T","Q","U","V","W","Y","Z","a","b","c","d","e","f","g","h","i","k","l","m","n","o","p","r","s","t","q","u","v","w","y","z"];
-	var random = "";
-	for (var i = 0; i < 2; i++ ) {
-	   random += letters[Math.floor(Math.random() * letters.length)];
-	}
-	if ($("#"+random)[0]) {
-		GetRandomID();
-	} else {
-		return "g_"+random;
-	}
-}
-
-// generate random color
-function GetRandomHexColor() {
-	if (bg.opt.grayscale_groups) {
-		var rgb = Math.floor(Math.random() * 190);
-		rgb = rgb+","+rgb+","+rgb;
-		return rgbtoHex(rgb);
-	} else {
-		var letters = "0123456789ABCDEF".split(""), color = "";
-		for (var i = 0; i < 6; i++ ) {
-			color += letters[Math.floor(Math.random() * 16)];
-		}
-		return color;
-	}
-}
-
-// color in format "rgb(r,g,b)" or simply "r,g,b" (can have spaces, but must contain "," between values)
-function rgbtoHex(color){
-	color = color.replace(/[rgb(]|\)|\s/g, "");
-	color = color.split(",");
-	return color.map(function(v){ return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
-}
 
 
 
-// bg.groups[group].id, bg.groups[group].name, bg.groups[group].background, bg.groups[group].font);
+// bggroups[group].id, bggroups[group].name, bggroups[group].background, bggroups[group].font);
 
 
 // Edit group popup
-function ShowGroupEditWindow() {
+function ShowGroupEditWindow(GroupId) {
+	// $("#group_edit_font").css({"background-color": "#"+bggroups[menuGroupId].font});
+	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
+	$("#group_edit_name")[0].value = bggroups[GroupId].name;
+	$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 20, "left": 22});
+}
+
+function ShowGroupEditWindowBAK() {
 	$(".menu").hide(0);
-	// $("#group_edit_font").css({"background-color": "#"+bg.groups[menuGroupId].font});
-	// $("#group_edit_background").css({"background-color": "#"+bg.groups[menuGroupId].background});
-	$("#group_edit_name")[0].value = bg.groups[menuGroupId].name;
+	// $("#group_edit_font").css({"background-color": "#"+bggroups[menuGroupId].font});
+	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
+	$("#group_edit_name")[0].value = bggroups[menuGroupId].name;
 	$("#group_edit").css({"display": "block", "top": $("#_"+menuGroupId).offset().top, "left": 22});
 }
 
@@ -263,9 +265,9 @@ function GroupEditConfirm() {
 	// $("#_"+menuGroupId+"> .group_title_container > .group_title").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId+"> .group_title_container > .group_tab_count").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId).css({"background-color": $("#group_edit_background").css("background-color")});
-	bg.groups[menuGroupId].name = $("#group_edit_name")[0].value;
-	bg.groups[menuGroupId].background = rgbtoHex($("#group_edit_background").css("background-color"));
-	bg.groups[menuGroupId].font = rgbtoHex($("#group_edit_font").css("background-color"));
+	bggroups[menuGroupId].name = $("#group_edit_name")[0].value;
+	bggroups[menuGroupId].background = rgbtoHex($("#group_edit_background").css("background-color"));
+	bggroups[menuGroupId].font = rgbtoHex($("#group_edit_font").css("background-color"));
 	$("#group_edit").hide(0);
 	RefreshGUI();
 	
@@ -277,7 +279,7 @@ function GroupEditConfirm() {
 // "Move to group" popup
 function ShowMoveToGroupWindow(x, y) {
 	// $(".move_to_group_menu_entry").remove();
-	// bg.groups.forEach(function(group) {
+	// bggroups.forEach(function(group) {
 		// if (vt.ActiveGroup != group.g) {
 			// var	li = document.createElement("li");
 				// li.id = "move_to_"+group.g;

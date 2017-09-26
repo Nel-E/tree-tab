@@ -11,6 +11,13 @@ if (navigator.userAgent.match("Firefox") !== null) {
 	bg = chrome.extension.getBackgroundPage();
 }
 
+chrome.runtime.sendMessage({command: "get_opt"}, function(response) {
+	opt = response;
+});			
+chrome.runtime.sendMessage({command: "get_browser_ID"}, function(response) {
+	browserId = response;
+});	
+
 var themes = [];
 var theme = {};
 var active_group = "tab_list";
@@ -18,11 +25,11 @@ var active_group = "tab_list";
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
 
-	if (bg.opt == undefined) {
-		setTimeout(function() {
-			location.reload();
-		}, 3000);
-	}
+	// if (opt == undefined) {
+		// setTimeout(function() {
+			// location.reload();
+		// }, 3000);
+	// }
 
 	if (localStorage.getItem("themes") != null) {
 		themes = JSON.parse(localStorage["themes"]);
@@ -126,7 +133,7 @@ function LoadTheme(themeName) {
 	$(".drag_entered_bottom").first().addClass("highlighted_drop_target");
 
 	// toolbar events
-	$("#toolbar_tools, #toolbar_search").addClass("hidden");
+	$("#toolbar_shelf_tools, #toolbar_search").addClass("hidden");
 	$(".on").removeClass("on");
 
 	ScrollbarPinList = $("#scrollbar_pin_list")[0].value = theme.ScrollbarPinList;
@@ -155,7 +162,7 @@ function GetOptions() {
 	
 	// get checkboxes from saved states
 	$(".opt_checkbox").each(function() {
-		$(this)[0].checked = bg.opt[this.id];
+		$(this)[0].checked = opt[this.id];
 	});
 	$(".set_button").each(function() {
 		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
@@ -169,7 +176,7 @@ function GetOptions() {
 	
 	// get options for append child tab
 	for (var i = 0; i < $("#append_child_tab")[0].options.length; i++) {
-		if ($("#append_child_tab")[0].options[i].value === bg.opt.append_child_tab) {
+		if ($("#append_child_tab")[0].options[i].value === opt.append_child_tab) {
 			$("#append_child_tab")[0].selectedIndex = i;
 			break;
 		}
@@ -177,7 +184,7 @@ function GetOptions() {
 
 	// get options for append child tab after limit
 	for (var i = 0; i < $("#append_child_tab_after_limit")[0].options.length; i++) {
-		if ($("#append_child_tab_after_limit")[0].options[i].value === bg.opt.append_child_tab_after_limit) {
+		if ($("#append_child_tab_after_limit")[0].options[i].value === opt.append_child_tab_after_limit) {
 			$("#append_child_tab_after_limit")[0].selectedIndex = i;
 			break;
 		}
@@ -185,7 +192,7 @@ function GetOptions() {
 	
 	// get options for append orphan tab
 	for (var i = 0; i < $("#append_orphan_tab")[0].options.length; i++) {
-		if ($("#append_orphan_tab")[0].options[i].value === bg.opt.append_orphan_tab) {
+		if ($("#append_orphan_tab")[0].options[i].value === opt.append_orphan_tab) {
 			$("#append_orphan_tab")[0].selectedIndex = i;
 			break;
 		}
@@ -193,14 +200,14 @@ function GetOptions() {
 	
 	// get options for action after closing active tab
 	for (var i = 0; i < $("#after_closing_active_tab")[0].options.length; i++) {
-		if ($("#after_closing_active_tab")[0].options[i].value === bg.opt.after_closing_active_tab) {
+		if ($("#after_closing_active_tab")[0].options[i].value === opt.after_closing_active_tab) {
 			$("#after_closing_active_tab")[0].selectedIndex = i;
 			break;
 		}
 	}
 
 	// get options for tabs tree depth option
-	$("#max_tree_depth")[0].value = bg.opt.max_tree_depth;
+	$("#max_tree_depth")[0].value = opt.max_tree_depth;
 
 	// append themes to dropdown menu
 	for (var i = 0; i < themes.length; i++) {
@@ -350,21 +357,21 @@ function SetEvents() {
 
 	// set checkbox options on/off and save
 	$(document).on("click", ".bg_opt", function(event) {
-		bg.opt[this.id] = $(this)[0].checked ? true : false;
-		chrome.runtime.sendMessage({command: "options_save"});
+		opt[this.id] = $(this)[0].checked ? true : false;
+		SavePreferences();
 	});
 
 	// set dropdown menu options
 	$("#append_child_tab, #append_child_tab_after_limit, #after_closing_active_tab, #append_orphan_tab").change(function() {
-		bg.opt[this.id] = $(this).val();
-		chrome.runtime.sendMessage({command: "options_save"});
+		opt[this.id] = $(this).val();
+		SavePreferences();
 	});
 
 	
 	// set tabs tree depth option
 	$(document).on("input", "#max_tree_depth", function(event) {
-		bg.opt.max_tree_depth = $(this)[0].value;
-		chrome.runtime.sendMessage({command: "options_save"});
+		opt.max_tree_depth = $(this)[0].value;
+		SavePreferences();
 	});
 
 	
@@ -407,11 +414,18 @@ function SetEvents() {
 		ToolbarSet = $("#toolbar").html();
 		SaveTheme($("#theme_list").val());
 	});
+	
+	// reset toolbar
+	$(document).on("click", "#options_reset_toolbar_button", function(event) {
+		ToolbarSet = ToolbarSetDefault;
+		$("#toolbar").html(ToolbarSetDefault);
+		SaveTheme($("#theme_list").val());
+	});
 
 
 	// drag&drop buttons to lists
-	$(document).on("dragenter", "#toolbar_main, #toolbar_tools, #toolbar_unused_buttons", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search") && $(this).is("#toolbar_tools")) {
+	$(document).on("dragenter", "#toolbar_main, #toolbar_shelf_tools, #toolbar_unused_buttons", function(event) {
+		if ($(dragged_button).is("#button_tools, #button_search") && $(this).is("#toolbar_shelf_tools")) {
 			return;
 		}
 		if (dragged_button.parentNode.id != this.id) {
@@ -421,7 +435,7 @@ function SetEvents() {
 
 	// move (flip) buttons
 	$(document).on("dragenter", ".button", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search") && $(this).parent().is("#toolbar_tools")) {
+		if ($(dragged_button).is("#button_tools, #button_search") && $(this).parent().is("#toolbar_shelf_tools")) {
 			return;
 		}
 		if ($(this).parent().is("#toolbar_search, #toolbar_search_buttons")) {
@@ -547,16 +561,16 @@ function SetEvents() {
 		}
 		if ($(this).is(".on")) {
 			$("#button_tools, #button_search").removeClass("on");
-			$("#toolbar_tools, #toolbar_search").addClass("hidden");
+			$("#toolbar_shelf_tools, #toolbar_search").addClass("hidden");
 		} else {
 			$(this).addClass("on");
 			if ($(this).is("#button_tools")) {
 				$("#button_search").removeClass("on");
 				$("#toolbar_search").addClass("hidden");
-				$("#toolbar_tools").removeClass("hidden");
+				$("#toolbar_shelf_tools").removeClass("hidden");
 			} else {
 				$("#button_tools").removeClass("on");
-				$("#toolbar_tools").addClass("hidden");
+				$("#toolbar_shelf_tools").addClass("hidden");
 				$("#toolbar_search").removeClass("hidden");
 			}
 		}

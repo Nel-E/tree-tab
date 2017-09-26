@@ -21,21 +21,56 @@ function SetTRefreshEvents() {
 }
 
 function RefreshGUI() {
+	
+	
+	
+	
+
 	if ($("#toolbar").children().length > 0) {
-		if ($("#button_tools, #button_search").is(".on")) {
+		if ($(".button").is(".on")) {
 			$("#toolbar").css({ "height": 53 });
 		} else {
 			$("#toolbar").css({ "height": 26 });
 		}
 	} else {
-		$("#toolbar").css({ "height": 0 });
+		$("#toolbar").css({ "height": 0, "width": "0px", "display": "none", "padding": "0", "border": "none" });
 	}
-	if ($("#pin_list").children().length == 0) {
-		$("#pin_list").addClass("hidden");
+	
+
+	// $("#toolbar_groups").css({ "top": $("#toolbar").outerHeight(), "height": $(window).height() - $("#toolbar").outerHeight() -20 });
+
+
+
+	if ($("#pin_list").children().length > 0) {
+		// $("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "left": "20px", "height": "", "width": $(window).width() - $("#toolbar_groups")[0].getBoundingClientRect().width - 1, "display": "", "padding": "", "border": "" });
+		// $("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "height": "", "width": $(window).width() - 1, "display": "", "padding": "", "border": "" });
+		$("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "height": "", "width":"", "display": "", "padding": "", "border": "" });
 	} else {
-		$("#pin_list").removeClass("hidden");
+		$("#pin_list").css({ "height": "0px", "width": "0px", "display": "none", "padding": "0", "border": "none" });
 	}
-	$(".group, #tabs_box").css({ "height": $(window).height() - $("#pin_list").outerHeight() - $("#toolbar").outerHeight() });
+
+
+	$("#toolbar_groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list")[0].getBoundingClientRect().height, "height": $(window).height() - $("#toolbar").outerHeight() -20 });
+
+
+	// $("#pin_list").css({ "top": $("#toolbar").outerHeight() });
+	
+	
+	// console.log($("#pin_list").outerHeight());
+	// console.log($("#pin_list")[0].getBoundingClientRect());
+	// console.log($("#pin_list").outerWidth());
+	
+	// $("#groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list").outerHeight(), "left": "20px", "height": $(window).height() - $("#pin_list").outerHeight() - $("#toolbar").outerHeight(), "width": $(window).width() - 20 });
+	$("#groups").css({ "top": $("#toolbar")[0].getBoundingClientRect().height + $("#pin_list")[0].getBoundingClientRect().height, "left": "20px", "height": $(window).height() - $("#pin_list")[0].getBoundingClientRect().height - $("#toolbar").outerHeight(), "width": $(window).width() - 20 });
+
+	// $("#toolbar_groups").css({ "top": $("#groups").offset().top, "height": $("#groups").outerHeight() });
+
+
+	// $("#groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list").outerHeight(), "height": $(window).height() - $("#pin_list").outerHeight() - $("#toolbar").outerHeight() });
+
+
+	
+	// $(".group").css({ "height": $("#groups").innerHeight() });
 
 	$(".group_tab_count").each(function(){
 		$(this)[0].innerText = " ("+$("#"+    ($(this).parent().parent()[0].id).substr(1)    ).find(".tab").length  +   ")";
@@ -48,18 +83,27 @@ function RefreshGUI() {
 function RefreshDiscarded(tabId) {
 	if ($("#" + tabId).length > 0) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
-			if (tab.discarded) {
-				$("#" + tabId).addClass("discarded");
-			} else {
-				$("#" + tabId).removeClass("discarded");
+			if (tab) {
+				if (tab.discarded) {
+					$("#" + tabId).addClass("discarded");
+				} else {
+					$("#" + tabId).removeClass("discarded");
+				}
 			}
 		});
 	}
 }
 
+// set discarded class
+function SetAttentionIcon(tabId) {
+	if ($("#" + tabId).length > 0) {
+		$("#" + tabId).addClass("attention");
+	}
+}
+
 // change media icon
 function RefreshMediaIcon(tabId) {
-	if ($("#" + tabId).length > 0 && bg.tabs[tabId]) {
+	if ($("#" + tabId).length > 0) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab) {
 				if (tab.mutedInfo.muted) {
@@ -97,45 +141,46 @@ function VivaldiRefreshMediaIcons() {
 
 
 function GetFaviconAndTitle(tabId) {
-	if ($("#" + tabId).length > 0 && bg.tabs[tabId]) {
+	if ($("#" + tabId).length > 0) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
-			var title = tab.title ? tab.title : tab.url;
-
-			if (tab && tab.status == "complete") {
-				$("#" + tabId).removeClass("loading");
-				// change title
-				$("#tab_title" + tab.id)[0].textContent = title;
-				$("#tab_header" + tab.id).attr("title", title);
-				
-				// compatibility with various Tab suspender extensions
-				if (tab.favIconUrl != undefined && tab.favIconUrl.match("data:image/png;base64") != null) {
-					$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
-				} else {
-					// case for internal pages, favicons don't have access, but can be loaded from url
-					if (tab.url.match("opera://|vivaldi://|browser://|chrome://|chrome-extension://|about:") != null) {
-						$("#tab_header" + tab.id).css({ "background-image": "url(chrome://favicon/" + tab.url + ")" });
+			if (tab){
+				var title = tab.title ? tab.title : tab.url;
+				if (tab.status == "complete") {
+					$("#" + tabId).removeClass("loading");
+					// change title
+					$("#tab_title" + tab.id)[0].textContent = title;
+					$("#tab_header" + tab.id).attr("title", title);
+					
+					// compatibility with various Tab suspender extensions
+					if (tab.favIconUrl != undefined && tab.favIconUrl.match("data:image/png;base64") != null) {
+						$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
 					} else {
-						// change favicon
-						var img = new Image();
-						img.src = tab.favIconUrl;
-						img.onload = function() {
-							$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
-						};
-						img.onerror = function() {
+						// case for internal pages, favicons don't have access, but can be loaded from url
+						if (tab.url.match("opera://|vivaldi://|browser://|chrome://|chrome-extension://|about:") != null) {
 							$("#tab_header" + tab.id).css({ "background-image": "url(chrome://favicon/" + tab.url + ")" });
+						} else {
+							// change favicon
+							var img = new Image();
+							img.src = tab.favIconUrl;
+							img.onload = function() {
+								$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
+							};
+							img.onerror = function() {
+								$("#tab_header" + tab.id).css({ "background-image": "url(chrome://favicon/" + tab.url + ")" });
+							}
 						}
 					}
 				}
-			}
-			if (tab && tab.status == "loading") {
-				$("#tab_header" + tab.id).css({ "background-image": "" });
-				$("#" + tabId).addClass("loading");
-				title = tab.title ? tab.title : bg.caption_loading;
-				$("#tab_title" + tab.id)[0].textContent = title;
-				$("#tab_header" + tab.id).attr("title", title);
-				setTimeout(function() {
-					if ($("#" + tabId).length != 0) GetFaviconAndTitle(tabId);
-				}, 1000);
+				if (tab.status == "loading") {
+					$("#tab_header" + tab.id).css({ "background-image": "" });
+					$("#" + tabId).addClass("loading");
+					title = tab.title ? tab.title : caption_loading;
+					$("#tab_title" + tab.id)[0].textContent = title;
+					$("#tab_header" + tab.id).attr("title", title);
+					setTimeout(function() {
+						if ($("#" + tabId).length != 0) GetFaviconAndTitle(tabId);
+					}, 1000);
+				}
 			}
 		});
 	}

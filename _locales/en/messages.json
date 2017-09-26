@@ -23,6 +23,9 @@
 	"button_tools": {
 		"message": "Tools"
 	},
+	"button_groups": {
+		"message": "Groups"
+	},
 	"filter_search_go_prev": {
 		"message": "Previous search result"
 	},
@@ -437,6 +440,9 @@
 	},
 	"options_syncro_tabbar_tabs_order": {
 		"message": "synchronise TabBar tabs order with Tree Tabs (with too many tabs, after moving tabs, Tree Tabs may be unresponsive for a second)"
+	},
+	"options_reset_toolbar_button": {
+		"message": "Reset toolbar"
 	},
 	"options_switch_with_scroll": {
 		"message": "switch tabs with mouse wheel"

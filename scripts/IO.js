@@ -22,7 +22,7 @@ function BindTabsSwitchingToMouseWheel() {
 
 function SetIOEvents() {
 
-	if (bg.opt.switch_with_scroll) {
+	if (opt.switch_with_scroll) {
 		BindTabsSwitchingToMouseWheel();
 	} else {
 		// scroll horizontally on pin list
@@ -46,7 +46,7 @@ function SetIOEvents() {
 		});
 		
 		// this is for faster scrolling in firefox, for some reason its default scrolling is slow
-		if (bg.opt.faster_scroll) {
+		if (opt.faster_scroll) {
 			$(".group").bind("mousewheel DOMMouseScroll", function(event) {
 				event = event.originalEvent;
 				var delta = event.wheelDelta > 0 || event.detail < 0 ? -1.5 : 1.5;
@@ -115,19 +115,13 @@ function SetIOEvents() {
 		RefreshGUI();
 	});
 
-	$(document).on("dragenter", "#toolbar", function(event) { // set mouse over id
-		MouseHoverOver = this.id;
-	});
-	$(document).on("mouseenter", "#pin_list, .group, #toolbar", function(event) { // set mouse over id
-		MouseHoverOver = this.id;
-	});
-	$(document).on("mouseleave", window, function(event) {
-		MouseHoverOver = "";
-	});
-
+	// $(document).on("dragenter", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) { // set mouse over id
+		// MouseHoverOver = this.id;
+	// });
+	
 	// remove middle mouse and set hiding menu
 	document.body.onmousedown = function(event) {
-		if (event.button == 1 && bg.opt.close_with_MMB == true) {
+		if (event.button == 1 && opt.close_with_MMB == true) {
 			event.preventDefault();
 		}
 		if (event.button == 0 && !$(event.target).is(".menu_item")) {
