@@ -22,6 +22,9 @@ function StartChromeListeners(){
 		if (message.command == "reload") {
 			window.location.reload();
 		}
+		if (message.command == "dropped_tabs") {
+			Dropped = true;
+		}
 		// if (message.command == "recheck_tabs") {
 			// schedule_update_data++;
 		// }

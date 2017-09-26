@@ -212,10 +212,7 @@ function SetMenu() {
 	
 	
 
-	// set color from color picker (here, because it is available only from menu)
-	// $(document).on("input", "#color_picker", function(event) {
-		// $("#"+PickColor).css({"background-color": $("#color_picker")[0].value});
-	// });
+
 
 	// move tabs to group
 	// $(document).on("mousedown", "#tabs_menu_move_to_new_group, .move_to_group_menu_entry", function(event) {

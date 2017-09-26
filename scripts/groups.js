@@ -50,14 +50,18 @@ function RearrangeGroups(stack) {
 function AppendGroupToList(groupId, group_name, background_color, font_color) {
 
 	if ($("#"+groupId).length == 0) {
-		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; $("#groups")[0].appendChild(grp);
+		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.backgroundColor = "#"+background_color; $("#groups")[0].appendChild(grp);
 	}
-	
+	console.log(background_color);
 	if ($("#_"+groupId).length == 0) {
-		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
+		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; gbn.style.backgroundColor = "#"+background_color; $("#group_list")[0].appendChild(gbn);
 		var gtc = document.createElement("div"); gtc.className = "group_title_container"; gbn.appendChild(gtc);
 		var gte = document.createElement("span"); gte.className = "group_title"; gte.textContent = group_name; gtc.appendChild(gte);
 		var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.textContent = " (0)"; gtc.appendChild(gtn);
+
+	// $(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
+
+
 	}
 	
 	// $("#"+groupId).attr("draggable", "true");
@@ -122,7 +126,7 @@ function GroupRemove(groupId, close_tabs) {
 		}
 	}
 	
-	chrome.runtime.sendMessage({command: "groups_save"});
+	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 
 	$("#"+groupId).remove();
 	$("#_"+groupId).remove();
@@ -261,17 +265,23 @@ function ShowGroupEditWindowBAK() {
 // when pressed OK in group popup
 function GroupEditConfirm() {
 	$("#group_edit_name")[0].value = $("#group_edit_name")[0].value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
-	$("#_"+menuGroupId+"> .group_title_container > .group_title")[0].innerText = $("#group_edit_name")[0].value;
+	$("#_"+active_group+"> .group_title_container > .group_title")[0].innerText = $("#group_edit_name")[0].value;
 	// $("#_"+menuGroupId+"> .group_title_container > .group_title").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId+"> .group_title_container > .group_tab_count").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId).css({"background-color": $("#group_edit_background").css("background-color")});
-	bggroups[menuGroupId].name = $("#group_edit_name")[0].value;
-	bggroups[menuGroupId].background = rgbtoHex($("#group_edit_background").css("background-color"));
-	bggroups[menuGroupId].font = rgbtoHex($("#group_edit_font").css("background-color"));
+	bggroups[active_group].name = $("#group_edit_name")[0].value;
+	bggroups[active_group].background = rgbtoHex($("#group_edit_background").css("background-color"));
+	bggroups[active_group].font = rgbtoHex($("#group_edit_font").css("background-color"));
+	
+	
+	
+	
+	
 	$("#group_edit").hide(0);
 	RefreshGUI();
 	
-	chrome.runtime.sendMessage({command: "groups_save"});
+	$(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
+	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 	// bg.schedule_save++;
 	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: windowId});
 }

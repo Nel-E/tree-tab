@@ -22,22 +22,6 @@ function SetDragAndDropEvents() {
 		MouseHoverOver = "";
 	});
 
-
-	// set DragAndDrop to detach tabs when drag ends outside the window
-	// $(document).on("dragleave", "body", function(event) {
-		// if (DragAndDrop.DropToWindowId != 0) {
-			// DragAndDrop.DropToWindowId = 0;
-		// }
-	// });
-	
-	// set DragAndDrop to attach tabs when drag ends inside the window
-	// $(document).on("dragover", "*", function(event) {
-		// if (DragAndDrop.DropToWindowId != CurrentWindowId) {
-			// chrome.runtime.sendMessage({command: "drag_and_drop_drop_to_window", DropToWindowId: CurrentWindowId});
-			// DragAndDrop.DropToWindowId = CurrentWindowId;
-		// }
-	// });
-
 	// PREVENT THE DEFAULT BROWSER DROP ACTION
 	$(document).bind("drop dragover", function(event) {
 		event.preventDefault();
@@ -46,23 +30,13 @@ function SetDragAndDropEvents() {
 
 	// bring to front drop zones
 	$(document).on("dragenter", ".tab_header", function(event) {
-		// if (DragAndDrop.DropToWindowId != 0 || DragAndDrop.ComesFromWindowId != 0) {
-			DropTargetsSendToFront();
-		// }
+		DropTargetsSendToFront();
 	});
 
 	// SET DRAG SOURCE
 	$(document).on("dragstart", ".tab_header", function(event) {
 		event.stopPropagation();
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-		// DropTargetsSendToFront();
-		// DragAndDrop.tabsIds.splice(0, DragAndDrop.tabsIds.length);
-		// DragAndDrop.DropToWindowId = CurrentWindowId;
-		// DragAndDrop.ComesFromWindowId = CurrentWindowId;
-		// DragAndDrop.DragNodeId = $(this).parent()[0] ? $(this).parent()[0].id : undefined;
-
-		// event.originalEvent.dataTransfer.setData("null", "null");
-		// event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 
 		$(".close").removeClass("show");
 		$(".tab_header_hover").removeClass("tab_header_hover");
@@ -74,37 +48,20 @@ function SetDragAndDropEvents() {
 		}
 
 		$(".selected:not(:visible)").addClass("selected_frozen").removeClass("selected");
-
+		
+		DetachIfDraggedOut.splice(0, DetachIfDraggedOut.length);
 		let tabsIds = [];
-		// let tabsIdsParents = [];
 		$(".selected:visible").each(function() {
-			// tabsIds.push(parseInt(this.id));
-			// tabsIdsParents.push($(this).parent()[0].id);
+			DetachIfDraggedOut.push(parseInt(this.id));
 			tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
 			if ($("#ch" + this.id).children().length > 0) {
 				$($("#ch" + this.id).find(".tab")).each(function() {
-					// tabsIds.push(parseInt(this.id));
-					// tabsIdsParents.push($(this).parent()[0].id);
+					DetachIfDraggedOut.push(parseInt(this.id));
 					tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
-					// tabsIdsParents.push();
 				});
 			}
 		});
-		// event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, tabsIds: tabsIds, tabsIdsParents: tabsIdsParents}));
-		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, tabsIds: tabsIds}));
-
-		// $(".selected:visible").each(function() {
-			// DragAndDrop.tabsIds.push(parseInt(this.id));
-			// if ($("#ch" + this.id).children().length > 0) {
-				// $($("#ch" + this.id).find(".tab")).each(function() {
-					// DragAndDrop.tabsIds.push(parseInt(this.id));
-				// });
-			// }
-		// });
-
-		// chrome.runtime.sendMessage({command: "drag_and_drop_dragged_node_id", DragNodeId: DragAndDrop.DragNodeId});
-		// chrome.runtime.sendMessage({command: "drag_and_drop_comes_from_window", ComesFromWindowId: CurrentWindowId});
-		
+		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, tabsIds: tabsIds, DroppedSuccess: false}));
 	});
 	
 	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
@@ -137,7 +94,6 @@ function SetDragAndDropEvents() {
 
 	});
 
-
 	// TIMER FOR FOR AUTO EXPAND
 	$(document).on("dragenter", ".drag_enter_center", function(event) {
 		event.stopPropagation();
@@ -156,37 +112,35 @@ function SetDragAndDropEvents() {
 
 	$(document).on("drop", ".group_button, .highlighted_drop_target", function(event) {
 		event.stopPropagation();
+		chrome.runtime.sendMessage({command: "dropped_tabs"});
 		let data = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
-
-
 		if (data.ComesFromWindowId != CurrentWindowId) {
 			let target = $(".highlighted_drop_target")[0].id;
-
-			// if ($(".highlighted_drop_target")[0]) {
-			// target
-				// target = $(".highlighted_drop_target");
-			// }
 			$(".selected").addClass("selected_frozen").removeClass("selected");
-
-			(data.tabsIds).forEach(function(TabId) {
-				chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 });
-			});
 			if (browserId != 3) {
-				setTimeout(function() {
-					for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
-						if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
-							$("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
+				(data.tabsIds).forEach(function(TabId) {
+					chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+						if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
+							for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
+								if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
+									$("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
+								}
+								
+							}
+							setTimeout(function() {
+								$("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
+								if (target) {
+									$("#"+target).addClass("highlighted_drop_target");
+								}
+								HandleDrop();
+							},100);
 						}
-						
-					}
-					if (target) {
-						$("#"+target).addClass("highlighted_drop_target");
-					}
-					// $("#"+DragNode.id).addClass("selected_temporarly").addClass("selected");
-					$("#"+data.DragNode).addClass("selected_temporarly").addClass("selected");
-					HandleDrop();
-				},300);
-			} else { // FUCKING MOZILLA
+					});
+				});
+			} else { // FUCKING FIREFOX SHIT AINT WORKING
+				(data.tabsIds).forEach(function(TabId) {
+					chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 });
+				});
 				setTimeout(function() {
 					// for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
 						// if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
@@ -198,131 +152,28 @@ function SetDragAndDropEvents() {
 						if (target) {
 							$("#"+target).addClass("highlighted_drop_target");
 						}
-						// $("#"+DragNode.id).addClass("selected_temporarly").addClass("selected");
-						$("#"+data.DragNode).addClass("selected_temporarly").addClass("selected");
+						$("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
 						HandleDrop();
 					});
-				},300);
+				},1000);
 			}
-			
-			// setTimeout(function() {
-				
-				
-				// $("#"+TabArr[1]).append($("#"+TabArr[0]));
-				
-				// (message.tabsIds).forEach(function(TabArr) {
-					// if($("#"+TabArr[1])[0]) {
-						// $("#"+TabArr[1]).append($("#"+TabArr[0]));
-					// }
-				// });
-				
-				
-				
-				// $("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
-				// $("#"+DragAndDrop.DragNodeId).addClass("selected_temporarly").addClass("selected");
-				// if (target.is(":not(.highlighted_drop_target)")) {
-					// target.addClass("highlighted_drop_target");
-				// }
-				
-				// HandleDrop();
-			// },2000);
-
-
-				// setTimeout(function() {
-						// console.log(data);
-						// for (var TabIndex = 0; TabIndex < (data.tabsIds).length; TabIndex++) {
-							// console.log($("#"+(data.tabsIds[TabIndex])));
-							// if($("#"+(data.tabsIds[TabIndex]))[0] && $("#"+(data.tabsIdsParents[TabIndex]))[0]) {
-								// $("#"+data.tabsIdsParents[TabIndex]).append($("#"+data.tabsIds[TabIndex]));
-							// }
-						// }
-					// },2000);
-			
-			// chrome.tabs.move(data.tabsIds, { windowId: CurrentWindowId, index: -1 });
-			// chrome.tabs.move(data.tabsIds, { windowId: CurrentWindowId, index: -1 }, function(tab) {
-				
-				
-				// (message.tabsIds).forEach(function(TabArr) {
-					// if($("#"+TabArr[1])[0]) {
-						// $("#"+TabArr[1]).append($("#"+TabArr[0]));
-					// }
-				// });
-				// console.log("moved tab/s?");  
-				
-			// });
 		} else {
 			if ($(".highlighted_drop_target")[0] != undefined) {
 				HandleDrop();
 			}
 			
 		}
-		// event.originalEvent.dataTransfer.setData("text", "");
-		// if (data.ComesFromWindowId == CurrentWindowId) {
-			// HandleDrop();
-		// }
+		Dropped = true;
 	});
 	
-	// THIS IS WHERE ALL DRAG&DROP IS HANDLED
+	// DETACH TABS
 	$(document).on("dragend", ".tab_header", function(event) {
-		let data = event.originalEvent.dataTransfer.getData("text");
-		
-		if (MouseHoverOver == "" && data) {
-			
-			console.log("dragend");		
-			console.log(data);		
-			console.log(MouseHoverOver);		
-		
-				$(".highlighted_selected").addClass("selected").removeClass("highlighted_selected");
-				$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-				$(".tab_header_hover").removeClass("tab_header_hover");
-				$(".selected_frozen").addClass("selected").removeClass("selected_frozen");
-				$(".selected_temporarly").removeClass("selected").removeClass("selected_temporarly");
-				
-				// this is group dragover indicator
-				$(".dragover_highlight").removeClass("dragover_highlight");
-
-				
+		if (MouseHoverOver == "" && !Dropped) {
+			DetachTabs(DetachIfDraggedOut);
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			HandleDrop();
 		}
-		
-		
-		
-		// CameFromWindowId == CurrentWindowId means that tabs were dragged from this window, DroppedToWindowId == 0, means that tabs were DROPPED out of window,
-		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DropToWindowId == 0) {
-
-		
-			// var tabsIds = [];
-			// $(".selected:visible").each(function() {
-				// tabsIds.push(parseInt(this.id));
-				// if ($("#ch" + this.id).children().length > 0) {
-					// $($("#ch" + this.id).find(".tab")).each(function() {
-						// tabsIds.push(parseInt(this.id));
-					// });
-				// }
-			// });
-			
-			
-			// DetachTabs(DragAndDrop.tabsIds);
-			// DetachTabs(tabsIds);
-		// }
-
-		// CameFromWindowId == CurrentWindowId means that tabs were dragged from this window, DroppedToWindowId != CurrentWindowId, means that tabs were DROPPED to another window,
-		// DroppedToWindowId != 0, means there is actually a window to send tabs to
-		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DropToWindowId != CurrentWindowId && DragAndDrop.DropToWindowId != 0) {
-			// var tabsIds = [];
-			// $(".selected:visible").each(function() {
-				// tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
-				// if ($("#ch" + this.id).children().length > 0) {
-					// $($("#ch" + this.id).find(".tab")).each(function() {
-						// tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
-					// });
-				// }
-			// });
-			// chrome.runtime.sendMessage({command: "drag_and_drop_dropped", DragNodeId: DragAndDrop.DragNodeId, tabsIds: tabsIds, ComesFromWindowId: CurrentWindowId});
-		// }
-
-		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DropToWindowId == CurrentWindowId) {
-			// HandleDrop();
-		// }
+		Dropped = false;
 	});
 }
 
@@ -389,5 +240,4 @@ function HandleDrop() {
 	
 	// this is group dragover indicator
 	$(".dragover_highlight").removeClass("dragover_highlight");
-	// chrome.runtime.sendMessage({command: "drag_and_drop_end"});
 }

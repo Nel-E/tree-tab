@@ -222,23 +222,11 @@ function DetachTabs(tabsIds) {
 			return;
 		}
 		chrome.windows.create({state:window.state}, function(new_window) {
-			// chrome.tabs.move(tabsIds[0], {windowId: new_window.id, index:-1});
-			
-			// chrome.tabs.move(tabsIds, { windowId: new_window.id, index: -1 }, function() { chrome.tabs.remove(new_window.tabs[0].id, null); } );
-			
-			// (tabsIds).forEach(function(TabId) {
-				// chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 });
-			// });
-			
-			for (var i = 0; i < tabsIds.length; i++) {
-				let Index = i;
-				// let last_tab = tabsIds.length;
-				chrome.tabs.move(tabsIds[i], {windowId: new_window.id, index:-1}, function() { if (Index == tabsIds.length-1) chrome.tabs.remove(new_window.tabs[0].id, null); } );
-			}
-			// chrome.tabs.update(tabsIds[0], {active: true});
-			// setTimeout(function() {
-				// chrome.tabs.remove(new_window.tabs[0].id, null);
-			// },500);
+			(tabsIds).forEach(function(tabId) {
+				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(DetachedTab) {
+					if (DetachedTab.id == tabsIds[tabsIds.length-1]) chrome.tabs.remove(new_window.tabs[0].id, null);
+				});
+			});
 		})
 	});
 }

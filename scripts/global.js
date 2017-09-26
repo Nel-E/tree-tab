@@ -19,10 +19,17 @@ var tabs = {};
 
 // var ready = false;
 // var DD;
-var DragAndDrop = {DropToWindowId: 0};
+// var DragAndDrop = {DropToWindowId: 0};
 // var DragAndDrop = {tabsIds: [], tabsIdsParents: [], DragNodeId: undefined, ComesFromWindowId: 0, DropToWindowId: 0};
+
+var MouseHoverOver = "";
 var MouseHoverOver = "";
 var GroupDragNode;
+
+
+// var DragAndDrop ={tabsIds: [], tabsIdsParents: [], DragNodeId: undefined, Dropped: false, };
+var Dropped = false;
+var DetachIfDraggedOut = [];
 var DropTargetsInFront = false;
 
 
@@ -269,34 +276,9 @@ var TabsSizeSets = [
 	{"pin_height": "20px", "pin_width": "22px", "tab_height": "15px", "tab_height_line": "17px", "expand_box_size": "5px", "expand_box_top": "4px", "expand_box_left": "3px", "expand_line_h_top": "7px",  "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-7px",  "expand_line_v_left": "0px", "expand_line_v_last_height": "15px", "title_padding_with_close": "20px", "title_font_size": "10.5px", "title_padding_left": "19px", "drag_area_top": "6px", "drag_area_bottom": "4px", "close_top": "1px", "close_right": "1px", "close_size": "11px", "favicon_size": "13px 13px", "favicon_pos": "4px"},
 	{"pin_height": "22px", "pin_width": "24px", "tab_height": "17px", "tab_height_line": "19px", "expand_box_size": "5px", "expand_box_top": "5px", "expand_box_left": "3px", "expand_line_h_top": "8px",  "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-8px",  "expand_line_v_left": "0px", "expand_line_v_last_height": "17px", "title_padding_with_close": "20px", "title_font_size": "10.5px", "title_padding_left": "20px", "drag_area_top": "7px", "drag_area_bottom": "5px", "close_top": "2px", "close_right": "2px", "close_size": "11px", "favicon_size": "14px 14px", "favicon_pos": "5px"},
 	{"pin_height": "25px", "pin_width": "25px", "tab_height": "19px", "tab_height_line": "23px", "expand_box_size": "5px", "expand_box_top": "6px", "expand_box_left": "3px", "expand_line_h_top": "9px",  "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-9px",  "expand_line_v_left": "0px", "expand_line_v_last_height": "19px", "title_padding_with_close": "24px", "title_font_size": "12px",   "title_padding_left": "25px", "drag_area_top": "7px", "drag_area_bottom": "5px", "close_top": "2px", "close_right": "2px", "close_size": "13px", "favicon_size": "16px 16px", "favicon_pos": "6px"},
-	{"pin_height": "26px", "pin_width": "28px", "tab_height": "21px", "tab_height_line": "25px", "expand_box_size": "5px", "expand_box_top": "7px", "expand_box_left": "3px", "expand_line_h_top": "10px", "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-10px", "expand_line_v_left": "0px", "expand_line_v_last_height": "21px", "title_padding_with_close": "24px", "title_font_size": "12px",   "title_padding_left": "25px", "drag_area_top": "8px", "drag_area_bottom": "5px", 
-		"close_top": "3px", "close_right": "3px", "close_size": "13px", 
-		"favicon_size": "16px 16px", // "favicon_pos": "4px center"
-		"favicon_pos": "6px"
-	},
-//4
-	{
-		"pin_width": "30px", "pin_height": "28px", 
-		"tab_height": "23px", "tab_height_line": "26px",
-
-		"expand_box_size": "5px", "expand_box_top": "8px", "expand_box_left": "3px", 
-		"expand_line_h_top": "11px", "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", 
-		"expand_line_v_top": "-11px", "expand_line_v_left": "0px", "expand_line_v_last_height": "23px", 
-		"title_padding_with_close": "24px", "title_font_size": "12.5px",
-
-		"title_padding_left": "25px",
-
-		"drag_area_top": "9px", "drag_area_bottom": "6px", 
-		"close_top": "4px", "close_right": "4px", "close_size": "14px", 
-		"favicon_size": "16px 16px", // "favicon_pos": "4px center"
-		"favicon_pos": "6px"
-	}
+	{"pin_height": "26px", "pin_width": "28px", "tab_height": "21px", "tab_height_line": "25px", "expand_box_size": "5px", "expand_box_top": "7px", "expand_box_left": "3px", "expand_line_h_top": "10px", "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-10px", "expand_line_v_left": "0px", "expand_line_v_last_height": "21px", "title_padding_with_close": "24px", "title_font_size": "12px",   "title_padding_left": "25px", "drag_area_top": "8px", "drag_area_bottom": "5px", "close_top": "3px", "close_right": "3px", "close_size": "13px", "favicon_size": "16px 16px", "favicon_pos": "6px"},
+	{"pin_height": "28px", "pin_width": "30px", "tab_height": "23px", "tab_height_line": "26px", "expand_box_size": "5px", "expand_box_top": "8px", "expand_box_left": "3px", "expand_line_h_top": "11px", "expand_line_h_width": "12px", "expand_line_h_oc_width": "3px", "expand_line_v_top": "-11px", "expand_line_v_left": "0px", "expand_line_v_last_height": "23px", "title_padding_with_close": "24px", "title_font_size": "12.5px", "title_padding_left": "25px", "drag_area_top": "9px", "drag_area_bottom": "6px", "close_top": "4px", "close_right": "4px", "close_size": "14px", "favicon_size": "16px 16px", "favicon_pos": "6px"}
 ];
-
-
-
-
-
 
 
 // if (localStorage.getItem("themeDefault") === null) {

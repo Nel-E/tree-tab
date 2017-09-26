@@ -74,8 +74,9 @@ function SetGroupEvents() {
 		$("#color_picker").click();
 	});
 	
-	
-	
+	$(document).on("input", "#color_picker", function(event) {
+		$("#"+PickColor).css({"background-color": $("#color_picker")[0].value});
+	});	
 
 	// scroll groups
 	// $(document).on("mousedown", "#scroll_group_up, #scroll_group_down", function(event) {
