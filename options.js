@@ -4,32 +4,51 @@
 
 // **********      OPTIONS       ***************
 
-var bg;
-if (navigator.userAgent.match("Firefox") !== null) {
-	bg = browser.extension.getBackgroundPage();
-} else {
-	bg = chrome.extension.getBackgroundPage();
-}
-
-chrome.runtime.sendMessage({command: "get_opt"}, function(response) {
-	opt = response;
-});			
-chrome.runtime.sendMessage({command: "get_browser_ID"}, function(response) {
-	browserId = response;
-});	
+// chrome.runtime.sendMessage({command: "get_opt"}, function(response) {
+	// opt = response;
+// });			
+// chrome.runtime.sendMessage({command: "get_browser_ID"}, function(response) {
+	// browserId = response;
+// });	
 
 var themes = [];
-var theme = {};
-var active_group = "tab_list";
+var SelectedTheme = {"toolbar": DefaultToolbar, "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "ScrollbarPinList": 4, "ScrollbarTabList": 16, /* "theme_name": "untitled",  */"theme_version": CurrentThemeVersion};
+var dragged_button;
+	
+active_group = "tab_list";
+
+
+function LoadTheme(themeName) {
+	if (localStorage.getItem("theme"+themeName) != null) {
+		SelectedTheme = JSON.parse(localStorage["theme"+themeName]);
+	}
+}
+function SaveTheme(themeName) {
+	console.log(themeName);
+	localStorage["theme"+themeName] = JSON.stringify(SelectedTheme);
+	chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
+	return SelectedTheme;
+}
+
+
+function AddNewTheme() {
+	SelectedTheme = {
+		"ToolbarShow": true,
+		"ColorsSet": {},
+		"TabsSizeSetNumber": 2,
+		"ScrollbarPinList": 4,
+		"ScrollbarTabList": 16,
+		"theme_name": "untitled",
+		"theme_version": CurrentThemeVersion,
+		"toolbar": DefaultToolbar
+	};
+}
+
+
 
 document.addEventListener("DOMContentLoaded", function() {
+	LoadPreferences();
 	document.title = "Tree Tabs";
-
-	// if (opt == undefined) {
-		// setTimeout(function() {
-			// location.reload();
-		// }, 3000);
-	// }
 
 	if (localStorage.getItem("themes") != null) {
 		themes = JSON.parse(localStorage["themes"]);
@@ -40,109 +59,94 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	GetOptions();
 	RefreshFields();
-	SetEvents();	
-});
-
-
-// AppendCSSSheets from theme
-function AppendCSSSheets(theme) {
-	var css_variables = "";
-	for (var css_variable in theme.TabsSizeSet) {
-		css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSet[css_variable] + ";";
-	}
+	SetEvents();
 	
-	for (var css_variable in theme.ColorsSet) {
-		ColorsSet[css_variable] = theme.ColorsSet[css_variable];
-		if ($("#"+css_variable)[0]) $("#"+css_variable)[0].value = theme.ColorsSet[css_variable];
-		css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
-	}
-	
-	// remove previous css rules in css sheet 0
-	for (var r = 0; r < document.styleSheets[0].cssRules.length; r++) {
-		if (document.styleSheets[0].cssRules[r].cssText.match("--pin_width") !== null) {
-			document.styleSheets[0].deleteRule(r);
-		}
-		if (document.styleSheets[0].cssRules[r].cssText.match("::-webkit-scrollbar") !== null) {
-			document.styleSheets[0].deleteRule(r);
-		}
-	}
-	document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
-	
-	// scrollbars
-	if (navigator.userAgent.match("Firefox") === null) {
-		document.styleSheets[0].insertRule(".scrollbar::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px; height:"+theme.ScrollbarPinList+"px; }", 3);
-	}
-}
 
-function LoadTheme(themeName) {
-	var theme = JSON.parse(localStorage["theme"+themeName]);
+		// setTimeout(function() {
+			// AddSamples();
+		// }, 200);
+		
+	AppendGroupToList("tab_list", caption_ungrouped_group, 0, 0);
+	// var theme = JSON.parse(localStorage["theme"+themeName]);
 
-	TabsSizeSet = theme.TabsSizeSetNumber;
+	// TabsSizeSetNumber = theme.TabsSizeSetNumber;
 
 	// append toolbar from theme
-	$("#toolbar").html(theme.toolbar);
+	// $("#toolbar").html(theme.toolbar);
+	// $("#toolbar").html(DefaultToolbar);
 
-	AppendCSSSheets(theme);
+	// AppendCSSSheets(theme);
 	
-	$("#button_filter_type").addClass("url").removeClass("title");
+	// $("#button_filter_type").addClass("url").removeClass("title");
 
 	// expand toolbar options
-	ToolbarShow = $("#show_toolbar")[0].checked = theme.ToolbarShow;
-	$("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
-	ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
+	// ToolbarShow = $("#show_toolbar")[0].checked = theme.ToolbarShow;
+	// $("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
+	// ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
 	
 	// append example tabs
-	$("#pin_list, #tab_list").html("");
+	// $("#pin_list, #tab_list").html("");
 	// pins
-	AppendTab({tab: {id: "p0", pinned: true}, Append: true});
-	AppendTab({tab: {id: "p1", pinned: true, active: true}, Append: true});
+	AppendTab({tab: {id: 0, pinned: true}, Append: true});
+	AppendTab({tab: {id: 1, pinned: true, active: true}, Append: true});
 	
 	// tabs
-	AppendTab({tab: {id: "t2", pinned: false}, Append: true});
-	$("#tab_titlet2")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal");
-
-	AppendTab({tab: {id: "t3", pinned: false, active: true}, Append: true, ParentId: "t2"});
-	$("#tab_titlet3")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected");
-	$(".tab#t3").addClass("c selected");
+	AppendTab({tab: {id: 2, pinned: false}, Append: true});
+	$("#tab_title2")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal");
+	$(".tab_header#tab_header2").addClass("close_show");
 	
+	AppendTab({tab: {id: 3, pinned: false, active: true}, Append: true, ParentId: "t2"});
+	$("#tab_title3")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected");
+	$(".tab#3").addClass("c selected");
 
-	AppendTab({tab: {id: "t5", pinned: false, discarded: true}, Append: true});
-	$("#tab_titlet5")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded");
+	AppendTab({tab: {id: 5, pinned: false, discarded: true}, Append: true});
+	$("#tab_title5")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded");
 
-	AppendTab({tab: {id: "t6", pinned: false}, Append: true});
-	$("#tab_titlet6")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result");
-	$(".tab#t6").addClass("filtered");
+	AppendTab({tab: {id: 6, pinned: false}, Append: true});
+	$("#tab_title6")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result");
+	$(".tab#6").addClass("filtered");
 	
+	$(".tab_header#tab_header6").addClass("close_show");
+	$(".close#close6").addClass("close_hover");
 
-	AppendTab({tab: {id: "t7", pinned: false}, Append: true});
-	$("#tab_titlet7")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted");
-	$(".tab#t7").addClass("filtered highlighted_search");
+	AppendTab({tab: {id: 7, pinned: false}, Append: true});
+	$("#tab_title7")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted");
+	$(".tab#7").addClass("filtered highlighted_search");
 
 
-	AppendTab({tab: {id: "t8", pinned: false}, Append: true});
-	$("#tab_titlet8")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected");
-	$(".tab#t8").addClass("selected filtered");
+	AppendTab({tab: {id: 8, pinned: false}, Append: true});
+	$("#tab_title8")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected");
+	$(".tab#8").addClass("selected filtered");
 	
 	
 	
-	AppendTab({tab: {id: "t9", pinned: false}, Append: true});
-	$("#tab_titlet9")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active");
-	$(".tab#t9").addClass("active selected filtered");
+	AppendTab({tab: {id: 9, pinned: false}, Append: true});
+	$("#tab_title9")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active");
+	$(".tab#9").addClass("active selected filtered");
 	
 	// drag&drop indicator
 	$(".drag_entered_bottom").first().addClass("highlighted_drop_target");
 
 	// toolbar events
-	$("#toolbar_shelf_tools, #toolbar_search").addClass("hidden");
-	$(".on").removeClass("on");
+	// $("#toolbar_shelf_tools, #toolbar_search").addClass("hidden");
+	// $(".on").removeClass("on");
 
-	ScrollbarPinList = $("#scrollbar_pin_list")[0].value = theme.ScrollbarPinList;
-	ScrollbarTabList = $("#scrollbar_tab_list")[0].value = theme.ScrollbarTabList;
+	// ScrollbarPinList = $("#scrollbar_pin_list")[0].value = theme.ScrollbarPinList;
+	// ScrollbarTabList = $("#scrollbar_tab_list")[0].value = theme.ScrollbarTabList;
 
-	$("#active_tab_font_bold")[0].checked = theme.ColorsSet.active_font_weight == "normal" ? false : true;
-	$("#body").css({"background-color": "transparent"});
+	// $("#active_tab_font_bold")[0].checked = theme.ColorsSet.active_font_weight == "normal" ? false : true;
+	// $("#body").css({"background-color": "transparent"});
 
-}
+	setTimeout(function() {
+		RestoreToolbarShelf();
+		RestoreToolbarSearchFilter();
+		SetToolbarShelfToggle();
+		ApplySizeSet(4);
+		ApplySizeOptionsSet(4);
+		// RefreshGUI();		
+	}, 400);
+	
+});
 
 
 // document events
@@ -229,18 +233,7 @@ function GetOptions() {
 
 
 function ExportTheme(filename) {
-	var themeObj = {
-		"ToolbarShow": ToolbarShow,
-		"ColorsSet": ColorsSet,
-		"TabsSizeSetNumber": TabsSizeSet,
-		"TabsSizeSet": TabsSizeSets[TabsSizeSet],
-		"ScrollbarPinList": ScrollbarPinList,
-		"ScrollbarTabList": ScrollbarTabList,
-		"theme_name": $("#theme_list").val(),
-		"theme_version": CurrentThemeVersion,
-		"toolbar": ToolbarSet
-	};
-	var data = JSON.stringify(themeObj);
+	var data = JSON.stringify(SelectedTheme);
 	var body = document.getElementById("body");
 	var link = document.createElement("a");
 	link.target = "_blank";
@@ -274,7 +267,7 @@ function ImportTheme() {
 			}
 			
 			ToolbarShow = themeObj.ToolbarShow;
-			TabsSizeSet = themeObj.TabsSizeSetNumber;
+			TabsSizeSetNumber = themeObj.TabsSizeSetNumber;
 			ScrollbarPinList = themeObj.ScrollbarPinList;
 			ScrollbarTabList = themeObj.ScrollbarTabList;
 
@@ -328,6 +321,15 @@ function SetEvents() {
 	});
 
 
+
+
+
+
+
+
+
+
+
 	// rename theme preset button
 	$(document).on("click", "#options_rename_theme_button", function(event) {
 		
@@ -354,7 +356,16 @@ function SetEvents() {
 	});
 
 
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// set checkbox options on/off and save
 	$(document).on("click", ".bg_opt", function(event) {
 		opt[this.id] = $(this)[0].checked ? true : false;
@@ -389,7 +400,16 @@ function SetEvents() {
 		event.preventDefault();
 	});
 
-	var dragged_button;
+
+
+
+
+
+
+
+
+
+
 	$(document).on("mousedown", ".button", function(event) {
 		if ($(this).is("#button_filter_type, #filter_search_go_prev, #filter_search_go_next")) {
 			return;
@@ -409,23 +429,11 @@ function SetEvents() {
 		$(".button").removeAttr("draggable");
 	});
 	
-	// save toolbar
-	$(document).on("dragend", ".button", function(event) {
-		ToolbarSet = $("#toolbar").html();
-		SaveTheme($("#theme_list").val());
-	});
 	
-	// reset toolbar
-	$(document).on("click", "#options_reset_toolbar_button", function(event) {
-		ToolbarSet = ToolbarSetDefault;
-		$("#toolbar").html(ToolbarSetDefault);
-		SaveTheme($("#theme_list").val());
-	});
-
-
+	
 	// drag&drop buttons to lists
-	$(document).on("dragenter", "#toolbar_main, #toolbar_shelf_tools, #toolbar_unused_buttons", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search") && $(this).is("#toolbar_shelf_tools")) {
+	$(document).on("dragenter", "#toolbar_main, .toolbar_shelf, #toolbar_unused_buttons", function(event) {
+		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_folders") && $(this).is(".toolbar_shelf")) {
 			return;
 		}
 		if (dragged_button.parentNode.id != this.id) {
@@ -435,7 +443,7 @@ function SetEvents() {
 
 	// move (flip) buttons
 	$(document).on("dragenter", ".button", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search") && $(this).parent().is("#toolbar_shelf_tools")) {
+		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_folders") && $(this).parent().is(".toolbar_shelf")) {
 			return;
 		}
 		if ($(this).parent().is("#toolbar_search, #toolbar_search_buttons")) {
@@ -447,6 +455,29 @@ function SetEvents() {
 			$("#"+dragged_button.id).insertAfter($(this));
 		}
 	});
+
+	// save toolbar
+	$(document).on("dragend", ".button", function(event) {
+		ToolbarSet = $("#toolbar").html();
+		SaveTheme($("#theme_list").val());
+	});
+	
+	// reset toolbar
+	$(document).on("click", "#options_reset_toolbar_button", function(event) {
+		SelectedTheme["toolbar"] = DefaultToolbar;
+		$("#toolbar").html(DefaultToolbar);
+		SaveTheme($("#theme_list").val());
+	});
+
+
+
+
+
+
+
+
+
+
 	
 	// add new theme preset button
 	$(document).on("click", "#options_add_theme_button", function(event) {
@@ -460,7 +491,12 @@ function SetEvents() {
 			return;
 		}
 		
-		LoadTheme("Default");
+
+		// AddNewTheme();
+		// LoadTheme("Default");
+			
+		SelectedTheme = {"toolbar": DefaultToolbar, "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "ScrollbarPinList": 4, "ScrollbarTabList": 16, /* "theme_name": "untitled",  */"theme_version": CurrentThemeVersion};
+		
 		themes.push($("#new_theme_name")[0].value);
 		var t_list = document.getElementById("theme_list");
 		var	theme_name = document.createElement("option");
@@ -469,7 +505,10 @@ function SetEvents() {
 		t_list.add(theme_name);
 		
 		$("#theme_list")[0].selectedIndex = $("#theme_list")[0].options.length-1;
+		
 		SaveTheme(theme_name.value);
+		
+		
 		localStorage["themes"] = JSON.stringify(themes);
 		localStorage["current_theme"] = $("#theme_list").val();
 		RefreshFields();
@@ -494,6 +533,9 @@ function SetEvents() {
 		RefreshFields();
 	});
 
+	
+	
+	
 	// select theme from list
 	$("#theme_list").change(function() {
 		localStorage["current_theme"] = $(this).val();
@@ -501,11 +543,23 @@ function SetEvents() {
 	});
 
 		
+
+		
+
 	// change colors with color pickers
 	$(document).on("input", ".cp", function(event) {
-		ColorsSet[this.id] = $(this)[0].value;
-		AppendCSSSheets(SaveTheme($("#theme_list").val()));
+		SelectedTheme["ColorsSet"][this.id] = $(this)[0].value;
+		
+		console.log(SelectedTheme["ColorsSet"]);
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		// ColorsSet[this.id] = $(this)[0].value;
+		// AppendCSSSheets(SaveTheme($("#theme_list").val()));
 	});
+
+
+
+
+
 
 	// set scrollbar sizes
 	$(document).on("input", "#scrollbar_pin_list, #scrollbar_tab_list", function(event) {
@@ -516,85 +570,213 @@ function SetEvents() {
 	});
 	
 	
+
+
+
 	// change tabs size preset(up)
 	$(document).on("click", "#options_tabs_size_up", function(event) {
-		if (TabsSizeSet < TabsSizeSets.length-1) {
-			TabsSizeSet++;
-			AppendCSSSheets(SaveTheme($("#theme_list").val()));
+		if (SelectedTheme["TabsSizeSetNumber"] < 4) {
+			SelectedTheme["TabsSizeSetNumber"]++;
+			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
+			SaveTheme($("#theme_list").val());
 		}
 	});
 
 	// change tabs size preset(down)
 	$(document).on("click", "#options_tabs_size_down", function(event) {
-		if (TabsSizeSet > 0) {
-			TabsSizeSet--;
-			AppendCSSSheets(SaveTheme($("#theme_list").val()));
+		if (SelectedTheme["TabsSizeSetNumber"] > 0) {
+			SelectedTheme["TabsSizeSetNumber"]--;
+			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
+			SaveTheme($("#theme_list").val());
 		}
 	});
+
+
+
 	
 	// change active_tab_font_bold
 	$(document).on("click", "#active_tab_font_bold", function(event) {
-		ColorsSet.active_font_weight = $(this)[0].checked ? "bold" : "normal";
-		AppendCSSSheets(SaveTheme($("#theme_list").val()));
+		SelectedTheme["ColorsSet"]["active_font_weight"] = $(this)[0].checked ? "bold" : "normal";
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		
+		// console.log(SelectedTheme["ColorsSet"]);
+		// ApplyColorsSet(ThemeColors);
+		SaveTheme($("#theme_list").val());
+		// AppendCSSSheets(SaveTheme($("#theme_list").val()));
 	});
 	
+
+
+
+
+
+
+
+
 	// show close button on hover
-	$(document).on("mouseenter", ".close", function(event) {
-		$(this).addClass("close_hover");
-	});
-	$(document).on("mouseleave", ".close", function(event) {
-		$(".close_hover").removeClass("close_hover");
-	});
+	// $(document).on("mouseenter", ".close", function(event) {
+		// $(this).addClass("close_hover");
+	// });
+	// $(document).on("mouseleave", ".close", function(event) {
+		// $(".close_hover").removeClass("close_hover");
+	// });
 	
 	// tabs on hover
-	$(document).on("mouseover", ".tab_header", function(event) {
-		$(this).addClass("tab_header_hover").addClass("close_show");
-	});
+	// $(document).on("mouseover", ".tab_header", function(event) {
+		// $(this).addClass("tab_header_hover").addClass("close_show");
+	// });
+	// $(document).on("mouseleave", ".tab_header", function(event) {
+		// $(this).removeClass("tab_header_hover").removeClass("close_show");
+	// });
 
-	$(document).on("mouseleave", ".tab_header", function(event) {
-		$(this).removeClass("tab_header_hover").removeClass("close_show");
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	// show color picker
+	$(document).on("mousedown", ".brush, .brush2, .brush3, .brush4", function(event) {
+		event.stopPropagation();
+		PickColor = this.id;
+		// $("#color_picker")[0].value = "#"+RGBtoHex($(this).css("background-color"));
+		
+		// $("#color_picker").css({"background-color": "var(--"+this.id+")"});
+		
+		
+		// $("#color_picker").css({"background-color": "var(--"+$(this).parent()[0].id+")"});
+		// console.log($("#color_picker")[0].style.backgroundColor);
+		
+		let bod = document.getElementById("body");
+		let color = window.getComputedStyle(bod, null).getPropertyValue("--"+this.id);
+		// $("#color_picker")[0].value = (window.getComputedStyle(bod, null).getPropertyValue("--"+$(this).parent()[0].id)).substr(1);
+		console.log(color.replace(" ", "").replace("#", ""));
+		
+		$("#color_picker")[0].value = color.replace(" ", "");
+		
+		
+		// $("#color_picker").focus();
+		$("#color_picker").click();
 	});
+	
+	$(document).on("input", "#color_picker", function(event) {
+		console.log($("#color_picker")[0].value);
+		console.log(PickColor);
+		
+		SelectedTheme["ColorsSet"][PickColor] = $("#color_picker")[0].value;
+		console.log(SelectedTheme["ColorsSet"]);
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		
 
-	$(document).on("click", "#button_tools, #button_search", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		if ($(this).is(".on")) {
-			$("#button_tools, #button_search").removeClass("on");
-			$("#toolbar_shelf_tools, #toolbar_search").addClass("hidden");
-		} else {
-			$(this).addClass("on");
-			if ($(this).is("#button_tools")) {
-				$("#button_search").removeClass("on");
-				$("#toolbar_search").addClass("hidden");
-				$("#toolbar_shelf_tools").removeClass("hidden");
-			} else {
-				$("#button_tools").removeClass("on");
-				$("#toolbar_shelf_tools").addClass("hidden");
-				$("#toolbar_search").removeClass("hidden");
-			}
-		}
-	});
-
+		SaveTheme($("#theme_list").val());
+	});	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 
 // shrink or expand theme field
 function RefreshFields() {
-	if ($("#theme_list")[0].options.length == 0) {
-		$("#field_theme").css({"height": "45px"});
-	} else {
-		$("#field_theme").css({"height": ""});
-	}
-	if (navigator.userAgent.match("Firefox") !== null) {
-		$("#field_scrollbars").hide();
-	} else {
-		$("#faster_scroll_for_firefox").hide();
-	}
-	if (navigator.userAgent.match("Vivaldi") !== null) {
-		$("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
-		$("#url_for_web_panel").prop("readonly", true);
-		$("#url_for_web_panel").select();
-	} else{
-		$("#field_vivaldi").hide();
+	// if ($("#theme_list")[0].options.length == 0) {
+		// $("#field_theme").css({"height": "45px"});
+	// } else {
+		// $("#field_theme").css({"height": ""});
+	// }
+	// if (navigator.userAgent.match("Firefox") !== null) {
+		// $("#field_scrollbars").hide();
+	// } else {
+		// $("#faster_scroll_for_firefox").hide();
+	// }
+	// if (navigator.userAgent.match("Vivaldi") !== null) {
+		// $("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
+		// $("#url_for_web_panel").prop("readonly", true);
+		// $("#url_for_web_panel").select();
+	// } else{
+		// $("#field_vivaldi").hide();
+	// }
+}
+
+
+// dummy functions
+function GetFaviconAndTitle() {}
+function RefreshMediaIcon() {}
+function RefreshGUI() {}
+
+
+
+// /* AppendCSSSheets from theme */
+// function AppendCSSSheets(theme) {
+	// var css_variables = "";
+	// for (var css_variable in theme.TabsSizeSetNumber) {
+		// css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSetNumber[css_variable] + ";";
+	// }
+	
+	// for (var css_variable in theme.ColorsSet) {
+		// ColorsSet[css_variable] = theme.ColorsSet[css_variable];
+		// if ($("#"+css_variable)[0]) $("#"+css_variable)[0].value = theme.ColorsSet[css_variable];
+		// css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
+	// }
+	
+	// /* remove previous css rules in css sheet 0 */
+	// for (var r = 0; r < document.styleSheets[0].cssRules.length; r++) {
+		// if (document.styleSheets[0].cssRules[r].cssText.match("--pin_width") !== null) {
+			// document.styleSheets[0].deleteRule(r);
+		// }
+		// if (document.styleSheets[0].cssRules[r].cssText.match("::-webkit-scrollbar") !== null) {
+			// document.styleSheets[0].deleteRule(r);
+		// }
+	// }
+	// document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
+	
+	// /* scrollbars */
+	// if (navigator.userAgent.match("Firefox") === null) {
+		// document.styleSheets[0].insertRule(".scrollbar::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px; height:"+theme.ScrollbarPinList+"px; }", 3);
+	// }
+// }
+
+function ApplySizeOptionsSet(size){
+	for (let si = 0; si < document.styleSheets.length; si++) {
+		if ((document.styleSheets[si].ownerNode.id).match("size_settings") != null) {
+			if (document.styleSheets[si].ownerNode.id == "size_settings_"+size) {
+				document.styleSheets.item(si).disabled = false;
+			} else {
+				document.styleSheets.item(si).disabled = true;
+			}
+		}
+
 	}
 }

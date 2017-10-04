@@ -22,6 +22,16 @@ function StartChromeListeners(){
 		if (message.command == "reload") {
 			window.location.reload();
 		}
+		if (message.command == "reload_theme") {
+			if (localStorage.getItem(message.themeName) != null) {
+				let theme = JSON.parse(localStorage[message.themeName]);
+				ApplySizeSet(theme["TabsSizeSetNumber"]);
+				ApplyColorsSet(theme["ColorsSet"]);
+
+				RefreshGUI();
+			}
+
+		}
 		if (message.command == "dropped_tabs") {
 			Dropped = true;
 		}
@@ -157,7 +167,7 @@ function StartChromeListeners(){
 					if (message.changeInfo.discarded != undefined) {
 						RefreshDiscarded(message.tabId);
 					}
-					if (message.changeInfo.pinned != undefined && DragAndDrop.DragNodeId == undefined) {
+					if (message.changeInfo.pinned != undefined/*  && DragAndDrop.DragNodeId == undefined */) {
 						if ((message.tab.pinned && $("#"+message.tabId).is(".tab")) || (!message.tab.pinned && $("#"+message.tabId).is(".pin"))) {
 							SetTabClass({ id: message.tabId, pin: message.tab.pinned });
 							schedule_update_data++;

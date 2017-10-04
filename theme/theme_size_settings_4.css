@@ -1,0 +1,106 @@
+#pin_list {
+	position: absolute; height: 31px; width: 380px;
+}
+#tab_list {
+	position: absolute; height: 300px; width: 380px; top: 32px; right: 0px;
+}
+
+
+.brush, .brush2, .brush3, .brush4 {z-index: 1000; position: absolute; display: float; height: 32px; width: 32px; background-size: 32px 32px;}
+
+.brush {background-image: url(../theme/brush.svg);}
+.brush:hover {background-image: url(../theme/brush_hover.svg);}
+
+.brush2 {background-image: url(../theme/brush2.svg);}
+.brush2:hover {background-image: url(../theme/brush2_hover.svg);}
+
+.brush3 {background-image: url(../theme/brush3.svg);}
+.brush3:hover {background-image: url(../theme/brush3_hover.svg);}
+
+.brush4 {background-image: url(../theme/brush4.svg);}
+.brush4:hover {background-image: url(../theme/brush4_hover.svg);}
+
+
+
+
+#scrollbar_thumb { top: 20px; left: 142px; }
+#scrollbar_thumb_hover { top: 20px; left: 142px; }
+#scrollbar_track { top: 20px; left: 142px; }
+	
+#drag_indicator { top: 20px; left: 142px; }
+
+	/* main toolbar */
+#toolbar_background { top: 20px; left: 142px; }
+#toolbar_border_bottom { top: 20px; left: 142px; }
+
+	/* main toolbar buttons colors */
+#button_background { top: 20px; left: 142px; }
+#button_border { top: 20px; left: 142px; }
+#button_hover_background { top: 20px; left: 142px; }
+#button_hover_border { top: 20px; left: 142px; }
+#button_icons { top: 20px; left: 142px; }
+#button_icons_hover { top: 20px; left: 142px; }
+
+	/* search box */
+#filter_box_background { top: 20px; left: 142px; }
+#filter_box_border { top: 20px; left: 142px; }
+#filter_box_font { top: 20px; left: 142px; }
+#filter_clear_icon { top: 20px; left: 142px; }
+
+	/* groups shelf toolbar */
+#group_list_background { top: 20px; left: 142px; }
+#group_list_borders { top: 20px; left: 142px; }
+#group_list_default_font_color { top: 20px; left: 142px; }
+#group_list_button_hover_background { top: 20px; left: 142px; }
+
+	/* TOTO GROUP EDIT DIALOG */
+#blablabla { top: 20px; left: 142px; }
+
+
+	/* lists */
+#pin_list_border_bottom { top: 3px; left: 110px; }
+#pin_list_background { top: 3px; left: 75px; }
+#tab_list_background { top: 20px; left: 142px; }
+
+	/* pins and tabs (what pins and tabs have in common) */
+#tab_border { top: 20px; left: 142px; }
+#tab_background { top: 20px; left: 142px; }
+#tab_hover_border { top: 20px; left: 142px; }
+#tab_hover_background { top: 20px; left: 142px; }
+#tab_selected_border { top: 20px; left: 142px; }
+#tab_selected_background { top: 20px; left: 142px; }
+#tab_selected_hover_border { top: 20px; left: 142px; }
+#tab_selected_hover_background { top: 20px; left: 142px; }
+
+
+#tab_title { top: 20px; left: 142px; }
+#tab_title_active { top: 20px; left: 142px; }
+
+
+
+
+#tab_title_discarded { top: 20px; left: 142px; }
+#tab_filtered { top: 20px; left: 142px; }
+#tab_filtered_selected { top: 20px; left: 142px; }
+#tab_filtered_selected_active { top: 20px; left: 142px; }
+#tab_filtered_highlighted { top: 20px; left: 142px; }
+
+
+
+#expand_hover_background { top: 20px; left: 142px; }
+#expand_closed_background { top: 20px; left: 142px; }
+#expand_open_background { top: 20px; left: 142px; }
+
+#attention_background { top: 20px; left: 142px; }
+#close_x { top: 20px; left: 142px; }
+#close_hover_x { top: 20px; left: 142px; }
+#close_hover_border { top: 20px; left: 142px; }
+#close_hover_background { top: 20px; left: 142px; }
+
+	/* menu */
+#tabs_menu_border { top: 20px; left: 142px; }
+#tabs_menu_background { top: 20px; left: 142px; }
+#tabs_menu_font { top: 20px; left: 142px; }
+#tabs_menu_hover_border { top: 20px; left: 142px; }
+#tabs_menu_hover_background { top: 20px; left: 142px; }
+#tabs_menu_separator { top: 20px; left: 142px; }

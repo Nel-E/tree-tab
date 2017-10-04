@@ -1,0 +1,25 @@
+body {
+	--pin_width: 30px;
+	--pin_height: 30px;
+
+	--tab_height: 23px;
+	--tab_height_line: 26px;
+
+	--title_font_size: 12.5px;
+
+	--tab_title_text_padding_left: 26px;
+	--tab_title_text_padding_right_with_close_button: 24px;
+
+	--favicon_size: 16px 16px;
+	--favicon_left: 6px;
+
+
+	--drag_area_top: 9px;
+	--drag_area_bottom: 6px;
+
+	--children_padding_left: 5px;
+	--close_top: 4px;
+	--close_right: 4px;
+	--close_height: 14px;
+	--close_width: 14px;
+}

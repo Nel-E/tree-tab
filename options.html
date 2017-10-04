@@ -72,7 +72,17 @@
 			}
 			
 		</style>
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_colors.css" id="theme_colors" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_0.css" id="sizes_preset_0" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_1.css" id="sizes_preset_1" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_2.css" id="sizes_preset_2" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_3.css" id="sizes_preset_3" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_4.css" id="sizes_preset_4" />
+
+
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_4.css" id="size_settings_4" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme.css" id="theme" />
+		<script type="text/javascript" src="../lib_jquery/jquery-3.2.1.min.js"></script>
 	</head>
 	<body id="body">
 		<div style="width:850px; align:left;"><span style="width:100%; font-size:20px; display:inline-block; text-align:center; ">Tree Tabs</span></div>
@@ -234,8 +244,12 @@
 
 				<label class="label" style="margin-bottom: 10px; margin-top: 4px; display: inline-block;" id="options_available_buttons"></label>	
 
-				<div class="toolbar" id="toolbar" style="height: 94px; width: 250px;">
-				</div>
+				<div class="toolbar" id="toolbar" style="position: relative; height: 94px; width: 250px;">
+					<div id="toolbar_separator">
+					</div>
+					<div class="toolbar_int" id="toolbar_unused_buttons">
+					</div>	
+				</div>	
 
 				<button class="set_button" type="button" id="options_reset_toolbar_button" style="margin:10px;">Reset</button>
 				<br>
@@ -279,16 +293,47 @@
 				<legend class="label" id="options_theme_tabs"></legend>
 				<table style="display: inline-block;">
 					<tr>
+
+
+						<div id="brushes_tabs" style="position: relative;">
+							<div class="brush" id="pin_list_border_bottom"></div>
+							<div class="brush3" id="pin_list_background"></div>
+						</div>
+
+
 						<td>
-							<div class="pin_list" id="pin_list" style="height: 30px; width: 250px;">
-							</div>
-							<br>
-							<div id="tabs_box" style="height: auto; width: 250px;">
-								<div class=".group" id="tab_list">
+							<div id="sampletabs" style="position: relative; height: 300px; width: 400px;">
+								
+								<div id="toolbar_groups" style="position: relative; height: 200px; width: 20px;">
+									<div class="scroll_group" id="scroll_group_up">
+									</div>
+									<div class="group_list" id="group_list">
+									</div>
+									<div class="scroll_group" id="scroll_group_down">
+									</div>
+								</div>
+								
+								
+								<div class="pin_list" id="pin_list">
+								</div>
+								<div class="group" id="tab_list">
 								</div>
 							</div>
 						</td>
 						
+
+
+
+
+
+
+
+
+
+
+
+
+
 						<table style="position:relative;top:-35px;display: inline-block;">
 							<tr>
 								<td>
@@ -454,9 +499,10 @@
 			</fieldset>
 		</fieldset>			
 		
-		<script type="text/javascript" src="../lib_jquery/jquery-3.2.1.min.js"></script>
+		<input type="color" id="color_picker" style="position:absolute; left:100px; top:100px; overflow:hidden;">
+
 		<script type="text/javascript" src="../scripts/global.js"></script>
-		<script type="text/javascript" src="../scripts/events_refresh.js"></script>
+		<script type="text/javascript" src="../scripts/events_toolbar.js"></script>
 		<script type="text/javascript" src="../scripts/tabs.js"></script>
 		<script type="text/javascript" src="../scripts/groups.js"></script>
 		<script type="text/javascript" src="../options.js"></script>

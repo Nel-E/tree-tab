@@ -21,12 +21,8 @@ function SetTRefreshEvents() {
 }
 
 function RefreshGUI() {
-	
-	
-	
-	
-
 	if ($("#toolbar").children().length > 0) {
+		$("#toolbar").css({ "height": "", "width": "", "display": "", "padding": "", "border": "" });
 		if ($(".button").is(".on")) {
 			$("#toolbar").css({ "height": 53 });
 		} else {
@@ -36,47 +32,24 @@ function RefreshGUI() {
 		$("#toolbar").css({ "height": 0, "width": "0px", "display": "none", "padding": "0", "border": "none" });
 	}
 	
-
-	// $("#toolbar_groups").css({ "top": $("#toolbar").outerHeight(), "height": $(window).height() - $("#toolbar").outerHeight() -20 });
-
-
-
 	if ($("#pin_list").children().length > 0) {
-		// $("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "left": "20px", "height": "", "width": $(window).width() - $("#toolbar_groups")[0].getBoundingClientRect().width - 1, "display": "", "padding": "", "border": "" });
-		// $("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "height": "", "width": $(window).width() - 1, "display": "", "padding": "", "border": "" });
 		$("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "height": "", "width":"", "display": "", "padding": "", "border": "" });
 	} else {
 		$("#pin_list").css({ "height": "0px", "width": "0px", "display": "none", "padding": "0", "border": "none" });
 	}
 
-
-	$("#toolbar_groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list")[0].getBoundingClientRect().height, "height": $(window).height() - $("#toolbar").outerHeight() -20 });
-
-
-	// $("#pin_list").css({ "top": $("#toolbar").outerHeight() });
+	$("#toolbar_groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list")[0].getBoundingClientRect().height, "height": $(window).height() - $("#toolbar").outerHeight() - $("#pin_list")[0].getBoundingClientRect().height});
 	
+	$(".group_title").each(function(){
+		$(this)[0].innerText = (bggroups[(this.id).substr(4)] ? bggroups[(this.id).substr(4)].name : caption_noname_group) + " (" + $("#" + (this.id).substr(4) ).children().length + ")";
+	});
+	$("#_gtetab_list")[0].innerText = caption_ungrouped_group + " (" + $("#tab_list").children().length + ")";
 	
-	// console.log($("#pin_list").outerHeight());
-	// console.log($("#pin_list")[0].getBoundingClientRect());
-	// console.log($("#pin_list").outerWidth());
-	
-	// $("#groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list").outerHeight(), "left": "20px", "height": $(window).height() - $("#pin_list").outerHeight() - $("#toolbar").outerHeight(), "width": $(window).width() - 20 });
-	$("#groups").css({ "top": $("#toolbar")[0].getBoundingClientRect().height + $("#pin_list")[0].getBoundingClientRect().height, "left": "20px", "height": $(window).height() - $("#pin_list")[0].getBoundingClientRect().height - $("#toolbar").outerHeight(), "width": $(window).width() - 20 });
-
-	// $("#toolbar_groups").css({ "top": $("#groups").offset().top, "height": $("#groups").outerHeight() });
-
-
-	// $("#groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list").outerHeight(), "height": $(window).height() - $("#pin_list").outerHeight() - $("#toolbar").outerHeight() });
-
-
-	
-	// $(".group").css({ "height": $("#groups").innerHeight() });
-
-	$(".group_tab_count").each(function(){
-		$(this)[0].innerText = " ("+$("#"+    ($(this).parent().parent()[0].id).substr(1)    ).find(".tab").length  +   ")";
-		// $(this)[0].innerText = " ("+$("#"+    ($(this).parent().parent()[0].id).substr(1)    ).children().length  +   ")";
+	$(".group_button").each(function(){
+		$(this).css({ "height": $(this).children(0).outerWidth() + 12 });
 	});
 
+	$("#groups").css({ "top": $("#toolbar")[0].getBoundingClientRect().height + $("#pin_list")[0].getBoundingClientRect().height, "left": $("#toolbar_groups").outerWidth(), "height": $(window).height() - $("#pin_list")[0].getBoundingClientRect().height - $("#toolbar").outerHeight(), "width": $(window).width() - $("#toolbar_groups").outerWidth() });
 }
 
 // set discarded class

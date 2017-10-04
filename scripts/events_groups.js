@@ -4,7 +4,22 @@
 
 // **********         GROUPS EVENTS         ***************
 
+// function RestoreToolbarSearchFilter() {
+	// let filter_type = "url";
+	// if (localStorage.getItem("filter_type") !== null) {
+		// filter_type = localStorage["filter_type"];
+	// }
+	// if (filter_type == "url") {
+		// $("#button_filter_type").addClass("url").removeClass("title");
+	// } else {
+		// $("#button_filter_type").addClass("title").removeClass("url");
+	// }
+// }
+
 function SetGroupEvents() {
+	
+	
+
 	$("#toolbar_groups").css({"display": "inline-block"});
 			
 	// activate group
@@ -15,6 +30,19 @@ function SetGroupEvents() {
 		}
 	});
 
+	// show/hide groups toolbar
+	$(document).on("mousedown", "#groups_toolbar_hide", function(event) {
+		if (event.button == 0) {
+			// $("#toolbar_groups").toggleClass("hidden");
+			$("#toolbar_groups").toggleClass("hidden");
+			if ($("#toolbar_groups").is(".hidden")) {
+				$("#toolbar_groups").css({"width": "0px", "border": "none"});
+			} else {
+				$("#toolbar_groups").css({"width": "", "border": ""});
+			}
+			RefreshGUI();
+		}
+	});
 	// show un-grouped tabs
 	$(document).on("mousedown", "#ungrouped_tabs", function(event) {
 		if (event.button == 0) {
@@ -39,13 +67,6 @@ function SetGroupEvents() {
 		}
 	});
 
-	// edit group
-	// $(document).on("mousedown", ".group_button", function(event) {
-		// if (event.button == 2) {
-			// ShowGroupEditWindow();
-		// }
-	// });
-	
 	// EDIT GROUP
 	$(document).on("mousedown", "#edit_group", function(event) {
 		if (active_group != "tab_list") {
@@ -69,7 +90,7 @@ function SetGroupEvents() {
 	$(document).on("mousedown", "#group_edit_font, #group_edit_background", function(event) {
 		event.stopPropagation();
 		PickColor = this.id;
-		$("#color_picker")[0].value = "#"+rgbtoHex($(this).css("background-color"));
+		$("#color_picker")[0].value = "#"+RGBtoHex($(this).css("background-color"));
 		$("#color_picker").focus();
 		$("#color_picker").click();
 	});

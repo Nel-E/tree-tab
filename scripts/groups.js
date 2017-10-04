@@ -50,19 +50,21 @@ function RearrangeGroups(stack) {
 function AppendGroupToList(groupId, group_name, background_color, font_color) {
 
 	if ($("#"+groupId).length == 0) {
-		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.backgroundColor = "#"+background_color; $("#groups")[0].appendChild(grp);
+		// var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.backgroundColor = "#"+background_color; $("#groups")[0].appendChild(grp);
+		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; $("#groups")[0].appendChild(grp);
 	}
-	console.log(background_color);
+
 	if ($("#_"+groupId).length == 0) {
-		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; gbn.style.backgroundColor = "#"+background_color; $("#group_list")[0].appendChild(gbn);
-		var gtc = document.createElement("div"); gtc.className = "group_title_container"; gbn.appendChild(gtc);
-		var gte = document.createElement("span"); gte.className = "group_title"; gte.textContent = group_name; gtc.appendChild(gte);
-		var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.textContent = " (0)"; gtc.appendChild(gtn);
+		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
+		// var gtc = document.createElement("div"); gtc.className = "group_title_container"; gtc.id = "_gtc"+groupId; /* gtc.style.backgroundColor = "#"+background_color; */ gbn.appendChild(gtc);
+		var gte = document.createElement("span"); gte.className = "group_title"; gte.id = "_gte"+groupId; gte.textContent = group_name; gte.style.color = "#"+font_color; gbn.appendChild(gte);
+		// var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.id = "_gtn"+groupId; gtn.textContent = " (0)"; gtn.style.color = "#"+font_color; gbn.appendChild(gtn);
 
 	// $(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
 
 
 	}
+	// $(".group_title_container#_gtc" +active_group).css({"background-color": "#"+bggroups[active_group].background});
 	
 	// $("#"+groupId).attr("draggable", "true");
 	// $("#"+groupId+"_button> .group_title_container > .group_title").css({"color": "#"+font_color});
@@ -72,8 +74,11 @@ function AppendGroupToList(groupId, group_name, background_color, font_color) {
 	if (opt.switch_with_scroll) {
 		BindTabsSwitchingToMouseWheel();
 	}
+	if (groupId != active_group) {
+		$("#"+groupId).hide();
+	}
 
-	// RefreshGUI();
+	RefreshGUI();
 }
 
 
@@ -88,10 +93,10 @@ function GenerateNewGroupID(){
 function AddNewGroup() {
 	var newId = GenerateNewGroupID();
 	
-	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: "untitled", background: "#000000", font: "#FFFFFF"  };
+	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: "untitled", background: "", font: ""  };
 
 	
-	AppendGroupToList(newId, "untitled", "#000000", "#FFFFFF");
+	AppendGroupToList(newId, caption_noname_group, "", "");
 	
 	// bggroups.push({g: "g_"+newId, n:bg.caption_group, c: color, f: "d9d9d9", i: 0});
 	// AppendGroupToList("g_"+newId, bg.caption_group, color);
@@ -152,7 +157,7 @@ function UpdateBgGroupsOrder() {
 		bggroups[(this.id).substr(1)].index = $(this).index();
 	});
 	// console.log(bggroups);
-	chrome.runtime.sendMessage({command: "groups_save"});
+	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 	// var new_groups = [];
 	// $(".group").each(function() {
 		// for (var group_index = 0; group_index < bggroups.length; group_index++) {
@@ -191,7 +196,7 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 	active_group = groupId;
 	RefreshGUI();
 	
-	$("#group_edit").hide(0);
+	$("#group_edit").hide();
 	
 	if ($("#"+groupId).find(".active")[0]){
 		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
@@ -200,21 +205,10 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 }
 
 function SetActiveTabInActiveGroup(tabId) {
-	
-	
-	// if (vt.ActiveGroup == "tab_list") {
-		// vt.utActiveTab = tabId;
-	// }
 	if (bggroups[active_group] != undefined) {
 		bggroups[active_group].activetab = parseInt(tabId);
-		
-log(bggroups);
-
+		chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 	}
-	// if (vt.ActiveGroup.match("at|ut") == null && $("#"+tabId).length != 0 && $("#"+tabId).is(".tab")) {
-		// bggroups[$("#"+vt.ActiveGroup).index()].i = tabId;
-		// bg.schedule_save++;
-	// }
 }
 
 // direction == true goes up, false goes down
@@ -248,10 +242,13 @@ function ScrollToGroup(groupId) {
 
 // Edit group popup
 function ShowGroupEditWindow(GroupId) {
-	// $("#group_edit_font").css({"background-color": "#"+bggroups[menuGroupId].font});
-	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
 	$("#group_edit_name")[0].value = bggroups[GroupId].name;
-	$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 20, "left": 22});
+	$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 8, "left": 22});
+	
+	// $("#group_edit_font").css({"background-color": (ggroups[menuGroupId].font).match("var") != null ? ggroups[menuGroupId].font : "#"+bggroups[menuGroupId].font});
+	$("#group_edit_font").css({"background-color": bggroups[GroupId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[menuGroupId].font});
+	$("#group_edit_background").css({"background-color": bggroups[GroupId].background == "" ? "var(--tab_list_background, #fafafa)" : "#"+bggroups[menuGroupId].background});
+	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
 }
 
 function ShowGroupEditWindowBAK() {
@@ -265,22 +262,31 @@ function ShowGroupEditWindowBAK() {
 // when pressed OK in group popup
 function GroupEditConfirm() {
 	$("#group_edit_name")[0].value = $("#group_edit_name")[0].value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
-	$("#_"+active_group+"> .group_title_container > .group_title")[0].innerText = $("#group_edit_name")[0].value;
+	
+	// $("#_"+active_group+"> .group_title_container > .group_title")[0].innerText = $("#group_edit_name")[0].value;
+	
+	
+	
 	// $("#_"+menuGroupId+"> .group_title_container > .group_title").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId+"> .group_title_container > .group_tab_count").css({"color": $("#group_edit_font").css("background-color")});
 	// $("#_"+menuGroupId).css({"background-color": $("#group_edit_background").css("background-color")});
 	bggroups[active_group].name = $("#group_edit_name")[0].value;
-	bggroups[active_group].background = rgbtoHex($("#group_edit_background").css("background-color"));
-	bggroups[active_group].font = rgbtoHex($("#group_edit_font").css("background-color"));
-	
+	// bggroups[active_group].background = RGBtoHex($("#group_edit_background").css("background-color"));
+	bggroups[active_group].font = RGBtoHex($("#group_edit_font").css("background-color"));
 	
 	
 	
 	
 	$("#group_edit").hide(0);
 	RefreshGUI();
+
+	$(".group_title#_gte" +active_group+ ", .group_tab_count#_gtn"+active_group).css({"color": "#"+bggroups[active_group].font});
+
+	// $(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
+	// $(".group_title_container#_gtc" +active_group).css({"background-color": "#"+bggroups[active_group].background});
 	
-	$(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
+	
+	
 	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
 	// bg.schedule_save++;
 	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: windowId});

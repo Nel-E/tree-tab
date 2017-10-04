@@ -6,9 +6,7 @@
 
 async function UpdateData() {
 	setTimeout(function() {
-		if (schedule_update_data > 1) {
-			schedule_update_data = 1;
-		}
+		if (schedule_update_data > 1) {schedule_update_data = 1;}
 		if (schedule_update_data > 0) {
 			$(".pin").each(function() {
 				chrome.runtime.sendMessage({
@@ -38,18 +36,54 @@ async function UpdateData() {
 	},1000);
 }
 
-async function RearrangeBrowserTabs() {
-	if (opt.syncro_tabbar_tabs_order) {
-		chrome.tabs.query({currentWindow: true}, function(tabs) {
-			var tabIds = $(".pin, .tab").map(   function(){   return parseInt(this.id);   }   ).toArray();
-			for (var tabIndex = 0; tabIndex < tabIds.length; tabIndex++) {
-				if (tabIds[tabIndex] != tabs[tabIndex].id) {
-					chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
-				}
-			}
-		});			
+// async function RearrangeBrowserTabs() {
+	// setTimeout(function() {
+		// if (schedule_rearrange_tabs > 1) {
+			// schedule_rearrange_tabs = 1;
+		// }
+		// if (schedule_rearrange_tabs > 0) {
+			// chrome.tabs.query({currentWindow: true}, function(tabs) {
+				// var tabIds = $(".pin, .tab").map(   function(){   return parseInt(this.id);   }   ).toArray();
+				// for (var tabIndex = 0; tabIndex < tabIds.length; tabIndex++) {
+					// if (tabIds[tabIndex] != tabs[tabIndex].id) {
+						// chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
+					// }
+				// }
+			// });			
+			// schedule_rearrange_tabs--;
+		// }
+		// RearrangeBrowserTabs();
+	// },5000);
+// }
+
+
+function RearrangeBrowserTabsCheck() {
+	setTimeout(function() {
+		RearrangeBrowserTabsCheck();
+		if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
+		if (schedule_rearrange_tabs > 0) {
+			chrome.tabs.query({currentWindow: true}, function(tabs) {
+				let atabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+				let btabIds = []; tabs.forEach(function(Tab){btabIds.push(Tab.id);});
+				RearrangeBrowserTabs(atabIds, btabIds, tabs.length-1);
+				schedule_rearrange_tabs--;
+			});
+		}
+	},10000);
+}
+
+function RearrangeBrowserTabs(tabIds, tabs, tabIndex) {
+	if (tabIndex > 0){
+		if (tabIds[tabIndex] != tabs[tabIndex]) {
+			chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
+		}
+		setTimeout(function(){ RearrangeBrowserTabs( tabIds, tabs, (tabIndex-1) ); }, 10);
 	}
 }
+
+
+
+
 
 function RearrangeTabs(tabs, bgtabs, first_run) {
 	tabs.forEach(function(Tab) {
@@ -145,10 +179,7 @@ function AppendTab(param) {
 }
 
 function RemoveTabFromList(tabId) {
-	console.log("called to remove tab id " + tabId);
 	if ($("#"+tabId)[0]) {
-	console.log("will remove tab id " + tabId);
-		
 		$("#"+tabId).remove();
 	}
 }

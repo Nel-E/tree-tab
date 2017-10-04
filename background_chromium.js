@@ -4,12 +4,12 @@
 
 
 if (browserId != 3) {
-	ChromeLoadTabs(0);
 	LoadPreferences();
-	started = true;
+	ChromeLoadTabs(0);
 }
 
 function ChromeLoadTabs(retry) {
+	started = true;
 	chrome.tabs.query({windowType: "normal"}, function(qtabs) {
 		// create current tabs object
 		qtabs.forEach(function(Tab) {
@@ -312,7 +312,7 @@ function ChromeStartListeners() {
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;
-			case "bg_is_busy":
+			case "is_bg_is_busy":
 				sendResponse(hold);
 			break;
 			case "update_tab":

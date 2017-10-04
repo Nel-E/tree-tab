@@ -6,7 +6,7 @@
 
 
 
-function SetToolbarSearchFilter() {
+function RestoreToolbarSearchFilter() {
 	let filter_type = "url";
 	if (localStorage.getItem("filter_type") !== null) {
 		filter_type = localStorage["filter_type"];
@@ -18,7 +18,7 @@ function SetToolbarSearchFilter() {
 	}
 }	
 
-function SetToolbarShelfsEvents() {
+function RestoreToolbarShelf() {
 	let shelf = "";
 	if (localStorage.getItem("toolbar_active_shelf") !== null) {
 		shelf = localStorage["toolbar_active_shelf"];
@@ -35,23 +35,18 @@ function SetToolbarShelfsEvents() {
 	$(".toolbar_shelf").addClass("hidden");
 	if (shelf == "search" && $("#button_search").length != 0) {
 		$("#toolbar_search").removeClass("hidden");
-		$("#toolbar_shelf_tools, #toolbar_shelf_groups, #toolbar_shelf_folders").addClass("hidden");
 		$("#button_search").addClass("on");
 	}
 	if (shelf == "tools" && $("#button_tools").length != 0) {
 		$("#toolbar_shelf_tools").removeClass("hidden");
-		$("#toolbar_search, #toolbar_shelf_groups, #toolbar_shelf_folders").addClass("hidden");
 		$("#button_tools").addClass("on");
 	}
 	if (shelf == "groups" && $("#button_groups").length != 0) {
 		$("#toolbar_shelf_groups").removeClass("hidden");
-		$("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_folders").addClass("hidden");
 		$("#button_groups").addClass("on");
 	}
-	// if (shelf == "folders" && $(", #toolbar_shelf_folders").length != 0) {
 	if (shelf == "folders" && $("#button_folders").length != 0) {
 		$("#button_folders").removeClass("hidden");
-		$("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
 		$("#button_folders").addClass("on");
 	}
 	
@@ -59,41 +54,43 @@ function SetToolbarShelfsEvents() {
 	$("#toolbar_unused_buttons").remove();
 }
 
-
-function SetToolbarEvents() {
+function SetToolbarShelfToggle() {
 	// tools and search buttons toggle
-	$(document).on("mousedown", "#button_tools, #button_search, #button_groups", function(event) {
+	$(document).on("mousedown", "#button_tools, #button_search, #button_groups, #button_folders", function(event) {
 		if (event.button != 0) {
 			return;
 		}
 		if ($(this).is(".on")) {
-			$("#button_tools, #button_search, #button_groups").removeClass("on");
+			$(".on").removeClass("on");
 			$(".toolbar_shelf").addClass("hidden");
-			// $("#toolbar_search, #toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
 			localStorage["toolbar_active_shelf"] = "";
 		} else {
+			$(".toolbar_shelf").addClass("hidden");
 			if ($(this).is("#button_tools")) {
-				$("#toolbar_search, #toolbar_shelf_groups").addClass("hidden");
 				$("#toolbar_shelf_tools").removeClass("hidden");
 				localStorage["toolbar_active_shelf"] = "tools";
 			}
 			if ($(this).is("#button_search")) {
-				$("#toolbar_shelf_tools, #toolbar_shelf_groups").addClass("hidden");
 				$("#toolbar_search").removeClass("hidden");
 				localStorage["toolbar_active_shelf"] = "search";
 			}
 			if ($(this).is("#button_groups")) {
-				$("#toolbar_search, #toolbar_shelf_tools").addClass("hidden");
 				$("#toolbar_shelf_groups").removeClass("hidden");
 				localStorage["toolbar_active_shelf"] = "groups";
+			}
+			if ($(this).is("#button_folders")) {
+				$("#toolbar_shelf_folders").removeClass("hidden");
+				localStorage["toolbar_active_shelf"] = "folders";
 			}
 			$(".button").removeClass("on");
 			$(this).addClass("on");
 		}
 		RefreshGUI();
 	});
+}
 
 
+function SetToolbarEvents() {
 	// go to previous or next search result
 	$(document).on("mousedown", "#filter_search_go_prev, #filter_search_go_next", function(event) {
 		if (event.button != 0 || $(".tab.filtered").length == 0) {
@@ -154,7 +151,18 @@ function SetToolbarEvents() {
 		}
 		chrome.sessions.getRecentlyClosed( null, function(sessions) {
 			if (sessions.length > 0) {
-				chrome.sessions.restore(null, function() {});
+				chrome.sessions.restore(null, function(restored) {
+					if (browserId == 3) {
+						if (restored.tab != undefined) {
+							let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
+
+// TODO RESTORE TREE IF POSSIBLE
+
+								console.log(TTId);
+							});
+						}
+					}
+				});
 			}
 		});
 	});

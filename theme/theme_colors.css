@@ -1,0 +1,88 @@
+body {
+	/* scrollbars */
+	--scrollbar_thumb: #cdcdcd;
+	--scrollbar_thumb_hover: #a6a6a6;
+	--scrollbar_track: #e4e4e4;
+	
+	--drag_indicator: #339bf3;
+
+	/* main toolbar */
+	--toolbar_background: #f2f2f2;
+	--toolbar_border_bottom: #cccccc;
+
+	/* main toolbar buttons colors */
+	--button_background: #f2f2f2;
+	--button_border: #f2f2f2;
+	--button_hover_background: #dcdcdc;
+	--button_hover_border: #bebebe;
+	--button_icons: #808080;
+	--button_icons_hover: #808080;
+
+	/* search box */
+	--filter_box_background: #fafafa;
+	--filter_box_border: #cccccc;
+	--filter_box_font: #808080;
+	--filter_clear_icon: #808080;
+
+	/* groups shelf toolbar */
+	--group_list_background: #fafafa;
+	--group_list_borders: #bebebe;
+	--group_list_default_font_color: #808080;
+	--group_list_button_hover_background: #dcdcdc;
+
+	/* TOTO GROUP EDIT DIALOG */
+	--blablabla: #0000;
+
+
+	/* lists */
+	--pin_list_background: #fafafa;
+	--pin_list_border_bottom: #cccccc;
+	--tab_list_background: #fafafa;
+
+	/* pins and tabs (what pins and tabs have in common) */
+	--tab_border: #bebebe;
+	--tab_background: #f1f1f1;
+	--tab_hover_border: #878787;
+	--tab_hover_background: #d7d7d7;
+	--tab_selected_border: #70c0e7;
+	--tab_selected_background: #e5f3fb;
+	--tab_selected_hover_border: #78aee5;
+	--tab_selected_hover_background: #d0e2f0;
+
+
+	--tab_title: #000000;
+	--tab_title_active: #000000;
+
+
+	--active_font_weight: bold;
+
+
+	--tab_title_discarded: #7e7e7e;
+	--tab_filtered: #e8e000;
+	--tab_filtered_selected: #0f8079;
+	--tab_filtered_selected_active: #1299a9;
+	--tab_filtered_highlighted: #ffa500;
+
+
+
+	--expand_hover_background: #ffa500;
+	--expand_closed_background: #969696;
+	--expand_open_background: #339bf3;
+
+	--attention_background: #96ddff;
+	--close_x: #7d7d7d;
+	--close_hover_x: #fbfcfe;
+	--close_hover_border: #757676;
+	--close_hover_background: #939394;
+
+	/* menu */
+	--tabs_menu_border: #bebebe;
+	--tabs_menu_background: #fafafa;
+	--tabs_menu_font: #333333;
+	--tabs_menu_hover_border: #bebebe;
+	--tabs_menu_hover_background: #efefef;
+	--tabs_menu_separator: #efefef;
+}
+body {
+	/* custom colors will be placed here, do not remove this */
+}

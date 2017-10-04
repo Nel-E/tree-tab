@@ -3,12 +3,12 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 if (browserId == 3) {
-	FirefoxStart();
 	LoadPreferences();
-	started = true;
+	FirefoxStart();
 }
 
 function FirefoxStart() {
+	started = true;
 	chrome.tabs.query({windowType: "normal"}, function(BrowserTabs) {
 		let SafeToRun = true;
 		// will loop forever if session restore tab is found
@@ -67,52 +67,78 @@ function FirefoxLoadTabs() {
 
 				
 			// LOAD WINDOWS, GROUPS AND FOLDERS
+			// var LoadedWindows = localStorage.getItem("windows") !== null && opt.skip_load == false ? JSON.parse(localStorage["windows"]) : {};
+			// for (var BrowserWindowIndex = 0; BrowserWindowIndex < BrowserWindows.length; BrowserWindowIndex++) {
+				// let WindowIndex = BrowserWindowIndex;
+				// let WindowId = BrowserWindows[WindowIndex].id;
+				// windows[WindowId] = {h: "", groups: {}, folders: {}};
+				// let w = Promise.resolve(browser.sessions.getWindowValue(WindowId, "TTId")).then(function(TTId) {
+					// if (TTId != undefined) {
+						// windows[WindowId].h = TTId;
+					// }
+					// if (WindowIndex == BrowserWindows.length-1) {
+						// BrowserWindows.forEach(function(BrowserWindow) {
+							// if (windows[BrowserWindow.id].h == ""){
+								// AppendWinTTId(BrowserWindow.id);
+							// } else {
+								// for (var LoadedWindowId in LoadedWindows) {
+									// if (LoadedWindows[LoadedWindowId].h == windows[BrowserWindow.id].h) {
+										// if (Object.keys(LoadedWindows[LoadedWindowId].groups).length > 0) {
+											// windows[WindowId].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
+										// }
+										// if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
+											// windows[WindowId].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
+										// }
+									// }
+								// }
+								// hold = false;
+
+							// }
+						// });
+					// }
+				// });			
+			// }
+
 			var LoadedWindows = localStorage.getItem("windows") !== null && opt.skip_load == false ? JSON.parse(localStorage["windows"]) : {};
-			for (var BrowserWindowIndex = 0; BrowserWindowIndex < BrowserWindows.length; BrowserWindowIndex++) {
-				let WindowIndex = BrowserWindowIndex;
-				let WindowId = BrowserWindows[WindowIndex].id;
-				windows[WindowId] = {h: "", groups: {}, folders: {}};
-				let w = Promise.resolve(browser.sessions.getWindowValue(WindowId, "TTId")).then(function(TTId) {
+			BrowserWindows.forEach(function(WinA) {
+				windows[WinA.id] = {h: "", groups: {}, folders: {}};
+				let w = Promise.resolve(browser.sessions.getWindowValue(WinA.id, "TTId")).then(function(TTId) {
 					if (TTId != undefined) {
-						windows[WindowId].h = TTId;
+						windows[WinA.id].h = TTId;
 					}
-					if (WindowIndex == BrowserWindows.length-1) {
-						BrowserWindows.forEach(function(BrowserWindow) {
-							if (windows[BrowserWindow.id].h == ""){
-								AppendWinTTId(BrowserWindow.id);
-								// let NewTTWindowId = GenerateNewWindowID();
-								// browser.sessions.setWindowValue(BrowserWindow.id, "TTId", NewTTWindowId);
-								// windows[BrowserWindow.id].h = NewTTWindowId;
+					if (WinA.id == BrowserWindows[BrowserWindows.length-1].id) { // IF ON LAST WINDOW, START THIS LOOP
+						BrowserWindows.forEach(function(WinB) {
+							if (windows[WinB.id].h == ""){
+								AppendWinTTId(WinB.id);
 							} else {
 								for (var LoadedWindowId in LoadedWindows) {
-									if (LoadedWindows[LoadedWindowId].h == windows[BrowserWindow.id].h) {
+									if (LoadedWindows[LoadedWindowId].h == windows[WinB.id].h) {
 										if (Object.keys(LoadedWindows[LoadedWindowId].groups).length > 0) {
-											windows[WindowId].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
+											windows[WinA.id].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
 										}
 										if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
-											windows[WindowId].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
+											windows[WinA.id].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
 										}
 									}
 								}
 								hold = false;
-
 							}
 						});
 					}
 				});			
-
-			}
+			});			
 			
 			// replace active tab ids for each group using reference_tabs
-			// for (var windowId in windows) {
-				// for (var group in windows[windowId].groups) {
-					// if (reference_tabs[windows[windowId].groups[group].activetab]) {
-						// windows[windowId].groups[group].activetab = reference_tabs[windows[windowId].groups[group].activetab];
-					// }
-				// }
-			// }
+			for (var windowId in windows) {
+				for (var group in windows[windowId].groups) {
+					if (reference_tabs[windows[windowId].groups[group].activetab]) {
+						windows[windowId].groups[group].activetab = reference_tabs[windows[windowId].groups[group].activetab];
+					}
+				}
+			}
 			
-			// replace parent tab ids for each folder using reference_tabs
+			// TODO
+			// replace parent tab ids for each folder using reference_tabs, unless tabs will be nested ONLY in tabs, I did not decide yet
 			// if (TabIndex == BrowserTabs.length-1) {
 				// folders
 			// }
@@ -312,7 +338,7 @@ function FirefoxStartListeners() {
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;
-			case "bg_is_busy":
+			case "is_bg_is_busy":
 				sendResponse(hold);
 			break;
 			case "update_tab":

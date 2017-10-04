@@ -6,12 +6,6 @@
 
 function SetDragAndDropEvents() {
 
-	$(document).on("dragover", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) {
-		MouseHoverOver = this.id;
-	});
-	$(document).on("mouseenter", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) { // set mouse over id
-		MouseHoverOver = this.id;
-	});
 	$(document).on("mouseleave", window, function(event) {
 		MouseHoverOver = "";
 	});
@@ -21,7 +15,14 @@ function SetDragAndDropEvents() {
 	$(document).on("dragleave", "body", function(event) {
 		MouseHoverOver = "";
 	});
-
+	$(document).on("dragover", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) {
+		MouseHoverOver = this.id;
+	});
+	// $(document).on("mouseenter", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) { // set mouse over id
+	$(document).on("mouseover", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) { // set mouse over id
+		MouseHoverOver = this.id;
+	});
+	
 	// PREVENT THE DEFAULT BROWSER DROP ACTION
 	$(document).bind("drop dragover", function(event) {
 		event.preventDefault();
@@ -35,6 +36,7 @@ function SetDragAndDropEvents() {
 
 	// SET DRAG SOURCE
 	$(document).on("dragstart", ".tab_header", function(event) {
+		Dropped = false;
 		event.stopPropagation();
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 
@@ -50,38 +52,22 @@ function SetDragAndDropEvents() {
 		$(".selected:not(:visible)").addClass("selected_frozen").removeClass("selected");
 		
 		DetachIfDraggedOut.splice(0, DetachIfDraggedOut.length);
-		let tabsIds = [];
+		let SelectedTabsIds = [];
+		let TabsIds = [];
 		$(".selected:visible").each(function() {
+			SelectedTabsIds.push(parseInt(this.id));
 			DetachIfDraggedOut.push(parseInt(this.id));
-			tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
+			TabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
 			if ($("#ch" + this.id).children().length > 0) {
 				$($("#ch" + this.id).find(".tab")).each(function() {
 					DetachIfDraggedOut.push(parseInt(this.id));
-					tabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
+					TabsIds.push([parseInt(this.id), $(this).parent()[0].id]);
 				});
 			}
 		});
-		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, tabsIds: tabsIds, DroppedSuccess: false}));
+		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, selectedTabs: SelectedTabsIds, tabsIds: TabsIds}));
 	});
 	
-	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
-	$(document).on("dragleave", "#pin_list, .group", function(event) {
-		$(this).removeClass("highlighted_drop_target");
-	});
-	$(document).on("dragenter", "#pin_list, .group", function(event) {
-		event.stopPropagation();
-		// DragAndDrop.DropToGroupId = this.id; DragAndDrop.DropBeforeTabId = DragAndDrop.DropAfterTabId = DragAndDrop.DropToTabId = DragAndDrop.DropToFolderId = undefined;
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $(this).addClass("highlighted_drop_target");
-	});
-	$(document).on("dragenter", ".group_button", function(event) {
-		event.stopPropagation();
-
-		// DragAndDrop.DropToGroupId = this.id.substr(1); DragAndDrop.DropBeforeTabId = DragAndDrop.DropAfterTabId = DragAndDrop.DropToTabId = DragAndDrop.DropToFolderId = undefined;
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $("#"+this.id.substr(1)).addClass("highlighted_drop_target");
-		$(".dragover_highlight").removeClass("dragover_highlight"); $(this).addClass("dragover_highlight");
-	});
-	
-
 	// SET DROP TARGET WHEN ENTERING PINS AND TABS
 	$(document).on("dragenter", ".drag_entered_top:not(.highlighted_drop_target), .drag_entered_bottom:not(.highlighted_drop_target), .drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
@@ -93,6 +79,23 @@ function SetDragAndDropEvents() {
 		$(this).addClass("highlighted_drop_target");
 
 	});
+	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
+	$(document).on("dragleave", "#pin_list, .group", function(event) {
+		$(this).removeClass("highlighted_drop_target");
+	});
+	$(document).on("dragenter", "#pin_list, .group", function(event) {
+		event.stopPropagation();
+		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $(this).addClass("highlighted_drop_target");
+	});
+	$(document).on("dragenter", ".group_button", function(event) {
+		event.stopPropagation();
+
+		// DragAndDrop.DropToGroupId = this.id.substr(1); DragAndDrop.DropBeforeTabId = DragAndDrop.DropAfterTabId = DragAndDrop.DropToTabId = DragAndDrop.DropToFolderId = undefined;
+		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $("#"+this.id.substr(1)).addClass("highlighted_drop_target");
+		$(".dragover_highlight").removeClass("dragover_highlight"); $(this).addClass("dragover_highlight");
+	});
+	
+
 
 	// TIMER FOR FOR AUTO EXPAND
 	$(document).on("dragenter", ".drag_enter_center", function(event) {
@@ -110,70 +113,62 @@ function SetDragAndDropEvents() {
 		}
 	});
 
-	$(document).on("drop", ".group_button, .highlighted_drop_target", function(event) {
+	// $(document).on("drop", ".group_button, .group, #pin_list", function(event) {
+	$(document).on("drop", "*", function(event) {
+		Dropped = true;
 		event.stopPropagation();
 		chrome.runtime.sendMessage({command: "dropped_tabs"});
 		let data = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
 		if (data.ComesFromWindowId != CurrentWindowId) {
-			let target = $(".highlighted_drop_target")[0].id;
 			$(".selected").addClass("selected_frozen").removeClass("selected");
-			if (browserId != 3) {
-				(data.tabsIds).forEach(function(TabId) {
-					chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-						if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
-							for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
-								if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
-									$("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
+			let target = $(".highlighted_drop_target")[0].id;
+			(data.tabsIds).reverse().forEach(function(TabId) {
+				chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+					if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
+						setTimeout(function() {
+							if (browserId != 3) { // FUCKING FIREFOX SHIT AINT WORKING
+								for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
+									if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
+										$("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
+									}
+									
 								}
-								
 							}
-							setTimeout(function() {
-								$("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
-								if (target) {
-									$("#"+target).addClass("highlighted_drop_target");
+						},100);
+						setTimeout(function() {
+							(data.selectedTabs).forEach(function(selectedTabId) {
+								if ($("#"+selectedTabId)[0]){
+									$("#"+selectedTabId).addClass("selected_temporarly").addClass("selected");
 								}
-								HandleDrop();
-							},100);
-						}
-					});
+							});
+							// $("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
+						},500);
+						setTimeout(function() {
+							if (target) {
+								$("#"+target).addClass("highlighted_drop_target");
+							}
+							HandleDrop();
+						},1000);
+					}
 				});
-			} else { // FUCKING FIREFOX SHIT AINT WORKING
-				(data.tabsIds).forEach(function(TabId) {
-					chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 });
-				});
-				setTimeout(function() {
-					// for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
-						// if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
-							// $("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
-						// }
-						
-					// }
-					chrome.tabs.get(parseInt(data.DragNodeId), function(DragNode) {
-						if (target) {
-							$("#"+target).addClass("highlighted_drop_target");
-						}
-						$("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
-						HandleDrop();
-					});
-				},1000);
-			}
+			});
 		} else {
 			if ($(".highlighted_drop_target")[0] != undefined) {
 				HandleDrop();
 			}
 			
 		}
-		Dropped = true;
 	});
 	
 	// DETACH TABS
 	$(document).on("dragend", ".tab_header", function(event) {
-		if (MouseHoverOver == "" && !Dropped) {
-			DetachTabs(DetachIfDraggedOut);
-			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-			HandleDrop();
-		}
-		Dropped = false;
+		setTimeout(function() {
+			if (MouseHoverOver == "" && !Dropped) {
+				DetachTabs(DetachIfDraggedOut);
+				$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+				HandleDrop();
+			}
+		},500);
 	});
 }
 
@@ -217,6 +212,7 @@ function HandleDrop() {
 	
 	// dropped on group or pin_list, somewhere on empty space on tabs list
 	if ($(".highlighted_drop_target").is("#pin_list, .group")) {
+console.log("dropped on group");
 		$(".selected").each(function() {
 			SetTabClass({ id: this.id, pin: ($(".highlighted_drop_target").is("#pin_list") ? true : false) });
 		});
@@ -231,8 +227,25 @@ function HandleDrop() {
 	setTimeout(function() {
 		DropTargetsSendToBack();
 		schedule_update_data++;
-		RearrangeBrowserTabs();
+		
+		// if (opt.syncro_tabbar_tabs_order) {
+			
+			// chrome.tabs.query({currentWindow: true}, function(tabs) {
+				// let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+				// let qtabIds = tabs;
+				// RearrangeBrowserTabs(tabIds, qtabIds, qtabIds.length-1);
+			// });
+		// }
+		
+		
+		// Dropped = false;
 	}, 500);
+	
+	setTimeout(function() {
+		schedule_rearrange_tabs++;
+	}, 1000);
+
+	
 	$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 	$(".tab_header_hover").removeClass("tab_header_hover");
 	$(".selected_frozen").addClass("selected").removeClass("selected_frozen");
