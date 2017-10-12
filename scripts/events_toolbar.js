@@ -19,39 +19,33 @@ function RestoreToolbarSearchFilter() {
 }	
 
 function RestoreToolbarShelf() {
-	let shelf = "";
-	if (localStorage.getItem("toolbar_active_shelf") !== null) {
-		shelf = localStorage["toolbar_active_shelf"];
-	}
-	
-	$(".button").each(function() {
-		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
+		$(".button").each(function() {
+			$(this).attr("title", chrome.i18n.getMessage(this.id));
+		});
+		
+		$("#filter_box").attr("placeholder", caption_searchbox);
+		$("#filter_box").css({"opacity": 1});
+		
+		$(".on").removeClass("on");
+		$(".toolbar_shelf").addClass("hidden");
+		if (response == "search" && $("#button_search").length != 0) {
+			$("#toolbar_search").removeClass("hidden");
+			$("#button_search").addClass("on");
+		}
+		if (response == "tools" && $("#button_tools").length != 0) {
+			$("#toolbar_shelf_tools").removeClass("hidden");
+			$("#button_tools").addClass("on");
+		}
+		if (response == "groups" && $("#button_groups").length != 0) {
+			$("#toolbar_shelf_groups").removeClass("hidden");
+			$("#button_groups").addClass("on");
+		}
+		if (response == "folders" && $("#button_folders").length != 0) {
+			$("#button_folders").removeClass("hidden");
+			$("#button_folders").addClass("on");
+		}
 	});
-	
-	$("#filter_box").attr("placeholder", caption_searchbox);
-	$("#filter_box").css({"opacity": 1});
-	
-	$(".on").removeClass("on");
-	$(".toolbar_shelf").addClass("hidden");
-	if (shelf == "search" && $("#button_search").length != 0) {
-		$("#toolbar_search").removeClass("hidden");
-		$("#button_search").addClass("on");
-	}
-	if (shelf == "tools" && $("#button_tools").length != 0) {
-		$("#toolbar_shelf_tools").removeClass("hidden");
-		$("#button_tools").addClass("on");
-	}
-	if (shelf == "groups" && $("#button_groups").length != 0) {
-		$("#toolbar_shelf_groups").removeClass("hidden");
-		$("#button_groups").addClass("on");
-	}
-	if (shelf == "folders" && $("#button_folders").length != 0) {
-		$("#button_folders").removeClass("hidden");
-		$("#button_folders").addClass("on");
-	}
-	
-	$("#toolbar_separator").remove();
-	$("#toolbar_unused_buttons").remove();
 }
 
 function SetToolbarShelfToggle() {
@@ -63,24 +57,24 @@ function SetToolbarShelfToggle() {
 		if ($(this).is(".on")) {
 			$(".on").removeClass("on");
 			$(".toolbar_shelf").addClass("hidden");
-			localStorage["toolbar_active_shelf"] = "";
+			chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "", windowId: CurrentWindowId});
 		} else {
 			$(".toolbar_shelf").addClass("hidden");
 			if ($(this).is("#button_tools")) {
 				$("#toolbar_shelf_tools").removeClass("hidden");
-				localStorage["toolbar_active_shelf"] = "tools";
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "tools", windowId: CurrentWindowId});
 			}
 			if ($(this).is("#button_search")) {
 				$("#toolbar_search").removeClass("hidden");
-				localStorage["toolbar_active_shelf"] = "search";
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "search", windowId: CurrentWindowId});
 			}
 			if ($(this).is("#button_groups")) {
 				$("#toolbar_shelf_groups").removeClass("hidden");
-				localStorage["toolbar_active_shelf"] = "groups";
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "groups", windowId: CurrentWindowId});
 			}
 			if ($(this).is("#button_folders")) {
 				$("#toolbar_shelf_folders").removeClass("hidden");
-				localStorage["toolbar_active_shelf"] = "folders";
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "folders", windowId: CurrentWindowId});
 			}
 			$(".button").removeClass("on");
 			$(this).addClass("on");
@@ -121,15 +115,13 @@ function SetToolbarEvents() {
 			chrome.tabs.create({});
 		}
 		if (event.button == 1 && $(".active:visible")[0]) {
-			// chrome.tabs.query({windowId: CurrentWindowId, active: true}, function(tabs) {
-				chrome.tabs.duplicate(parseInt($(".active:visible")[0].id), function(tab) {
-					setTimeout(function() {
-						$("#"+tab.id).insertAfter($(".active:visible")[0]);
-						RefreshExpandStates();
-						schedule_update_data++;
-					}, 100);
-				});
-			// });
+			chrome.tabs.duplicate(parseInt($(".active:visible")[0].id), function(tab) {
+				setTimeout(function() {
+					$("#"+tab.id).insertAfter($(".active:visible")[0]);
+					RefreshExpandStates();
+					schedule_update_data++;
+				}, 100);
+			});
 		}
 		if (event.button == 2 && $(".active:visible")[0]) {
 			ScrollToTab($(".active:visible")[0].id);
@@ -140,7 +132,7 @@ function SetToolbarEvents() {
 		if (event.button != 0) {
 			return;
 		}
-		$(".selected:visible").each(function() {
+		$(".active:visible, .selected:visible").each(function() {
 			chrome.tabs.update(parseInt(this.id), { pinned: ($(this).is(".pin") ? false : true) });
 		});
 	});
@@ -158,7 +150,7 @@ function SetToolbarEvents() {
 
 // TODO RESTORE TREE IF POSSIBLE
 
-								console.log(TTId);
+								// console.log(TTId);
 							});
 						}
 					}
@@ -172,7 +164,7 @@ function SetToolbarEvents() {
 			return;
 		}
 		var tabsArr = [];
-		$(".selected:visible").each(function() {
+		$(".active:visible, .selected:visible").each(function() {
 			tabsArr.push(parseInt(this.id));
 			if ($("#ch"+this.id).children().length > 0) {
 				$($("#ch"+this.id).find(".tab")).each(function() {

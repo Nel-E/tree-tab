@@ -4,46 +4,50 @@
 
 
 if (browserId != 3) {
-	LoadPreferences();
-	ChromeLoadTabs(0);
+	// chrome.runtime.onStartup.addListener(function() {
+		LoadPreferences();
+		ChromeLoadTabs(0);
+	// });
 }
 
 function ChromeLoadTabs(retry) {
 	started = true;
 	chrome.tabs.query({windowType: "normal"}, function(qtabs) {
+
 		// create current tabs object
 		qtabs.forEach(function(Tab) {
 			ChromeHashURL(Tab);
 		});
-		
+
 		var reference_tabs = {};
 		var tabs_matched = 0;
-		var t_count = localStorage.getItem("t_count") !== null ? JSON.parse(localStorage["t_count"]) : 0;
-		var LoadedTabs = localStorage.getItem("tabs") !== null ? JSON.parse(localStorage["tabs"]) : {};
+		
+		// load tabs and windows from hdd
+		var t_count = LoadData("t_count", 0);
+		var w_count = LoadData("w_count", 0);
+		var LoadedTabs = LoadData("tabs", {});
+		var LoadedWindows = LoadData("windows", {});
 
 		// if loaded tabs mismatch by 50%, then try to load back
-		if (LoadedTabs.length < t_count*0.5 && localStorage.getItem("tabs_BAK") !== null) {
-			LoadedTabs =  JSON.parse(localStorage["tabs_BAK"]);
+		if (Object.keys(LoadedTabs).length < t_count*0.5) {
+			LoadedTabs = LoadData("tabs_BAK", {});
 		}
-		
+		// if loaded windows mismatch, then try to load back
+		if (Object.keys(LoadedWindows).length < w_count) {
+			LoadedWindows = LoadData("windows_BAK", {});
+		}
+
 		// put tabs object in ordered array
 		var LoadedTabsArr;
 		if (Object.keys(LoadedTabs).length > 1){
 			LoadedTabsArr =  new Array(Object.keys(LoadedTabs).length).fill([0,0,0,0,0,0]);
 			for (var tab_obj in LoadedTabs) {
-				// LoadedTabsArr[LoadedTabs[tab_obj].j] = [parseInt(tab_obj), LoadedTabs[tab_obj].h, LoadedTabs[tab_obj].g, LoadedTabs[tab_obj].t, LoadedTabs[tab_obj].i, LoadedTabs[tab_obj].o];
 				LoadedTabsArr[LoadedTabs[tab_obj].j] = [parseInt(tab_obj), LoadedTabs[tab_obj].h, LoadedTabs[tab_obj].p, LoadedTabs[tab_obj].i, LoadedTabs[tab_obj].o];
 			}
 		} else {
 			LoadedTabsArr = [];
 		}
 		
-// console.log(LoadedTabsArr);
-		
-		// qtabs.forEach(function(Tab) {
-			// console.log(tabs[Tab.id]);
-		// });
-		// opt.skip_load = true;
 		// compare saved tabs from storage to current session tabs, but can be skipped if set in options
 		if (opt.skip_load == false && LoadedTabsArr.length > 0) {
 			
@@ -70,29 +74,35 @@ function ChromeLoadTabs(retry) {
 		}
 		
 		// LOAD WINDOWS, GROUPS AND FOLDERS
-		chrome.windows.getAll({windowTypes: ['normal'], populate: false}, function(query_windows) {
-		// chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(query_windows) {
-			var loaded_windows = {};
-			if (localStorage.getItem("windows") !== null) {
-				loaded_windows = JSON.parse(localStorage["windows"]);
-			}
-			
+		chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(query_windows) {
 			for (var winIndex = 0; winIndex < query_windows.length; winIndex++) {
 				// if (query_windows[winIndex].tabs[0].url != "chrome://videopopout/") {
-					windows[query_windows[winIndex].id] = {i: winIndex, groups: {}, folders: {}};
+					windows[query_windows[winIndex].id] = {i: winIndex, t: query_windows[winIndex].tabs[0].url, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
 				// }
 				
 			}
 			
-			for (var loaded_windowId in loaded_windows) {
+console.log("__________new windows__________");
+console.log(windows);
+			for (var LoadedWindowId in LoadedWindows) {
 				for (var windowId in windows) {
-					if (loaded_windows[loaded_windowId].i == windows[windowId].i) {
-						if (Object.keys(loaded_windows[loaded_windowId].groups).length > 0) {
-							windows[windowId].groups = Object.assign({}, loaded_windows[loaded_windowId].groups);
+					
+console.log("__________loaded window__________");
+console.log(LoadedWindows[LoadedWindowId]);
+console.log("__________ref tab__________");
+console.log(LoadedWindows[reference_tabs[windows[windowId].t]]);
+					
+					
+					if ((LoadedWindows[LoadedWindowId].i >= windows[windowId].i) && LoadedWindows[LoadedWindowId].t == windows[windowId].t) {
+						if (Object.keys(LoadedWindows[LoadedWindowId].groups).length > 0) {
+							windows[windowId].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
 						}
-						if (Object.keys(loaded_windows[loaded_windowId].folders).length > 0) {
-							windows[windowId].folders = Object.assign({}, loaded_windows[loaded_windowId].folders);
+						if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
+							windows[windowId].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
 						}
+						windows[windowId].active_group = LoadedWindows[LoadedWindowId].active_group;
+						windows[windowId].active_shelf = LoadedWindows[LoadedWindowId].active_shelf;
+						windows[windowId].group_bar = LoadedWindows[LoadedWindowId].group_bar;
 					}
 				}
 			}
@@ -106,6 +116,8 @@ function ChromeLoadTabs(retry) {
 					}
 				}
 			}
+console.log("__________finished__________");
+console.log(windows);
 			
 			// console.log(windows);
 			
@@ -179,12 +191,16 @@ async function ChromePeriodicCheck() {
 }
 
 function ChromeWindowsUpdateIndexes(){
-	chrome.windows.getAll({windowTypes: ['normal'], populate: false}, function(query_windows) {
+	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(query_windows) {
 		for (var winIndex = 0; winIndex < query_windows.length; winIndex++) {
 			if (windows[query_windows[winIndex].id] != undefined) {
 				windows[query_windows[winIndex].id].i = winIndex;
+				windows[query_windows[winIndex].id].t = query_windows[winIndex].tabs[0].url;
+			} else {
+				windows[query_windows[winIndex].id] = {i: winIndex, t: query_windows[winIndex].tabs[0].url, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
 			}
 		}
+		schedule_save++;
 	});
 }
 
@@ -212,6 +228,7 @@ function ChromeStartListeners() {
 		chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		delete tabs[tabId];
 		schedule_update_indexes++;
+		ChromeWindowsUpdateIndexes();
 	});
 	
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
@@ -219,11 +236,13 @@ function ChromeStartListeners() {
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: tabs[tabId].p});
 		});
 		schedule_update_indexes++;
+		ChromeWindowsUpdateIndexes();
 	});
 
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
 		schedule_update_indexes++;
+		ChromeWindowsUpdateIndexes();
 	});
 	
 	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -263,6 +282,7 @@ function ChromeStartListeners() {
 			}
 			schedule_save++;
 		});
+		ChromeWindowsUpdateIndexes();
 	});
 	
 	chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -270,7 +290,7 @@ function ChromeStartListeners() {
 	});
 	
 	chrome.windows.onCreated.addListener(function(window) {
-		windows[window.id] = {i: Object.keys(windows).length, groups: {}, folders: {}};
+		windows[window.id] = {i: Object.keys(windows).length, t: 0, groups: {}, folders: {}};
 		ChromeWindowsUpdateIndexes();
 	});
 	
@@ -292,19 +312,49 @@ function ChromeStartListeners() {
 			case "reload":
 				window.location.reload();
 			break;
+			
+			
 			case "get_groups":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].groups);
 				}
 			break;
-			case "groups_save":
+			case "save_groups":
 				windows[message.windowId].groups = Object.assign({}, message.groups);
-			// var obj2 = Object.assign({}, obj);
-			// groups: bggroups, windowId: CurrentWindowId
-			
 				schedule_save++;
-				// localStorage["windows"] = JSON.stringify(windows);
 			break;
+			
+			case "set_active_group":
+				windows[message.windowId].active_group = message.active_group;
+				schedule_save++;
+			break;
+			case "get_active_group":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].active_group);
+				}
+			break;
+			
+			
+			case "set_active_shelf":
+				windows[message.windowId].active_shelf = message.active_shelf;
+				schedule_save++;
+			break;
+			case "get_active_shelf":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].active_shelf);
+				}
+			break;
+			
+			case "set_group_bar":
+				windows[message.windowId].group_bar = message.group_bar;
+				schedule_save++;
+			break;
+			case "get_group_bar":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].group_bar);
+				}
+			break;
+			
 			case "console_log":
 				console.log(message.m);
 			break;

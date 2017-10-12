@@ -41,7 +41,7 @@
 		},
 		"default_panel": "sidebar.html",
 		"default_title": "Tree Tabs",
-		"browser_style": true
+		"browser_style": false
 	},
 	"applications": {
 		"gecko": {

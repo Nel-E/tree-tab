@@ -31,55 +31,30 @@ function Run() {
 	
 function Initialize() {
 	
+		RestoreStateOfGroupsToolbar();
 		var theme = {
 			"TabsSizeSetNumber": 2,
-			"ToolbarShow": false,
-			"ScrollbarPinList": 4,
-			"ScrollbarTabList": 16
+			"ToolbarShow": true,
+			"toolbar": DefaultToolbar
 		};
-		// ApplyColorsSet();
+
 		if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
 			theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
-			
-
-			// $("#toolbar").html(theme.toolbar);
-			
-			// var css_variables = "";
-			// for (var css_variable in theme.ColorsSet) {
-				// css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
-			// }
-			// for (var css_variable in theme.TabsSizeSet) {
-				// css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSet[css_variable] + ";";
-			// }
-			
-			// document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
-			// ApplySizeSet(0);
-			// if (navigator.userAgent.match("Firefox") === null) {
-				// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px;}", 0);
-				// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+theme.ScrollbarPinList+"px; }", 0);
-			// } else {
+			if (browserId == 3) {
 				// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-				// if (theme.TabsSizeSetNumber > 1) {
-					// document.styleSheets[1].insertRule(".tab_header>.tab_title { margin-top: -1.5px; }", document.styleSheets[1].cssRules.length);
-				// }
-			// }
+				if (theme.TabsSizeSetNumber > 1) {
+					document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+				}
+			}
 		}
-		
-			ApplySizeSet(theme["TabsSizeSetNumber"]);
-			ApplyColorsSet(theme["ColorsSet"]);
-		
-					// ApplySizeSet(theme.TabsSizeSetNumber);
 
-		
-		if (browserId != 3) {
-			// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+ScrollbarTabList+"px;}", 0);
-			// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+ScrollbarPinList+"px; }", 0);
-		}
-	
+		ApplySizeSet(theme["TabsSizeSetNumber"]);
+		ApplyColorsSet(theme["ColorsSet"]);
+
 		chrome.tabs.query({currentWindow: true}, function(tabs) {
 		
 
-		
+	
 			AppendGroupToList("tab_list", caption_ungrouped_group, 0, 0);
 
 			
@@ -92,15 +67,22 @@ function Initialize() {
 			
 			// CurrentWindowId = tabs[0].windowId;
 
-// console.log(bgtabs);
-// console.log(bggroups);
+console.log(bgtabs);
+console.log(bggroups);
 			if (opt.pin_list_multi_row) {
 				$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
 			}
+			if (theme.ToolbarShow) {
+				$("#toolbar").html(theme.toolbar);
+			}
 			
-			
+// set language titles
+// $(".button").each(function(){
+	// $(this).attr("title", chrome.i18n.getMessage(this.id));
+// });
 
-			$("#toolbar").html(DefaultToolbar);
+
+			// $("#toolbar").html(DefaultToolbar);
 
 			tabs.forEach(function(Tab) {
 				AppendTab({tab: Tab, Append: true});
@@ -126,7 +108,7 @@ function Initialize() {
 				}
 			});
 				
-			RearrangeTabs(tabs, bgtabs, true);
+			RearrangeTreeTabs(tabs, bgtabs, true);
 			
 			
 			// delete theme;
@@ -145,7 +127,6 @@ function Initialize() {
 			RefreshGUI();
 			RefreshExpandStates();
 			SetDragAndDropEvents();
-			SetActiveGroup("tab_list", true, true);
 			StartChromeListeners();
 			
 			setTimeout(function() {
@@ -162,6 +143,14 @@ function Initialize() {
 					$("#"+bggroups[group].activetab).addClass("active");
 				}
 			}
+			
+			chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+				SetActiveGroup(response, true, true);
+			});
+			
+			
+			
+		
 			// setTimeout(function() { ScrollToTab($(".active:visible")[0].id); },100); // Scroll to active tab
 			
 			

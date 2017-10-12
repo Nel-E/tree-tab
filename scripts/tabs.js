@@ -20,16 +20,32 @@ async function UpdateData() {
 				});
 			});
 			$(".tab").each(function() {
+				// if ($(this).parent().parent(".tab")[0]) {
+					// chrome.tabs.update(parseInt(this.id), { openerTabId: parseInt($(this).parent().parent(".tab")[0].id) }, function(tab) {
+						// console.log(tab.id +" "+ tab.openerTabId);
+					// });
+				// }
+				// console.log(($(this).parent(".group")[0] ? undefined : parseInt($(this).parents(".tab")[0].id)));
+				// chrome.tabs.update(parseInt(this.id), { openerTabId: $(this).parent(".group")[0] ? undefined : parseInt($(this).parent().parent()[0].id) }, function(tab) {
+				// chrome.tabs.update(parseInt(this.id), { openerTabId: ($(this).parent(".group")[0] ? undefined : parseInt($(this).parents(".tab")[0].id)) }, function(tab) {
+					// console.log(tab.id +" "+ (tab.openerTabId ? "none" : tab.openerTabId));
+					
 				chrome.runtime.sendMessage({
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
-						p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent()[0].id,
+						p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab")[0].id,
+						// p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parents(".tab")[0].id,
 						i: $(this).index(),
 						o: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
 					}
 				});
+					
+				// });
 			});
+			
+			
+			
 			schedule_update_data--;
 		}
 		UpdateData();
@@ -62,30 +78,53 @@ function RearrangeBrowserTabsCheck() {
 		RearrangeBrowserTabsCheck();
 		if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
 		if (schedule_rearrange_tabs > 0) {
-			chrome.tabs.query({currentWindow: true}, function(tabs) {
-				let atabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-				let btabIds = []; tabs.forEach(function(Tab){btabIds.push(Tab.id);});
-				RearrangeBrowserTabs(atabIds, btabIds, tabs.length-1);
-				schedule_rearrange_tabs--;
-			});
+			let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+			RearrangeBrowserTabs(tabIds, tabIds.length-1);
+			schedule_rearrange_tabs--;
 		}
-	},10000);
-}
+	},1000);}
 
-function RearrangeBrowserTabs(tabIds, tabs, tabIndex) {
+async function RearrangeBrowserTabs(tabIds, tabIndex) {
 	if (tabIndex > 0){
-		if (tabIds[tabIndex] != tabs[tabIndex]) {
-			chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
-		}
-		setTimeout(function(){ RearrangeBrowserTabs( tabIds, tabs, (tabIndex-1) ); }, 10);
+		chrome.tabs.get(tabIds[tabIndex], function(tab) {
+			if (tab && tabIndex != tab.index) {
+				chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
+			}
+			RearrangeBrowserTabs( tabIds, (tabIndex-1) );
+		});
 	}
 }
 
 
+// function RearrangeBrowserTabsCheck() {
+	// setTimeout(function() {
+		// RearrangeBrowserTabsCheck();
+		// if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
+		// if (schedule_rearrange_tabs > 0) {
+			// chrome.tabs.query({currentWindow: true}, function(tabs) {
+				// let atabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+				// let btabIds = []; tabs.forEach(function(Tab){btabIds.push(Tab.id);});
+				// RearrangeBrowserTabs(atabIds, btabIds, tabs.length-1);
+				// schedule_rearrange_tabs--;
+			// });
+		// }
+	// },3000);
+// }
+
+// function RearrangeBrowserTabs(tabIds, tabs, tabIndex) {
+	// if (tabIndex > 0){
+		// if (tabIds[tabIndex] != tabs[tabIndex]) {
+			// chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
+		// }
+		// setTimeout(function(){ RearrangeBrowserTabs( tabIds, tabs, (tabIndex-1) ); }, 10);
+	// }
+// }
 
 
 
-function RearrangeTabs(tabs, bgtabs, first_run) {
+
+
+function RearrangeTreeTabs(tabs, bgtabs, first_run) {
 	tabs.forEach(function(Tab) {
 		if (bgtabs[Tab.id] && $("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].i)[0]) {
 			if ($("#"+Tab.id).index() > bgtabs[Tab.id].i) {
@@ -95,7 +134,7 @@ function RearrangeTabs(tabs, bgtabs, first_run) {
 			}
 		}
 		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].i && first_run) {
-			RearrangeTabs(tabs, bgtabs, false);
+			RearrangeTreeTabs(tabs, bgtabs, false);
 		}
 	});
 }
@@ -214,7 +253,7 @@ function SetActiveTab(tabId) {
 		$(".active:visible").removeClass("active").removeClass("selected");
 		$(".pin, .tab:visible").removeClass("active").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$("#"+tabId).removeClass("attention").addClass("active").addClass("selected");
+		$("#"+tabId).removeClass("attention").addClass("active")/* .addClass("selected") */;
 		ScrollToTab(tabId);
 		SetActiveTabInActiveGroup(tabId);
 	}

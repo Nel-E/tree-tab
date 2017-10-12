@@ -3,8 +3,10 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 if (browserId == 3) {
-	LoadPreferences();
-	FirefoxStart();
+	// chrome.runtime.onStartup.addListener(function() {
+		LoadPreferences();
+		FirefoxStart();
+	// });
 }
 
 function FirefoxStart() {
@@ -32,7 +34,7 @@ function FirefoxLoadTabs() {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: false}, function(BrowserWindows) {
 		chrome.tabs.query({windowType: "normal"}, function(BrowserTabs) {
 			// LOAD TABS
-			var LoadedTabs = localStorage.getItem("tabs") !== null && opt.skip_load == false ? JSON.parse(localStorage["tabs"]) : {};
+			var LoadedTabs = LoadData("tabs", {});
 			let refTabs = {};
 			BrowserTabs.forEach(function(TabA) {
 				tabs[TabA.id] = {h: "", p: TabA.pinned ? "pin_list" : "tab_list", i: TabA.index, o: "n"};
@@ -67,41 +69,9 @@ function FirefoxLoadTabs() {
 
 				
 			// LOAD WINDOWS, GROUPS AND FOLDERS
-			// var LoadedWindows = localStorage.getItem("windows") !== null && opt.skip_load == false ? JSON.parse(localStorage["windows"]) : {};
-			// for (var BrowserWindowIndex = 0; BrowserWindowIndex < BrowserWindows.length; BrowserWindowIndex++) {
-				// let WindowIndex = BrowserWindowIndex;
-				// let WindowId = BrowserWindows[WindowIndex].id;
-				// windows[WindowId] = {h: "", groups: {}, folders: {}};
-				// let w = Promise.resolve(browser.sessions.getWindowValue(WindowId, "TTId")).then(function(TTId) {
-					// if (TTId != undefined) {
-						// windows[WindowId].h = TTId;
-					// }
-					// if (WindowIndex == BrowserWindows.length-1) {
-						// BrowserWindows.forEach(function(BrowserWindow) {
-							// if (windows[BrowserWindow.id].h == ""){
-								// AppendWinTTId(BrowserWindow.id);
-							// } else {
-								// for (var LoadedWindowId in LoadedWindows) {
-									// if (LoadedWindows[LoadedWindowId].h == windows[BrowserWindow.id].h) {
-										// if (Object.keys(LoadedWindows[LoadedWindowId].groups).length > 0) {
-											// windows[WindowId].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
-										// }
-										// if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
-											// windows[WindowId].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
-										// }
-									// }
-								// }
-								// hold = false;
-
-							// }
-						// });
-					// }
-				// });			
-			// }
-
-			var LoadedWindows = localStorage.getItem("windows") !== null && opt.skip_load == false ? JSON.parse(localStorage["windows"]) : {};
+			var LoadedWindows = LoadData("windows", {});
 			BrowserWindows.forEach(function(WinA) {
-				windows[WinA.id] = {h: "", groups: {}, folders: {}};
+				windows[WinA.id] = {h: "", group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
 				let w = Promise.resolve(browser.sessions.getWindowValue(WinA.id, "TTId")).then(function(TTId) {
 					if (TTId != undefined) {
 						windows[WinA.id].h = TTId;
@@ -119,6 +89,9 @@ function FirefoxLoadTabs() {
 										if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
 											windows[WinA.id].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
 										}
+										windows[windowId].active_group = LoadedWindows[LoadedWindowId].active_group;
+										windows[windowId].active_shelf = LoadedWindows[LoadedWindowId].active_shelf;
+										windows[windowId].group_bar = LoadedWindows[LoadedWindowId].group_bar;
 									}
 								}
 								hold = false;
@@ -202,7 +175,7 @@ function AppendWinTTId(windowId){
 	if (windows[windowId] != undefined) {
 		windows[windowId].h = NewTTWindowId;
 	} else {
-		windows[windowId] = {h: NewTTWindowId, groups: {}, folders: {}};
+		windows[windowId] = {h: NewTTWindowId, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
 	}
 }
 
@@ -297,10 +270,6 @@ function FirefoxStartListeners() {
 	
 	chrome.windows.onCreated.addListener(function(window) {
 		AppendWinTTId(window.id);
-		// windows[window.id] = {h: "", groups: {}, folders: {}};
-		// let NewTTWindowId = GenerateNewWindowID();
-		// browser.sessions.setWindowValue(window.id, "TTId", NewTTWindowId);
-		// windows[window.id].h = NewTTWindowId;
 		schedule_save++;
 	});
 	
@@ -322,15 +291,41 @@ function FirefoxStartListeners() {
 					sendResponse(windows[message.windowId].groups);
 				}
 			break;
-			case "groups_save":
-			
+			case "save_groups":
 				windows[message.windowId].groups = Object.assign({}, message.groups);
-			// var obj2 = Object.assign({}, obj);
-			// groups: bggroups, windowId: CurrentWindowId
-			
 				schedule_save++;
-				// localStorage["windows"] = JSON.stringify(windows);
 			break;
+			case "set_active_group":
+				windows[message.windowId].active_group = message.active_group;
+				schedule_save++;
+			break;
+			case "get_active_group":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].active_group);
+				}
+			break;
+			
+			
+			case "set_active_shelf":
+				windows[message.windowId].active_shelf = message.active_shelf;
+				schedule_save++;
+			break;
+			case "get_active_shelf":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].active_shelf);
+				}
+			break;
+			
+			case "set_group_bar":
+				windows[message.windowId].group_bar = message.group_bar;
+				schedule_save++;
+			break;
+			case "get_group_bar":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].group_bar);
+				}
+			break;
+			
 			case "console_log":
 				console.log(message.m);
 			break;

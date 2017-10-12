@@ -40,9 +40,11 @@ function SetDragAndDropEvents() {
 		event.stopPropagation();
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 
+		if ($(this).parent().is(".active")) {
+			$(this).parent().addClass("selected_temporarly").addClass("selected");
+		}
 		$(".close").removeClass("show");
 		$(".tab_header_hover").removeClass("tab_header_hover");
-		$(this).parent().addClass("tab_header_hover");
 
 		if ($(this).parent().is(":not(.selected)")) {
 			$(".selected").addClass("selected_frozen").removeClass("selected");
@@ -68,34 +70,28 @@ function SetDragAndDropEvents() {
 		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: $(this).parent()[0].id, ComesFromWindowId: CurrentWindowId, selectedTabs: SelectedTabsIds, tabsIds: TabsIds}));
 	});
 	
+	// REMOVE DROP TARGET WHEN DRAG LEAVES
+	$(document).on("dragleave", ".highlighted_drop_target", function(event) {
+		if ($(event.target).find(".group_title").length > 0) { return; }
+		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+	});
+	
 	// SET DROP TARGET WHEN ENTERING PINS AND TABS
 	$(document).on("dragenter", ".drag_entered_top:not(.highlighted_drop_target), .drag_entered_bottom:not(.highlighted_drop_target), .drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
-		// if ($(".selected:visible").find($(this)).length > 0 || DragAndDrop.DropToWindowId == 0 || DragAndDrop.ComesFromWindowId == 0) {
-		if ($(".selected:visible").find($(this)).length > 0) {
-			return;
-		}
+		if ($(".selected:visible").find($(this)).length > 0) { return; }
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		$(this).addClass("highlighted_drop_target");
 
 	});
 	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
-	$(document).on("dragleave", "#pin_list, .group", function(event) {
-		$(this).removeClass("highlighted_drop_target");
-	});
-	$(document).on("dragenter", "#pin_list, .group", function(event) {
+	$(document).on("dragenter", "#pin_list, .group, .group_button", function(event) {
+		if (GroupDragNode) { return; }
 		event.stopPropagation();
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $(this).addClass("highlighted_drop_target");
-	});
-	$(document).on("dragenter", ".group_button", function(event) {
-		event.stopPropagation();
-
-		// DragAndDrop.DropToGroupId = this.id.substr(1); DragAndDrop.DropBeforeTabId = DragAndDrop.DropAfterTabId = DragAndDrop.DropToTabId = DragAndDrop.DropToFolderId = undefined;
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target"); $("#"+this.id.substr(1)).addClass("highlighted_drop_target");
-		$(".dragover_highlight").removeClass("dragover_highlight"); $(this).addClass("dragover_highlight");
+		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+		$(this).addClass("highlighted_drop_target");
 	});
 	
-
 
 	// TIMER FOR FOR AUTO EXPAND
 	$(document).on("dragenter", ".drag_enter_center", function(event) {
@@ -113,11 +109,9 @@ function SetDragAndDropEvents() {
 		}
 	});
 
-	// $(document).on("drop", ".group_button, .group, #pin_list", function(event) {
 	$(document).on("drop", "*", function(event) {
 		Dropped = true;
 		event.stopPropagation();
-		chrome.runtime.sendMessage({command: "dropped_tabs"});
 		let data = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
 		if (data.ComesFromWindowId != CurrentWindowId) {
 			$(".selected").addClass("selected_frozen").removeClass("selected");
@@ -125,6 +119,13 @@ function SetDragAndDropEvents() {
 			(data.tabsIds).reverse().forEach(function(TabId) {
 				chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
 					if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
+						setTimeout(function() {
+							(data.selectedTabs).forEach(function(selectedTabId) {
+								if ($("#"+selectedTabId)[0]){
+									$("#"+selectedTabId).addClass("selected_temporarly").addClass("selected");
+								}
+							});
+						},500);
 						setTimeout(function() {
 							if (browserId != 3) { // FUCKING FIREFOX SHIT AINT WORKING
 								for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
@@ -134,15 +135,7 @@ function SetDragAndDropEvents() {
 									
 								}
 							}
-						},100);
-						setTimeout(function() {
-							(data.selectedTabs).forEach(function(selectedTabId) {
-								if ($("#"+selectedTabId)[0]){
-									$("#"+selectedTabId).addClass("selected_temporarly").addClass("selected");
-								}
-							});
-							// $("#"+data.DragNodeId).addClass("selected_temporarly").addClass("selected");
-						},500);
+						},800);
 						setTimeout(function() {
 							if (target) {
 								$("#"+target).addClass("highlighted_drop_target");
@@ -152,24 +145,78 @@ function SetDragAndDropEvents() {
 					}
 				});
 			});
-		} else {
-			if ($(".highlighted_drop_target")[0] != undefined) {
-				HandleDrop();
-			}
-			
 		}
 	});
+
+	// $(document).on("drop", ".group_button, .group, #pin_list", function(event) {
+	// $(document).on("drop", "*", function(event) {
+		// Dropped = true;
+		// event.stopPropagation();
+		// chrome.runtime.sendMessage({command: "dropped_tabs"});
+		// let data = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
+		// if (data.ComesFromWindowId != CurrentWindowId) {
+			// $(".selected").addClass("selected_frozen").removeClass("selected");
+			// let target = $(".highlighted_drop_target")[0].id;
+			// (data.tabsIds).reverse().forEach(function(TabId) {
+				// chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+					// if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
+						// setTimeout(function() {
+							// if (browserId != 3) { // FUCKING FIREFOX SHIT AINT WORKING
+								// for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
+									// if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
+										// $("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
+									// }
+									
+								// }
+							// }
+						// },100);
+						// setTimeout(function() {
+							// (data.selectedTabs).forEach(function(selectedTabId) {
+								// if ($("#"+selectedTabId)[0]){
+									// $("#"+selectedTabId).addClass("selected_temporarly").addClass("selected");
+								// }
+							// });
+						// },500);
+						// setTimeout(function() {
+							// if (target) {
+								// $("#"+target).addClass("highlighted_drop_target");
+							// }
+							// HandleDrop();
+						// },1000);
+					// }
+				// });
+			// });
+		// } else {
+			// if ($(".highlighted_drop_target")[0] != undefined) {
+				// HandleDrop();
+			// }
+			
+		// }
+	// });
 	
-	// DETACH TABS
+	// DROP (but not in drop, as it's buggy)
 	$(document).on("dragend", ".tab_header", function(event) {
-		setTimeout(function() {
-			if (MouseHoverOver == "" && !Dropped) {
+		if (Dropped && MouseHoverOver != "" && $(".highlighted_drop_target")[0] != undefined) {
+			HandleDrop();
+		} else {
+			if (!Dropped && MouseHoverOver == "" && $(".highlighted_drop_target")[0] == undefined) {
 				DetachTabs(DetachIfDraggedOut);
-				$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+				// $(".highlighted_drop_target").removeClass("highlighted_drop_target");
 				HandleDrop();
 			}
-		},500);
+		}
 	});
+
+	// DETACH TABS
+	// $(document).on("dragend", ".tab_header", function(event) {
+		// setTimeout(function() {
+			// if (MouseHoverOver == "" && !Dropped && $(".highlighted_drop_target")[0] == undefined) {
+				// DetachTabs(DetachIfDraggedOut);
+				// $(".highlighted_drop_target").removeClass("highlighted_drop_target");
+				// HandleDrop();
+			// }
+		// },800);
+	// });
 }
 
 
@@ -186,6 +233,14 @@ function HandleDrop() {
 		});
 	}
 
+	// dropped on pin_list
+	if ($(".highlighted_drop_target").is("#pin_list")) {
+		$(".selected").each(function() {
+			SetTabClass({ id: this.id, pin: true });
+		});
+		$(".highlighted_drop_target").append($(".selected"));
+	}
+	
 	// dropped on tab
 	if ($(".highlighted_drop_target").parent().is(".tab")) {
 		if ($(".highlighted_drop_target").parent().is(".selected")) {
@@ -210,14 +265,21 @@ function HandleDrop() {
 		}
 	}
 	
-	// dropped on group or pin_list, somewhere on empty space on tabs list
-	if ($(".highlighted_drop_target").is("#pin_list, .group")) {
-console.log("dropped on group");
+	// dropped on group (tab list)
+	if ($(".highlighted_drop_target").is(".group")) {
 		$(".selected").each(function() {
-			SetTabClass({ id: this.id, pin: ($(".highlighted_drop_target").is("#pin_list") ? true : false) });
+			SetTabClass({ id: this.id, pin: false });
 		});
 		$(".highlighted_drop_target").append($(".selected"));
 	}
+
+	// dropped on group button (group list)
+	if ($(".highlighted_drop_target").is(".group_button")) {
+		$(".selected").each(function() {
+			SetTabClass({ id: this.id, pin: false });
+		});
+		$("#"+$(".highlighted_drop_target")[0].id.substr(1)).append($(".selected"));
+	}	
 	
 	$(".highlighted_selected").addClass("selected").removeClass("highlighted_selected");
 	
@@ -227,24 +289,9 @@ console.log("dropped on group");
 	setTimeout(function() {
 		DropTargetsSendToBack();
 		schedule_update_data++;
-		
-		// if (opt.syncro_tabbar_tabs_order) {
-			
-			// chrome.tabs.query({currentWindow: true}, function(tabs) {
-				// let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-				// let qtabIds = tabs;
-				// RearrangeBrowserTabs(tabIds, qtabIds, qtabIds.length-1);
-			// });
-		// }
-		
-		
-		// Dropped = false;
+		schedule_rearrange_tabs++;
 	}, 500);
 	
-	setTimeout(function() {
-		schedule_rearrange_tabs++;
-	}, 1000);
-
 	
 	$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 	$(".tab_header_hover").removeClass("tab_header_hover");

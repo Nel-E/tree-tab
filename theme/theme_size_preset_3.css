@@ -1,10 +1,15 @@
 body {
+	
+	--scrollbar_height: 4px;
+	--scrollbar_width: 16px;
+	--button_size: 22px;
+	
 	--pin_width: 26px;
 	--pin_height: 26px;
 
 	--tab_height: 21px;
 	--tab_height_line: 25px;
-
+	
 	--title_font_size: 12px;
 
 	--tab_title_text_padding_left: 26px;

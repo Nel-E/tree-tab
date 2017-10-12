@@ -1,4 +1,9 @@
 body {
+	
+	--scrollbar_height: 4px;
+	--scrollbar_width: 16px;
+	--button_size: 22px;
+	
 	--pin_width: 20px;
 	--pin_height: 20px;
 

@@ -129,12 +129,16 @@ function SetMenu() {
 				if ($("#" + menuTabId).is(".selected")) {
 					$(".selected:visible").each(function() {
 						chrome.tabs.get(parseInt(this.id), function(tab) {
-							chrome.tabs.update(tab.id, { muted: true });
+							if (tab) {
+								chrome.tabs.update(tab.id, { muted: true });
+							}
 						});
 					});
 				} else {
 					chrome.tabs.get(menuTabId, function(tab) {
-						chrome.tabs.update(tab.id, { muted: true });
+						if (tab) {
+							chrome.tabs.update(tab.id, { muted: true });
+						}
 					});
 				}
 				break;
@@ -142,7 +146,9 @@ function SetMenu() {
 				if ($("#" + menuTabId).is(".selected")) {
 					$(".selected:visible").each(function() {
 						chrome.tabs.get(parseInt(this.id), function(tab) {
-							chrome.tabs.update(tab.id, { muted: false });
+							if (tab) {
+								chrome.tabs.update(tab.id, { muted: false });
+							}
 						});
 					});
 				} else {

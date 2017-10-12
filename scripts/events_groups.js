@@ -4,22 +4,19 @@
 
 // **********         GROUPS EVENTS         ***************
 
-// function RestoreToolbarSearchFilter() {
-	// let filter_type = "url";
-	// if (localStorage.getItem("filter_type") !== null) {
-		// filter_type = localStorage["filter_type"];
-	// }
-	// if (filter_type == "url") {
-		// $("#button_filter_type").addClass("url").removeClass("title");
-	// } else {
-		// $("#button_filter_type").addClass("title").removeClass("url");
-	// }
-// }
+function RestoreStateOfGroupsToolbar() {
+	chrome.runtime.sendMessage({command: "get_group_bar", windowId: CurrentWindowId}, function(response) {
+		if (response == true) {
+			$("#toolbar_groups").removeClass("hidden");
+			$("#toolbar_groups").css({"width": "", "border": ""});
+		} else {
+			$("#toolbar_groups").addClass("hidden");
+			$("#toolbar_groups").css({"width": "0px", "border": "none"});
+		}
+	});
+}
 
 function SetGroupEvents() {
-	
-	
-
 	$("#toolbar_groups").css({"display": "inline-block"});
 			
 	// activate group
@@ -37,18 +34,20 @@ function SetGroupEvents() {
 			$("#toolbar_groups").toggleClass("hidden");
 			if ($("#toolbar_groups").is(".hidden")) {
 				$("#toolbar_groups").css({"width": "0px", "border": "none"});
+				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: false, windowId: CurrentWindowId});
 			} else {
 				$("#toolbar_groups").css({"width": "", "border": ""});
+				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: true, windowId: CurrentWindowId});
 			}
 			RefreshGUI();
 		}
 	});
 	// show un-grouped tabs
-	$(document).on("mousedown", "#ungrouped_tabs", function(event) {
-		if (event.button == 0) {
-			SetActiveGroup("tab_list", true, true);
-		}
-	});
+	// $(document).on("mousedown", "#ungrouped_tabs", function(event) {
+		// if (event.button == 0) {
+			// SetActiveGroup("tab_list", true, true);
+		// }
+	// });
 
 	// new group button
 	$(document).on("mousedown", "#new_group", function(event) {
@@ -160,10 +159,7 @@ function SetGroupEvents() {
 
 	// when dragging the group, move it up or down
 	$(document).on("dragenter", ".group_button", function(event) {
-		// bg.dt.DropToGroup = this.id;
-		// if (GroupDragNode == undefined || this.id == GroupDragNode) {
-			// return;
-		// }
+		if (GroupDragNode == undefined || this.id == GroupDragNode) { return; }
 		if ( $(this).index() <= $("#"+GroupDragNode).index()) {
 			$("#"+GroupDragNode).insertBefore($(this));
 		} else {

@@ -50,13 +50,6 @@ if (navigator.userAgent.match("Firefox") !== null) { browserId = 3; }
 var bgtabs = {};
 var bggroups = {};
 
-var CurrentThemeVersion = 2;
-// var TabsSizeSet = 2;
-// var ScrollbarPinList = 4;
-// var ScrollbarTabList = 16;
-// var ToolbarShow = true;
-// var ToolbarSet;
-
 var caption_clear_filter = chrome.i18n.getMessage("caption_clear_filter");
 var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
@@ -64,7 +57,6 @@ var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 var caption_ungrouped_group = "Ungrouped tabs";
 var caption_noname_group = "untitled";
 
-var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "never_show_close": false, "faster_scroll": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
 var DefaultToolbar =
 	'<div class=toolbar id=toolbar>'+
 		'<div id=toolbar_main>'+
@@ -74,7 +66,7 @@ var DefaultToolbar =
 			'<div class=button id=button_search><div class=button_img></div></div>'+
 			'<div class=button id=button_tools><div class=button_img></div></div>'+
 			'<div class=button id=button_groups><div class=button_img></div></div>'+
-			'<div class=button id=button_folders><div class=button_img></div></div>'+
+			// '<div class=button id=button_folders><div class=button_img></div></div>'+
 		'</div>'+
 		'<div class=toolbar_shelf id=toolbar_search>'+
 			'<div id=toolbar_search_input_box>'+
@@ -101,22 +93,31 @@ var DefaultToolbar =
 			'<div class=button id=groups_toolbar_hide><div class=button_img></div></div>'+
 			'<div class=button id=new_group><div class=button_img></div></div>'+
 			'<div class=button id=remove_group><div class=button_img></div></div>'+
-			'<div class=button id=remove_tabs_from_group><div class=button_img></div></div>'+
-			'<div class=button id=ungrouped_tabs><div class=button_img></div></div>'+
 			'<div class=button id=edit_group><div class=button_img></div></div>'+
 		'</div>'+
-		'<div class=toolbar_shelf id=toolbar_shelf_folders>'+
-		'</div>'+
-		// '<div id=toolbar_separator>'+
-		// '</div>'+
-		// '<div class=toolbar_int id=toolbar_unused_buttons>'+
+		// '<div class=toolbar_shelf id=toolbar_shelf_folders>'+
 		// '</div>'+
 	'</div>';
+	
+var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
+var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "never_show_close": false, "faster_scroll": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
 
 
 
 
 // *******************             GLOBAL FUNCTIONS                 ************************
+
+function LoadData(KeyName, ExpectReturnDefaultType) {
+	var data = ExpectReturnDefaultType;
+	try {
+		data = JSON.parse(localStorage[KeyName]);
+		return data;
+	} catch(e) {
+		console.log("error in JSON PARSE of "+KeyName+", will return empty expected var type");
+		return ExpectReturnDefaultType;
+	}
+}
+
 // save every 0.5 seconds if there is anything to save obviously
 async function AutoSaveData() {
 	setTimeout(function() {
@@ -182,6 +183,17 @@ function ApplySizeSet(size){
 			}
 		}
 
+	}
+	if (browserId != 3) {
+		// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px;}", 0);
+		// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+theme.ScrollbarPinList+"px; }", 0);
+	} else {
+		// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
+		if (size > 1) {
+			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+		} else {
+			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: 0px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+		}
 	}
 }
 

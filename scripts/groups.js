@@ -4,7 +4,7 @@
 
 // **********       GROUPS FUNCTIONS        ***************
 
-// chrome.runtime.sendMessage({command: "groups_save"});
+// chrome.runtime.sendMessage({command: "save_groups"});
 
 function AppendAllGroups() {
 	// var scroll = $("#group_list").scrollTop();
@@ -49,7 +49,7 @@ function RearrangeGroups(stack) {
 
 function AppendGroupToList(groupId, group_name, background_color, font_color) {
 
-	if ($("#"+groupId).length == 0) {
+	if ($("#"+groupId).length == 0 && $("#groups")[0]) {
 		// var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.backgroundColor = "#"+background_color; $("#groups")[0].appendChild(grp);
 		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; $("#groups")[0].appendChild(grp);
 	}
@@ -103,7 +103,7 @@ function AddNewGroup() {
 	// $("#group_list").scrollTop($("#group_list")[0].scrollHeight);
 	// bg.schedule_save++;
 	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: CurrentWindowId});
-	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
+	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	// return "g_"+newId;
 }
 
@@ -131,7 +131,7 @@ function GroupRemove(groupId, close_tabs) {
 		}
 	}
 	
-	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
+	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 
 	$("#"+groupId).remove();
 	$("#_"+groupId).remove();
@@ -157,7 +157,7 @@ function UpdateBgGroupsOrder() {
 		bggroups[(this.id).substr(1)].index = $(this).index();
 	});
 	// console.log(bggroups);
-	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
+	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	// var new_groups = [];
 	// $(".group").each(function() {
 		// for (var group_index = 0; group_index < bggroups.length; group_index++) {
@@ -202,12 +202,14 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
 		ScrollToTab($("#"+groupId).find(".active")[0].id);
 	}
+	chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
+
 }
 
 function SetActiveTabInActiveGroup(tabId) {
 	if (bggroups[active_group] != undefined) {
 		bggroups[active_group].activetab = parseInt(tabId);
-		chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
+		chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	}
 }
 
@@ -287,7 +289,7 @@ function GroupEditConfirm() {
 	
 	
 	
-	chrome.runtime.sendMessage({command: "groups_save", groups: bggroups, windowId: CurrentWindowId});
+	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	// bg.schedule_save++;
 	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: windowId});
 }

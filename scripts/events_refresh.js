@@ -14,7 +14,9 @@ function SetTRefreshEvents() {
 		event.stopPropagation();
 		if (event.button == 0 && $(this).parent().parent().is(".audible, .muted")) {
 			chrome.tabs.get(parseInt(this.parentNode.parentNode.id), function(tab) {
-				chrome.tabs.update(tab.id, {muted:!tab.mutedInfo.muted});
+				if (tab) {
+					chrome.tabs.update(tab.id, {muted:!tab.mutedInfo.muted});
+				}
 			});
 		}
 	});
@@ -114,7 +116,7 @@ function VivaldiRefreshMediaIcons() {
 
 
 function GetFaviconAndTitle(tabId) {
-	if ($("#" + tabId).length > 0) {
+	if ($("#" + tabId)[0]) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab){
 				var title = tab.title ? tab.title : tab.url;

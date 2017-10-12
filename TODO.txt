@@ -1,0 +1,41 @@
+TOP PRIORITY:
+
+apply scrollbars from theme
+groups order/reorder
+fix edit group dialog
+
+Add a shortcut to open tree tabs sidebar
+
+fix options page
+add missing labels in options page
+add missing labels in global
+
+remove ctrl+1 and ctrl+2 when order tabs 100% works
+
+undo close to restore trees (will work ONLY in firefox)
+
+
+LOW PRIORITY:
+folders
+save/load sessions
+
+unread state?
+
+menu: collapse entire tree
+menu: expand tree
+menu: copy urls of the selected tabs
+menu: bookmark selected tabs/tree
+menu: select all
+menu: invert selection
+
+options: Customising the context menu
+
+
+css: toolbar icon colors, background hover and border hover
+css: Colours for tree elements
+
+click on active to return to previous tab
+
+sort tabs/tree
+
+maybe filter tabs on search

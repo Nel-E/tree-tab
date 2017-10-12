@@ -101,6 +101,9 @@ function SetTabEvents() {
 
 			// TOGGLE SELECTION WITH CTRL
 			if (event.ctrlKey) {
+				// if ($(".active:visible").is(":not(.selected)")) {
+					// $(".active:visible").addClass("selected");
+				// }
 				$(this).toggleClass("selected");
 			}
 		}
