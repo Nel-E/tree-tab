@@ -5,11 +5,6 @@
 // **********			 MENU		 ***************
 
 function SetMenu() {
-	// set menu labels
-	$(".menu_item").each(function() {
-		$(this).text(chrome.i18n.getMessage(this.id));
-	});
-
 	// trigger action when the contexmenu is about to be shown
 	$(document).bind("contextmenu", function(event) {
 		if (!event.ctrlKey) {

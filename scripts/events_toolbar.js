@@ -20,9 +20,6 @@ function RestoreToolbarSearchFilter() {
 
 function RestoreToolbarShelf() {
 	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
-		$(".button").each(function() {
-			$(this).attr("title", chrome.i18n.getMessage(this.id));
-		});
 		
 		$("#filter_box").attr("placeholder", caption_searchbox);
 		$("#filter_box").css({"opacity": 1});
@@ -144,7 +141,7 @@ function SetToolbarEvents() {
 		chrome.sessions.getRecentlyClosed( null, function(sessions) {
 			if (sessions.length > 0) {
 				chrome.sessions.restore(null, function(restored) {
-					if (browserId == 3) {
+					if (browserId == "F") {
 						if (restored.tab != undefined) {
 							let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
 

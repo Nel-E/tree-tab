@@ -3,145 +3,198 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 
-if (browserId != 3) {
-	// chrome.runtime.onStartup.addListener(function() {
-		LoadPreferences();
-		ChromeLoadTabs(0);
-	// });
+if (browserId != "F") {
+	LoadPreferences();
+	ChromeLoadTabs(0);
 }
 
 function ChromeLoadTabs(retry) {
-	started = true;
-	chrome.tabs.query({windowType: "normal"}, function(qtabs) {
-
-		// create current tabs object
-		qtabs.forEach(function(Tab) {
-			ChromeHashURL(Tab);
-		});
-
-		var reference_tabs = {};
+	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
+		started = true;
+		var refTabs = {};
 		var tabs_matched = 0;
 		
 		// load tabs and windows from hdd
-		var t_count = LoadData("t_count", 0);
 		var w_count = LoadData("w_count", 0);
-		var LoadedTabs = LoadData("tabs", {});
-		var LoadedWindows = LoadData("windows", {});
+		var t_count = LoadData("t_count", 0);
+		var LoadedWindows = LoadData("windows", []);
+		var LoadedTabs = LoadData("tabs", []);
 
 		// if loaded tabs mismatch by 50%, then try to load back
-		if (Object.keys(LoadedTabs).length < t_count*0.5) {
-			LoadedTabs = LoadData("tabs_BAK", {});
+		if (LoadedTabs.length < t_count*0.5) {
+			LoadedTabs = LoadData("tabs_BAK", []);
 		}
 		// if loaded windows mismatch, then try to load back
-		if (Object.keys(LoadedWindows).length < w_count) {
-			LoadedWindows = LoadData("windows_BAK", {});
+		if (LoadedWindows.length < w_count) {
+			LoadedWindows = LoadData("windows_BAK", []);
 		}
 
-		// put tabs object in ordered array
-		var LoadedTabsArr;
-		if (Object.keys(LoadedTabs).length > 1){
-			LoadedTabsArr =  new Array(Object.keys(LoadedTabs).length).fill([0,0,0,0,0,0]);
-			for (var tab_obj in LoadedTabs) {
-				LoadedTabsArr[LoadedTabs[tab_obj].j] = [parseInt(tab_obj), LoadedTabs[tab_obj].h, LoadedTabs[tab_obj].p, LoadedTabs[tab_obj].i, LoadedTabs[tab_obj].o];
-			}
-		} else {
-			LoadedTabsArr = [];
-		}
+
+		// CACHED COUNTS
+		var WinCount = w.length;
+		var LoadedWinCount = LoadedWindows.length;
+		var LoadedTabsCount = LoadedTabs.length;
 		
+		for (var a = 0; a < WinCount; a++) {
+			var TabsCount = w[a].tabs.length;
+			for (var b = 0; b < TabsCount; b++) {
+				ChromeHashURL(w[a].tabs[b]);
+			}
+		}
+
 		// compare saved tabs from storage to current session tabs, but can be skipped if set in options
-		if (opt.skip_load == false && LoadedTabsArr.length > 0) {
+		if (opt.skip_load == false && LoadedTabs.length > 0) {
 			
 			// match loaded tabs
-			qtabs.forEach(function(Tab) {
-				for (var tabIndex = 0; tabIndex < LoadedTabsArr.length; tabIndex++) {
-					if (LoadedTabsArr[tabIndex][1] == tabs[Tab.id].h && reference_tabs[LoadedTabsArr[tabIndex][0]] == undefined) {
-						reference_tabs[LoadedTabsArr[tabIndex][0]] = Tab.id;
-						tabs[Tab.id].p = LoadedTabsArr[tabIndex][2];
-						tabs[Tab.id].i = LoadedTabsArr[tabIndex][3];
-						tabs[Tab.id].o = LoadedTabsArr[tabIndex][4];
-						tabs_matched++;
-						LoadedTabsArr.splice(tabIndex, 1);
+			for (var i = 0; i < WinCount; i++) {
+				var TabsCount = w[i].tabs.length;
+				for (var j = 0; j < TabsCount; j++) {
+					for (var k = 0; k < LoadedTabsCount; k++) {
+						let tabId = w[i].tabs[j].id;
+						if (LoadedTabs[k][1] == tabs[tabId].h && refTabs[LoadedTabs[k][0]] == undefined) {
+							refTabs[LoadedTabs[k][0]] = tabId;
+							tabs[tabId].p = LoadedTabs[k][2];
+							tabs[tabId].i = LoadedTabs[k][3];
+							tabs[tabId].o = LoadedTabs[k][4];
+							tabs_matched++;
+							LoadedTabs.splice(k, 1);
+							break;
+						}
+					}
+				}
+			}
+				
+			// replace parents tabIds for new ones, for that purpose refTabs was made before
+			for (var tabId in tabs) {
+				if (refTabs[tabs[tabId].p] != undefined) {
+					tabs[tabId].p = refTabs[tabs[tabId].p];
+				}
+			}
+		}
+			
+		for (var m = 0; m < WinCount; m++) {
+			if (w[m].tabs[0].url != "chrome://videopopout/") { // this is for opera for their extra video popup, which is weirdly queried as a "normal" window
+				let winId = w[m].id;
+				let url1 = w[m].tabs[0].url;
+				let url2 = w[m].tabs[w[m].tabs.length-1].url;
+				windows[winId] = {group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+				for (var n = 0; n < LoadedWinCount; n++) {
+					if (LoadedWindows[n][0] == url1 || LoadedWindows[n][1] == url2) {
+						windows[winId].group_bar = LoadedWindows[n][2];
+						windows[winId].active_shelf = LoadedWindows[n][3];
+						windows[winId].active_group = LoadedWindows[n][4];
+						if (Object.keys(LoadedWindows[n][5]).length > 0) { windows[winId].groups = Object.assign({}, LoadedWindows[n][5]); }
+						if (Object.keys(LoadedWindows[n][6]).length > 0) { windows[winId].folders = Object.assign({}, LoadedWindows[n][6]); }
+						LoadedWindows.splice(n, 1);
 						break;
 					}
 				}
-			});
-			// replace parents tabIds for new ones, for that purpose reference_tabs was made before
-			for (var tabId in tabs) {
-				if (reference_tabs[tabs[tabId].p] != undefined) {
-					tabs[tabId].p = reference_tabs[tabs[tabId].p];
+			}
+		}
+			
+		// replace active tab ids for each group using refTabs
+		for (var windowId in windows) {
+			for (var group in windows[windowId].groups) {
+				if (refTabs[windows[windowId].groups[group].activetab]) {
+					windows[windowId].groups[group].activetab = refTabs[windows[windowId].groups[group].activetab];
 				}
 			}
 		}
-		
-		// LOAD WINDOWS, GROUPS AND FOLDERS
-		chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(query_windows) {
-			for (var winIndex = 0; winIndex < query_windows.length; winIndex++) {
-				// if (query_windows[winIndex].tabs[0].url != "chrome://videopopout/") {
-					windows[query_windows[winIndex].id] = {i: winIndex, t: query_windows[winIndex].tabs[0].url, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
-				// }
-				
-			}
-			
-console.log("__________new windows__________");
 console.log(windows);
-			for (var LoadedWindowId in LoadedWindows) {
-				for (var windowId in windows) {
-					
-console.log("__________loaded window__________");
-console.log(LoadedWindows[LoadedWindowId]);
-console.log("__________ref tab__________");
-console.log(LoadedWindows[reference_tabs[windows[windowId].t]]);
-					
-					
-					if ((LoadedWindows[LoadedWindowId].i >= windows[windowId].i) && LoadedWindows[LoadedWindowId].t == windows[windowId].t) {
-						if (Object.keys(LoadedWindows[LoadedWindowId].groups).length > 0) {
-							windows[windowId].groups = Object.assign({}, LoadedWindows[LoadedWindowId].groups);
-						}
-						if (Object.keys(LoadedWindows[LoadedWindowId].folders).length > 0) {
-							windows[windowId].folders = Object.assign({}, LoadedWindows[LoadedWindowId].folders);
-						}
-						windows[windowId].active_group = LoadedWindows[LoadedWindowId].active_group;
-						windows[windowId].active_shelf = LoadedWindows[LoadedWindowId].active_shelf;
-						windows[windowId].group_bar = LoadedWindows[LoadedWindowId].group_bar;
-					}
-				}
-			}
-			
-			
-			// replace active tab ids for each group using reference_tabs
-			for (var windowId in windows) {
-				for (var group in windows[windowId].groups) {
-					if (reference_tabs[windows[windowId].groups[group].activetab]) {
-						windows[windowId].groups[group].activetab = reference_tabs[windows[windowId].groups[group].activetab];
-					}
-				}
-			}
-console.log("__________finished__________");
-console.log(windows);
-			
-			// console.log(windows);
-			
-		});
-
 		// will try to find tabs for 3 times
-		if (opt.skip_load == true || retry > 1 || tabs_matched > t_count*0.5) {
-
+		if (opt.skip_load == true || retry > 1 || (tabs_matched > t_count*0.5)) {
 			schedule_save++;
 			hold = false;
 			ChromeStartListeners();
-			// ChromePeriodicCheck();
-			AutoSaveData();
-			ChromeTabsUpdateIndexes();
-// console.log("should start "+opt.skip_load+retry+tabs_matched+t_count+hold);
+			ChromeAutoSaveData();
 		} else {
 			setTimeout(function() {ChromeLoadTabs(retry+1);}, 2000);
 		}
 	});
 }
 
+// save every 0.5 seconds if there is anything to save obviously
+async function ChromeAutoSaveData() {
+	setTimeout(function() {
+		ChromeAutoSaveData();
+		if (schedule_save > 1) {schedule_save = 1;}
+		if (!hold && schedule_save > 0 && Object.keys(tabs).length > 1) {
+			
+			localStorage["tabs_BAK"] = JSON.stringify(LoadData("tabs", []));
+			localStorage["windows_BAK"] = JSON.stringify(LoadData("windows", []));
+			
+			chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
+				var WinCount = w.length;
+				var t_count = 0;
+				var k = [];
+				var s = [];
+
+				for (var a = 0; a < WinCount; a++) {
+					t_count = t_count + w[a].tabs.length;
+				}
+
+				for (var b = 0; b < WinCount; b++) {
+					let winId = w[b].id;
+					if (
+						windows[winId] != undefined &&
+						windows[winId].group_bar != undefined &&
+						windows[winId].active_shelf != undefined &&
+						windows[winId].active_group != undefined &&
+						windows[winId].groups != undefined &&
+						windows[winId].folders != undefined
+					) {
+						var j = [
+							w[b].tabs[0].url,
+							w[b].tabs[w[b].tabs.length-1].url,
+							windows[winId].group_bar,
+							windows[winId].active_shelf,
+							windows[winId].active_group,
+							windows[winId].groups,
+							windows[winId].folders
+						];
+						k.push(j);
+					}
+
+					let TabsCount = w[b].tabs.length;
+					for (var c = 0; c < TabsCount; c++) {
+						let tabId = w[b].tabs[c].id;
+						if (
+							tabs[tabId] != undefined &&
+							tabs[tabId].h != undefined &&
+							tabs[tabId].p != undefined &&
+							tabs[tabId].i != undefined &&
+							tabs[tabId].o != undefined
+						) {
+							var r = [
+								tabId,
+								tabs[tabId].h,
+								tabs[tabId].p,
+								tabs[tabId].i,
+								tabs[tabId].o
+							];
+							s.push(r);
+						}
+					}
+					
+					if (s.length == t_count) {
+						localStorage["t_count"] = JSON.stringify(t_count);
+						localStorage["w_count"] = JSON.stringify(WinCount);
+						localStorage["tabs"] = JSON.stringify(s);
+						localStorage["windows"] = JSON.stringify(k);
+					}
+				}
+				
+				var tabsBAK = LoadData("tabs", []);
+				if (tabsBAK.length) { localStorage["tabs_BAK"] = JSON.stringify(tabsBAK); }
+				schedule_save--;
+			});
+		}
+	}, 500);
+}
+
 function ChromeHashURL(tab){
 	if (tabs[tab.id] == undefined) {
-		tabs[tab.id] = {j: tab.index, h: 0, p: tab.pinned ? "pin_list" : "tab_list", i: tab.index, o: "n"};
+		tabs[tab.id] = {h: 0, p: tab.pinned ? "pin_list" : "tab_list", i: tab.index, o: "n"};
 	}
 	var hash = 0;
 	var url = tab.url.replace(/opera|chrome|vivaldi|http|https|www|com|html|jpg|gif|pdf|[<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
@@ -149,59 +202,6 @@ function ChromeHashURL(tab){
 		hash = hash+url.charCodeAt(charIndex);
 	}
 	tabs[tab.id].h = hash;
-}
-
-function ChromeTabsUpdateIndexes(){
-	setTimeout(function() {
-		ChromeTabsUpdateIndexes();
-		if (schedule_update_indexes > 1) {
-			schedule_update_indexes = 1;
-		}
-		if (!hold && schedule_update_indexes > 0) {
-			schedule_update_indexes--;
-			chrome.tabs.query({windowType: "normal"}, function(qtabs) {
-				qtabs.forEach(function(Tab){
-					if (tabs[Tab.id] != undefined){
-						tabs[Tab.id].j = Tab.index;
-					} else {
-						ChromeHashURL(Tab);
-					}
-				});
-				schedule_save++;
-			});
-		}
-	}, 500);
-}
-
-async function ChromePeriodicCheck() {
-	setTimeout(function() {
-		ChromePeriodicCheck();
-		if (!hold) {
-			chrome.tabs.query({windowType: "normal"}, function(qtabs) {
-				qtabs.forEach(function(Tab) {
-					if (tabs[Tab.id] == undefined) {
-						ChromeHashURL(Tab);
-						setTimeout(function() {chrome.runtime.sendMessage({command: "recheck_tabs"});},300);
-						setTimeout(function() {schedule_save++;},600);
-					}
-				});
-			});
-		}
-	},60000);
-}
-
-function ChromeWindowsUpdateIndexes(){
-	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(query_windows) {
-		for (var winIndex = 0; winIndex < query_windows.length; winIndex++) {
-			if (windows[query_windows[winIndex].id] != undefined) {
-				windows[query_windows[winIndex].id].i = winIndex;
-				windows[query_windows[winIndex].id].t = query_windows[winIndex].tabs[0].url;
-			} else {
-				windows[query_windows[winIndex].id] = {i: winIndex, t: query_windows[winIndex].tabs[0].url, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
-			}
-		}
-		schedule_save++;
-	});
 }
 
 function ReplaceParents(oldTabId, newTabId) {
@@ -219,7 +219,6 @@ function ReplaceParents(oldTabId, newTabId) {
 function ChromeStartListeners() {
 	chrome.tabs.onCreated.addListener(function(tab) {
 		ChromeHashURL(tab);
-		schedule_update_indexes++;
 		chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id});
 		schedule_save++;
 	});
@@ -227,22 +226,19 @@ function ChromeStartListeners() {
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 		chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		delete tabs[tabId];
-		schedule_update_indexes++;
-		ChromeWindowsUpdateIndexes();
+		schedule_save++;
 	});
 	
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
 		chrome.tabs.get(tabId, function(tab) {
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: tabs[tabId].p});
 		});
-		schedule_update_indexes++;
-		ChromeWindowsUpdateIndexes();
+		schedule_save++;
 	});
 
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
-		schedule_update_indexes++;
-		ChromeWindowsUpdateIndexes();
+		schedule_save++;
 	});
 	
 	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -250,7 +246,7 @@ function ChromeStartListeners() {
 			ChromeHashURL(tab);
 		}
 		if (changeInfo.pinned != undefined) {
-			schedule_update_indexes++;
+			schedule_save++;
 		}
 		if (changeInfo.pinned == true) {
 			tabs[tabId].p = "pin_list";
@@ -262,7 +258,7 @@ function ChromeStartListeners() {
 	});
 	
 	chrome.tabs.onMoved.addListener(function(tabId, moveInfo) {
-		schedule_update_indexes++;
+		schedule_save++;
 	});
 	
 	chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
@@ -282,7 +278,6 @@ function ChromeStartListeners() {
 			}
 			schedule_save++;
 		});
-		ChromeWindowsUpdateIndexes();
 	});
 	
 	chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -290,13 +285,13 @@ function ChromeStartListeners() {
 	});
 	
 	chrome.windows.onCreated.addListener(function(window) {
-		windows[window.id] = {i: Object.keys(windows).length, t: 0, groups: {}, folders: {}};
-		ChromeWindowsUpdateIndexes();
+		windows[window.id] = {i: Object.keys(windows).length, t: 0, groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+		schedule_save++;
 	});
 	
 	chrome.windows.onRemoved.addListener(function(windowId) {
 		delete windows[windowId];
-		ChromeWindowsUpdateIndexes();
+		schedule_save++;
 	});
 	
 	chrome.runtime.onSuspend.addListener(function() {

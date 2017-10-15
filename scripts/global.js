@@ -12,21 +12,10 @@ var schedule_update_indexes = 0;
 var schedule_rearrange_tabs = 0;
 var windows = {};
 var tabs = {};
-// var groups = {};
-
-
-// var groups = {};
-
-
-// var ready = false;
-// var DD;
-// var DragAndDrop = {DropToWindowId: 0};
-// var DragAndDrop = {tabsIds: [], tabsIdsParents: [], DragNodeId: undefined, ComesFromWindowId: 0, DropToWindowId: 0};
 
 var MouseHoverOver = "";
 var GroupDragNode;
 
-// var DragAndDrop ={tabsIds: [], tabsIdsParents: [], DragNodeId: undefined, Dropped: false, };
 var Dropped = false;
 var DetachIfDraggedOut = [];
 var DropTargetsInFront = false;
@@ -34,7 +23,6 @@ var DropTargetsInFront = false;
 
 var timeout = false;
 var menuTabId = 0;
-// var menuGroupId = "tab_list";
 var CurrentWindowId = 0;
 var SearchIndex = 0;
 var schedule_update_data = 0;
@@ -42,10 +30,7 @@ var active_group = "tab_list";
 var PickColor = "";
 
 var opt = {};
-var browserId = 0;
-if (navigator.userAgent.match("Opera") !== null)   { browserId = 1; }
-if (navigator.userAgent.match("Vivaldi") !== null) { browserId = 2; }
-if (navigator.userAgent.match("Firefox") !== null) { browserId = 3; }
+var browserId = navigator.userAgent.match("Opera") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
 
 var bgtabs = {};
 var bggroups = {};
@@ -113,35 +98,11 @@ function LoadData(KeyName, ExpectReturnDefaultType) {
 		data = JSON.parse(localStorage[KeyName]);
 		return data;
 	} catch(e) {
-		console.log("error in JSON PARSE of "+KeyName+", will return empty expected var type");
+		// console.log("error in JSON PARSE of "+KeyName+", will return empty expected var type:");
+		// console.log(ExpectReturnDefaultType);
 		return ExpectReturnDefaultType;
 	}
 }
-
-// save every 0.5 seconds if there is anything to save obviously
-async function AutoSaveData() {
-	setTimeout(function() {
-		AutoSaveData();
-		if (schedule_save > 1) {schedule_save = 1;}
-		if (!hold && schedule_save > 0 && Object.keys(tabs).length > 1) {
-			if (localStorage.getItem("tabs") !== null) {
-				var tabs_BAK = JSON.parse(localStorage["tabs"]);
-				localStorage["tabs_BAK"] = JSON.stringify(tabs_BAK);
-			}
-			localStorage["t_count"] = Object.keys(tabs).length;
-			setTimeout(function() {localStorage["tabs"] = JSON.stringify(tabs);}, 100);
-			
-			if (localStorage.getItem("windows") !== null) {
-				var windows_BAK = JSON.parse(localStorage["windows"]);
-				localStorage["windows_BAK"] = JSON.stringify(windows_BAK);
-			}
-			localStorage["w_count"] = Object.keys(windows).length;
-			setTimeout(function() {localStorage["windows"] = JSON.stringify(windows);}, 100);
-			schedule_save--;
-		}
-	}, 500);
-}
-
 
 // generate random id
 function GenerateRandomID(){
@@ -182,12 +143,8 @@ function ApplySizeSet(size){
 				document.styleSheets.item(si).disabled = true;
 			}
 		}
-
 	}
-	if (browserId != 3) {
-		// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px;}", 0);
-		// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+theme.ScrollbarPinList+"px; }", 0);
-	} else {
+	if (browserId == "F") {
 		// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
 		if (size > 1) {
 			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
@@ -196,150 +153,6 @@ function ApplySizeSet(size){
 		}
 	}
 }
-
-
-
-
-
-	// SelectedTheme = {
-		// "ToolbarShow": true,
-		// "ColorsSet": {},
-		// "TabsSizeSetNumber": 2,
-		// "ScrollbarPinList": 4,
-		// "ScrollbarTabList": 16,
-		// "theme_name": "untitled",
-		// "theme_version": CurrentThemeVersion,
-		// "toolbar": DefaultToolbar
-	// };
-
-
-// generate random color
-// function GenerateRandomHexColor() {
-	// if (opt.grayscale_groups) {
-		// var rgb = Math.floor(Math.random() * 190);
-		// rgb = rgb+","+rgb+","+rgb;
-		// return RGBtoHex(rgb);
-	// } else {
-		// var letters = "0123456789ABCDEF".split(""), color = "";
-		// for (var letter = 0; letter < 6; letter++ ) {
-			// color += letters[Math.floor(Math.random() * 16)];
-		// }
-		// return color;
-	// }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-		// var theme = {
-			// "ToolbarShow": false,
-			// "ScrollbarPinList": 4,
-			// "ScrollbarTabList": 16
-		// };
-
-
-			// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+ScrollbarTabList+"px;}", 0);
-			// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+ScrollbarPinList+"px; }", 0);
-
-
-
-		// if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
-			// theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
-			
-			// $("#toolbar").html(theme.toolbar);
-			
-			// var css_variables = "";
-			// for (var css_variable in theme.ColorsSet) {
-				// css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
-			// }
-			// for (var css_variable in theme.TabsSizeSet) {
-				// css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSet[css_variable] + ";";
-			// }
-			
-			// document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
-		// }
-
-		// if (navigator.userAgent.match("Firefox") === null) {
-			// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px;}", 0);
-			// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+theme.ScrollbarPinList+"px; }", 0);
-		// } else {
-			// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-			// if (theme.TabsSizeSetNumber > 1) {
-				// document.styleSheets[1].insertRule(".tab_header>.tab_title { margin-top: -1.5px; }", document.styleSheets[1].cssRules.length);
-			// }
-		// }
-			
-			// CurrentWindowId = tabs[0].windowId;
-
-
-
-
-// if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
-	// theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
-	
-	// $("#toolbar").html(theme.toolbar);
-	
-	// var css_variables = "";
-	// for (var css_variable in theme.TabsSizeSet) {
-		// css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSet[css_variable] + ";";
-	// }
-	// for (var css_variable in theme.ColorsSet) {
-		// css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
-	// }
-	
-	// document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
-// }
-// if (navigator.userAgent.match("Firefox") === null) {
-	// document.styleSheets[0].insertRule(".group::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px;}", 0);
-	// document.styleSheets[0].insertRule("#pin_list::-webkit-scrollbar { height:"+theme.ScrollbarPinList+"px; }", 0);
-// } else {
-	// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-	// if (theme.TabsSizeSetNumber > 1) {
-		// document.styleSheets[1].insertRule(".tab_header>.tab_title { margin-top: -1.5px; }", document.styleSheets[1].cssRules.length);
-	// }
-// }
-
-
-
-// /* AppendCSSSheets from theme */
-// function AppendCSSSheets(theme) {
-	// var css_variables = "";
-	// for (var css_variable in theme.TabsSizeSet) {
-		// css_variables = css_variables + "--" + css_variable + ":" + theme.TabsSizeSet[css_variable] + ";";
-	// }
-	
-	// for (var css_variable in theme.ColorsSet) {
-		// ColorsSet[css_variable] = theme.ColorsSet[css_variable];
-		// if ($("#"+css_variable)[0]) $("#"+css_variable)[0].value = theme.ColorsSet[css_variable];
-		// css_variables = css_variables + "--" + css_variable + ":" + theme.ColorsSet[css_variable] + ";";
-	// }
-	
-	// /* remove previous css rules in css sheet 0 */
-	// for (var r = 0; r < document.styleSheets[0].cssRules.length; r++) {
-		// if (document.styleSheets[0].cssRules[r].cssText.match("--pin_width") !== null) {
-			// document.styleSheets[0].deleteRule(r);
-		// }
-		// if (document.styleSheets[0].cssRules[r].cssText.match("::-webkit-scrollbar") !== null) {
-			// document.styleSheets[0].deleteRule(r);
-		// }
-	// }
-	// document.styleSheets[0].insertRule("body { "+css_variables+" }", 0);
-	
-	// /* scrollbars */
-	// if (navigator.userAgent.match("Firefox") === null) {
-		// document.styleSheets[0].insertRule(".scrollbar::-webkit-scrollbar { width:"+theme.ScrollbarTabList+"px; height:"+theme.ScrollbarPinList+"px; }", 3);
-	// }
-// }
-
 
 function LoadPreferences() {
 	var	LoadedPreferences = {};
@@ -364,11 +177,3 @@ function SavePreferences() {
 	localStorage["preferences"] = JSON.stringify(opt);
 }
 
-
-
-// function LoadTheme(themeName) {
-	// var theme = JSON.parse(localStorage["theme"+themeName]);
-
-	// TabsSizeSet = theme.TabsSizeSetNumber;
-
-// }

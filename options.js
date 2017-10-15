@@ -4,53 +4,10 @@
 
 // **********      OPTIONS       ***************
 
-// chrome.runtime.sendMessage({command: "get_opt"}, function(response) {
-	// opt = response;
-// });			
-// chrome.runtime.sendMessage({command: "get_browser_ID"}, function(response) {
-	// browserId = response;
-// });	
-
 var themes = [];
-// var SelectedTheme = {"toolbar": DefaultToolbar, "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "ScrollbarPinList": 4, "ScrollbarTabList": 16, /* "theme_name": "untitled",  */"theme_version": CurrentThemeVersion};
 var SelectedTheme =  Object.assign({}, DefaultTheme);
 var dragged_button;
-	
 active_group = "tab_list";
-
-
-function LoadTheme(themeName) {
-	if (localStorage.getItem("theme"+themeName) != null) {
-		SelectedTheme = JSON.parse(localStorage["theme"+themeName]);
-		setTimeout(function() {
-			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-			ApplyColorsSet(SelectedTheme["ColorsSet"]);
-			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
-			
-			$("#toolbar").html(SelectedTheme.toolbar);
-			$("#toolbar_unused_buttons").html(SelectedTheme.unused_buttons);
-			
-			// expand toolbar options
-			SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
-			$("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
-			SelectedTheme.ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
-			
-			$("#button_filter_type").addClass("url").removeClass("title");
-			$(".on").removeClass("on");
-			
-			RefreshGUI();
-			setTimeout(function() {
-				chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
-			}, 200);
-		}, 200);
-	}
-}
-function SaveTheme(themeName) {
-	localStorage["theme"+themeName] = JSON.stringify(SelectedTheme);
-	chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
-	return SelectedTheme;
-}
-
 
 document.addEventListener("DOMContentLoaded", function() {
 	LoadPreferences();
@@ -68,8 +25,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	SetEvents();
 	SetToolbarShelfToggle();
 	
-	AppendGroupToList("tab_list", caption_ungrouped_group, 0, 0);
-	AppendGroupToList("tab_list2", caption_ungrouped_group, 0, 0);
+	AppendGroupToList("tab_list", caption_ungrouped_group, "");
+	AppendGroupToList("tab_list2", caption_ungrouped_group, "");
 
 	
 	// pins
@@ -112,8 +69,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_header16").addClass("tab_header_hover");
 	$("#exp16").addClass("hover");
 
-
-
 	// discarded tabs
 	AppendTab({tab: {id: 5, pinned: false, discarded: true}, Append: true});
 	$("#tab_title5")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded");
@@ -128,9 +83,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	AppendTab({tab: {id: 20, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected"});
 	$("#tab_title20")[0].textContent = "Unloaded selected hover";
 	$("#tab_header20").addClass("tab_header_hover");
-	
-	
-
 
 	// search result
 	AppendTab({tab: {id: 6, pinned: false}, Append: true, AdditionalClass: "filtered"});
@@ -162,8 +114,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_title26")[0].textContent = "Searh result selected active hover";
 	$("#tab_header26").addClass("tab_header_hover");
 
-
-
 	// search result highlighted
 	AppendTab({tab: {id: 30, pinned: false}, Append: true, AdditionalClass: "filtered highlighted_search"});
 	$("#tab_title30")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result");
@@ -194,11 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_title37")[0].textContent = "Searh result selected active hover";
 	$("#tab_header37").addClass("tab_header_hover");
 	
-	
 	$("#_tab_list").addClass("active_group");
-
-
-	
 });
 
 
@@ -326,12 +272,6 @@ function ImportTheme() {
 			SelectedTheme["theme_version"] = DefaultTheme["theme_version"];
 			SelectedTheme["unused_buttons"] = themeObj["unused_buttons"] ? themeObj["unused_buttons"] : "";
 
-
-
-
-			// $("#toolbar").html(themeObj.toolbar);
-			// ToolbarSet = themeObj.toolbar;
-
 			if (themes.indexOf(themeObj.theme_name) == -1) {
 				SelectedTheme["theme_name"] = themeObj.theme_name;
 			} else {
@@ -360,11 +300,127 @@ function ImportTheme() {
 
 
 
+function RemoveRedPreview() {
+	if (document.styleSheets[document.styleSheets.length-1].cssRules.length) {
+		document.styleSheets[document.styleSheets.length-1].deleteRule(document.styleSheets[document.styleSheets.length-1].cssRules.length-1);
+	}
+}
+
 
 // document events
 function SetEvents() {
+	
+// --------------------------------ADD RED PREVIEW------------------------------------------------------------------------	
 
-// ----------------------------------SETTINGS CHECKBOXES AND DROPDOWN MENUS-----------------------------------------------	
+	$(document).on("mouseenter", ".pick_col", function(event) {
+		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": red; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	});
+	$(document).on("mouseenter", ".font_weight_normal", function(event) {
+		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": normal; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	});
+	$(document).on("mouseenter", ".font_weight_bold", function(event) {
+		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": bold; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	});
+	
+	$(document).on("mouseenter", ".font_style_normal", function(event) {
+		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": normal; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	});
+	$(document).on("mouseenter", ".font_style_italic", function(event) {
+		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": italic; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	});
+	
+	
+	$(document).on("mouseleave", ".pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic", function(event) {
+		RemoveRedPreview();
+	});
+
+	
+	$(document).on("mouseenter", "#scrollbar_thumb_hover", function(event) {
+		// $("#group_scrollbar_thumb").css({ "background-color": "red" });
+		$("#group_scrollbar_thumb, #pin_list_scrollbar_thumb").addClass("hover_blinking");
+	});
+	
+	$(document).on("mouseleave", "#scrollbar_thumb_hover", function(event) {
+		// $("#group_scrollbar_thumb").css({ "background-color": "" });
+		$("#group_scrollbar_thumb, #pin_list_scrollbar_thumb").removeClass("hover_blinking");
+	});
+	
+	$(document).on("mouseenter", "#group_list_button_hover_background", function(event) {
+		// $("#group_scrollbar_thumb").css({ "background-color": "red" });
+		$("#_tab_list2").addClass("hover_blinking");
+	});
+	
+	$(document).on("mouseleave", "#group_list_button_hover_background", function(event) {
+		// $("#group_scrollbar_thumb").css({ "background-color": "" });
+		$("#_tab_list2").removeClass("hover_blinking");
+	});
+	
+
+	
+	$(document).on("mouseenter", "#button_hover_border", function(event) {
+		$(".button").addClass("hover_blinking");
+	});
+	$(document).on("mouseleave", "#button_hover_border", function(event) {
+		$(".button").removeClass("hover_blinking");
+	});
+	
+
+
+	$(document).on("mouseenter", "#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down", function(event) {
+		$("#group_scrollbar, #group_scrollbar_thumb").css({ "background-color": "red" });
+	});
+	$(document).on("mouseleave", "#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down", function(event) {
+		$("#group_scrollbar, #group_scrollbar_thumb").css({ "background-color": "" });
+	});
+	
+	$(document).on("mouseenter", "#options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down", function(event) {
+		$("#pin_list_scrollbar, #pin_list_scrollbar_thumb").css({ "background-color": "red" });
+	});
+	$(document).on("mouseleave", "#options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down", function(event) {
+		$("#pin_list_scrollbar, #pin_list_scrollbar_thumb").css({ "background-color": "" });
+	});
+	
+
+
+// --------------------------------------COLOR PICKER---------------------------------------------------------------------	
+	
+	// change fonts weight
+	$(document).on("mousedown", ".font_weight_normal, .font_weight_bold", function(event) {
+		SelectedTheme["ColorsSet"][this.id] = $(this).is(".font_weight_normal") ? "normal" : "bold";
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		SaveTheme($("#theme_list").val());
+	});
+	
+	// change fonts style
+	$(document).on("mousedown", ".font_style_normal, .font_style_italic", function(event) {
+		SelectedTheme["ColorsSet"][this.id] = $(this).is(".font_style_normal") ? "normal" : "italic";
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		SaveTheme($("#theme_list").val());
+	});
+	
+	
+	// show color picker
+	$(document).on("mousedown", ".pick_col", function(event) {
+		RemoveRedPreview();
+		if (event.shiftKey || event.ctrlKey) return;
+		event.stopPropagation();
+		PickColor = this.id;
+		let bod = document.getElementById("body");
+		let color = window.getComputedStyle(bod, null).getPropertyValue("--"+this.id);
+		console.log(color.replace(" ", "").replace("#", ""));
+		$("#color_picker")[0].value = color.replace(" ", "");
+		$("#color_picker").click();
+	});
+	$(document).on("input", "#color_picker", function(event) {
+		SelectedTheme["ColorsSet"][PickColor] = $("#color_picker")[0].value;
+		ApplyColorsSet(SelectedTheme["ColorsSet"]);
+		SaveTheme($("#theme_list").val());
+	});	
+	
+
+
+	
+// ----------------------------------EVENTS FOR CHECKBOXES AND DROPDOWN MENUS---------------------------------------------	
 	// set checkbox options on/off and save
 	$(document).on("click", ".bg_opt", function(event) {
 		opt[this.id] = $(this)[0].checked ? true : false;
@@ -497,9 +553,8 @@ function SetEvents() {
 
 
 
-	
-		
 
+// -------------------------OLD COLOR PICKER TO BE REPLACED---------------------------------------------------------------	
 		
 
 	// change colors with color pickers
@@ -511,9 +566,6 @@ function SetEvents() {
 		// ColorsSet[this.id] = $(this)[0].value;
 		// AppendCSSSheets(SaveTheme($("#theme_list").val()));
 	});
-
-
-
 
 
 
@@ -668,40 +720,6 @@ function SetEvents() {
 
 
 
-// --------------------------------------COLOR PICKER---------------------------------------------------------------------	
-	
-	// change fonts weight
-	$(document).on("mousedown", ".font_weight_normal, .font_weight_bold", function(event) {
-		SelectedTheme["ColorsSet"][this.id] = $(this).is(".font_weight_normal") ? "normal" : "bold";
-		ApplyColorsSet(SelectedTheme["ColorsSet"]);
-		SaveTheme($("#theme_list").val());
-	});
-	
-	// change fonts style
-	$(document).on("mousedown", ".font_style_normal, .font_style_italic", function(event) {
-		SelectedTheme["ColorsSet"][this.id] = $(this).is(".font_style_normal") ? "normal" : "italic";
-		ApplyColorsSet(SelectedTheme["ColorsSet"]);
-		SaveTheme($("#theme_list").val());
-	});
-	
-	
-	// show color picker
-	$(document).on("mousedown", ".color_x, .color_border, .font_color, .color_brush, .color_bucket", function(event) {
-		if (event.shiftKey || event.ctrlKey) return;
-		event.stopPropagation();
-		PickColor = this.id;
-		let bod = document.getElementById("body");
-		let color = window.getComputedStyle(bod, null).getPropertyValue("--"+this.id);
-		console.log(color.replace(" ", "").replace("#", ""));
-		$("#color_picker")[0].value = color.replace(" ", "");
-		$("#color_picker").click();
-	});
-	$(document).on("input", "#color_picker", function(event) {
-		SelectedTheme["ColorsSet"][PickColor] = $("#color_picker")[0].value;
-		ApplyColorsSet(SelectedTheme["ColorsSet"]);
-		SaveTheme($("#theme_list").val());
-	});	
-	
 
 // -------------------------------INDENTATION ADJUSTMENT------------------------------------------------------------------	
 
@@ -831,7 +849,14 @@ function SetEvents() {
 
 
 
+// ----------------------CLEAR DATA BUTTON--------------------------------------------------------------------------------	
 
+
+	// clear data
+	$(document).on("click", "#options_clear_data", function(event) {
+		localStorage.clear();
+		location.reload();
+	});
 
 
 
@@ -843,7 +868,7 @@ function SetEvents() {
 			event.preventDefault();
 		}
 	});
-	$(document).on("mousedown", ".color_border, .tab_color_options_row, #tabs_options_block, .color_bucket, .color_brush, .font_color, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, .brush, .brush2, .brush3, .brush4", function(event) {
+	$(document).on("mousedown", ".color_bucket", function(event) {
 		event.stopPropagation();
 		if (event.button == 0 && event.shiftKey) {
 			$(this).css({ "left": $(this).position().left-1 });
@@ -878,19 +903,30 @@ function RefreshFields() {
 	} else {
 		$("#field_theme").css({"height": ""});
 	}
-	// if (navigator.userAgent.match("Firefox") !== null) {
-		// $("#field_scrollbars").hide();
-	// } else {
-		// $("#faster_scroll_for_firefox").hide();
-	// }
-	// if (navigator.userAgent.match("Vivaldi") !== null) {
+	if (browserId != "F") {
+		$("#faster_scroll_for_firefox").hide();
+	}
+	if (browserId == "V") {
 		$("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
 		$("#url_for_web_panel").prop("readonly", true);
 		$("#url_for_web_panel").select();
-	// } else{
-		// $("#field_vivaldi").hide();
-	// }
+	} else{
+		$("#field_vivaldi").hide();
+	}
 }
+
+
+
+// function RepositionColorPicks() {
+	// if ($(".button:first").offset().top > 0){
+		// $("#button_icons").css({ "top": $(".button:first").offset().top - 10, "left": $(".button:first").offset().left - 10 });
+	// } else {
+		// $("#button_icons").css({ "top": -100, "left": -100 });
+	// }
+// }
+
+
+
 
 
 // dummy functions
@@ -912,6 +948,13 @@ function RefreshGUI() {
 	// } else {
 		// $("#toolbar").css({ "height": 0, "width": "0px", "display": "none", "padding": "0", "border": "none" });
 	// }
+	
+	
+
+	
+	// # { top: 99px; left: 30px; }
+	
+	
 }
 
 
@@ -926,4 +969,37 @@ function ApplySizeOptionsSet(size){
 		}
 
 	}
+}
+
+function LoadTheme(themeName) {
+	if (localStorage.getItem("theme"+themeName) != null) {
+		SelectedTheme = JSON.parse(localStorage["theme"+themeName]);
+		setTimeout(function() {
+			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+			ApplyColorsSet(SelectedTheme["ColorsSet"]);
+			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
+			
+			$("#toolbar").html(SelectedTheme.toolbar);
+			$("#toolbar_unused_buttons").html(SelectedTheme.unused_buttons);
+			
+			// expand toolbar options
+			SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
+			$("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
+			SelectedTheme.ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
+			
+			$("#button_filter_type").addClass("url").removeClass("title");
+			$(".on").removeClass("on");
+			
+			RefreshGUI();
+			setTimeout(function() {
+				chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
+			}, 200);
+		}, 200);
+	}
+}
+
+function SaveTheme(themeName) {
+	localStorage["theme"+themeName] = JSON.stringify(SelectedTheme);
+	chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
+	return SelectedTheme;
 }

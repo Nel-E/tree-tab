@@ -100,14 +100,15 @@ function RefreshMediaIcon(tabId) {
 function VivaldiRefreshMediaIcons() {
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
 		$(".audible, .muted").removeClass("audible").removeClass("muted");
-		tabs.forEach(function(Tab) {
-			if (Tab.audible) {
-				$("#" + Tab.id).addClass("audible");
+		let tc = tabs.length;
+		for (var ti = 0; ti < tc; ti++) {
+			if (tabs[ti].audible) {
+				$("#" + tabs[ti].id).addClass("audible");
 			}
-			if (Tab.mutedInfo.muted) {
-				$("#" + Tab.id).addClass("muted");
+			if (tabs[ti].mutedInfo.muted) {
+				$("#" + tabs[ti].id).addClass("muted");
 			}
-		});
+		}
 	});
 	setTimeout(function() {
 		VivaldiRefreshMediaIcons();

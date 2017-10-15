@@ -20,58 +20,21 @@ async function UpdateData() {
 				});
 			});
 			$(".tab").each(function() {
-				// if ($(this).parent().parent(".tab")[0]) {
-					// chrome.tabs.update(parseInt(this.id), { openerTabId: parseInt($(this).parent().parent(".tab")[0].id) }, function(tab) {
-						// console.log(tab.id +" "+ tab.openerTabId);
-					// });
-				// }
-				// console.log(($(this).parent(".group")[0] ? undefined : parseInt($(this).parents(".tab")[0].id)));
-				// chrome.tabs.update(parseInt(this.id), { openerTabId: $(this).parent(".group")[0] ? undefined : parseInt($(this).parent().parent()[0].id) }, function(tab) {
-				// chrome.tabs.update(parseInt(this.id), { openerTabId: ($(this).parent(".group")[0] ? undefined : parseInt($(this).parents(".tab")[0].id)) }, function(tab) {
-					// console.log(tab.id +" "+ (tab.openerTabId ? "none" : tab.openerTabId));
-					
 				chrome.runtime.sendMessage({
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
 						p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab")[0].id,
-						// p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parents(".tab")[0].id,
 						i: $(this).index(),
 						o: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
 					}
 				});
-					
-				// });
 			});
-			
-			
-			
 			schedule_update_data--;
 		}
 		UpdateData();
 	},1000);
 }
-
-// async function RearrangeBrowserTabs() {
-	// setTimeout(function() {
-		// if (schedule_rearrange_tabs > 1) {
-			// schedule_rearrange_tabs = 1;
-		// }
-		// if (schedule_rearrange_tabs > 0) {
-			// chrome.tabs.query({currentWindow: true}, function(tabs) {
-				// var tabIds = $(".pin, .tab").map(   function(){   return parseInt(this.id);   }   ).toArray();
-				// for (var tabIndex = 0; tabIndex < tabIds.length; tabIndex++) {
-					// if (tabIds[tabIndex] != tabs[tabIndex].id) {
-						// chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
-					// }
-				// }
-			// });			
-			// schedule_rearrange_tabs--;
-		// }
-		// RearrangeBrowserTabs();
-	// },5000);
-// }
-
 
 function RearrangeBrowserTabsCheck() {
 	setTimeout(function() {
@@ -94,35 +57,6 @@ async function RearrangeBrowserTabs(tabIds, tabIndex) {
 		});
 	}
 }
-
-
-// function RearrangeBrowserTabsCheck() {
-	// setTimeout(function() {
-		// RearrangeBrowserTabsCheck();
-		// if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
-		// if (schedule_rearrange_tabs > 0) {
-			// chrome.tabs.query({currentWindow: true}, function(tabs) {
-				// let atabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-				// let btabIds = []; tabs.forEach(function(Tab){btabIds.push(Tab.id);});
-				// RearrangeBrowserTabs(atabIds, btabIds, tabs.length-1);
-				// schedule_rearrange_tabs--;
-			// });
-		// }
-	// },3000);
-// }
-
-// function RearrangeBrowserTabs(tabIds, tabs, tabIndex) {
-	// if (tabIndex > 0){
-		// if (tabIds[tabIndex] != tabs[tabIndex]) {
-			// chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
-		// }
-		// setTimeout(function(){ RearrangeBrowserTabs( tabIds, tabs, (tabIndex-1) ); }, 10);
-	// }
-// }
-
-
-
-
 
 function RearrangeTreeTabs(tabs, bgtabs, first_run) {
 	tabs.forEach(function(Tab) {
@@ -208,7 +142,7 @@ function AppendTab(param) {
 	GetFaviconAndTitle(param.tab.id);
 	RefreshMediaIcon(param.tab.id);
 
-	if (param.tab.active) {
+	if (param.tab.active && param.SkipSetActive == undefined) {
 		SetActiveTab(param.tab.id);
 	}
 

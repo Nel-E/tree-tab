@@ -393,7 +393,7 @@ div {
 	border: 1px solid #bebebe;
 	padding: 0px 0px 0px 0px;
 	background: #ffffff;
-	color: #333333;
+	color: var(--tabs_menu_font);
 }
 
 #group_edit_font,
@@ -408,6 +408,7 @@ div {
 	width: 19px; height: 19px;
 	border: 1px solid #bebebe;
 	background-color: #000000;
+	color: var(--tabs_menu_font);
 }
 #group_edit_font {
 	right: 5px;

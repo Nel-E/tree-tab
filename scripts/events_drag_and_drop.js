@@ -127,7 +127,7 @@ function SetDragAndDropEvents() {
 							});
 						},500);
 						setTimeout(function() {
-							if (browserId != 3) { // FUCKING FIREFOX SHIT AINT WORKING
+							if (browserId != "F") { // FUCKING FIREFOX SHIT AINT WORKING, SO I HAVE TO EXLUDE THIS
 								for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
 									if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
 										$("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
@@ -161,7 +161,7 @@ function SetDragAndDropEvents() {
 				// chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
 					// if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
 						// setTimeout(function() {
-							// if (browserId != 3) { // FUCKING FIREFOX SHIT AINT WORKING
+							// if (browserId != "F") { // FUCKING FIREFOX SHIT AINT WORKING
 								// for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
 									// if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
 										// $("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));

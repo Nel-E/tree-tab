@@ -2,11 +2,9 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-if (browserId == 3) {
-	// chrome.runtime.onStartup.addListener(function() {
-		LoadPreferences();
-		FirefoxStart();
-	// });
+if (browserId == "F") {
+	LoadPreferences();
+	FirefoxStart();
 }
 
 function FirefoxStart() {
@@ -31,6 +29,132 @@ function FirefoxStart() {
 	
 	
 function FirefoxLoadTabs() {
+	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
+		var LoadedWindows = LoadData("windows", []);
+		var LoadedTabs = LoadData("tabs", []);
+		var refTabs = {};
+		
+		// CACHED COUNTS AND STUFF
+		var lastWinId = w[w.length-1].id;
+		var lastTabId = w[w.length-1].tabs[w[w.length-1].tabs.length-1].id;
+		
+		var LoadedWinCount = LoadedWindows.length;
+		var LoadedTabsCount = LoadedTabs.length;
+
+		var WinCount = w.length;
+		
+		
+		// console.log(lastWinId);
+		// console.log(lastTabId);
+		
+		// console.log("Loadded t");
+		// console.log(LoadedTabs);
+		
+		
+		for (var a = 0; a < WinCount; a++) {
+			
+			let winIndex = a;
+			let winId = w[winIndex].id;
+			let tabsCount = w[winIndex].tabs.length;
+
+			let win = Promise.resolve(browser.sessions.getWindowValue(winId, "TTId")).then(function(TTId) { // LOAD TTID FROM FIREFOX GET WINDOW VALUE
+				if (TTId != undefined) {
+					windows[winId] = {h: TTId, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+				} else {
+					windows[winId] = {h: "", group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+				}
+				
+				
+				for (var t = 0; t < tabsCount; t++) {
+
+					let tabIndex = t;
+					let tabId = w[winIndex].tabs[tabIndex].id;
+					let tabPinned = w[winIndex].tabs[tabIndex].pinned;
+
+					
+					let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTId")).then(function(TTId) { // LOAD TTID FROM FIREFOX GET TAB VALUE
+						if (TTId != undefined) {
+							tabs[tabId] = {h: TTId, p: tabPinned ? "pin_list" : "tab_list", i: tabIndex, o: "n"};
+						} else {
+							tabs[tabId] = {h: "", p: tabPinned ? "pin_list" : "tab_list", i: tabIndex, o: "n"};
+						}
+						
+						// IF ON LAST TAB AND LAST WINDOW, START MATCHING LOADED DATA
+						if (tabId == lastTabId && winId == lastWinId) {
+							for (var ThisSessonWinId in windows) {
+								if (windows[ThisSessonWinId].h != ""){
+									for (var j = 0; j < LoadedWinCount; j++) {
+										if (LoadedWindows[j][0] == windows[ThisSessonWinId].h) {
+											windows[ThisSessonWinId].group_bar = LoadedWindows[j][1];
+											windows[ThisSessonWinId].active_shelf = LoadedWindows[j][2];
+											windows[ThisSessonWinId].active_group = LoadedWindows[j][3];
+											if (Object.keys(LoadedWindows[j][4]).length > 0) { windows[ThisSessonWinId].groups = Object.assign({}, LoadedWindows[j][4]); }
+											if (Object.keys(LoadedWindows[j][5]).length > 0) { windows[ThisSessonWinId].folders = Object.assign({}, LoadedWindows[j][5]); }
+											LoadedWindows.splice(j, 1);
+											break;
+										}
+									}
+								} else {
+									AppendWinTTId(ThisSessonWinId);
+								}
+							}
+							// OK, DONE WITH WINDOWS, START TABS LOOP
+							for (var ThisSessonTabId in tabs) {
+								if (tabs[ThisSessonTabId].h != ""){
+									for (var k = 0; k < LoadedTabsCount; k++) {
+										if (LoadedTabs[k][1] == tabs[ThisSessonTabId].h) {
+											refTabs[LoadedTabs[k][0]] = ThisSessonTabId;
+											tabs[ThisSessonTabId].p = LoadedTabs[k][2];
+											tabs[ThisSessonTabId].i = LoadedTabs[k][3];
+											tabs[ThisSessonTabId].o = LoadedTabs[k][4];
+											LoadedTabs.splice(k, 1);
+											break;
+										}
+									}
+								} else {
+									AppendTabTTId(ThisSessonTabId);
+								}
+							}
+							// OK, DONE, NOW REPLACE OLD PARENTS IDS WITH THIS SESSION IDS
+							for (var ThisSessonTabId in tabs) {
+								if (refTabs[tabs[ThisSessonTabId].p] != undefined) {
+									tabs[ThisSessonTabId].p = refTabs[tabs[ThisSessonTabId].p];
+								}
+							}
+							// OK, SAME THING FOR ACTIVE TABS IN GROUPS
+									
+							for (var ThisSessonWinId in windows) {
+								for (var group in windows[ThisSessonWinId].groups) {
+									if (refTabs[windows[ThisSessonWinId].groups[group].activetab]) {
+										windows[ThisSessonWinId].groups[group].activetab = refTabs[windows[ThisSessonWinId].groups[group].activetab];
+									}
+								}
+							}
+
+							// TODO
+							// replace parent tab ids for each folder using reference_tabs, unless tabs will be nested ONLY in tabs and folders ONLY in folders, I did not decide yet
+
+							hold = false;
+							
+							setTimeout(function() {
+								FirefoxStartListeners();
+								FirefoxAutoSaveData();
+							}, 1000);
+
+		// console.log(" yay it went through windows:");
+		// console.log(windows);
+									
+
+						}
+					});
+				}
+			});			
+		}
+	});
+}
+
+	
+function FirefoxLoadTabsBAK() {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: false}, function(BrowserWindows) {
 		chrome.tabs.query({windowType: "normal"}, function(BrowserTabs) {
 			// LOAD TABS
@@ -121,11 +245,90 @@ function FirefoxLoadTabs() {
 			
 			setTimeout(function() {
 				FirefoxStartListeners();
-				AutoSaveData();
+				FirefoxAutoSaveData();
 			}, 1000);
 		});
 	});
 
+}
+
+// save every 0.5 seconds if there is anything to save obviously
+async function FirefoxAutoSaveData() {
+	setTimeout(function() {
+		FirefoxAutoSaveData();
+		if (schedule_save > 1) {schedule_save = 1;}
+		if (!hold && schedule_save > 0 && Object.keys(tabs).length > 1) {
+			
+			localStorage["tabs_BAK"] = JSON.stringify(LoadData("tabs", []));
+			localStorage["windows_BAK"] = JSON.stringify(LoadData("windows", []));
+			
+			chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
+				var WinCount = w.length;
+				var t_count = 0;
+				var k = [];
+				var s = [];
+
+				for (var a = 0; a < WinCount; a++) {
+					t_count = t_count + w[a].tabs.length;
+				}
+
+				for (var b = 0; b < WinCount; b++) {
+					let winId = w[b].id;
+					if (
+						windows[winId] != undefined &&
+						windows[winId].h != undefined &&
+						windows[winId].group_bar != undefined &&
+						windows[winId].active_shelf != undefined &&
+						windows[winId].active_group != undefined &&
+						windows[winId].groups != undefined &&
+						windows[winId].folders != undefined
+					) {
+						var j = [
+							windows[winId].h,
+							windows[winId].group_bar,
+							windows[winId].active_shelf,
+							windows[winId].active_group,
+							windows[winId].groups,
+							windows[winId].folders
+						];
+						k.push(j);
+					}
+
+					let TabsCount = w[b].tabs.length;
+					for (var c = 0; c < TabsCount; c++) {
+						let tabId = w[b].tabs[c].id;
+						if (
+							tabs[tabId] != undefined &&
+							tabs[tabId].h != undefined &&
+							tabs[tabId].p != undefined &&
+							tabs[tabId].i != undefined &&
+							tabs[tabId].o != undefined
+						) {
+							var r = [
+								tabId,
+								tabs[tabId].h,
+								tabs[tabId].p,
+								tabs[tabId].i,
+								tabs[tabId].o
+							];
+							s.push(r);
+						}
+					}
+					
+					if (s.length == t_count) {
+						localStorage["t_count"] = JSON.stringify(t_count);
+						localStorage["w_count"] = JSON.stringify(WinCount);
+						localStorage["tabs"] = JSON.stringify(s);
+						localStorage["windows"] = JSON.stringify(k);
+					}
+				}
+				
+				var tabsBAK = LoadData("tabs", []);
+				if (tabsBAK.length) { localStorage["tabs_BAK"] = JSON.stringify(tabsBAK); }
+				schedule_save--;
+			});
+		}
+	}, 500);
 }
 
 function GenerateNewWindowID(){
@@ -175,7 +378,7 @@ function AppendWinTTId(windowId){
 	if (windows[windowId] != undefined) {
 		windows[windowId].h = NewTTWindowId;
 	} else {
-		windows[windowId] = {h: NewTTWindowId, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {}, folders: {}};
+		windows[windowId] = {h: NewTTWindowId, group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 	}
 }
 

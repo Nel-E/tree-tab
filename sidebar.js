@@ -6,6 +6,23 @@ document.addEventListener("DOMContentLoaded", Run(), false);
 
 
 
+function Loadi18n() {
+	// toolbar labels
+	$(".button").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	});
+
+	// menu labels
+	$(".menu_item").each(function() {
+		$(this).text(chrome.i18n.getMessage(this.id));
+	});
+	
+	// edit group dialog labels
+	$(".group_edit_button").each(function() {
+		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
+	});
+}
+	
 function Run() {
 	LoadPreferences();
 	chrome.windows.getCurrent({populate: false}, function(window) {
@@ -31,138 +48,121 @@ function Run() {
 	
 function Initialize() {
 	
-		RestoreStateOfGroupsToolbar();
-		var theme = {
-			"TabsSizeSetNumber": 2,
-			"ToolbarShow": true,
-			"toolbar": DefaultToolbar
-		};
+	RestoreStateOfGroupsToolbar();
+	var theme = {
+		"TabsSizeSetNumber": 2,
+		"ToolbarShow": true,
+		"toolbar": DefaultToolbar
+	};
 
-		if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
-			theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
-			if (browserId == 3) {
-				// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-				if (theme.TabsSizeSetNumber > 1) {
-					document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+	if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
+		theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
+		if (browserId == "F") {
+			// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
+			if (theme.TabsSizeSetNumber > 1) {
+				document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+			}
+		}
+	}
+
+	ApplySizeSet(theme["TabsSizeSetNumber"]);
+	ApplyColorsSet(theme["ColorsSet"]);
+
+	chrome.tabs.query({currentWindow: true}, function(tabs) {
+
+		AppendAllGroups();
+
+// log(bgtabs);
+// log(bggroups);
+
+		if (opt.pin_list_multi_row) {
+			$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
+		}
+		if (theme.ToolbarShow) {
+			$("#toolbar").html(theme.toolbar);
+		}
+		
+
+		let tc = tabs.length;
+		for (var ti = 0; ti < tc; ti++) {
+			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
+		}
+		
+		for (var ti = 0; ti < tc; ti++) {
+			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].p)[0] && $("#"+bgtabs[tabs[ti].id].p).is(".group")) {
+				$("#"+bgtabs[tabs[ti].id].p).append($("#"+tabs[ti].id));
+			}
+		}
+		
+		for (var ti = 0; ti < tc; ti++) {
+			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
+				if ($("#"+bgtabs[tabs[ti].id].p).length > 0 && $("#"+bgtabs[tabs[ti].id].p).is(".tab") && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].p)).length == 0) {
+					$("#ch"+bgtabs[tabs[ti].id].p).append($("#"+tabs[ti].id));
 				}
 			}
 		}
+		
+		for (var ti = 0; ti < tc; ti++) {
+			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
+				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].o);
+			}
+		}
+			
+		for (var group in bggroups) {
+			if ($("#"+bggroups[group].activetab)[0]) {
+				$("#"+bggroups[group].activetab).addClass("active");
+			}
+		}
+		
+		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+			SetActiveGroup(response, true, true);
+		});
 
-		ApplySizeSet(theme["TabsSizeSetNumber"]);
-		ApplyColorsSet(theme["ColorsSet"]);
-
-		chrome.tabs.query({currentWindow: true}, function(tabs) {
+		RearrangeTreeTabs(tabs, bgtabs, true);
 		
 
-	
-			AppendGroupToList("tab_list", caption_ungrouped_group, 0, 0);
-
-			
-			AppendAllGroups();
+		SetIOEvents();
+		SetToolbarEvents();
 		
-
-
-
-
-			
-			// CurrentWindowId = tabs[0].windowId;
-
-console.log(bgtabs);
-console.log(bggroups);
-			if (opt.pin_list_multi_row) {
-				$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
-			}
-			if (theme.ToolbarShow) {
-				$("#toolbar").html(theme.toolbar);
-			}
-			
-// set language titles
-// $(".button").each(function(){
-	// $(this).attr("title", chrome.i18n.getMessage(this.id));
-// });
-
-
-			// $("#toolbar").html(DefaultToolbar);
-
-			tabs.forEach(function(Tab) {
-				AppendTab({tab: Tab, Append: true});
-			});
-
-			tabs.forEach(function(Tab) {
-				if (bgtabs[Tab.id] && !Tab.pinned && $("#"+bgtabs[Tab.id].p)[0] && $("#"+bgtabs[Tab.id].p).is(".group")) {
-					$("#"+bgtabs[Tab.id].p).append($("#"+Tab.id));
-				}
-			});
-			
-			tabs.forEach(function(Tab) {
-				if (bgtabs[Tab.id] && !Tab.pinned) {
-					if ($("#"+bgtabs[Tab.id].p).length > 0 && $("#"+bgtabs[Tab.id].p).is(".tab") && $("#"+Tab.id).find($("#ch"+bgtabs[Tab.id].p)).length == 0) {
-						$("#ch"+bgtabs[Tab.id].p).append($("#"+Tab.id));
-					}
-				}
-			});			
-			
-			tabs.forEach(function(Tab) {
-				if (bgtabs[Tab.id] && !Tab.pinned) {
-					$("#"+Tab.id).addClass(bgtabs[Tab.id].o);
-				}
-			});
-				
-			RearrangeTreeTabs(tabs, bgtabs, true);
-			
-			
-			// delete theme;
-
-			SetIOEvents();
-			SetToolbarEvents();
-			
-			RestoreToolbarShelf();
-			RestoreToolbarSearchFilter();
-			SetToolbarShelfToggle();
-			
-			SetTRefreshEvents();
-			SetGroupEvents();
-			SetTabEvents();
-			SetMenu();
-			RefreshGUI();
-			RefreshExpandStates();
-			SetDragAndDropEvents();
-			StartChromeListeners();
-			
-			setTimeout(function() {
-				UpdateData();
-				delete bgtabs;
-			},5000);
-			
-			if (opt.syncro_tabbar_tabs_order) {
-				RearrangeBrowserTabsCheck();
-			}
-			
-			for (var group in bggroups) {
-				if ($("#"+bggroups[group].activetab)[0]) {
-					$("#"+bggroups[group].activetab).addClass("active");
-				}
-			}
-			
-			chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-				SetActiveGroup(response, true, true);
-			});
-			
-			
-			
+		RestoreToolbarShelf();
+		RestoreToolbarSearchFilter();
+		SetToolbarShelfToggle();
 		
-			// setTimeout(function() { ScrollToTab($(".active:visible")[0].id); },100); // Scroll to active tab
-			
-			
+		SetTRefreshEvents();
+		SetGroupEvents();
+		SetTabEvents();
+		SetMenu();
+		RefreshGUI();
+		RefreshExpandStates();
+		SetDragAndDropEvents();
+		StartChromeListeners();
+		
+		Loadi18n();
+
+		setTimeout(function() {
+			UpdateData();
+			delete bgtabs;
+			delete theme;
+		},5000);
+		
+		if (opt.syncro_tabbar_tabs_order) {
+			RearrangeBrowserTabsCheck();
+		}
+		
+		if (opt.syncro_tabbar_tabs_order) {
+			if ($(".active").length == 0) {
+				chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
+					SetActiveTab(tabs[0].id);
+				});
+			}
+		}
+		
 // AddNewFolder();			
-			if (navigator.userAgent.match("Vivaldi") !== null) {
-				VivaldiRefreshMediaIcons();
-			}
-				
-		});			
-
-	// }
-
+		if (browserId == "V") {
+			VivaldiRefreshMediaIcons();
+		}
+			
+	});			
 }
 	
 

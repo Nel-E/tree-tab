@@ -1,3 +1,42 @@
+/* MAIN TOOLBAR */
+#button_icons { top: 78px; left: 5px; }
+#button_icons_hover { top: 99px; left: 50px; }
+
+#button_border { top: 99px; left: 30px; }
+#button_hover_border { top: 99px; left: 50px; }
+
+@keyframes hover_blinking {
+	0%  {background-color: transparent;}
+	100% {background-color: blue;}
+}
+.hover_blinking {
+	animation: blinking 1s infinite;
+}
+
+#toolbar_background { top: 99px; left: 318px; }
+#toolbar_border_bottom { top: 99px; left: 338px; }
+
+/* MAIN TOOLBAR BUTTONS COLORS */
+/* 	
+--button_background: #f2f2f2;
+button_background
+	--button_hover_background: #dcdcdc;
+
+	*/
+
+	/* SEARCH BOX */
+/* 	--filter_box_background: #fafafa;
+	--filter_box_border: #cccccc;
+	--filter_box_font: #808080;
+	--filter_clear_icon: #808080; */
+
+
+/* SEARCH BOX */
+/* #filter_box_background { top: 20px; left: 142px; }
+#filter_box_border { top: 20px; left: 142px; }
+#filter_box_font { top: 20px; left: 142px; }
+#filter_clear_icon { top: 20px; left: 142px; } */
+
 
 #options_tabs_indentation_indicator { z-index: 3000; display: float; position: absolute; top: 25px; left: 550px; height: 30px; width: 80px; background-size: 80px 30px; background-image: url(../theme/options_tabs_indentation_indicator.svg);}
 #options_tabs_roundness_indicator { z-index: 3000; display: float; position: absolute; top: 25px; left: 640px; height: 30px; width: 80px; background-size: 80px 30px; background-image: url(../theme/options_tabs_roundness_indicator.svg);}
@@ -37,11 +76,11 @@
 
 
 /* SCROLLBAR RESIZE */
-#scrollbar_size_indicator {z-index: 3000; display: float; position: absolute; top: 780px; left: 735px; height: 80px; width: 80px; background-size: 80px 80px; background-image: url(../theme/options_scrollbar_size_indicator.svg); }
-#options_tab_list_scrollbar_width_down { top: 33px; }
-#options_tab_list_scrollbar_width_up { top: 33px; }
-#options_tab_list_scrollbar_height_down { left: 30px; top: 60px; }
-#options_tab_list_scrollbar_height_up { left: 30px; top: 5px; }
+#scrollbar_size_indicator {z-index: 3000; display: float; position: absolute; top: 20px; left: 335px; height: 80px; width: 80px; background-size: 80px 80px; background-image: url(../theme/options_scrollbar_size_indicator.svg); }
+#options_tab_list_scrollbar_width_down { left: 3px; top: 30px; }
+#options_tab_list_scrollbar_width_up { left: 57px; top: 30px; }
+#options_tab_list_scrollbar_height_up { left: 30px; top: 3px; }
+#options_tab_list_scrollbar_height_down { left: 30px; top: 57px; }
 
 
 /* TABS */
@@ -57,23 +96,10 @@
 .tab_color_options_row>.font_style_italic {top: 0px; left: 609px; }
 
 
-/*  border: 1px solid blue;
- */
-
-
-
-/* 	--scrollbar_height: 10px;
-	--scrollbar_width: 10px; */
-
-
-/* #scrollbar_thumb { top: 20px; left: 142px; }
-#scrollbar_thumb_hover { top: 20px; left: 142px; }
-#scrollbar_track { top: 20px; left: 142px; } */
-
-
-
 /* DRAG AND DROP INDICATOR */
 #dd19 { display: inline-block; border-bottom: 2px solid var(--drag_indicator); }
+#drag_indicator { top: 8px; left: 350px; }
+
 
 /* CLOSE TAB BUTTON OPTIONS */
 .tab_color_options_row>#close_x { top: 0px; left: calc(753px - var(--scrollbar_width)); }
@@ -82,9 +108,7 @@
 .tab_color_options_row>#close_hover_background { top: 20px; left: calc(753px - var(--scrollbar_width)); }
 
 
-
-
-
+/* CLOSE TAB BUTTON OPTIONS */
 #expand_hover_background { top: 0px; left: calc(var(--children_padding_left) + 4px); }
 #expand_closed_background { top: 0px; left: calc(var(--children_padding_left) + 4px); }
 #expand_open_background { top: 0px; left: 4px; }
@@ -92,14 +116,6 @@
 
 #tab_list_background { top: 835px; left: 50px; }
 
-
-/* MENU */
-/* #tabs_menu_border { top: 20px; left: 142px; }
-#tabs_menu_background { top: 20px; left: 142px; }
-#tabs_menu_font { top: 20px; left: 142px; }
-#tabs_menu_hover_border { top: 20px; left: 142px; }
-#tabs_menu_hover_background { top: 20px; left: 142px; }
-#tabs_menu_separator { top: 20px; left: 142px; } */
 
 
 #toolbar_groups_block { position: absolute; left: 20px; top: calc(var(--scrollbar_height) + var(--pin_height) + 32px); width: 19px; height: 800px; background-color: var(--group_list_background); border-right: 1px solid var(--group_list_borders); overflow: visible; }
@@ -117,23 +133,6 @@
 
 /* #drag_indicator { top: 100px; left: 10px; } */
 
-/* MAIN TOOLBAR */
-/* #toolbar_background { top: 20px; left: 142px; }
-#toolbar_border_bottom { top: 20px; left: 142px; } */
-
-/* MAIN TOOLBAR BUTTONS COLORS */
-/* #button_background { top: 20px; left: 142px; }
-#button_border { top: 20px; left: 142px; }
-#button_hover_background { top: 20px; left: 142px; }
-#button_hover_border { top: 20px; left: 142px; }
-#button_icons { top: 20px; left: 142px; }
-#button_icons_hover { top: 20px; left: 142px; } */
-
-/* SEARCH BOX */
-/* #filter_box_background { top: 20px; left: 142px; }
-#filter_box_border { top: 20px; left: 142px; }
-#filter_box_font { top: 20px; left: 142px; }
-#filter_clear_icon { top: 20px; left: 142px; } */
 
 /* GROUPS SHELF TOOLBAR */
 /* #group_list_background { top: 20px; left: 142px; }
@@ -147,9 +146,24 @@
 
 
 
+/* MENU */
+/* #tabs_menu_border { top: 20px; left: 142px; }
+#tabs_menu_background { top: 20px; left: 142px; }
+#tabs_menu_font { top: 20px; left: 142px; }
+#tabs_menu_hover_border { top: 20px; left: 142px; }
+#tabs_menu_hover_background { top: 20px; left: 142px; }
+#tabs_menu_separator { top: 20px; left: 142px; } */
+	/* MENU */
+/* 	--tabs_menu_border: #bebebe;
+	--tabs_menu_background: #fafafa;
+	--tabs_menu_font: #333333;
+	--tabs_menu_hover_border: #bebebe;
+	--tabs_menu_hover_background: #efefef;
+	--tabs_menu_separator: #efefef; */
 
 
-/* OPTIONS BUTTONS IMAGES */
+
+/* OPTIONS IMAGES */
 .font_color {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_font_color.svg);}
 .font_color:hover {background-image: url(../theme/options_font_color_hover.svg);}
 .font_weight_normal {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_font_style_normal.svg);}
@@ -160,6 +174,12 @@
 .font_style_normal:hover {background-image: url(../theme/options_font_style_normal_hover.svg);}
 .font_style_italic {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_font_style_italic.svg);}
 .font_style_italic:hover {background-image: url(../theme/options_font_style_italic_hover.svg);}
+
+
+.color_toolbar_icon {z-index: 10000; position: absolute; display: block; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_toolbar_icon.svg);}
+.color_toolbar_icon:hover {background-image: url(../theme/options_color_bucket_hover.svg);}
+
+.color_toolbar_hover_icon {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_toolbar_hover_icon.svg);}
 
 
 .color_bucket {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_bucket.svg);}

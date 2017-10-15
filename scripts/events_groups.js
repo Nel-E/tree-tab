@@ -152,8 +152,9 @@ function SetGroupEvents() {
 	// dragging groups
 	$(document).on("dragstart", ".group_button", function(event) {
 		// alert();
-		event.originalEvent.dataTransfer.setData("null", "null");
+		// event.originalEvent.dataTransfer.setData("null", "null");
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+		event.originalEvent.dataTransfer.setData("text", JSON.stringify({DragNodeId: this.id, ComesFromWindowId: CurrentWindowId, selectedTabs: [], tabsIds: []}));
 		GroupDragNode = this.id;
 	});
 

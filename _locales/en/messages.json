@@ -168,7 +168,7 @@
 		"message": "at the bottom"
 	},
 	"options_append_orphan_tab": {
-		"message": "append orphan tabs (opened from +, shortcut or bookmark)"
+		"message": "append orphan tabs (new tabs, tabs opened from shortcuts or from bookmarks)"
 	},
 	"options_append_orphan_tab_top": {
 		"message": "at the top"
@@ -435,6 +435,13 @@
 	"options_never_show_close": {
 	 "message": "don't show close button (option above will be ignored)"
 	},
+	
+	
+	"options_clear_data": {
+	 "message": "Did something go wrong? Sidebar is not loading? Clear everything! ATTENTION! Tabs arrangement will be lost as well!"
+	},
+	
+	
 	"tabs_menu_close_tree": {
 		"message": "Close tree"
 	},

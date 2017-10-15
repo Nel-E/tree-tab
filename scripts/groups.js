@@ -23,7 +23,7 @@ function AppendAllGroups() {
 	
 	for (var group in bggroups) {
 		// if (group != "tab_list") {
-		AppendGroupToList(bggroups[group].id, bggroups[group].name, bggroups[group].background, bggroups[group].font);
+		AppendGroupToList(bggroups[group].id, bggroups[group].name, bggroups[group].font);
 			// groups[group].activetab = reference_tabs[groups[group].activetab];
 		// }
 	}
@@ -33,7 +33,7 @@ function AppendAllGroups() {
 
 
 function RearrangeGroups(stack) {
-	$(".group_button:not(#_tab_list)").each(function() {
+	$(".group_button").each(function() {
 		if ($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0] && $(this).index() > bggroups[(this.id).substr(1)].index) {
 			$(this).insertBefore($("#group_list").children().eq(bggroups[(this.id).substr(1)].index)[0]);
 		} else {
@@ -47,7 +47,7 @@ function RearrangeGroups(stack) {
 	});
 }
 
-function AppendGroupToList(groupId, group_name, background_color, font_color) {
+function AppendGroupToList(groupId, group_name, font_color) {
 
 	if ($("#"+groupId).length == 0 && $("#groups")[0]) {
 		// var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.backgroundColor = "#"+background_color; $("#groups")[0].appendChild(grp);
@@ -57,7 +57,7 @@ function AppendGroupToList(groupId, group_name, background_color, font_color) {
 	if ($("#_"+groupId).length == 0) {
 		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
 		// var gtc = document.createElement("div"); gtc.className = "group_title_container"; gtc.id = "_gtc"+groupId; /* gtc.style.backgroundColor = "#"+background_color; */ gbn.appendChild(gtc);
-		var gte = document.createElement("span"); gte.className = "group_title"; gte.id = "_gte"+groupId; gte.textContent = group_name; gte.style.color = "#"+font_color; gbn.appendChild(gte);
+		var gte = document.createElement("span"); gte.className = "group_title"; gte.id = "_gte"+groupId; gte.textContent = group_name; if (font_color != "") {gte.style.color = "#"+font_color;} gbn.appendChild(gte);
 		// var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.id = "_gtn"+groupId; gtn.textContent = " (0)"; gtn.style.color = "#"+font_color; gbn.appendChild(gtn);
 
 	// $(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
@@ -93,10 +93,10 @@ function GenerateNewGroupID(){
 function AddNewGroup() {
 	var newId = GenerateNewGroupID();
 	
-	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: "untitled", background: "", font: ""  };
+	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: caption_noname_group, font: ""  };
 
 	
-	AppendGroupToList(newId, caption_noname_group, "", "");
+	AppendGroupToList(newId, caption_noname_group, "");
 	
 	// bggroups.push({g: "g_"+newId, n:bg.caption_group, c: color, f: "d9d9d9", i: 0});
 	// AppendGroupToList("g_"+newId, bg.caption_group, color);
@@ -153,7 +153,7 @@ function GroupRemove(groupId, close_tabs) {
 }
 
 function UpdateBgGroupsOrder() {
-	$(".group_button:not(#_tab_list)").each(function() {
+	$(".group_button").each(function() {
 		bggroups[(this.id).substr(1)].index = $(this).index();
 	});
 	// console.log(bggroups);
