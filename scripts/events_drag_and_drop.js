@@ -148,52 +148,6 @@ function SetDragAndDropEvents() {
 		}
 	});
 
-	// $(document).on("drop", ".group_button, .group, #pin_list", function(event) {
-	// $(document).on("drop", "*", function(event) {
-		// Dropped = true;
-		// event.stopPropagation();
-		// chrome.runtime.sendMessage({command: "dropped_tabs"});
-		// let data = JSON.parse(event.originalEvent.dataTransfer.getData("text"));
-		// if (data.ComesFromWindowId != CurrentWindowId) {
-			// $(".selected").addClass("selected_frozen").removeClass("selected");
-			// let target = $(".highlighted_drop_target")[0].id;
-			// (data.tabsIds).reverse().forEach(function(TabId) {
-				// chrome.tabs.move(TabId[0], { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-					// if (MovedTab.id == data.tabsIds[data.tabsIds.length-1][0]) {
-						// setTimeout(function() {
-							// if (browserId != "F") { // FUCKING FIREFOX SHIT AINT WORKING
-								// for (var tabsIdsIndex = 1; tabsIdsIndex < (data.tabsIds).length; tabsIdsIndex++) {
-									// if ($("#"+data.tabsIds[tabsIdsIndex][0])[0] && $("#"+data.tabsIds[tabsIdsIndex][1])[0]){
-										// $("#"+data.tabsIds[tabsIdsIndex][1]).append($("#"+data.tabsIds[tabsIdsIndex][0]));
-									// }
-									
-								// }
-							// }
-						// },100);
-						// setTimeout(function() {
-							// (data.selectedTabs).forEach(function(selectedTabId) {
-								// if ($("#"+selectedTabId)[0]){
-									// $("#"+selectedTabId).addClass("selected_temporarly").addClass("selected");
-								// }
-							// });
-						// },500);
-						// setTimeout(function() {
-							// if (target) {
-								// $("#"+target).addClass("highlighted_drop_target");
-							// }
-							// HandleDrop();
-						// },1000);
-					// }
-				// });
-			// });
-		// } else {
-			// if ($(".highlighted_drop_target")[0] != undefined) {
-				// HandleDrop();
-			// }
-			
-		// }
-	// });
-	
 	// DROP (but not in drop, as it's buggy)
 	$(document).on("dragend", ".tab_header", function(event) {
 		if (Dropped && MouseHoverOver != "" && $(".highlighted_drop_target")[0] != undefined) {
@@ -206,17 +160,6 @@ function SetDragAndDropEvents() {
 			}
 		}
 	});
-
-	// DETACH TABS
-	// $(document).on("dragend", ".tab_header", function(event) {
-		// setTimeout(function() {
-			// if (MouseHoverOver == "" && !Dropped && $(".highlighted_drop_target")[0] == undefined) {
-				// DetachTabs(DetachIfDraggedOut);
-				// $(".highlighted_drop_target").removeClass("highlighted_drop_target");
-				// HandleDrop();
-			// }
-		// },800);
-	// });
 }
 
 
@@ -250,17 +193,16 @@ function HandleDrop() {
 			SetTabClass({ id: this.id, pin: false });
 		});
 		if ($(".highlighted_drop_target").is(".drag_entered_top")) {
-			$(".selected").insertBefore($(".highlighted_drop_target").parent());
+			$($(".selected").get().reverse()).insertBefore($(".highlighted_drop_target").parent());
 		}
 		if ($(".highlighted_drop_target").is(".drag_entered_bottom")) {
-			$(".selected").insertAfter($(".highlighted_drop_target").parent());
+			$($(".selected").get().reverse()).insertAfter($(".highlighted_drop_target").parent());
 		}
-		// if (($(".highlighted_drop_target").is(".drag_enter_center") && $("#" + DragAndDrop.DragNodeId).parent()[0].id != "ch" + $(".highlighted_drop_target")[0].id.substr(2))) {
 		if ($(".highlighted_drop_target").is(".drag_enter_center")) {
-			if (opt.append_at_end) {
-				$("#ch" + $(".highlighted_drop_target")[0].id.substr(2)).append($(".selected"));
+			if (opt.append_child_tab == "bottom") {
+				$("#ch" + $(".highlighted_drop_target")[0].id.substr(2)).append($($(".selected").get().reverse()));
 			} else {
-				$("#ch" + $(".highlighted_drop_target")[0].id.substr(2)).prepend($(".selected"));
+				$("#ch" + $(".highlighted_drop_target")[0].id.substr(2)).prepend($($(".selected").get().reverse()));
 			}
 		}
 	}
@@ -270,7 +212,7 @@ function HandleDrop() {
 		$(".selected").each(function() {
 			SetTabClass({ id: this.id, pin: false });
 		});
-		$(".highlighted_drop_target").append($(".selected"));
+		$(".highlighted_drop_target").append($($(".selected").get().reverse()));
 	}
 
 	// dropped on group button (group list)
@@ -278,7 +220,7 @@ function HandleDrop() {
 		$(".selected").each(function() {
 			SetTabClass({ id: this.id, pin: false });
 		});
-		$("#"+$(".highlighted_drop_target")[0].id.substr(1)).append($(".selected"));
+		$("#"+$(".highlighted_drop_target")[0].id.substr(1)).append($($(".selected").get().reverse()));
 	}	
 	
 	$(".highlighted_selected").addClass("selected").removeClass("highlighted_selected");

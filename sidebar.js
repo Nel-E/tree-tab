@@ -88,6 +88,16 @@ function Initialize() {
 			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
 		}
 		
+		for (var group in bggroups) {
+			if ($("#"+bggroups[group].activetab)[0]) {
+				$("#"+bggroups[group].activetab).addClass("active");
+			}
+		}
+		
+		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+			SetActiveGroup(response, true, true);
+		});
+
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].p)[0] && $("#"+bgtabs[tabs[ti].id].p).is(".group")) {
 				$("#"+bgtabs[tabs[ti].id].p).append($("#"+tabs[ti].id));
@@ -107,19 +117,8 @@ function Initialize() {
 				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].o);
 			}
 		}
-			
-		for (var group in bggroups) {
-			if ($("#"+bggroups[group].activetab)[0]) {
-				$("#"+bggroups[group].activetab).addClass("active");
-			}
-		}
-		
-		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-			SetActiveGroup(response, true, true);
-		});
 
 		RearrangeTreeTabs(tabs, bgtabs, true);
-		
 
 		SetIOEvents();
 		SetToolbarEvents();

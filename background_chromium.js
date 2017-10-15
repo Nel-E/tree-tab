@@ -100,7 +100,6 @@ function ChromeLoadTabs(retry) {
 				}
 			}
 		}
-console.log(windows);
 		// will try to find tabs for 3 times
 		if (opt.skip_load == true || retry > 1 || (tabs_matched > t_count*0.5)) {
 			schedule_save++;
