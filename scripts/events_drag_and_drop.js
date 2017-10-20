@@ -89,7 +89,7 @@ function SetDragAndDropEvents() {
 	});
 	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
 	$(document).on("dragover", "#pin_list, .group, .group_drag_box", function(event) {
-		if ($(".highlighted_drop_target").length == 0 && event.target.className == $(this)[0].className) {
+		if (GroupDragNode == undefined && $(".highlighted_drop_target").length == 0 && event.target.className == $(this)[0].className) {
 			$(this).addClass("highlighted_drop_target");
 		}
 	});	
