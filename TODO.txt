@@ -1,19 +1,10 @@
 TOP PRIORITY:
 
-TT ICON MUST OPEN SIDEBAR!
-
-apply scrollbars from theme
-groups order/reorder
-fix edit group dialog
-
 Add a shortcut to open tree tabs sidebar
 
 fix options page (almost there)
 
 add missing labels in options page
-add missing labels in global
-
-remove ctrl+1 and ctrl+2 when order tabs 100% works
 
 undo close to restore trees (will work ONLY in firefox)
 

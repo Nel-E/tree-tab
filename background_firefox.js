@@ -276,10 +276,10 @@ var DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA = {};
 // start all listeners
 function FirefoxStartListeners() {
 	
-	
-	// browser.browserAction.onClicked.addListener(function() { browser.sidebarAction.open(); });
-	browser.browserAction.onClicked.addListener(function() {  console.log("clicked") });
-	
+	browser.browserAction.onClicked.addListener(function() {
+		browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
+		browser.sidebarAction.open();
+	});
 	
 	chrome.tabs.onCreated.addListener(function(tab) {
 		AppendTabTTId(tab.id);
