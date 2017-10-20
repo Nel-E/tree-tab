@@ -1,20 +1,49 @@
-/* MAIN TOOLBAR */
-#button_icons { top: 78px; left: 5px; }
-#button_icons_hover { top: 99px; left: 50px; }
-
-#button_border { top: 99px; left: 30px; }
-#button_hover_border { top: 99px; left: 50px; }
 
 @keyframes hover_blinking {
 	0%  {background-color: transparent;}
 	100% {background-color: blue;}
 }
 .hover_blinking {
-	animation: blinking 1s infinite;
+	animation: hover_blinking 1s infinite;
 }
 
-#toolbar_background { top: 99px; left: 318px; }
-#toolbar_border_bottom { top: 99px; left: 338px; }
+@keyframes hover_border_blinking {
+	0%  {border: 1px solid transparent;}
+	100% {border: 1px solid blue;}
+}
+.hover_border_blinking {
+	animation: hover_border_blinking 1s infinite;
+}
+/* MAIN TOOLBAR */
+
+
+
+#button_icons { top: 86px; left: 65px; }
+#button_icons_hover { top: 86px; left: 86px; }
+
+#button_background { top: 86px; left: 16px; }
+#button_hover_background { top: 86px; left: 37px; }
+
+
+#button_border { top: 86px; left: 115px; }
+#button_hover_border { top: 86px; left: 136px; }
+
+
+#filter_box_font { top: 86px; left: 175px; }
+#filter_clear_icon { top: 86px; left: 238px; }
+#filter_box_background { top: 86px; left: 196px; }
+#filter_box_border { top: 86px; left: 217px; }
+
+
+
+#toolbar_background { top: 86px; left: 328px; }
+#toolbar_border_bottom { top: 86px; left: 348px; }
+
+
+
+
+
+
 
 /* MAIN TOOLBAR BUTTONS COLORS */
 /* 	
@@ -54,13 +83,13 @@ button_background
 
 /* PINS */
 #pin_list_options_block {z-index: 2000; position:absolute; width: 500px; height: var(--pin_height); top: 30px; left: 20px; margin: 0; /* background:rgba(0,0,255,0.1); */ }
-#attention_background.color_bucket { top: 4px; left: 72px; }
-#pin_list_background.color_bucket { top: 4px; left: 137px; }
-#pin_list_border_bottom.color_border { top: 4px; left: 114px; }
+#pin_list_background { top: 4px; left: 187px; }
+#pin_list_border_bottom { top: 4px; left: 164px; }
 
 
 /* ATTENTION PIN */
-#attention_background { top: 20px; left: 142px; }
+#attention_background { top: 4px; left: 72px; }
+#attention_border { top: 4px; left: 93px; }
 
 
 
@@ -177,9 +206,8 @@ button_background
 
 
 .color_toolbar_icon {z-index: 10000; position: absolute; display: block; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_toolbar_icon.svg);}
-.color_toolbar_icon:hover {background-image: url(../theme/options_color_bucket_hover.svg);}
+.color_toolbar_icon:hover {background-image: url(../theme/options_color_toolbar_icon_hover.svg);}
 
-.color_toolbar_hover_icon {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_toolbar_hover_icon.svg);}
 
 
 .color_bucket {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../theme/options_color_bucket.svg);}

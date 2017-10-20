@@ -20,7 +20,6 @@ function RestoreToolbarSearchFilter() {
 
 function RestoreToolbarShelf() {
 	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
-		
 		$("#filter_box").attr("placeholder", caption_searchbox);
 		$("#filter_box").css({"opacity": 1});
 		
@@ -42,12 +41,13 @@ function RestoreToolbarShelf() {
 			$("#button_folders").removeClass("hidden");
 			$("#button_folders").addClass("on");
 		}
+		RefreshGUI();
 	});
 }
 
-function SetToolbarShelfToggle() {
+function SetToolbarShelfToggle(click_type) {
 	// tools and search buttons toggle
-	$(document).on("mousedown", "#button_tools, #button_search, #button_groups, #button_folders", function(event) {
+	$(document).on(click_type, "#button_tools, #button_search, #button_groups, #button_folders", function(event) {
 		if (event.button != 0) {
 			return;
 		}

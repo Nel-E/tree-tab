@@ -16,8 +16,9 @@ var tabs = {};
 var MouseHoverOver = "";
 var GroupDragNode;
 
-var Dropped = false;
-var DetachIfDraggedOut = [];
+
+
+var DragAndDrop = {Dropped: false, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0};
 var DropTargetsInFront = false;
 
 
@@ -39,8 +40,8 @@ var caption_clear_filter = chrome.i18n.getMessage("caption_clear_filter");
 var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 
-var caption_ungrouped_group = "Ungrouped tabs";
-var caption_noname_group = "untitled";
+var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
+var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
 
 var DefaultToolbar =
 	'<div class=toolbar id=toolbar>'+
@@ -56,7 +57,7 @@ var DefaultToolbar =
 		'<div class=toolbar_shelf id=toolbar_search>'+
 			'<div id=toolbar_search_input_box>'+
 				'<input id=filter_box type=text placeholder=Search tabs...></input>'+
-				'<div id=button_filter_clear style=opacity:0; type=reset></div>'+
+				'<div id=button_filter_clear style="opacity:0; position:absolute;" type=reset></div>'+
 			'</div>'+
 			'<div id=toolbar_search_buttons>'+
 				'<div class=button id=button_filter_type><div class=button_img></div></div>'+
@@ -98,8 +99,6 @@ function LoadData(KeyName, ExpectReturnDefaultType) {
 		data = JSON.parse(localStorage[KeyName]);
 		return data;
 	} catch(e) {
-		// console.log("error in JSON PARSE of "+KeyName+", will return empty expected var type:");
-		// console.log(ExpectReturnDefaultType);
 		return ExpectReturnDefaultType;
 	}
 }
@@ -145,7 +144,7 @@ function ApplySizeSet(size){
 		}
 	}
 	if (browserId == "F") {
-		// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
+		// I have no idea what is going on, but why top position for various things is different in firefox?????
 		if (size > 1) {
 			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
 		} else {
@@ -155,10 +154,8 @@ function ApplySizeSet(size){
 }
 
 function LoadPreferences() {
-	var	LoadedPreferences = {};
-	if (localStorage.getItem("preferences") !== null) {
-		LoadedPreferences = JSON.parse(localStorage["preferences"]);
-	}
+	var	LoadedPreferences = LoadData("preferences", {});
+
 	for (var parameter in DefaultPreferences) {
 		opt[parameter] = DefaultPreferences[parameter];
 	}
@@ -173,7 +170,3 @@ function LoadDefaultPreferences() {
 		opt[parameter] = DefaultPreferences[parameter];
 	}
 }
-function SavePreferences() {
-	localStorage["preferences"] = JSON.stringify(opt);
-}
-

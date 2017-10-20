@@ -19,7 +19,6 @@ function ChromeLoadTabs(retry) {
 		var t_count = LoadData("t_count", 0);
 		var LoadedWindows = LoadData("windows", []);
 		var LoadedTabs = LoadData("tabs", []);
-
 		// if loaded tabs mismatch by 50%, then try to load back
 		if (LoadedTabs.length < t_count*0.5) {
 			LoadedTabs = LoadData("tabs_BAK", []);
@@ -29,12 +28,33 @@ function ChromeLoadTabs(retry) {
 			LoadedWindows = LoadData("windows_BAK", []);
 		}
 
-
 		// CACHED COUNTS
 		var WinCount = w.length;
 		var LoadedWinCount = LoadedWindows.length;
 		var LoadedTabsCount = LoadedTabs.length;
 		
+		for (var m = 0; m < WinCount; m++) {
+			if (w[m].tabs[0].url != "chrome://videopopout/") { // this is for opera for their extra video popup, which is weirdly queried as a "normal" window
+				let winId = w[m].id;
+				let url1 = w[m].tabs[0].url;
+				let url2 = w[m].tabs[w[m].tabs.length-1].url;
+				windows[winId] = {group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+				for (var n = 0; n < LoadedWinCount; n++) {
+					if (LoadedWindows[n][0] != undefined) {
+						if (LoadedWindows[n][0] == url1 || LoadedWindows[n][1] == url2) {
+							windows[winId].group_bar = LoadedWindows[n][2];
+							windows[winId].active_shelf = LoadedWindows[n][3];
+							windows[winId].active_group = LoadedWindows[n][4];
+							if (Object.keys(LoadedWindows[n][5]).length > 0) { windows[winId].groups = Object.assign({}, LoadedWindows[n][5]); }
+							if (Object.keys(LoadedWindows[n][6]).length > 0) { windows[winId].folders = Object.assign({}, LoadedWindows[n][6]); }
+							LoadedWindows[n][0] = undefined;
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		for (var a = 0; a < WinCount; a++) {
 			var TabsCount = w[a].tabs.length;
 			for (var b = 0; b < TabsCount; b++) {
@@ -44,21 +64,22 @@ function ChromeLoadTabs(retry) {
 
 		// compare saved tabs from storage to current session tabs, but can be skipped if set in options
 		if (opt.skip_load == false && LoadedTabs.length > 0) {
-			
 			// match loaded tabs
 			for (var i = 0; i < WinCount; i++) {
 				var TabsCount = w[i].tabs.length;
 				for (var j = 0; j < TabsCount; j++) {
 					for (var k = 0; k < LoadedTabsCount; k++) {
-						let tabId = w[i].tabs[j].id;
-						if (LoadedTabs[k][1] == tabs[tabId].h && refTabs[LoadedTabs[k][0]] == undefined) {
-							refTabs[LoadedTabs[k][0]] = tabId;
-							tabs[tabId].p = LoadedTabs[k][2];
-							tabs[tabId].i = LoadedTabs[k][3];
-							tabs[tabId].o = LoadedTabs[k][4];
-							tabs_matched++;
-							LoadedTabs.splice(k, 1);
-							break;
+						if (LoadedTabs[k][0] != undefined) {
+							let tabId = w[i].tabs[j].id;
+							if (LoadedTabs[k][1] == tabs[tabId].h && refTabs[LoadedTabs[k][0]] == undefined) {
+								refTabs[LoadedTabs[k][0]] = tabId;
+								tabs[tabId].p = LoadedTabs[k][2];
+								tabs[tabId].i = LoadedTabs[k][3];
+								tabs[tabId].o = LoadedTabs[k][4];
+								LoadedTabs[k][0] = undefined;
+								tabs_matched++;
+								break;
+							}
 						}
 					}
 				}
@@ -72,25 +93,6 @@ function ChromeLoadTabs(retry) {
 			}
 		}
 			
-		for (var m = 0; m < WinCount; m++) {
-			if (w[m].tabs[0].url != "chrome://videopopout/") { // this is for opera for their extra video popup, which is weirdly queried as a "normal" window
-				let winId = w[m].id;
-				let url1 = w[m].tabs[0].url;
-				let url2 = w[m].tabs[w[m].tabs.length-1].url;
-				windows[winId] = {group_bar: true, active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
-				for (var n = 0; n < LoadedWinCount; n++) {
-					if (LoadedWindows[n][0] == url1 || LoadedWindows[n][1] == url2) {
-						windows[winId].group_bar = LoadedWindows[n][2];
-						windows[winId].active_shelf = LoadedWindows[n][3];
-						windows[winId].active_group = LoadedWindows[n][4];
-						if (Object.keys(LoadedWindows[n][5]).length > 0) { windows[winId].groups = Object.assign({}, LoadedWindows[n][5]); }
-						if (Object.keys(LoadedWindows[n][6]).length > 0) { windows[winId].folders = Object.assign({}, LoadedWindows[n][6]); }
-						LoadedWindows.splice(n, 1);
-						break;
-					}
-				}
-			}
-		}
 			
 		// replace active tab ids for each group using refTabs
 		for (var windowId in windows) {
@@ -125,8 +127,9 @@ async function ChromeAutoSaveData() {
 			chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 				var WinCount = w.length;
 				var t_count = 0;
-				var k = [];
-				var s = [];
+				var counter = 0;
+				var x = "";
+				var y = "";
 
 				for (var a = 0; a < WinCount; a++) {
 					t_count = t_count + w[a].tabs.length;
@@ -142,16 +145,13 @@ async function ChromeAutoSaveData() {
 						windows[winId].groups != undefined &&
 						windows[winId].folders != undefined
 					) {
-						var j = [
-							w[b].tabs[0].url,
-							w[b].tabs[w[b].tabs.length-1].url,
-							windows[winId].group_bar,
-							windows[winId].active_shelf,
-							windows[winId].active_group,
-							windows[winId].groups,
-							windows[winId].folders
-						];
-						k.push(j);
+						x += ',["'+ w[b].tabs[0].url+'","'+
+							w[b].tabs[w[b].tabs.length-1].url+'",'+
+							windows[winId].group_bar+','+
+							JSON.stringify(windows[winId].active_shelf)+','+
+							JSON.stringify(windows[winId].active_group)+','+
+							JSON.stringify(windows[winId].groups)+','+
+							JSON.stringify(windows[winId].folders)+']';
 					}
 
 					let TabsCount = w[b].tabs.length;
@@ -164,27 +164,17 @@ async function ChromeAutoSaveData() {
 							tabs[tabId].i != undefined &&
 							tabs[tabId].o != undefined
 						) {
-							var r = [
-								tabId,
-								tabs[tabId].h,
-								tabs[tabId].p,
-								tabs[tabId].i,
-								tabs[tabId].o
-							];
-							s.push(r);
+							y += ',['+tabId+','+tabs[tabId].h+',"'+tabs[tabId].p+'",'+tabs[tabId].i+',"'+tabs[tabId].o+'"]';
+							counter++;
 						}
 					}
-					
-					if (s.length == t_count) {
+					if (counter == t_count) {
 						localStorage["t_count"] = JSON.stringify(t_count);
 						localStorage["w_count"] = JSON.stringify(WinCount);
-						localStorage["tabs"] = JSON.stringify(s);
-						localStorage["windows"] = JSON.stringify(k);
+						localStorage["tabs"] = ("["+y.substr(1)+"]");
+						localStorage["windows"] = ("["+x.substr(1)+"]");
 					}
 				}
-				
-				var tabsBAK = LoadData("tabs", []);
-				if (tabsBAK.length) { localStorage["tabs_BAK"] = JSON.stringify(tabsBAK); }
 				schedule_save--;
 			});
 		}
@@ -306,8 +296,6 @@ function ChromeStartListeners() {
 			case "reload":
 				window.location.reload();
 			break;
-			
-			
 			case "get_groups":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].groups);
@@ -327,8 +315,6 @@ function ChromeStartListeners() {
 					sendResponse(windows[message.windowId].active_group);
 				}
 			break;
-			
-			
 			case "set_active_shelf":
 				windows[message.windowId].active_shelf = message.active_shelf;
 				schedule_save++;
@@ -338,7 +324,6 @@ function ChromeStartListeners() {
 					sendResponse(windows[message.windowId].active_shelf);
 				}
 			break;
-			
 			case "set_group_bar":
 				windows[message.windowId].group_bar = message.group_bar;
 				schedule_save++;
@@ -348,11 +333,9 @@ function ChromeStartListeners() {
 					sendResponse(windows[message.windowId].group_bar);
 				}
 			break;
-			
 			case "console_log":
 				console.log(message.m);
 			break;
-
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;

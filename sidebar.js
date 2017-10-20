@@ -22,6 +22,16 @@ function Loadi18n() {
 		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
 	});
 }
+function RestorePinListRowSettings() {
+	if (opt.pin_list_multi_row) {
+		$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
+	} else {
+		$("#pin_list").css({"white-space": "", "overflow-x": ""});
+	}
+	// setTimeout(function() {
+		RefreshGUI();
+	// },100);
+}
 	
 function Run() {
 	LoadPreferences();
@@ -49,35 +59,23 @@ function Run() {
 function Initialize() {
 	
 	RestoreStateOfGroupsToolbar();
-	var theme = {
-		"TabsSizeSetNumber": 2,
-		"ToolbarShow": true,
-		"toolbar": DefaultToolbar
-	};
+	var theme = LoadData(("theme"+localStorage["current_theme"]), {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
 
-	if (localStorage.getItem("current_theme") != null && localStorage["theme"+localStorage["current_theme"]] != null) {
-		theme = JSON.parse(localStorage["theme"+localStorage["current_theme"]]);
-		if (browserId == "F") {
-			// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-			if (theme.TabsSizeSetNumber > 1) {
-				document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-			}
+	if (browserId == "F") {
+		// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
+		if (theme.TabsSizeSetNumber > 1) {
+			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
 		}
 	}
 
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
 
+	AppendAllGroups();
+
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
 
-		AppendAllGroups();
 
-// log(bgtabs);
-// log(bggroups);
-
-		if (opt.pin_list_multi_row) {
-			$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
-		}
 		if (theme.ToolbarShow) {
 			$("#toolbar").html(theme.toolbar);
 		}
@@ -119,24 +117,25 @@ function Initialize() {
 		}
 
 		RearrangeTreeTabs(tabs, bgtabs, true);
-
-		SetIOEvents();
-		SetToolbarEvents();
+		RefreshExpandStates();
 		
 		RestoreToolbarShelf();
 		RestoreToolbarSearchFilter();
-		SetToolbarShelfToggle();
+		SetToolbarShelfToggle("mousedown");
 		
+		StartChromeListeners();
+		SetIOEvents();
+		SetToolbarEvents();
 		SetTRefreshEvents();
 		SetGroupEvents();
 		SetTabEvents();
 		SetMenu();
-		RefreshGUI();
-		RefreshExpandStates();
 		SetDragAndDropEvents();
-		StartChromeListeners();
-		
+
+		RearrangeBrowserTabsCheck();
 		Loadi18n();
+		
+		RestorePinListRowSettings();
 
 		setTimeout(function() {
 			UpdateData();
@@ -144,22 +143,23 @@ function Initialize() {
 			delete theme;
 		},5000);
 		
-		if (opt.syncro_tabbar_tabs_order) {
-			RearrangeBrowserTabsCheck();
-		}
-		
-		if (opt.syncro_tabbar_tabs_order) {
-			if ($(".active").length == 0) {
-				chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
+		if ($(".active").length == 0) {
+			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
+				if (tabs[0]) {
 					SetActiveTab(tabs[0].id);
-				});
-			}
+				}
+			});
 		}
 		
 // AddNewFolder();			
 		if (browserId == "V") {
 			VivaldiRefreshMediaIcons();
 		}
+		
+		// if (browserId == "F") {
+			// browser.sidebarAction.open();
+		// }
+
 			
 	});			
 }

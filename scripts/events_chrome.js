@@ -5,22 +5,23 @@
 // **********         CHROME EVENTS         ***************
 
 function StartChromeListeners(){
-	chrome.commands.onCommand.addListener(function(command) {
-		chrome.windows.getLastFocused({windowTypes: ["normal"]}, function(window) {
-			if (CurrentWindowId == window.id) {
-				if (command == "goto_tab_above") {
-					ActivatePrevTab();
-				}
-				if (command == "goto_tab_below") {
-					ActivateNextTab();
-				}
-			}
-		});
-	});
 
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		if (message.command == "reload") {
+		if (message.command == "drag_drop") {
+			DragAndDrop.SelectedTabsIds = message.SelectedTabsIds;
+			DragAndDrop.TabsIds = message.TabsIds;
+			DragAndDrop.Parents = message.Parents;
+			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
+			// console.log(DragAndDrop);
+		}
+		if (message.command == "reload_sidebar") {
 			window.location.reload();
+		}
+		if (message.command == "reload_options") {
+			LoadPreferences();
+			setTimeout(function() {
+				RestorePinListRowSettings();
+			},200);
 		}
 		if (message.command == "reload_theme") {
 			if (localStorage.getItem(message.themeName) != null) {
@@ -32,30 +33,11 @@ function StartChromeListeners(){
 				} else {
 					$("#toolbar").html("");
 				}
-				RefreshGUI();
+				RestoreToolbarSearchFilter();
+				RestoreToolbarShelf();
 			}
 
 		}
-		// if (message.command == "dropped_tabs") {
-			// Dropped = true;
-		// }
-		// if (message.command == "recheck_tabs") {
-			// schedule_update_data++;
-		// }
-		
-		
-		// if (message.windowId != CurrentWindowId){
-			// switch(message.command){
-				// case "group_removed":
-					// AppendTabsToGroup({tabsIds: $(".tab."+message.groupId).map(function(){return parseInt(this.id);}).toArray(), groupId:"ut"});
-					// AppendAllGroups();
-				// break;
-				// case "groups_reappend":
-					// AppendAllGroups();
-				// break;
-			// }
-		// }
-
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {
 				case "tab_created":

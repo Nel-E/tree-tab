@@ -13,22 +13,11 @@ function AppendAllGroups() {
 		// return;
 	// }
 	// bggroups.forEach(function(group) {
-		// AppendGroupToList(group.g, group.n, group.c, group.f);
-	// });
-	// SetActiveGroup(vt.ActiveGroup, false, false);
-	// $("#group_list").scrollTop(scroll);
-	
-	
-		// groups["tab_list"] = { id: "g_23y23hriouh", index: 0, activetab: 0, name: "QPA", background: "#000000", font: "#FFFFFF"  };
-	
+
 	for (var group in bggroups) {
-		// if (group != "tab_list") {
 		AppendGroupToList(bggroups[group].id, bggroups[group].name, bggroups[group].font);
-			// groups[group].activetab = reference_tabs[groups[group].activetab];
-		// }
 	}
 	RearrangeGroups(0);
-	
 }
 
 
@@ -55,9 +44,10 @@ function AppendGroupToList(groupId, group_name, font_color) {
 	}
 
 	if ($("#_"+groupId).length == 0) {
-		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.draggable = true; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
-		// var gtc = document.createElement("div"); gtc.className = "group_title_container"; gtc.id = "_gtc"+groupId; /* gtc.style.backgroundColor = "#"+background_color; */ gbn.appendChild(gtc);
+		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
 		var gte = document.createElement("span"); gte.className = "group_title"; gte.id = "_gte"+groupId; gte.textContent = group_name; if (font_color != "") {gte.style.color = "#"+font_color;} gbn.appendChild(gte);
+		var gtd = document.createElement("div"); gtd.className = "group_drag_box"; gtd.draggable = true; gtd.id = "-"+groupId; gbn.appendChild(gtd);
+
 		// var gtn = document.createElement("span"); gtn.className = "group_tab_count"; gtn.id = "_gtn"+groupId; gtn.textContent = " (0)"; gtn.style.color = "#"+font_color; gbn.appendChild(gtn);
 
 	// $(".group_button#_" +active_group+ ", .group#"+active_group).css({"background-color": "#"+bggroups[active_group].background});
@@ -81,7 +71,6 @@ function AppendGroupToList(groupId, group_name, font_color) {
 	RefreshGUI();
 }
 
-
 function GenerateNewGroupID(){
 	var newID = "g_"+GenerateRandomID();
 	if ($("#"+newID)[0]) {
@@ -92,24 +81,14 @@ function GenerateNewGroupID(){
 }
 function AddNewGroup() {
 	var newId = GenerateNewGroupID();
-	
 	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: caption_noname_group, font: ""  };
-
-	
 	AppendGroupToList(newId, caption_noname_group, "");
-	
-	// bggroups.push({g: "g_"+newId, n:bg.caption_group, c: color, f: "d9d9d9", i: 0});
-	// AppendGroupToList("g_"+newId, bg.caption_group, color);
-	// $("#group_list").scrollTop($("#group_list")[0].scrollHeight);
-	// bg.schedule_save++;
-	// chrome.runtime.sendMessage({command: "groups_reappend", windowId: CurrentWindowId});
-	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
-	// return "g_"+newId;
+	UpdateBgGroupsOrder();
+	// chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 }
 
-
-function AppendTabsToGroup(p) {
-}
+// function AppendTabsToGroup(p) {
+// }
 
 
 // remove group, delete tabs if close_tabs is true
@@ -214,7 +193,7 @@ function SetActiveTabInActiveGroup(tabId) {
 }
 
 // direction == true goes up, false goes down
-function ScrollGroupList(direction) {
+// function ScrollGroupList(direction) {
 	// if (direction) {
 		// $("#group_list").scrollTop($("#group_list").scrollTop()-3);
 	// }
@@ -224,9 +203,9 @@ function ScrollGroupList(direction) {
 	// if (IOKeys.LMB) {
 		// setTimeout(function() { ScrollGroupList(direction); },10);
 	// }
-}
+// }
 
-function ScrollToGroup(groupId) {
+// function ScrollToGroup(groupId) {
 	// if ($("#"+groupId).offset().top-$("#group_list").offset().top < 1) {
 		// $("#group_list").scrollTop($("#group_list").scrollTop()+$("#"+groupId).offset().top-$("#group_list").offset().top-1);
 	// } else {
@@ -234,7 +213,7 @@ function ScrollToGroup(groupId) {
 			// $("#group_list").scrollTop($("#group_list").scrollTop()+$("#"+groupId).offset().top-$("#group_list").offset().top-$("#group_list").innerHeight()+$("#"+groupId).outerHeight()-1);
 		// }
 	// }
-}
+// }
 
 
 
@@ -248,17 +227,10 @@ function ShowGroupEditWindow(GroupId) {
 	$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 8, "left": 22});
 	
 	// $("#group_edit_font").css({"background-color": (ggroups[menuGroupId].font).match("var") != null ? ggroups[menuGroupId].font : "#"+bggroups[menuGroupId].font});
-	$("#group_edit_font").css({"background-color": bggroups[GroupId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[menuGroupId].font});
-	$("#group_edit_background").css({"background-color": bggroups[GroupId].background == "" ? "var(--tab_list_background, #fafafa)" : "#"+bggroups[menuGroupId].background});
-	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
-}
+	$("#group_edit_font").css({"background-color": bggroups[GroupId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[GroupId].font});
+	// $("#group_edit_background").css({"background-color": bggroups[GroupId].background == "" ? "var(--tab_list_background, #fafafa)" : "#"+bggroups[menuGroupId].background});
 
-function ShowGroupEditWindowBAK() {
-	$(".menu").hide(0);
-	// $("#group_edit_font").css({"background-color": "#"+bggroups[menuGroupId].font});
 	// $("#group_edit_background").css({"background-color": "#"+bggroups[menuGroupId].background});
-	$("#group_edit_name")[0].value = bggroups[menuGroupId].name;
-	$("#group_edit").css({"display": "block", "top": $("#_"+menuGroupId).offset().top, "left": 22});
 }
 
 // when pressed OK in group popup
@@ -295,7 +267,7 @@ function GroupEditConfirm() {
 }
 
 // "Move to group" popup
-function ShowMoveToGroupWindow(x, y) {
+// function ShowMoveToGroupWindow(x, y) {
 	// $(".move_to_group_menu_entry").remove();
 	// bggroups.forEach(function(group) {
 		// if (vt.ActiveGroup != group.g) {
@@ -313,4 +285,4 @@ function ShowMoveToGroupWindow(x, y) {
 		// y = $(window).height()-$("#move_to_group_menu").outerHeight();
 	// }
 	// $("#move_to_group_menu").css({"display": "block", "top": y-24, "left": x-20});
-}
+// }

@@ -61,8 +61,10 @@ function SetTabEvents() {
 				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { o: "c" } });
 			} else {
 				if ($(this).parent().parent().is(".c")) {
+					$(this).parent().parent().removeClass("c").addClass("o");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { o: "o" } });
 					if (opt.close_other_trees) {
-						$(".o:visible").removeClass("o").addClass("c");
+						$(".o:visible:not(#"+$(this).parent().parent()[0].id+")").removeClass("o").addClass("c");
 						$(this).parents(".tab").each(function() {
 							$(this).removeClass("n").removeClass("c").addClass("o");
 							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { o: "o" } });
@@ -71,8 +73,6 @@ function SetTabEvents() {
 							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { o: "c" } });
 						});
 					}
-					$(this).parent().parent().removeClass("c").addClass("o");
-					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { o: "o" } });
 				}
 			}
 		}

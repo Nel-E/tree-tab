@@ -233,6 +233,7 @@
 					<td class="label" id="options_max_tree_depth"></td>
 				</tr>
 			</table>
+			
 		</fieldset>
 		
 		
@@ -259,21 +260,46 @@
 				<label class="label" style="margin-bottom: 10px; margin-top: 4px; display: inline-block;" id="options_available_buttons"></label>	
 
 				<div id="sample_toolbar_block">
-					<div id="toolbar_unused_buttons"></div>
+					<div id="toolbar_unused_buttons" style="position: relative; margin-bottom: 16px; background-color: #b8ffbf; height: 30px;"></div>
 					<br>
 					
 					<div class="toolbar" id="toolbar" style="position: relative; height: 94px; width: 350px;"></div>	
 					<br>
 
+
+					
+					
+					
+					
+					
+					<div class="pick_col font_color" id="filter_box_font"></div>
+					<div class="pick_col color_x" id="filter_clear_icon"></div>
+					
+					<div class="pick_col color_bucket" id="filter_box_background"></div>
+					<div class="pick_col color_border" id="filter_box_border"></div>
+					
+					
+					
+					<div class="pick_col color_bucket" id="button_background"></div>
+					<div class="pick_col color_bucket pick_col_hover" id="button_hover_background"></div>
+
+					
+					
 					<div class="pick_col color_bucket" id="toolbar_background"></div>
 					<div class="pick_col color_border" id="toolbar_border_bottom"></div>
 
 					<div class="pick_col color_toolbar_icon" id="button_icons"></div>
+					<div class="pick_col color_toolbar_icon pick_col_hover" id="button_icons_hover"></div>
 
-					<div class="pick_col color_toolbar_hover_icon" id="button_icons_hover"></div>
-
+					
+					
 					<div class="pick_col color_border" id="button_border"></div>
-					<div class="pick_col color_border" id="button_hover_border"></div>
+					<div class="pick_col color_border pick_col_hover" id="button_hover_border"></div>
+					
+					
+					
+					
+					
 
 				</div>
 
@@ -329,9 +355,9 @@
 					<!-- normal selected hover --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_selected_hover_title_font_color"></div><div class="font_weight_normal" id="tab_selected_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_selected_hover_title_font_weight"></div><div class="font_style_normal" id="tab_selected_hover_title_font_style"></div><div class="font_style_italic" id="tab_selected_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_selected_hover_background"></div><div class="pick_col color_border" id="tab_selected_hover_border"></div><div class="pick_col color_x" id="close_hover_x"></div><div class="pick_col color_border" id="close_hover_border"></div><div class="pick_col color_bucket" id="close_hover_background"></div></div>
 					<!-- normal active --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_active_title_font_color"></div><div class="font_weight_normal" id="tab_active_title_font_weight"></div><div class="font_weight_bold" id="tab_active_title_font_weight"></div><div class="font_style_normal" id="tab_active_title_font_style"></div><div class="font_style_italic" id="tab_active_title_font_style"></div><div class="pick_col color_bucket" id="tab_active_background"></div><div class="pick_col color_border" id="tab_active_border"></div></div>
 					<!-- normal active hover --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_active_hover_title_font_color"></div><div class="font_weight_normal" id="tab_active_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_active_hover_title_font_weight"></div><div class="font_style_normal" id="tab_active_hover_title_font_style"></div><div class="font_style_italic" id="tab_active_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_active_hover_background"></div><div class="pick_col color_border" id="tab_active_hover_border"></div></div>
-					<!-- normal selected active --><div class="tab_color_options_row"><div class="color_brush" id="expand_closed_background"></div><div class="pick_col font_color" id="tab_active_selected_title_font_color"></div><div class="font_weight_normal" id="tab_active_selected_title_font_weight"></div><div class="font_weight_bold" id="tab_active_selected_title_font_weight"></div><div class="font_style_normal" id="tab_active_selected_title_font_style"></div><div class="font_style_italic" id="tab_active_selected_title_font_style"></div><div class="pick_col color_bucket" id="tab_active_selected_background"></div><div class="pick_col color_border" id="tab_active_selected_border"></div></div>
-					<!-- normal selected active hover --><div class="tab_color_options_row"><div class="color_brush" id="expand_hover_background"></div><div class="pick_col font_color" id="tab_selected_active_hover_title_font_color"></div><div class="font_weight_normal" id="tab_selected_active_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_selected_active_hover_title_font_weight"></div><div class="font_style_normal" id="tab_selected_active_hover_title_font_style"></div><div class="font_style_italic" id="tab_selected_active_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_selected_active_hover_background"></div><div class="pick_col color_border" id="tab_selected_active_hover_border"></div></div>
-					<!-- unloaded --><div class="tab_color_options_row"><div class="color_brush" id="expand_open_background"></div><div class="pick_col font_color" id="tab_discarded_title_font_color"></div><div class="font_weight_normal" id="tab_discarded_title_font_weight"></div><div class="font_weight_bold" id="tab_discarded_title_font_weight"></div><div class="font_style_normal" id="tab_discarded_title_font_style"></div><div class="font_style_italic" id="tab_discarded_title_font_style"></div><div class="pick_col color_bucket" id="tab_discarded_background"></div><div class="pick_col color_border" id="tab_discarded_border"></div></div>
+					<!-- normal selected active --><div class="tab_color_options_row"><div class="pick_col color_bucket" id="expand_closed_background"></div><div class="pick_col font_color" id="tab_active_selected_title_font_color"></div><div class="font_weight_normal" id="tab_active_selected_title_font_weight"></div><div class="font_weight_bold" id="tab_active_selected_title_font_weight"></div><div class="font_style_normal" id="tab_active_selected_title_font_style"></div><div class="font_style_italic" id="tab_active_selected_title_font_style"></div><div class="pick_col color_bucket" id="tab_active_selected_background"></div><div class="pick_col color_border" id="tab_active_selected_border"></div></div>
+					<!-- normal selected active hover --><div class="tab_color_options_row"><div class="pick_col color_bucket pick_col_hover" id="expand_hover_background"></div><div class="pick_col font_color" id="tab_selected_active_hover_title_font_color"></div><div class="font_weight_normal" id="tab_selected_active_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_selected_active_hover_title_font_weight"></div><div class="font_style_normal" id="tab_selected_active_hover_title_font_style"></div><div class="font_style_italic" id="tab_selected_active_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_selected_active_hover_background"></div><div class="pick_col color_border" id="tab_selected_active_hover_border"></div></div>
+					<!-- unloaded --><div class="tab_color_options_row"><div class="pick_col color_bucket" id="expand_open_background"></div><div class="pick_col font_color" id="tab_discarded_title_font_color"></div><div class="font_weight_normal" id="tab_discarded_title_font_weight"></div><div class="font_weight_bold" id="tab_discarded_title_font_weight"></div><div class="font_style_normal" id="tab_discarded_title_font_style"></div><div class="font_style_italic" id="tab_discarded_title_font_style"></div><div class="pick_col color_bucket" id="tab_discarded_background"></div><div class="pick_col color_border" id="tab_discarded_border"></div></div>
 					<!-- unloaded hover --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_discarded_hover_title_font_color"></div><div class="font_weight_normal" id="tab_discarded_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_discarded_hover_title_font_weight"></div><div class="font_style_normal" id="tab_discarded_hover_title_font_style"></div><div class="font_style_italic" id="tab_discarded_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_discarded_hover_background"></div><div class="pick_col color_border" id="tab_discarded_hover_border"></div></div>
 					<!-- unloaded selected --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_selected_discarded_title_font_color"></div><div class="font_weight_normal" id="tab_selected_discarded_title_font_weight"></div><div class="font_weight_bold" id="tab_selected_discarded_title_font_weight"></div><div class="font_style_normal" id="tab_selected_discarded_title_font_style"></div><div class="font_style_italic" id="tab_selected_discarded_title_font_style"></div><div class="pick_col color_bucket" id="tab_selected_discarded_background"></div><div class="pick_col color_border" id="tab_selected_discarded_border"></div><div class="pick_col color_bucket" id="drag_indicator"></div></div>
 					<!-- unloaded selected hover --><div class="tab_color_options_row"><div class="pick_col font_color" id="tab_selected_discarded_hover_title_font_color"></div><div class="font_weight_normal" id="tab_selected_discarded_hover_title_font_weight"></div><div class="font_weight_bold" id="tab_selected_discarded_hover_title_font_weight"></div><div class="font_style_normal" id="tab_selected_discarded_hover_title_font_style"></div><div class="font_style_italic" id="tab_selected_discarded_hover_title_font_style"></div><div class="pick_col color_bucket" id="tab_selected_discarded_hover_background"></div><div class="pick_col color_border" id="tab_selected_discarded_hover_border"></div></div>
@@ -363,7 +389,7 @@
 				</div>
 
 				<div class="pick_col color_bucket" id="scrollbar_thumb"></div>
-				<div class="pick_col color_bucket" id="scrollbar_thumb_hover"></div>
+				<div class="pick_col color_bucket pick_col_hover" id="scrollbar_thumb_hover"></div>
 				<div class="pick_col color_bucket" id="scrollbar_track"></div>
 
 				<div class="pin_list" id="pin_list"></div>
@@ -374,7 +400,7 @@
 				<div class="pick_col color_bucket" id="group_list_background"></div>
 				<div class="pick_col color_border" id="group_list_borders"></div>
 				
-				<div class="pick_col color_bucket" id="group_list_button_hover_background"></div>
+				<div class="pick_col color_bucket pick_col_hover" id="group_list_button_hover_background"></div>
 				
 				<div class="pick_col font_color" id="group_list_default_font_color"></div>
 
@@ -398,9 +424,10 @@
 				</div>
 
 				<div id="pin_list_options_block">
+					<div class="pick_col color_bucket" id="attention_background"></div>
+					<div class="pick_col color_border" id="attention_border"></div>
 					<div class="pick_col color_border" id="pin_list_border_bottom"></div>
 					<div class="pick_col color_bucket" id="pin_list_background"></div>
-					<div class="pick_col color_bucket" id="attention_background"></div>
 				</div>
 				
 				

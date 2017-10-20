@@ -39,13 +39,16 @@ async function UpdateData() {
 function RearrangeBrowserTabsCheck() {
 	setTimeout(function() {
 		RearrangeBrowserTabsCheck();
-		if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
-		if (schedule_rearrange_tabs > 0) {
-			let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-			RearrangeBrowserTabs(tabIds, tabIds.length-1);
-			schedule_rearrange_tabs--;
+		if (opt.syncro_tabbar_tabs_order) {
+			if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
+			if (schedule_rearrange_tabs > 0) {
+				let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+				RearrangeBrowserTabs(tabIds, tabIds.length-1);
+				schedule_rearrange_tabs--;
+			}
 		}
-	},1000);}
+	},1000);
+}
 
 async function RearrangeBrowserTabs(tabIds, tabIndex) {
 	if (tabIndex > 0){
@@ -228,7 +231,9 @@ function DetachTabs(tabsIds) {
 		chrome.windows.create({state:window.state}, function(new_window) {
 			(tabsIds).forEach(function(tabId) {
 				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(DetachedTab) {
-					if (DetachedTab.id == tabsIds[tabsIds.length-1]) chrome.tabs.remove(new_window.tabs[0].id, null);
+					if (DetachedTab.id == tabsIds[tabsIds.length-1] && new_window.tabs[0]) {
+						chrome.tabs.remove(new_window.tabs[0].id, null);
+					}
 				});
 			});
 		})
@@ -305,8 +310,8 @@ function ActivateNextTab() {
 				if ($(".active:visible").parent().parent().next(".tab")[0]) {
 					chrome.tabs.update(parseInt($(".active:visible").parent().parent().next(".tab")[0].id), { active: true });
 				} else {
-					if ($(".active:visible").parents(".tab").eq(-2).next(".tab")[0]) {
-						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").eq(-2).next(".tab")[0].id), { active: true });
+					if ($(".active:visible").parents(".tab").last().next(".tab")[0]) {
+						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
 					}
 				}
 			}

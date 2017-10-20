@@ -13,9 +13,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	LoadPreferences();
 	document.title = "Tree Tabs";
 
-	if (localStorage.getItem("themes") != null) {
-		themes = JSON.parse(localStorage["themes"]);
-	}
+	themes = LoadData("themes", []);
 	if (localStorage.getItem("current_theme") != null) {
 		LoadTheme(localStorage["current_theme"]);
 	}
@@ -23,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	GetOptions();
 	RefreshFields();
 	SetEvents();
-	SetToolbarShelfToggle();
+	SetToolbarShelfToggle("click");
 	
 	AppendGroupToList("tab_list", caption_ungrouped_group, "");
 	AppendGroupToList("tab_list2", caption_ungrouped_group, "");
@@ -42,30 +40,30 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_title2")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal");
 	
 	AppendTab({tab: {id: 11, pinned: false}, Append: true, ParentId: "2"});
-	$("#tab_title11")[0].textContent = "normal_hover";
+	$("#tab_title11")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_hover");
 	$("#tab_header11").addClass("tab_header_hover").addClass("close_show");
 
 	AppendTab({tab: {id: 12, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected"});
-	$("#tab_title12")[0].textContent = 'normal_selected';
+	$("#tab_title12")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected");
 	
 	AppendTab({tab: {id: 13, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected"});
-	$("#tab_title13")[0].textContent = 'normal_selected_hover';
+	$("#tab_title13")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected_hover");
 	$("#tab_header13").addClass("tab_header_hover").addClass("close_show");
 	$("#close13").addClass("close_hover");
 
 	// regular active tabs
 	AppendTab({tab: {id: 3, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "active"});
-	$("#tab_title3")[0].textContent = "active";
+	$("#tab_title3")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active");
 	
 	AppendTab({tab: {id: 15, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "active"});
-	$("#tab_title15")[0].textContent = "active hover";
+	$("#tab_title15")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_hover");
 	$("#tab_header15").addClass("tab_header_hover");
 	
 	AppendTab({tab: {id: 14, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected active"});
 	$("#tab_title14")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected");
 	
 	AppendTab({tab: {id: 16, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected active"});
-	$("#tab_title16")[0].textContent = "active selected hover";
+	$("#tab_title16")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected_hover");
 	$("#tab_header16").addClass("tab_header_hover");
 	$("#exp16").addClass("hover");
 
@@ -74,14 +72,14 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_title5")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded");
 	
 	AppendTab({tab: {id: 17, pinned: false, discarded: true}, Append: true, ParentId: "5"});
-	$("#tab_title17")[0].textContent = "Unloaded hover";
+	$("#tab_title17")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_hover");
 	$("#tab_header17").addClass("tab_header_hover");
 
 	AppendTab({tab: {id: 19, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected"});
-	$("#tab_title19")[0].textContent = "Unloaded selected";
+	$("#tab_title19")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected");
 	
 	AppendTab({tab: {id: 20, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected"});
-	$("#tab_title20")[0].textContent = "Unloaded selected hover";
+	$("#tab_title20")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected_hover");
 	$("#tab_header20").addClass("tab_header_hover");
 
 	// search result
@@ -89,29 +87,31 @@ document.addEventListener("DOMContentLoaded", function() {
 	$("#tab_title6")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result");
 	
 	AppendTab({tab: {id: 21, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "filtered"});
-	$("#tab_title21")[0].textContent = "Search result hover";
+	$("#tab_title21")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_hover");
 	$("#tab_header21").addClass("tab_header_hover");
 
 	AppendTab({tab: {id: 22, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "filtered active"});
-	$("#tab_title22")[0].textContent = "Search result active";
+	$("#tab_title22")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_active");
 	
 	AppendTab({tab: {id: 23, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "filtered active"});
-	$("#tab_title23")[0].textContent = "Search result active hover";
+	$("#tab_title23")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_active_hover");
 	$("#tab_header23").addClass("tab_header_hover");
 
+
+	// search result selected
 	AppendTab({tab: {id: 8, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered"});
 	$("#tab_title8")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected");
-	
+
 	AppendTab({tab: {id: 18, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered"});
-	$("#tab_title18")[0].textContent = "Searh result selected hover";
+	$("#tab_title18")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_hover");
 	$("#tab_header18").addClass("tab_header_hover");
 
 	AppendTab({tab: {id: 25, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered active"});
-	$("#tab_title25")[0].textContent = "Searh result selected active";
+	$("#tab_title25")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active");
 
 
 	AppendTab({tab: {id: 26, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered active"});
-	$("#tab_title26")[0].textContent = "Searh result selected active hover";
+	$("#tab_title26")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active_hover");
 	$("#tab_header26").addClass("tab_header_hover");
 
 	// search result highlighted
@@ -176,6 +176,32 @@ function GetOptions() {
 		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
 	});
 
+
+
+
+	// get language for color pick labels
+	$(".color_border").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_border"));
+	});
+	$(".color_bucket").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_background"));
+	});
+	$(".pick_col_hover").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_hover"));
+	});
+	$(".font_color").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_font"));
+	});
+
+	$(".options_button_minus, .options_button_plus").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	});
+	$("#filter_clear_icon").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_filter_clear_icon"));
+	});
+
+	
+	
 	
 	// get options for append child tab
 	for (var i = 0; i < $("#append_child_tab")[0].options.length; i++) {
@@ -312,7 +338,7 @@ function SetEvents() {
 	
 // --------------------------------ADD RED PREVIEW------------------------------------------------------------------------	
 
-	$(document).on("mouseenter", ".pick_col", function(event) {
+	$(document).on("mouseenter", ".pick_col, #filter_box_font", function(event) {
 		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": red; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
 	});
 	$(document).on("mouseenter", ".font_weight_normal", function(event) {
@@ -330,9 +356,19 @@ function SetEvents() {
 	});
 	
 	
-	$(document).on("mouseleave", ".pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic", function(event) {
+	$(document).on("mouseleave", ".pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font", function(event) {
 		RemoveRedPreview();
 	});
+
+
+
+	// $(document).on("mouseenter", "#filter_box_font", function(event) {
+		// $(".button").addClass("hover_border_blinking");
+	// });
+	// $(document).on("mouseleave", "#filter_box_font", function(event) {
+		// $(".button").removeClass("hover_border_blinking");
+	// });
+
 
 	
 	$(document).on("mouseenter", "#scrollbar_thumb_hover", function(event) {
@@ -350,6 +386,7 @@ function SetEvents() {
 		$("#_tab_list2").addClass("hover_blinking");
 	});
 	
+	
 	$(document).on("mouseleave", "#group_list_button_hover_background", function(event) {
 		// $("#group_scrollbar_thumb").css({ "background-color": "" });
 		$("#_tab_list2").removeClass("hover_blinking");
@@ -357,14 +394,30 @@ function SetEvents() {
 	
 
 	
-	$(document).on("mouseenter", "#button_hover_border", function(event) {
+	$(document).on("mouseenter", "#button_hover_background", function(event) {
 		$(".button").addClass("hover_blinking");
 	});
-	$(document).on("mouseleave", "#button_hover_border", function(event) {
+	$(document).on("mouseleave", "#button_hover_background", function(event) {
 		$(".button").removeClass("hover_blinking");
 	});
 	
-
+	$(document).on("mouseenter", "#button_icons_hover", function(event) {
+		$(".button_img").addClass("hover_blinking");
+	});
+	$(document).on("mouseleave", "#button_icons_hover", function(event) {
+		$(".button_img").removeClass("hover_blinking");
+	});
+	
+	$(document).on("mouseenter", "#button_hover_border", function(event) {
+		$(".button").addClass("hover_border_blinking");
+	});
+	$(document).on("mouseleave", "#button_hover_border", function(event) {
+		$(".button").removeClass("hover_border_blinking");
+	});
+	
+	
+	
+// filter_box_font 
 
 	$(document).on("mouseenter", "#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down", function(event) {
 		$("#group_scrollbar, #group_scrollbar_thumb").css({ "background-color": "red" });
@@ -427,6 +480,11 @@ function SetEvents() {
 		SavePreferences();
 	});
 
+	// options that need reload
+	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees, #faster_scroll", function(event) {
+		chrome.runtime.sendMessage({command: "reload_sidebar"});
+	});
+
 	// set dropdown menu options
 	$("#append_child_tab, #append_child_tab_after_limit, #after_closing_active_tab, #append_orphan_tab").change(function() {
 		opt[this.id] = $(this).val();
@@ -471,14 +529,16 @@ function SetEvents() {
 
 
 	$(document).on("mousedown", ".button", function(event) {
-		// if ($(this).is(".on") && $(this).parent("#toolbar_unused_buttons")[0]) {
-			// $(this).removeClass("on");
-		// }
+		
+		$("#button_filter_clear").css({"opacity": "1", "position": "absolute"});
 		if ($(this).is("#button_filter_type, #filter_search_go_prev, #filter_search_go_next")) {
 			return;
 		}
 		$(this).attr("draggable", "true");
 		dragged_button = this;
+		// setTimeout(function() {
+			// on.addClass("on");
+		// },20);
 	});
 	
 	// set dragged button node
@@ -488,7 +548,7 @@ function SetEvents() {
 
 		// if ($(this).is(".on")) {
 			// $(".on").removeClass("on");
-			// RefreshGUI();
+			RefreshGUI();
 		// }
 
 
@@ -531,9 +591,15 @@ function SetEvents() {
 
 	// save toolbar
 	$(document).on("dragend", ".button", function(event) {
+		// let on = $(".on");
+		// $(".on").removeClass("on");
+		$("#button_filter_clear").css({"opacity": "0"});
+
 		SelectedTheme.toolbar = $("#toolbar").html();
 		SelectedTheme.unused_buttons = $("#toolbar_unused_buttons").html();
 		SaveTheme($("#theme_list").val());
+		$("#button_filter_clear").css({"opacity": "1"});
+		// on.addClass("on");
 	});
 	
 	// reset toolbar
@@ -856,6 +922,8 @@ function SetEvents() {
 	$(document).on("click", "#options_clear_data", function(event) {
 		localStorage.clear();
 		location.reload();
+		chrome.runtime.sendMessage({command: "reload"});
+		chrome.runtime.sendMessage({command: "reload_sidebar"});
 	});
 
 
@@ -868,7 +936,7 @@ function SetEvents() {
 			event.preventDefault();
 		}
 	});
-	$(document).on("mousedown", ".color_bucket", function(event) {
+	$(document).on("mousedown", ".pick_col", function(event) {
 		event.stopPropagation();
 		if (event.button == 0 && event.shiftKey) {
 			$(this).css({ "left": $(this).position().left-1 });
@@ -906,6 +974,9 @@ function RefreshFields() {
 	if (browserId != "F") {
 		$("#faster_scroll_for_firefox").hide();
 	}
+	if (browserId == "F") {
+		$("#scrollbar_size_indicator").hide();
+	}
 	if (browserId == "V") {
 		$("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
 		$("#url_for_web_panel").prop("readonly", true);
@@ -929,34 +1000,14 @@ function RefreshFields() {
 
 
 
-// dummy functions
-function GetFaviconAndTitle() {}
-function RefreshMediaIcon() {}
 function RefreshGUI() {
 	$("#button_filter_type").addClass("url").removeClass("title");
-	// if ($("#toolbar").children().length > 0) {
-		// $("#toolbar").css({ "height": "", "width": "", "display": "", "padding": "", "border": "" });
-		if ($(".button").is(".on")) {
-			$("#toolbar").css({ "height": 53 });
-		} else {
-			$("#toolbar").css({ "height": 26 });
-		}
-	// $("toolbar_groups").css({ "top": "50px" });
-	// $("#_gtetab_list").css({ "width": "200px" });
-	
-	// $("#_tab_list, #_gtetab_list").css({ "height": $(this).children(0).outerWidth() + 12 });
-	// } else {
-		// $("#toolbar").css({ "height": 0, "width": "0px", "display": "none", "padding": "0", "border": "none" });
-	// }
-	
-	
-
-	
-	// # { top: 99px; left: 30px; }
-	
-	
+	if ($(".button").is(".on")) {
+		$("#toolbar").css({ "height": 53 });
+	} else {
+		$("#toolbar").css({ "height": 26 });
+	}
 }
-
 
 function ApplySizeOptionsSet(size){
 	for (let si = 0; si < document.styleSheets.length; si++) {
@@ -1003,3 +1054,17 @@ function SaveTheme(themeName) {
 	chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
 	return SelectedTheme;
 }
+function SavePreferences() {
+	localStorage["preferences"] = JSON.stringify(opt);
+	setTimeout(function() {
+		chrome.runtime.sendMessage({command: "reload_options"});
+	},200);
+}
+
+
+
+
+// dummy functions
+function BindTabsSwitchingToMouseWheel() {}
+function GetFaviconAndTitle() {}
+function RefreshMediaIcon() {}

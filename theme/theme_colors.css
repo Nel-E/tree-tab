@@ -274,6 +274,7 @@ body {
 	--expand_open_background: #339bf3;
 
 	--attention_background: #96ddff;
+	--attention_border: #96ddff;
 	--close_x: #7d7d7d;
 	--close_hover_x: #fbfcfe;
 	--close_hover_border: #757676;
