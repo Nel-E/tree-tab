@@ -6,11 +6,11 @@
 if (browserId != "F") {
 	LoadPreferences();
 	ChromeLoadTabs(0);
+	ChromeMessageListeners();
 }
 
 function ChromeLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
-		started = true;
 		var refTabs = {};
 		var tabs_matched = 0;
 		
@@ -106,7 +106,7 @@ function ChromeLoadTabs(retry) {
 		if (opt.skip_load == true || retry > 1 || (tabs_matched > t_count*0.5)) {
 			schedule_save++;
 			hold = false;
-			ChromeStartListeners();
+			ChromeListeners();
 			ChromeAutoSaveData();
 		} else {
 			setTimeout(function() {ChromeLoadTabs(retry+1);}, 2000);
@@ -205,7 +205,7 @@ function ReplaceParents(oldTabId, newTabId) {
 }
 
 // start all listeners
-function ChromeStartListeners() {
+function ChromeListeners() {
 	chrome.tabs.onCreated.addListener(function(tab) {
 		ChromeHashURL(tab);
 		chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id});
@@ -286,13 +286,11 @@ function ChromeStartListeners() {
 	chrome.runtime.onSuspend.addListener(function() {
 		hold = true;
 	});
+}	
 	
-	
+function ChromeMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		switch(message.command) {
-			case "background_start":
-				if (!started) {Start();}
-			break;
 			case "reload":
 				window.location.reload();
 			break;

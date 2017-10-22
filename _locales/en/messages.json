@@ -239,6 +239,9 @@
 	"options_append_child_tab_after_limit_bottom": {
 		"message": "at the bottom"
 	},
+	"options_max_tree_drag_drop": {
+		"message": "Limit Drag&Drop to tree's maximum depth as well"
+	},
 
 	"options_max_tree_depth": {
 		"message": "maximum tree depth: set it to -1 for unlimited branches, 0 for flat tabs placement (no trees), any number above 0 will be its maximum"
@@ -370,17 +373,37 @@
 		"message": "Search result selected, active, mouse hover over"
 	},
 
+	
+	
 	"options_theme_tabs_sample_text_search_result_highlighted": {
 		"message": "Search result highlighted"
 	},
-	"options_theme_tabs_sample_text_search_result_selected": {
-		"message": "Search result, selected"
+	"options_theme_tabs_sample_text_search_result_highlighted_hover": {
+		"message": "Search result highlighted, mouse hover over"
 	},
-	"options_theme_tabs_sample_text_search_result_selected_active": {
-		"message": "Search result, selected, active"
+	"options_theme_tabs_sample_text_search_result_highlighted_active": {
+		"message": "Search result highlighted, active"
+	},
+	"options_theme_tabs_sample_text_search_result_highlighted_active_hover": {
+		"message": "Search result highlighted, active, mouse hover over"
 	},
 
+
+
+
 	
+	"options_theme_tabs_sample_text_search_result_highlighted_selected": {
+		"message": "Search result highlighted, selected"
+	},
+	"options_theme_tabs_sample_text_search_result_highlighted_selected_hover": {
+		"message": "Search result highlighted, selected, mouse hover over"
+	},
+	"options_theme_tabs_sample_text_search_result_highlighted_selected_active": {
+		"message": "Search result highlighted, selected, active"
+	},
+	"options_theme_tabs_sample_text_search_result_highlighted_selected_active_hover": {
+		"message": "Search result highlighted, selected, active, mouse hover over"
+	},
 
 
 
@@ -494,8 +517,16 @@
 
 	
 	
+	"options_vivaldi_copied_url": {
+	 "message": "Web Panel Url has been copied to clipboard, add a new Web Panel and paste url."
+	},
+	"options_copied_wallet_address": {
+	 "message": "Wallet address has been copied to clipboard"
+	},
+	
+	
 	"options_clear_data": {
-	 "message": "Did something go wrong? Sidebar is not loading? Clear everything! ATTENTION! Tabs arrangement will be lost as well!"
+	 "message": "Sidebar is not loading? Clear everything! ATTENTION! Tabs arrangement will be lost as well!"
 	},
 	
 	

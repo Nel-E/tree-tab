@@ -275,7 +275,7 @@ div {
 
 #pin_list {
 	position: absolute;
-	display: vinline-block;
+	display: block;
 	width: calc(100% - 1px);
 	height: auto;
 	left: 0px;
@@ -297,7 +297,7 @@ div {
 .group {
 	position: absolute;
 	height: 100%;
-	width: 100%;
+	width: calc(100% - 1px);
 	display: inline-block;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -321,7 +321,7 @@ div {
 }
 #group_list {
 	position: relative;
-	display: vinline-block;
+	display: block;
 	vertical-align: top;
 	left: 0px;
 	top: 10px;
@@ -360,7 +360,7 @@ div {
 	height: 100%;
 	left: -1px;
 	top: -1px;
-	/* background:rgba(0,255,0,0.5); */
+	background-color: transparent;
 }
 .group_drag_box.highlighted_drop_target {
 	border: 1px solid var(--drag_indicator);
@@ -373,7 +373,7 @@ div {
 .group_button.active_group {
 	width: 20px;
 	border: 1px solid var(--group_list_borders);
-	background-color: var(--group_list_background);
+	background-color: var(--tab_list_background);
 }
 
 
@@ -531,7 +531,7 @@ div {
 
 .tab {
 	position: relative;
-	display: vinline-block;
+	display: block;
 	left: 0px;
 	height: auto;
 	width: auto;
@@ -872,12 +872,12 @@ div {
 
 #tabs_menu li {
 	padding: 3px 8px;
+	border: 1px solid var(--tabs_menu_background);
 	cursor: pointer;
 	list-style-type: none;
 }
 
 #tabs_menu li:hover {
-	padding: 2px 7px;
 	border: 1px solid var(--tabs_menu_hover_border);
 	background-color: var(--tabs_menu_hover_background);
 }

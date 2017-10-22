@@ -87,8 +87,8 @@ function SetTabEvents() {
 		
 		DropTargetsSendToBack();
 		event.stopPropagation();
+		
 		if (event.button == 0) {
-
 			// SET SELECTION WITH SHIFT
 			if (event.shiftKey) {
 				$(".pin, .tab:visible").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly");
@@ -110,9 +110,10 @@ function SetTabEvents() {
 
 		// CLOSE TAB
 		if (
-			(($(this).is(".tab") && $(event.target).is(":not(.expand)")) && ((event.button == 1 && opt.close_with_MMB == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))))
-			||
-			($(this).is(".pin") && event.button == 1 && opt.close_with_MMB == true && opt.allow_pin_close == true)
+			(
+			($(this).is(".tab") && $(event.target).is(":not(.expand)")) && ((event.button == 1 && opt.close_with_MMB == true)
+			|| (event.button == 0 && $(event.target).is(".close, .close_img"))))
+			|| ($(this).is(".pin") && event.button == 1 && opt.close_with_MMB == true && opt.allow_pin_close == true)
 		) {
 			if ($(this).is(".active:visible") && opt.after_closing_active_tab != "browser") {
 				if (opt.after_closing_active_tab == "above") {
@@ -127,20 +128,25 @@ function SetTabEvents() {
 				$("#" + this.id).remove();
 				chrome.tabs.update(parseInt(this.id), { pinned: false });
 			}
-
 			chrome.tabs.remove(parseInt(this.id));
+		}
+		
+		// ACTIVATE TAB
+		if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+			SetActiveTab(this.id);
+			chrome.tabs.update(parseInt(this.id), { active: true });
 		}
 	});
 
 	// SINGLE CLICK TO ACTIVATE TAB
-	$(document).on("click", ".tab_header", function(event) {
-		if ($(".menu").is(":visible")) {
-			return;
-		}
-		event.stopPropagation();
-		if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
-			SetActiveTab($(this).parent()[0].id);
-			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
-		}
-	});
+	// $(document).on("click", ".tab_header", function(event) {
+		// if ($(".menu").is(":visible")) {
+			// return;
+		// }
+		// event.stopPropagation();
+		// if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+			// SetActiveTab($(this).parent()[0].id);
+			// chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
+		// }
+	// });
 }

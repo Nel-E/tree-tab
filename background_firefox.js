@@ -5,24 +5,28 @@
 if (browserId == "F") {
 	LoadPreferences();
 	FirefoxStart();
+	FirefoxMessageListeners();
 }
 
+
 function FirefoxStart() {
-	started = true;
-	chrome.tabs.query({windowType: "normal"}, function(BrowserTabs) {
-		let SafeToRun = true;
+	var SafeToRun = true;
+	chrome.tabs.query({windowType: "normal"}, function(t) {
 		// will loop forever if session restore tab is found
-		for (var tabIndex = 0; tabIndex < BrowserTabs.length; tabIndex++) {
-			if (BrowserTabs[tabIndex].url.match("sessionrestore")) {
+		for (var tabIndex = 0; tabIndex < t.length; tabIndex++) {
+			if (t[tabIndex].url.match("about:sessionrestore") && t.length < 5) {
 				SafeToRun = false;
-				chrome.tabs.update(BrowserTabs[tabIndex].id, { active: true });
-				break;
+				chrome.tabs.update(t[tabIndex].id, { active: true });
 			}
-		}
-		if (SafeToRun) {
-			FirefoxLoadTabs();
-		} else {
-			setTimeout(function() { FirefoxStart(); }, 1000);
+			if (tabIndex == t.length-1) {
+				if (SafeToRun) {
+					FirefoxLoadTabs();
+				} else {
+					setTimeout(function() {
+						FirefoxStart();
+					}, 1000);
+				}
+			}
 		}
 	});
 }
@@ -130,8 +134,8 @@ function FirefoxLoadTabs() {
 							hold = false;
 							
 							setTimeout(function() {
-								FirefoxStartListeners();
 								FirefoxAutoSaveData();
+								FirefoxListeners();
 							}, 1000);
 						}
 					});
@@ -274,7 +278,7 @@ function ReplaceParents(oldTabId, newTabId) {
 var DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA = {};
 
 // start all listeners
-function FirefoxStartListeners() {
+function FirefoxListeners() {
 	
 	browser.browserAction.onClicked.addListener(function() {
 		browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
@@ -364,12 +368,11 @@ function FirefoxStartListeners() {
 		delete windows[windowId];
 		schedule_save++;
 	});
+}
 	
+function FirefoxMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		switch(message.command) {
-			case "background_start":
-				if (!started) {Start();}
-			break;
 			case "reload":
 				window.location.reload();
 			break;

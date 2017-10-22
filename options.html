@@ -3,81 +3,8 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title></title>
-		<style rel="stylesheet">
-			body:hover #donate {
-				animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-				transform: translate3d(0, 0, 0);
-				backface-visibility: hidden;
-				perspective: 1000px;
-			}
-
-			@keyframes shake {
-				10%, 90% {
-					transform: translate3d(-1px, 0, 0);
-				}
-				20%, 80% {
-					transform: translate3d(2px, 0, 0);
-				}
-				30%, 50%, 70% {
-					transform: translate3d(-4px, 0, 0);
-				}
-				40%, 60% {
-					transform: translate3d(4px, 0, 0);
-				}
-			}
-			body {
-				margin: 20px;
-				background-color: transparent;
-				border: none;
-				width: auto;
-				height: auto;
-				overflow: auto;
-				padding: 0;
-				font-family: Arial;
-				font-size: 13px;
-			}
-			.field {
-				width: 850px;
-				word-wrap: break-word;
-				overflow: hidden;
-				margin-bottom:15px;
-			}
-			ul {
-				padding-left: 22px;
-			}
-			
-			ul li {
-				margin: 5px;
-			}
-			.label {
-				padding-left: 6px;
-				padding-right: 6px;
-			}
-				<!--
-			.cp {
-				position:relative;
-				left:-10px;
-				top:-10px;
-				width:40px;
-				height:40px;
-				border:none;
-				margin:none;
-			}
-			.cb {
-				border:1px solid #636363;
-				overflow:hidden;
-				width:20px;
-				height:20px;
-				margin-bottom:2px;
-			}
-			#toolbar {
-				overflow: hidden;
-			}
-			-->
-}
-
-			
-		</style>
+		<link type="text/css" rel="stylesheet" media="all" href="../options/options.css" id="main_body_css" />
+		
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_0.css" id="sizes_preset_0" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_1.css" id="sizes_preset_1" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_2.css" id="sizes_preset_2" />
@@ -87,16 +14,12 @@
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_colors.css" id="theme_colors" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme.css" id="theme" />
 
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_0.css" id="size_settings_0" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_1.css" id="size_settings_1" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_2.css" id="size_settings_2" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_3.css" id="size_settings_3" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_settings_4.css" id="size_settings_4" />
-		<style rel="stylesheet">
-			#placeholder {
-				background-color: transparent;
-			}
-		</style>
+		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_0.css" id="size_settings_0" />
+		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_1.css" id="size_settings_1" />
+		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_2.css" id="size_settings_2" />
+		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_3.css" id="size_settings_3" />
+		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_4.css" id="size_settings_4" />
+		<style rel="stylesheet">	#red_higlights_go_here { background-color: transparent; } </style>
 		<script type="text/javascript" src="../lib_jquery/jquery-3.2.1.min.js"></script>
 	</head>
 	<body id="body">
@@ -110,6 +33,7 @@
 				<tr>
 					<td class="label" id="opt_url_for_web_panel"></td>
 					<td><input style="position:relative;width:450px;left:8px;" type="text" id="url_for_web_panel" value="test"></input></td>
+					<td><div style="position:relative; width:20px; height: 20px; left:8px; background-size: 20px 20px; background-image: url(../options/options_copy_icon.png);" id="copy_vivaldi_url_for_web_panel" ></div></td>
 				</tr>
 			</table>
 		</fieldset>
@@ -178,6 +102,11 @@
 					<td style="position:relative;top:-1px;"><input type="checkbox" class="opt_checkbox bg_opt" id="skip_load"></input></td>
 					<td style="position:relative;top:-1px;left:2px;width:3px;">-</td>
 					<td class="label" id="options_skip_load"></td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" class="opt_checkbox bg_opt" id="max_tree_drag_drop"></input></td>
+					<td style="position:relative;left:2px;width:3px;">-</td>
+					<td class="label" id="options_max_tree_drag_drop"></td>
 				</tr>
 			</table>
 			
@@ -248,8 +177,6 @@
 			<button class="set_button" type="button" id="options_import_theme_button" style="margin:10px;">Import</button>
 			<button class="set_button" type="button" id="options_export_theme_button" style="margin:10px;">Export</button>
 			<input type="file" multiple id="import_theme" style="display:none"></input>
-
-							
 							
 			<fieldset class="field" id="field_show_toolbar" style="position: relative; width:816px;">
 				<legend id="toolbar_legend">
@@ -257,89 +184,29 @@
 					<label class="label" style="position:relative; top:-3px;" id="options_toolbar"></label>
 				</legend>
 
-				<label class="label" style="margin-bottom: 10px; margin-top: 4px; display: inline-block;" id="options_available_buttons"></label>	
+				<label class="label" style="margin-top: 4px;" id="options_available_buttons"></label>	
 
-				<div id="sample_toolbar_block">
-					<div id="toolbar_unused_buttons" style="position: relative; margin-bottom: 16px; background-color: #b8ffbf; height: 30px;"></div>
-					<br>
-					
-					<div class="toolbar" id="toolbar" style="position: relative; height: 94px; width: 350px;"></div>	
-					<br>
-
-
-					
-					
-					
-					
-					
-					<div class="pick_col font_color" id="filter_box_font"></div>
-					<div class="pick_col color_x" id="filter_clear_icon"></div>
-					
-					<div class="pick_col color_bucket" id="filter_box_background"></div>
-					<div class="pick_col color_border" id="filter_box_border"></div>
-					
-					
-					
-					<div class="pick_col color_bucket" id="button_background"></div>
-					<div class="pick_col color_bucket pick_col_hover" id="button_hover_background"></div>
-
-					
-					
-					<div class="pick_col color_bucket" id="toolbar_background"></div>
-					<div class="pick_col color_border" id="toolbar_border_bottom"></div>
-
-					<div class="pick_col color_toolbar_icon" id="button_icons"></div>
-					<div class="pick_col color_toolbar_icon pick_col_hover" id="button_icons_hover"></div>
-
-					
-					
-					<div class="pick_col color_border" id="button_border"></div>
-					<div class="pick_col color_border pick_col_hover" id="button_hover_border"></div>
-					
-					
-					
-					
-					
-
+				<div id="sample_toolbar_block" style="position:relative; margin-top: 10px; width: 355px;">
+					<div id="toolbar_unused_buttons" style="position: relative; background-color: #b8ffbf; height: 30px; width: 350px;"></div>
+					<div id="toolbar_colors_pick_block" style="position: relative; top: 5px;  width: 355px; height: 26px;">
+						<div class="pick_col font_color" id="filter_box_font"></div>
+						<div class="pick_col color_x" id="filter_clear_icon"></div>
+						<div class="pick_col color_bucket" id="filter_box_background"></div>
+						<div class="pick_col color_border" id="filter_box_border"></div>
+						<div class="pick_col color_bucket" id="button_background"></div>
+						<div class="pick_col color_bucket pick_col_hover" id="button_hover_background"></div>
+						<div class="pick_col color_bucket" id="toolbar_background"></div>
+						<div class="pick_col color_border" id="toolbar_border_bottom"></div>
+						<div class="pick_col color_toolbar_icon" id="button_icons"></div>
+						<div class="pick_col color_toolbar_icon pick_col_hover" id="button_icons_hover"></div>
+						<div class="pick_col color_border" id="button_border"></div>
+						<div class="pick_col color_border pick_col_hover" id="button_hover_border"></div>
+					</div>
+					<div class="toolbar" id="toolbar" style="position: relative; top: 5px;  height: 26px; width: 350px; overflow:hidden;"></div>	
 				</div>
 
 				<button class="set_button" type="button" id="options_reset_toolbar_button" style="margin:10px;">Reset</button>
-				<!--
-				<br>
-				<table id="toolbar_colors" style="margin: 10px; vertical-align: top;">
-				
-					<tr>
-						<td><div class="cb"><input class="cp" id="toolbar_background" type="color"></div></td>
-						<td class="cpl" id="options_color_theme_toolbar_background"></td>
-						<td><div class="cb"><input class="cp" id="toolbar_border_bottom" type="color"></div></td>
-						<td class="cpl" id="options_color_toolbar_border_bottom"></td>
-					</tr>
-					<tr>
-						<td><div class="cb"><input class="cp" id="button_icons" type="color"></div></td>
-						<td class="cpl" id="options_color_button_icons"></td>
-						<td><div class="cb"><input class="cp" id="button_border" type="color"></div></td>
-						<td class="cpl" id="options_color_button_border"></td>
-						<td><div class="cb"><input class="cp" id="button_background" type="color"></div></td>
-						<td class="cpl" id="options_color_button_background"></td>
-					</tr>
-					<tr>
-						<td><div class="cb"><input class="cp" id="button_hover_border" type="color"></div></td>
-						<td class="cpl" id="options_color_button_hover_border"></td>
-						<td><div class="cb"><input class="cp" id="button_hover_background" type="color"></div></td>
-						<td class="cpl" id="options_color_button_hover_background"></td>
-						<td><div class="cb"><input class="cp" id="filter_box_background" type="color"></div></td>
-						<td class="cpl" id="options_color_filter_box_background"></td>
-					</tr>
-					<tr>
-						<td><div class="cb"><input class="cp" id="filter_box_border" type="color"></div></td>
-						<td class="cpl" id="options_color_filter_box_border"></td>
-						<td><div class="cb"><input class="cp" id="filter_box_font" type="color"></div></td>
-						<td class="cpl" id="options_color_filter_box_font"></td>
-						<td><div class="cb"><input class="cp" id="filter_clear_icon" type="color"></div></td>
-						<td class="cpl" id="options_color_filter_clear_icon"></td>
-					</tr>
-				</table>
-				-->
+
 			</fieldset>
 
 
@@ -440,8 +307,19 @@
 			<fieldset class="field" style="width:816px;">
 				<legend class="label" id="options_menu"></legend>
 				
-				<ul class="menu" id="tabs_menu" style="display:inline-block;position:relative;top:0px;left:0px;">
-					<li class="menu_item"></li>
+				<div id="menu_options_block" style="position:relative; top:0px; left:10px;">
+					<div class="pick_col color_border" id="tabs_menu_border"></div>
+					<div class="pick_col color_bucket" id="tabs_menu_background"></div>
+
+					<div class="pick_col font_color" id="tabs_menu_font"></div>
+					
+					<div class="pick_col color_border" id="tabs_menu_hover_border"></div>
+					<div class="pick_col color_bucket" id="tabs_menu_hover_background"></div>
+					<div class="pick_col color_border" id="tabs_menu_separator"></div>
+				</div>
+
+				<ul class="menu" id="tabs_menu" style="display:inline-block;position:relative;top:0px;left:10px;">
+					<li class="menu_item" id="menu_hover_sample" style="border: 1px solid var(--tabs_menu_hover_border); background-color: var(--tabs_menu_hover_background);"></li>
 					<div class="separator"></div>
 					<li class="menu_item"></li>
 					<div class="separator"></div>
@@ -449,54 +327,29 @@
 				</ul>
 				
 
-				<table style="display:inline-block;vertical-align:top;margin-left:10px;margin-top:16px;">
-					<tr>
-						<td><div class="cb"><input class="cp" id="tabs_menu_background" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_background"></td>
-						<td><div class="cb"><input class="cp" id="tabs_menu_border" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_border"></td>
-					</tr>
-					<tr>
-						<td><div class="cb"><input class="cp" id="tabs_menu_hover_background" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_hover_background"></td>
-						<td><div class="cb"><input class="cp" id="tabs_menu_hover_border" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_hover_border"></td>
-					</tr>
-					<tr>
-						<td><div class="cb"><input class="cp" id="tabs_menu_font" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_font"></td>
-						<td><div class="cb"><input class="cp" id="tabs_menu_separator" type="color"></div></td>
-						<td class="cpl" id="options_color_tabs_menu_separator"></td>
-					</tr>
-				</table>
+
 			</fieldset>
 		</fieldset>
 		
 		<button class="set_button" type="button" id="options_clear_data" style="margin:10px;"></button>
 		
-		<input type="color" id="color_picker" style="position:absolute; left:-500px; top:-500px; overflow:hidden;">
+		<input type="color" id="color_picker" style="position:absolute; left:-500px; top:-500px; overflow:hidden; user-select: none; -moz-user-select: none;">
 		<div id="DragImage" style="display: none; width:0px; height:0px;"></div>
 
 		<script type="text/javascript" src="../scripts/global.js"></script>
 		<script type="text/javascript" src="../scripts/events_toolbar.js"></script>
 		<script type="text/javascript" src="../scripts/tabs.js"></script>
 		<script type="text/javascript" src="../scripts/groups.js"></script>
-		<script type="text/javascript" src="../options.js"></script>
+		<script type="text/javascript" src="../options/options_refresh.js"></script>
+		<script type="text/javascript" src="../options/options_sample_tabs.js"></script>
+		<script type="text/javascript" src="../options/options_theme_functions.js"></script>
+		<script type="text/javascript" src="../options/options.js"></script>
 
 
-		<div id="donate" style="position:absolute; top:10px; left:700px;">
-			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-				<input type="hidden" name="cmd" value="_donations">
-				<input type="hidden" name="business" value="karol@jagiello.it">
-				<input type="hidden" name="lc" value="US">
-				<input type="hidden" name="item_number" value="Vertical Tabs Support">
-				<input type="hidden" name="no_note" value="0">
-				<input type="hidden" name="currency_code" value="USD">
-				<input type="hidden" name="bn" value="PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest">
-				<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-			</form>
-		</div>
+		<div id="donate"></div>
+		<div id="donate_paypal" class="donation_button"></div>
+		<div id="donate_bitcoin" class="donation_button"></div>
+		<div id="donate_ethereum" class="donation_button"></div>
 
 	</body>
 

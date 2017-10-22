@@ -24,19 +24,16 @@ function StartChromeListeners(){
 			},200);
 		}
 		if (message.command == "reload_theme") {
-			if (localStorage.getItem(message.themeName) != null) {
-				let theme = LoadData(message.themeName, DefaultTheme);
-				ApplySizeSet(theme["TabsSizeSetNumber"]);
-				ApplyColorsSet(theme["ColorsSet"]);
-				if (theme.ToolbarShow) {
-					$("#toolbar").html(theme.toolbar);
-				} else {
-					$("#toolbar").html("");
-				}
-				RestoreToolbarSearchFilter();
-				RestoreToolbarShelf();
+			let theme = LoadData(message.themeName, DefaultTheme);
+			ApplySizeSet(theme["TabsSizeSetNumber"]);
+			ApplyColorsSet(theme["ColorsSet"]);
+			if (theme.ToolbarShow) {
+				$("#toolbar").html(theme.toolbar);
+			} else {
+				$("#toolbar").html("");
 			}
-
+			RestoreToolbarSearchFilter();
+			RestoreToolbarShelf();
 		}
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {

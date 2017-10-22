@@ -38,13 +38,13 @@ function Run() {
 	chrome.windows.getCurrent({populate: false}, function(window) {
 		CurrentWindowId = window.id;
 		chrome.runtime.sendMessage({command: "is_bg_is_busy"}, function(response) {
-			let bgBusy = response;
+			hold = response;
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 				bgtabs = Object.assign({}, response);
 				chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
 					bggroups = Object.assign({}, response);
 					setTimeout(function() {
-						if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && bgBusy == false) {
+						if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && hold == false) {
 							Initialize();
 						} else {
 							Run();

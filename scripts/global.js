@@ -6,7 +6,6 @@
 
 
 var hold = true;
-var started = false;
 var schedule_save = 0;
 var schedule_update_indexes = 0;
 var schedule_rearrange_tabs = 0;
@@ -44,49 +43,49 @@ var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
 
 var DefaultToolbar =
-	'<div class=toolbar id=toolbar>'+
-		'<div id=toolbar_main>'+
-			'<div class=button id=button_new><div class=button_img></div></div>'+
-			'<div class=button id=button_pin><div class=button_img></div></div>'+
-			'<div class=button id=button_undo><div class=button_img></div></div>'+
-			'<div class=button id=button_search><div class=button_img></div></div>'+
-			'<div class=button id=button_tools><div class=button_img></div></div>'+
-			'<div class=button id=button_groups><div class=button_img></div></div>'+
-			// '<div class=button id=button_folders><div class=button_img></div></div>'+
+	'<div id=toolbar_main>'+
+		'<div class=button id=button_new><div class=button_img></div></div>'+
+		'<div class=button id=button_pin><div class=button_img></div></div>'+
+		'<div class=button id=button_undo><div class=button_img></div></div>'+
+		'<div class=button id=button_search><div class=button_img></div></div>'+
+		'<div class=button id=button_tools><div class=button_img></div></div>'+
+		'<div class=button id=button_groups><div class=button_img></div></div>'+
+		// '<div class=button id=button_folders><div class=button_img></div></div>'+
+	'</div>'+
+	'<div class=toolbar_shelf id=toolbar_search>'+
+		'<div id=toolbar_search_input_box>'+
+			'<input id=filter_box type=text placeholder=Search tabs...></input>'+
+			'<div id=button_filter_clear style="opacity:0; position:absolute;" type=reset></div>'+
 		'</div>'+
-		'<div class=toolbar_shelf id=toolbar_search>'+
-			'<div id=toolbar_search_input_box>'+
-				'<input id=filter_box type=text placeholder=Search tabs...></input>'+
-				'<div id=button_filter_clear style="opacity:0; position:absolute;" type=reset></div>'+
-			'</div>'+
-			'<div id=toolbar_search_buttons>'+
-				'<div class=button id=button_filter_type><div class=button_img></div></div>'+
-				'<div class=button id=filter_search_go_prev><div class=button_img></div></div>'+
-				'<div class=button id=filter_search_go_next><div class=button_img></div></div>'+
-			'</div>'+
+		'<div id=toolbar_search_buttons>'+
+			'<div class=button id=button_filter_type><div class=button_img></div></div>'+
+			'<div class=button id=filter_search_go_prev><div class=button_img></div></div>'+
+			'<div class=button id=filter_search_go_next><div class=button_img></div></div>'+
 		'</div>'+
-		'<div class=toolbar_shelf id=toolbar_shelf_tools>'+
-			'<div class=button id=button_options><div class=button_img></div></div>'+
-			'<div class=button id=button_bookmarks><div class=button_img></div></div>'+
-			'<div class=button id=button_downloads><div class=button_img></div></div>'+
-			'<div class=button id=button_history><div class=button_img></div></div>'+
-			'<div class=button id=button_settings><div class=button_img></div></div>'+
-			'<div class=button id=button_extensions><div class=button_img></div></div>'+
-			'<div class=button id=button_discard><div class=button_img></div></div>'+
-			'<div class=button id=button_move><div class=button_img></div></div>'+
-		'</div>'+
-		'<div class=toolbar_shelf id=toolbar_shelf_groups>'+
-			'<div class=button id=groups_toolbar_hide><div class=button_img></div></div>'+
-			'<div class=button id=new_group><div class=button_img></div></div>'+
-			'<div class=button id=remove_group><div class=button_img></div></div>'+
-			'<div class=button id=edit_group><div class=button_img></div></div>'+
-		'</div>'+
-		// '<div class=toolbar_shelf id=toolbar_shelf_folders>'+
-		// '</div>'+
+	'</div>'+
+	'<div class=toolbar_shelf id=toolbar_shelf_tools>'+
+		'<div class=button id=button_options><div class=button_img></div></div>'+
+		(browserId != "F" ?
+		'<div class=button id=button_bookmarks><div class=button_img></div></div>'+
+		'<div class=button id=button_downloads><div class=button_img></div></div>'+
+		'<div class=button id=button_history><div class=button_img></div></div>'+
+		'<div class=button id=button_settings><div class=button_img></div></div>'+
+		'<div class=button id=button_extensions><div class=button_img></div></div>'+
+		'<div class=button id=button_discard><div class=button_img></div></div>'
+		: '')+
+		'<div class=button id=button_move><div class=button_img></div></div>'+
+	'</div>'+
+	'<div class=toolbar_shelf id=toolbar_shelf_groups>'+
+		'<div class=button id=groups_toolbar_hide><div class=button_img></div></div>'+
+		'<div class=button id=new_group><div class=button_img></div></div>'+
+		'<div class=button id=remove_group><div class=button_img></div></div>'+
+		'<div class=button id=edit_group><div class=button_img></div></div>'+
 	'</div>';
+	// '<div class=toolbar_shelf id=toolbar_shelf_folders>'+
+	// '</div>'+
 	
 var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
-var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "never_show_close": false, "faster_scroll": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
+var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "faster_scroll": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
 
 
 

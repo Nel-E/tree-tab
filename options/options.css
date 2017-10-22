@@ -1,0 +1,101 @@
+:hover #donate {
+	animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+	transform: translate3d(0, 0, 0);
+	backface-visibility: hidden;
+	perspective: 1000px;
+}
+
+#donate {
+	position:absolute;
+	top:17px;
+	left:700px;
+	width: 100px;
+	height: 20px;
+	background-image: url(../options/donate_title.svg);
+}
+
+#donate_paypal {
+	position:absolute;
+	top:14px;
+	left:790px;
+	width: 32px;
+	height: 32px;
+	background-image: url(../options/donate_paypal.png);
+	background-size: 30px 30px;
+}
+#donate_paypal:hover {
+	top: 13px;
+	left:789px;
+	background-size: 32px 32px;
+}
+#donate_bitcoin {
+	position:absolute;
+	top:14px;
+	left:825px;
+	width: 32px;
+	height: 32px;
+	background-image: url(../options/donate_bitcoin.png);
+	background-size: 30px 30px;
+}
+#donate_bitcoin:hover {
+	top: 13px;
+	left:824px;
+	background-size: 32px 32px;
+}
+#donate_ethereum {
+	position:absolute;
+	top:14px;
+	left:860px;
+	width: 32px;
+	height: 32px;
+	background-image: url(../options/donate_eth.png);
+	background-size: 30px 30px;
+}
+#donate_ethereum:hover {
+	top: 13px;
+	left:859px;
+	background-size: 32px 32px;
+}
+
+@keyframes shake {
+	10%, 90% {
+		transform: translate3d(-1px, 0, 0);
+	}
+	20%, 80% {
+		transform: translate3d(2px, 0, 0);
+	}
+	30%, 50%, 70% {
+		transform: translate3d(-4px, 0, 0);
+	}
+	40%, 60% {
+		transform: translate3d(4px, 0, 0);
+	}
+}
+body {
+	margin: 20px;
+	background-color: transparent;
+	border: none;
+	width: auto;
+	height: auto;
+	overflow: auto;
+	padding: 0;
+	font-family: Arial;
+	font-size: 13px;
+}
+.field {
+	width: 850px;
+	word-wrap: break-word;
+	overflow: hidden;
+	margin-bottom:15px;
+}
+ul:not(#tabs_menu) {
+	padding-left: 22px;
+}
+
+ul:not(#tabs_menu) li {
+	margin: 5px;
+}
+.label {
+	padding-left: 6px;
+	padding-right: 6px;
+}

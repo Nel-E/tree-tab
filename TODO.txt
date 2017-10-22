@@ -4,8 +4,6 @@ Add a shortcut to open tree tabs sidebar
 
 fix options page (almost there)
 
-add missing labels in options page
-
 undo close to restore trees (will work ONLY in firefox)
 
 
@@ -24,9 +22,6 @@ menu: invert selection
 
 options: Customising the context menu
 
-
-css: toolbar icon colors, background hover and border hover
-css: Colours for tree elements
 
 click on active to return to previous tab
 

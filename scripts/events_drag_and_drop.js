@@ -84,6 +84,10 @@ function SetDragAndDropEvents() {
 	$(document).on("dragenter", ".drag_entered_top:not(.highlighted_drop_target), .drag_entered_bottom:not(.highlighted_drop_target), .drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
 		if ($(".selected:visible").find($(this)).length > 0) { return; }
+		if (opt.max_tree_drag_drop) {
+			if ($(this).is(".drag_enter_center") && opt.max_tree_depth == 0) { return; }
+			if ($(this).parents(".tab").length > opt.max_tree_depth && opt.max_tree_depth > 0) { return; }
+		}
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		$(this).addClass("highlighted_drop_target");
 	});

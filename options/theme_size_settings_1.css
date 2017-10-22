@@ -1,0 +1,168 @@
+/* OPTIONS IMAGES */
+.font_color {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_font_color.svg);}
+.font_color:hover {background-image: url(../options/options_font_color_hover.svg);}
+.font_weight_normal {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_font_style_normal.svg);}
+.font_weight_normal:hover {background-image: url(../options/options_font_style_normal_hover.svg);}
+.font_weight_bold {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_font_weight_bold.svg);}
+.font_weight_bold:hover {background-image: url(../options/options_font_weight_bold_hover.svg);}
+.font_style_normal {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_font_style_normal.svg);}
+.font_style_normal:hover {background-image: url(../options/options_font_style_normal_hover.svg);}
+.font_style_italic {z-index: 1000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_font_style_italic.svg);}
+.font_style_italic:hover {background-image: url(../options/options_font_style_italic_hover.svg);}
+
+.color_toolbar_icon {z-index: 10000; position: absolute; display: block; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_color_toolbar_icon.svg);}
+.color_toolbar_icon:hover {background-image: url(../options/options_color_toolbar_icon_hover.svg);}
+
+.color_bucket {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_color_bucket.svg);}
+.color_bucket:hover {background-image: url(../options/options_color_bucket_hover.svg);}
+
+.color_brush {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_color_brush.svg);}
+.color_brush:hover {background-image: url(../options/options_color_brush_hover.svg);}
+
+.color_border {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_color_border.svg);}
+.color_border:hover {background-image: url(../options/options_color_border_hover.svg);}
+
+.color_x {z-index: 10000; position: absolute; display: float; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_color_x.svg);}
+.color_x:hover {background-image: url(../options/options_color_x_hover.svg);}
+
+.options_button_minus {z-index: 10000; display: float; position: absolute; top: 5px; left: 6px; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_scale_minus.svg);}
+.options_button_minus:hover {background-image: url(../options/options_scale_minus_hover.svg);}
+.options_button_plus {z-index: 10000; display: float; position: absolute; top: 5px; left: 54px; height: 20px; width: 20px; background-size: 20px 20px; background-image: url(../options/options_scale_plus.svg);}
+.options_button_plus:hover {background-image: url(../options/options_scale_plus_hover.svg);}
+
+@keyframes hover_blinking {
+	0%  {background-color: transparent;}
+	100% {background-color: blue;}
+}
+.hover_blinking {
+	animation: hover_blinking 1s infinite;
+}
+
+@keyframes hover_border_blinking {
+	0%  {border: 1px solid transparent;}
+	100% {border: 1px solid blue;}
+}
+.hover_border_blinking {
+	animation: hover_border_blinking 1s infinite;
+}
+
+/* MAIN TOOLBAR */
+#toolbar_background { top: 0px; left: 307px; }
+#toolbar_border_bottom { top: 0px; left: 328px; }
+
+#button_icons { top: 0px; left: 59px; }
+#button_icons_hover { top: 0px; left: 80px; }
+
+#button_background { top: 0px; left: 4px; }
+#button_hover_background { top: 0px; left: 25px; }
+
+#button_border { top: 0px; left: 115px; }
+#button_hover_border { top: 0px; left: 136px; }
+
+#filter_box_font { top: 0px; left: 175px; }
+#filter_clear_icon { top: 0px; left: 238px; }
+#filter_box_background { top: 0px; left: 196px; }
+#filter_box_border { top: 0px; left: 217px; }
+
+
+/* BIG OPTIONS BUTTONS */
+#options_tabs_indentation_indicator { z-index: 3000; display: float; position: absolute; top: 25px; left: 550px; height: 30px; width: 80px; background-size: 80px 30px; background-image: url(../options/options_tabs_indentation_indicator.svg);}
+#options_tabs_roundness_indicator { z-index: 3000; display: float; position: absolute; top: 25px; left: 640px; height: 30px; width: 80px; background-size: 80px 30px; background-image: url(../options/options_tabs_roundness_indicator.svg);}
+#options_tabs_size_indicator { z-index: 3000; display: float; position: absolute; top: 25px; left: 730px; height: 30px; width: 80px; background-size: 80px 30px; background-image: url(../options/options_tabs_size_indicator.svg);}
+
+/* SCROLLBAR RESIZE */
+#scrollbar_size_indicator {z-index: 3000; display: float; position: absolute; top: 20px; left: 335px; height: 80px; width: 80px; background-size: 80px 80px; background-image: url(../options/options_scrollbar_size_indicator.svg); }
+#options_tab_list_scrollbar_width_down { left: 3px; top: 30px; }
+#options_tab_list_scrollbar_width_up { left: 57px; top: 30px; }
+#options_tab_list_scrollbar_height_up { left: 30px; top: 3px; }
+#options_tab_list_scrollbar_height_down { left: 30px; top: 57px; }
+
+
+/* PIN LIST AND SCROLLBAR */
+#pin_list { position: absolute; height: calc(var(--scrollbar_height) + var(--pin_height)); width: 788px; top: 30px; left: 20px;}
+
+#pin_list_scrollbar { position: absolute; height: var(--scrollbar_height); width: 790px; top: calc(var(--pin_height) + 31px); left: 20px; z-index: 1000; background-color: var(--scrollbar_track); }
+#pin_list_scrollbar_thumb { position: relative; height: 100%; width: 100px; top: 0px; left: 0px; z-index: 1200; background-color: var(--scrollbar_thumb); }
+#pin_list_scrollbar_thumb:hover { background-color: var(--scrollbar_thumb_hover); }
+
+
+
+/* PINS */
+#pin_list_options_block {z-index: 2000; position:absolute; width: 500px; height: var(--pin_height); top: 30px; left: 20px; margin: 0; /* background:rgba(0,0,255,0.1); */ }
+#pin_list_background { top: 1px; left: 187px; }
+#pin_list_border_bottom { top: 1px; left: 164px; }
+
+
+/* ATTENTION PIN */
+#attention_background { top: 1px; left: 72px; }
+#attention_border { top: 1px; left: 93px; }
+
+
+
+/* TAB LIST AND SCROLLBAR */
+#tab_list { position: absolute; height: 800px; width: calc(770px - var(--scrollbar_width)); top: calc(var(--scrollbar_height) + var(--pin_height) + 32px); left: 40px; z-index: 1000 }
+
+#group_scrollbar { position: absolute; height: 800px; width: var(--scrollbar_width); top: calc(var(--scrollbar_height) + var(--pin_height) + 32px); left: calc(810px - var(--scrollbar_width)); z-index: 1000; background-color: var(--scrollbar_track); }
+#group_scrollbar_thumb { position: relative; height: 200px; width: 100%; top: 140px; left: 0px; z-index: 1000; background-color: var(--scrollbar_thumb); }
+#group_scrollbar_thumb:hover { background-color: var(--scrollbar_thumb_hover); }
+#scrollbar_thumb { position: absolute; top: 370px; left: 790px; }
+#scrollbar_thumb_hover { position: absolute; top: 390px; left: 790px; }
+#scrollbar_track { position: absolute; top: 410px; left: 790px; }
+
+#Tabs {
+	--row_image_size: 18px 18px;
+}
+/* TABS */
+#tabs_options_block {z-index: 2000; position:absolute; width: 740px; height: auto; top: calc(var(--scrollbar_height) + var(--pin_height) + 32px); left: 50px; margin: 0; /* background:rgba(0,255,0,0.5); */ }
+
+.tab_color_options_row {z-index: 2000; position:relative; width: 740px; height: 20px; /* background:rgba(255,0,0,0.1); */ }
+.tab_color_options_row>.color_border {top: 1px; left: 659px; background-size: var(--row_image_size);}
+.tab_color_options_row>.color_bucket {top: 1px; left: 680px; background-size: var(--row_image_size);}
+.tab_color_options_row>.font_color {top: 1px; left: 509px; background-size: var(--row_image_size);}
+.tab_color_options_row>.font_weight_normal {top: 1px; left: 538px; background-size: var(--row_image_size);}
+.tab_color_options_row>.font_weight_bold {top: 1px; left: 559px; background-size: var(--row_image_size);}
+.tab_color_options_row>.font_style_normal {top: 1px; left: 588px; background-size: var(--row_image_size);}
+.tab_color_options_row>.font_style_italic {top: 1px; left: 609px; background-size: var(--row_image_size);}
+
+
+/* DRAG AND DROP INDICATOR */
+#dd19 { display: inline-block; border-bottom: 2px solid var(--drag_indicator); }
+#drag_indicator { top: 8px; left: 350px; background-size: var(--row_image_size);}
+
+
+/* CLOSE TAB BUTTON OPTIONS */
+#close_x { top: 0px; left: calc(753px - var(--scrollbar_width)); background-size: var(--row_image_size);}
+#close_hover_x { top: -16px; left: calc(753px - var(--scrollbar_width)); background-size: var(--row_image_size);}
+#close_hover_border { top: 2px; left: calc(753px - var(--scrollbar_width)); background-size: var(--row_image_size);}
+#close_hover_background { top: 20px; left: calc(753px - var(--scrollbar_width)); background-size: var(--row_image_size);}
+
+
+/* CLOSE TAB BUTTON OPTIONS */
+#expand_hover_background { top: 1px; left: calc(var(--children_padding_left) + 4px); background-size: var(--row_image_size);}
+#expand_closed_background { top: 1px; left: calc(var(--children_padding_left) + 4px); background-size: var(--row_image_size);}
+#expand_open_background { top: 1px; left: 4px; background-size: var(--row_image_size);}
+
+
+#tab_list_background { top: 835px; left: 50px; }
+
+
+
+#toolbar_groups_block { position: absolute; left: 20px; top: calc(var(--scrollbar_height) + var(--pin_height) + 32px); width: 19px; height: 800px; background-color: var(--group_list_background); border-right: 1px solid var(--group_list_borders); overflow: visible; }
+#_gtetab_list { width: 200px; height: 20px; }
+#_gtetab_list2 { width: 200px; height: 20px; }
+#_tab_list2:hover { background-color: var(--group_list_button_hover_background); }
+
+#group_list_background { top: 835px; left: 20px; }
+#group_list_borders { top: 631px; left: 20px; }
+#group_list_default_font_color { top: 652px; left: 20px; }
+#group_list_button_hover_background { top: 610px; left: 20px; }
+
+
+/* MENU */
+#tabs_menu_border { top: 59px; left: 80px; }
+#tabs_menu_background { top: 59px; left: 102px; }
+#tabs_menu_font { top: 36px; left: 102px; }
+#tabs_menu_hover_border { top: 14px; left: 80px; }
+#tabs_menu_hover_background { top: 14px; left: 102px; }
+#tabs_menu_separator { top: 36px; left: 80px; }
+

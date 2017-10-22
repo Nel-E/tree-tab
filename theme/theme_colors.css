@@ -30,7 +30,6 @@ body {
 	--group_list_button_hover_background: #dcdcdc;
 
 	/* TOTO GROUP EDIT DIALOG */
-	--blablabla: #0000;
 
 
 	/* LISTS */
@@ -126,15 +125,6 @@ body {
 	--tab_selected_discarded_hover_title_font_style: italic;
 	--tab_selected_discarded_hover_title_font_weight: normal;
 	
-	/* selected + hover state */
-/* 	--tab_selected_hover_border: #78aee5;
-	--tab_selected_hover_background: #d0e2f0; */
-
-
-/* 	--tab_filtered: #e8e000;
-	--tab_filtered_selected: #0f8079;
-	--tab_filtered_selected_active: #1299a9;
- */
 	/* search result */
 	--tab_filtered_border: #a6a000;
 	--tab_filtered_background: #e8e000;
@@ -259,16 +249,6 @@ body {
 
 
 
-
-
-
-
-
-
-	
-
-
-
 	--expand_hover_background: #ffa500;
 	--expand_closed_background: #969696;
 	--expand_open_background: #339bf3;
@@ -287,8 +267,6 @@ body {
 	--tabs_menu_hover_border: #bebebe;
 	--tabs_menu_hover_background: #efefef;
 	--tabs_menu_separator: #efefef;
-	
-	
 	
 	
 }

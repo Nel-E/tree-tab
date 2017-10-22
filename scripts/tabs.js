@@ -246,7 +246,11 @@ function FindTab(input) {
 	$(".highlighted_search").removeClass("highlighted_search");
 	if (input.length == 0) {
 		$("#filter_box")[0].value = "";
+		$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
 		return;
+	} else {
+		$("#button_filter_clear").css({"opacity": "1"});
+		$("#button_filter_clear").attr("title", caption_clear_filter);
 	}
 	SearchIndex = 0;
 	chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {

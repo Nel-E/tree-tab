@@ -180,12 +180,6 @@ function SetToolbarEvents() {
 	});
 	// filter on input
 	$("#filter_box").on("input", function() {
-		if ($("#filter_box")[0].value == "") {
-			$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
-		} else {
-			$("#button_filter_clear").css({"opacity": "1"});
-			$("#button_filter_clear").attr("title", caption_clear_filter);
-		}
 		FindTab($("#filter_box")[0].value);
 	});
 	// change filtering type
