@@ -88,6 +88,7 @@ function SetToolbarEvents() {
 			return;
 		}
 		
+		$(".highlighted_search").removeClass("highlighted_search");
 		if ($(this).is("#filter_search_go_prev")){
 			if (SearchIndex == 0) {
 				SearchIndex = $(".tab.filtered").length-1;
@@ -101,9 +102,8 @@ function SetToolbarEvents() {
 				SearchIndex++;
 			}
 		}
-		$(".highlighted_search").removeClass("highlighted_search");
-		$($(".tab.filtered")[SearchIndex]).addClass("highlighted_search");
 		ScrollToTab($(".tab.filtered")[SearchIndex].id);
+		$($(".tab.filtered")[SearchIndex]).addClass("highlighted_search");
 	});
 
 	// new tab

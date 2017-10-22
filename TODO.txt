@@ -8,6 +8,9 @@ undo close to restore trees (will work ONLY in firefox)
 
 
 LOW PRIORITY:
+
+tabs count in titles
+option for scrollbar on the left
 folders
 save/load sessions
 

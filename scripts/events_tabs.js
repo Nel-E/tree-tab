@@ -130,23 +130,17 @@ function SetTabEvents() {
 			}
 			chrome.tabs.remove(parseInt(this.id));
 		}
-		
-		// ACTIVATE TAB
-		if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
-			SetActiveTab(this.id);
-			chrome.tabs.update(parseInt(this.id), { active: true });
-		}
 	});
 
 	// SINGLE CLICK TO ACTIVATE TAB
-	// $(document).on("click", ".tab_header", function(event) {
-		// if ($(".menu").is(":visible")) {
-			// return;
-		// }
-		// event.stopPropagation();
-		// if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
-			// SetActiveTab($(this).parent()[0].id);
-			// chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
-		// }
-	// });
+	$(document).on("click", ".tab_header", function(event) {
+		if ($(".menu").is(":visible")) {
+			return;
+		}
+		event.stopPropagation();
+		if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+			SetActiveTab($(this).parent()[0].id);
+			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
+		}
+	});
 }
