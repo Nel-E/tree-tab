@@ -178,7 +178,7 @@ async function ChromeAutoSaveData() {
 				schedule_save--;
 			});
 		}
-	}, 500);
+	}, 1000);
 }
 
 function ChromeHashURL(tab){

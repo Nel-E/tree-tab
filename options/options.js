@@ -132,7 +132,7 @@ function GetOptions() {
 	
 	// select current theme in dropdown list
 	for (var i = 0; i < $("#theme_list")[0].options.length; i++) {
-		if ($("#theme_list")[0].options[i].value === localStorage["current_theme"]) {
+		if ($("#theme_list")[0].options[i].value == localStorage["current_theme"]) {
 			$("#theme_list")[0].selectedIndex = i;
 			break;
 		}
@@ -451,24 +451,7 @@ function SetEvents() {
 
 	// rename theme preset button
 	$(document).on("click", "#options_rename_theme_button", function(event) {
-		
-		if (themes.indexOf($("#new_theme_name")[0].value) != -1) {
-			alert(chrome.i18n.getMessage("options_there_is_a_theme_with_this_name"));
-			return;
-		}
-		
-		if ($("#new_theme_name")[0].value == "") {
-			alert(chrome.i18n.getMessage("options_theme_name_cannot_be_empty"));
-			return;
-		}
-		
-		localStorage.removeItem("theme"+SelectedTheme["theme_name"]);
-		SelectedTheme["theme_name"] = $("#new_theme_name")[0].value;
-
-		var t_list = document.getElementById("theme_list");
-		themes[themes.indexOf(t_list.options[t_list.selectedIndex].value)] = $("#new_theme_name")[0].value;
-		t_list.options[t_list.selectedIndex].value = t_list.options[t_list.selectedIndex].text = $("#new_theme_name")[0].value;
-		SaveTheme($("#theme_list").val());
+		RenameSelectedTheme();
 	});
 
 

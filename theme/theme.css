@@ -873,7 +873,6 @@ div {
 #tabs_menu li {
 	padding: 3px 8px;
 	border: 1px solid var(--tabs_menu_background);
-	cursor: pointer;
 	list-style-type: none;
 }
 

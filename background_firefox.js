@@ -211,7 +211,7 @@ async function FirefoxAutoSaveData() {
 				schedule_save--;
 			});
 		}
-	}, 500);
+	}, 1000);
 }
 
 function GenerateNewWindowID(){

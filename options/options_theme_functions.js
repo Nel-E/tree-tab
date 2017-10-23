@@ -1,7 +1,7 @@
 function LoadTheme(themeName) {
 	if (localStorage.getItem("theme"+themeName) != null) {
 		SelectedTheme = JSON.parse(localStorage["theme"+themeName]);
-		
+		$("#new_theme_name")[0].value = themeName;
 		setTimeout(function() {
 			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
 			ApplyColorsSet(SelectedTheme["ColorsSet"]);
@@ -83,6 +83,25 @@ function DeleteSelectedTheme() {
 		SelectedTheme["ColorsSet"] = {};
 		chrome.runtime.sendMessage({command: "reload_theme", themeName: "themeDefault"});
 	}
+}
+
+function RenameSelectedTheme() {
+		if (themes.indexOf($("#new_theme_name")[0].value) != -1) {
+			alert(chrome.i18n.getMessage("options_there_is_a_theme_with_this_name"));
+			return;
+		}
+		if ($("#new_theme_name")[0].value == "") {
+			alert(chrome.i18n.getMessage("options_theme_name_cannot_be_empty"));
+			return;
+		}
+		var t_list = document.getElementById("theme_list");
+		localStorage.removeItem("theme"+SelectedTheme["theme_name"]);
+		SelectedTheme["theme_name"] = $("#new_theme_name")[0].value;
+		themes[themes.indexOf(t_list.options[t_list.selectedIndex].value)] = SelectedTheme["theme_name"];
+		t_list.options[t_list.selectedIndex].value = t_list.options[t_list.selectedIndex].text = SelectedTheme["theme_name"];
+		localStorage["current_theme"] = SelectedTheme["theme_name"];
+		localStorage["themes"] = JSON.stringify(themes);
+		SaveTheme(SelectedTheme["theme_name"]);
 }
 
 
