@@ -58,6 +58,15 @@
 	"button_filter_type": {
 		"message": "Search titles or urls"
 	},
+	"button_load_bak1": {
+		"message": "EMERGENCY: Load latest backup (autosave that is made every 5 minutes)"
+	},
+	"button_load_bak2": {
+		"message": "EMERGENCY: Load previous to latest backup (autosave that is made every 10 minutes)"
+	},
+	"button_load_bak3": {
+		"message": "EMERGENCY: Load oldest backup (autosave that is made every 30 minutes)"
+	},
 
 
 	"groups_toolbar_hide": {

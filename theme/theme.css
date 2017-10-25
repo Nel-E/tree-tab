@@ -58,6 +58,9 @@ div {
 	overflow: hidden;
 }
 
+.button.disabled {
+	opacity: 0.2;
+}
 .button {
 	position: relative;
 	display: inline-block;
@@ -186,6 +189,19 @@ div {
 #remove_group>.button_img {
 	-webkit-mask-box-image: url(../theme/toolbar_shelf_groups_remove.svg);
 	mask-image: url(../theme/toolbar_shelf_groups_remove.svg);
+}
+
+#button_load_bak1>.button_img {
+	-webkit-mask-box-image: url(../theme/toolbar_load_bak1.svg);
+	mask-image: url(../theme/toolbar_load_bak1.svg);
+}
+#button_load_bak2>.button_img {
+	-webkit-mask-box-image: url(../theme/toolbar_load_bak2.svg);
+	mask-image: url(../theme/toolbar_load_bak2.svg);
+}
+#button_load_bak3>.button_img {
+	-webkit-mask-box-image: url(../theme/toolbar_load_bak3.svg);
+	mask-image: url(../theme/toolbar_load_bak3.svg);
 }
 
 

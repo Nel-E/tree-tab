@@ -65,6 +65,9 @@ var DefaultToolbar =
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_shelf_tools>'+
 		'<div class=button id=button_options><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak1><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak2><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak3><div class=button_img></div></div>'+
 		(browserId != "F" ?
 		'<div class=button id=button_bookmarks><div class=button_img></div></div>'+
 		'<div class=button id=button_downloads><div class=button_img></div></div>'+
@@ -91,6 +94,43 @@ var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_lis
 
 
 // *******************             GLOBAL FUNCTIONS                 ************************
+
+// autosave every 10 minutes
+async function AutoSaveBackup() {
+	setTimeout(function() {
+		AutoSaveBackup();
+		localStorage["tabs_BAK3"] = JSON.stringify(LoadData("tabs_BAK2", []));
+		localStorage["windows_BAK3"] = JSON.stringify(LoadData("windows_BAK2", []));
+
+		localStorage["tabs_BAK2"] = JSON.stringify(LoadData("tabs_BAK1", []));
+		localStorage["windows_BAK2"] = JSON.stringify(LoadData("windows_BAK1", []));
+
+		localStorage["tabs_BAK1"] = JSON.stringify(LoadData("tabs", []));
+		localStorage["windows_BAK1"] = JSON.stringify(LoadData("windows", []));
+	}, 600000);
+}
+// autosaves
+// async function SaveBackup1() {
+	// setTimeout(function() {
+		// SaveBackup1();
+		// localStorage["tabs_BAK1"] = JSON.stringify(LoadData("tabs", []));
+		// localStorage["windows_BAK1"] = JSON.stringify(LoadData("windows", []));
+	// }, 600000);
+// }
+// async function SaveBackup2() {
+	// setTimeout(function() {
+		// SaveBackup2();
+		// localStorage["tabs_BAK2"] = JSON.stringify(LoadData("tabs_BAK1", []));
+		// localStorage["windows_BAK2"] = JSON.stringify(LoadData("windows_BAK1", []));
+	// }, 1200000);
+// }
+// async function SaveBackup3() {
+	// setTimeout(function() {
+		// SaveBackup3();
+		// localStorage["tabs_BAK3"] = JSON.stringify(LoadData("tabs_BAK2", []));
+		// localStorage["windows_BAK3"] = JSON.stringify(LoadData("windows_BAK2", []));
+	// }, 1800000);
+// }
 
 function LoadData(KeyName, ExpectReturnDefaultType) {
 	var data = ExpectReturnDefaultType;

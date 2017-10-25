@@ -592,9 +592,9 @@ function SetEvents() {
 	// clear data
 	$(document).on("click", "#options_clear_data", function(event) {
 		localStorage.clear();
-		location.reload();
 		chrome.runtime.sendMessage({command: "reload"});
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
+		location.reload();
 	});
 
 

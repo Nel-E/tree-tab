@@ -41,6 +41,29 @@ function RestoreToolbarShelf() {
 			$("#button_folders").removeClass("hidden");
 			$("#button_folders").addClass("on");
 		}
+		
+		let bak1 = LoadData("windows_BAK1", []);
+		let bak2 = LoadData("windows_BAK2", []);
+		let bak3 = LoadData("windows_BAK3", []);
+		
+		if (bak1.length && $(".button#button_load_bak1")[0]) {
+			$(".button#button_load_bak1").removeClass("disabled");
+		} else {
+			$(".button#button_load_bak1").addClass("disabled");
+		}
+		
+		if (bak2.length && $(".button#button_load_bak2")[0]) {
+			$(".button#button_load_bak2").removeClass("disabled");
+		} else {
+			$(".button#button_load_bak2").addClass("disabled");
+		}
+		
+		if (bak3.length && $(".button#button_load_bak3")[0]) {
+			$(".button#button_load_bak3").removeClass("disabled");
+		} else {
+			$(".button#button_load_bak3").addClass("disabled");
+		}
+		
 		RefreshGUI();
 	});
 }
@@ -260,5 +283,25 @@ function SetToolbarEvents() {
 			});
 			DiscardTabs(tabsIds);
 		});
+	});
+	// load backups
+	$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
+		if (event.button != 0) {
+			return;
+		}
+		let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
+		let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
+		
+		if (wins.length) {
+			localStorage["windows"] = JSON.stringify(wins);
+		}
+		if (tabs.length) {
+			localStorage["tabs"] = JSON.stringify(tabs);
+			alert("Loaded backup");
+		}
+		
+		chrome.runtime.sendMessage({command: "reload"});
+		chrome.runtime.sendMessage({command: "reload_sidebar"});
+		location.reload();
 	});
 }

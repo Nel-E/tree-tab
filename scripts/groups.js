@@ -181,8 +181,13 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
 		ScrollToTab($("#"+groupId).find(".active")[0].id);
 	}
+	
+	if (groupId == "tab_list" && $(".button#edit_group")[0]) {
+		$(".button#edit_group").addClass("disabled");
+	} else {
+		$(".button#edit_group").removeClass("disabled");
+	}
 	chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
-
 }
 
 function SetActiveTabInActiveGroup(tabId) {
