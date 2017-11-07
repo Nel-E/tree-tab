@@ -58,30 +58,52 @@
 	"button_filter_type": {
 		"message": "Search titles or urls"
 	},
-	"button_load_bak1": {
-		"message": "EMERGENCY: Load latest backup (autosave that is made every 5 minutes)"
-	},
-	"button_load_bak2": {
-		"message": "EMERGENCY: Load previous to latest backup (autosave that is made every 10 minutes)"
-	},
-	"button_load_bak3": {
-		"message": "EMERGENCY: Load oldest backup (autosave that is made every 30 minutes)"
-	},
 
 
-	"groups_toolbar_hide": {
+
+
+
+	"button_groups_toolbar_hide": {
 		"message": "Hide/Show Groups toolbar"
 	},
-	"new_group": {
+	"button_new_group": {
 		"message": "New group"
 	},
-	"remove_group": {
-		"message": "Remove group"
+	"button_remove_group": {
+		"message": "Remove group.\nHold shift key to close tabs from this group"
 	},
-	"edit_group": {
+	"button_edit_group": {
 		"message": "Edit group"
 	},
 
+	"button_import_group": {
+		"message": "Import group"
+	},
+	"button_export_group": {
+		"message": "Export group"
+	},
+
+	"button_backup": {
+		"message": "Session"
+	},
+	"button_import_bak": {
+		"message": "Import session"
+	},
+	"button_import_merge_bak": {
+		"message": "Import and merge session"
+	},
+	"button_export_bak": {
+		"message": "Export session"
+	},
+	"button_load_bak1": {
+		"message": "EMERGENCY if lost groupings: Load latest internal backup (autosave is made every 5 minutes)"
+	},
+	"button_load_bak2": {
+		"message": "EMERGENCY if lost groupings: Load previous to latest internal backup (autosave is made every 10 minutes)"
+	},
+	"button_load_bak3": {
+		"message": "EMERGENCY if lost groupings: Load oldest internal backup (autosave is made every 30 minutes)"
+	},
 
 
 
@@ -192,9 +214,6 @@
 	},
 	"options_skip_load": {
 		"message": "discard tree structure after browser's restart, this option is for those who don't use browser's session. Basically it disables loading database at startup."
-	},
-	"options_faster_scroll": {
-		"message": "Faster scrolling"
 	},
 
 	"options_append_child_tab": {

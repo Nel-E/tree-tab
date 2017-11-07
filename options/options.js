@@ -305,7 +305,7 @@ function SetEvents() {
 	});
 
 	// options that need reload
-	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees, #faster_scroll", function(event) {
+	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees", function(event) {
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
 	});
 
@@ -365,11 +365,11 @@ function SetEvents() {
 	
 	// drag&drop buttons to lists
 	$(document).on("dragenter", "#toolbar_main, .toolbar_shelf, #toolbar_unused_buttons", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_folders") && $(this).is(".toolbar_shelf")) {
+		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_backup, #button_folders") && $(this).is(".toolbar_shelf")) {
 			return;
 		}
 		if (dragged_button.parentNode.id != this.id) {
-			// if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_folders") && $(this).is("#toolbar_unused_buttons")) {
+			// if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_backup, #button_folders") && $(this).is("#toolbar_unused_buttons")) {
 				// $(".on").removeClass("on");
 			// }
 			$("#"+dragged_button.id).appendTo($(this));
@@ -378,7 +378,7 @@ function SetEvents() {
 
 	// move (flip) buttons
 	$(document).on("dragenter", ".button", function(event) {
-		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_folders") && $(this).parent().is(".toolbar_shelf")) {
+		if ($(dragged_button).is("#button_tools, #button_search, #button_groups, #button_backup, #button_folders") && $(this).parent().is(".toolbar_shelf")) {
 			return;
 		}
 		if ($(this).parent().is("#toolbar_search, #toolbar_search_buttons")) {
@@ -434,7 +434,7 @@ function SetEvents() {
 
 	// import theme preset button
 	$(document).on("click", "#options_import_theme_button", function(event) {
-		$("#import_theme").click();
+		ShowOpenFileDialog("import_theme", ".tt_theme");
 	});
 	$(document).on("change", "#import_theme", function(event) {
 		ImportTheme();
@@ -445,7 +445,7 @@ function SetEvents() {
 		if ($("#theme_list")[0].options.length == 0) {
 			alert(chrome.i18n.getMessage("options_no_theme_to_export"));
 		} else {
-			ExportTheme($("#theme_list").val() + ".tt_theme");
+			SaveFile($("#theme_list").val() + ".tt_theme", SelectedTheme);
 		}
 	});
 
@@ -607,6 +607,7 @@ function SetEvents() {
 			// event.preventDefault();
 		// }
 	// });
+	$(document).on("mousedown", "*", function(event) {
 	// $(document).on("mousedown", ".pick_col", function(event) {
 		// event.stopPropagation();
 		// if (event.button == 0 && event.shiftKey) {
@@ -622,16 +623,10 @@ function SetEvents() {
 			// $(this).css({ "top": $(this).position().top+1 });
 		// }
 		// console.log(this.id + " top: " + $(this).position().top + "px; left: " + $(this).position().left + "px;");
-	// });
+		console.log(this.id);
+	});
 }
 
-
-function SavePreferences() {
-	localStorage["preferences"] = JSON.stringify(opt);
-	setTimeout(function() {
-		chrome.runtime.sendMessage({command: "reload_options"});
-	},200);
-}
 
 function copyStringToClipboard(string) {
 	function handler (event){
@@ -648,7 +643,3 @@ function copyStringToClipboard(string) {
 function BindTabsSwitchingToMouseWheel() {}
 function GetFaviconAndTitle() {}
 function RefreshMediaIcon() {}
-
-
-
-

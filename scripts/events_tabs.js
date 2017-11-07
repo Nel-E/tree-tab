@@ -58,19 +58,19 @@ function SetTabEvents() {
 		if (event.button == 0) {
 			if ($(this).parent().parent().is(".o")) {
 				$(this).parent().parent().removeClass("o").addClass("c");
-				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { o: "c" } });
+				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "c" } });
 			} else {
 				if ($(this).parent().parent().is(".c")) {
 					$(this).parent().parent().removeClass("c").addClass("o");
-					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { o: "o" } });
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "o" } });
 					if (opt.close_other_trees) {
 						$(".o:visible:not(#"+$(this).parent().parent()[0].id+")").removeClass("o").addClass("c");
 						$(this).parents(".tab").each(function() {
 							$(this).removeClass("n").removeClass("c").addClass("o");
-							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { o: "o" } });
+							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "o" } });
 						});
 						$(".c").each(function() {
-							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { o: "c" } });
+							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "c" } });
 						});
 					}
 				}
@@ -80,13 +80,13 @@ function SetTabEvents() {
 
 	// SELECT OR CLOSE TAB/PIN
 	$(document).on("mousedown", ".tab, .pin", function(event) {
-		
 		if ($(".menu").is(":visible")) {
 			return;
-		}		
-		
-		DropTargetsSendToBack();
+		}
 		event.stopPropagation();
+
+		DropTargetsSendToBack();
+		let tabId = parseInt(this.id);
 		
 		if (event.button == 0) {
 			// SET SELECTION WITH SHIFT
@@ -123,12 +123,20 @@ function SetTabEvents() {
 					ActivateNextTab();
 				}
 			}
+			
+			// hide tab that will be closed
+			$("#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
 
-			if ($("#" + this.id).is(".pin")) {
-				$("#" + this.id).remove();
-				chrome.tabs.update(parseInt(this.id), { pinned: false });
+			// repeated what is in chrome events on tab_removed event, to avoid lag
+			if (opt.promote_children && $(this).is(".tab")) {
+				$("#ch"+tabId).children().insertAfter($("#"+tabId));
 			}
-			chrome.tabs.remove(parseInt(this.id));
+			
+			// delayed tab removal, so ActivatePrevTab() or ActivateNextTab() will not activate wrong tab
+			setTimeout(function() {
+				chrome.tabs.update(tabId, { pinned: false });
+				chrome.tabs.remove(tabId);
+			}, 500);
 		}
 	});
 
@@ -138,7 +146,7 @@ function SetTabEvents() {
 			return;
 		}
 		event.stopPropagation();
-		if (!event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+		if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
 			SetActiveTab($(this).parent()[0].id);
 			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
 		}

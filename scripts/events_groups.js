@@ -28,7 +28,7 @@ function SetGroupEvents() {
 	});
 
 	// show/hide groups toolbar
-	$(document).on("mousedown", "#groups_toolbar_hide", function(event) {
+	$(document).on("mousedown", "#button_groups_toolbar_hide", function(event) {
 		if (event.button == 0) {
 			// $("#toolbar_groups").toggleClass("hidden");
 			$("#toolbar_groups").toggleClass("hidden");
@@ -50,29 +50,42 @@ function SetGroupEvents() {
 	// });
 
 	// new group button
-	$(document).on("mousedown", "#new_group", function(event) {
+	$(document).on("mousedown", "#button_new_group", function(event) {
 		if (event.button == 0) {
-			// AddNewGroup(GenerateRandomHexColor());
-			AddNewGroup();
+			AddNewGroup({});
 		}
 	});
 
 	// new group button
-	$(document).on("mousedown", "#remove_group", function(event) {
+	$(document).on("mousedown", "#button_remove_group", function(event) {
+		let close_tabs = event.shiftKey;
 		if (event.button == 0) {
 			if (active_group != "tab_list") {
-				GroupRemove(active_group, false);
+				GroupRemove(active_group, close_tabs);
 			}
 		}
 	});
 
 	// EDIT GROUP
-	$(document).on("mousedown", "#edit_group", function(event) {
+	$(document).on("mousedown", "#button_edit_group", function(event) {
 		if (active_group != "tab_list") {
 			ShowGroupEditWindow(active_group);
 		}
 	});
+	
+	// import-export group
+	$(document).on("mousedown", "#button_export_group", function(event) {
+		ExportGroup(bggroups[active_group].name+".tt_group");
+	});
 
+	$(document).on("mousedown", "#button_import_group", function(event) {
+		ShowOpenFileDialog("file_import_group", ".tt_group");
+	});
+	$(document).on("change", "#file_import_group", function(event) {
+		ImportGroup();
+	});
+
+	// edit group dialog box
 	$(document).on("mousedown", "#group_edit_discard", function(event) {
 		$("#group_edit").hide(0);
 	});

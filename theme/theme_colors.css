@@ -112,15 +112,15 @@ body {
 	--tab_discarded_hover_title_font_weight: normal;
 
 	/* unloaded selected */
-	--tab_selected_discarded_border: #bebebe;
-	--tab_selected_discarded_background: #f1f1f1;
+	--tab_selected_discarded_border: #70c0e7;
+	--tab_selected_discarded_background: #e5f3fb;
 	--tab_selected_discarded_title_font_color: #7e7e7e;
 	--tab_selected_discarded_title_font_style: italic;
 	--tab_selected_discarded_title_font_weight: normal;
 	
 	/* unloaded selected hover */
-	--tab_selected_discarded_hover_border: #878787;
-	--tab_selected_discarded_hover_background: #d7d7d7;
+	--tab_selected_discarded_hover_border: #78aee5;
+	--tab_selected_discarded_hover_background: #d0e2f0;
 	--tab_selected_discarded_hover_title_font_color: #7e7e7e;
 	--tab_selected_discarded_hover_title_font_style: italic;
 	--tab_selected_discarded_hover_title_font_weight: normal;
@@ -253,8 +253,8 @@ body {
 	--expand_closed_background: #969696;
 	--expand_open_background: #339bf3;
 
-	--attention_background: #96ddff;
-	--attention_border: #96ddff;
+	--attention_background: #ffd6ce;
+	--attention_border: #ff9d8a;
 	--close_x: #7d7d7d;
 	--close_hover_x: #fbfcfe;
 	--close_hover_border: #757676;

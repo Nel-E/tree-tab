@@ -1,3 +1,7 @@
+// Copyright (c) 2017 kroppy. All rights reserved.
+// Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
+// that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
+
 function LoadTheme(themeName) {
 	if (localStorage.getItem("theme"+themeName) != null) {
 		SelectedTheme = JSON.parse(localStorage["theme"+themeName]);
@@ -112,6 +116,7 @@ function ImportTheme() {
 	fr.readAsText(file.files[0]);
 	fr.onload = function() {
 		var data = fr.result;
+		file.remove();
 		var themeObj = JSON.parse(data);
 
 		if (themeObj.theme_version > DefaultTheme["theme_version"]) {
@@ -137,7 +142,6 @@ function ImportTheme() {
 			if (themeObj.theme_version == 1) {
 				SelectedTheme["ColorsSet"]["scrollbar_height"] = themeObj.ScrollbarPinList + "px";
 				SelectedTheme["ColorsSet"]["scrollbar_width"] = themeObj.ScrollbarTabList + "px";
-				console.log(SelectedTheme);
 			}
 			if (themeObj.theme_version == 2) {
 				SelectedTheme["unused_buttons"] = themeObj["unused_buttons"];
@@ -172,18 +176,6 @@ function ImportTheme() {
 		}
 	}	 
 
-}
-
-function ExportTheme(filename) {
-	var data = JSON.stringify(SelectedTheme);
-	var body = document.getElementById("body");
-	var link = document.createElement("a");
-	link.target = "_blank";
-	link.download = filename;
-	link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(data);
-	body.appendChild(link);
-	link.click();
-	link.remove();
 }
 
 

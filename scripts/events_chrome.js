@@ -12,7 +12,7 @@ function StartChromeListeners(){
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.Parents = message.Parents;
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
-			// console.log(DragAndDrop);
+			DragAndDrop.Depth = message.Depth;
 		}
 		if (message.command == "reload_sidebar") {
 			window.location.reload();
@@ -101,7 +101,6 @@ function StartChromeListeners(){
 					RefreshGUI();
 				break;
 				case "tab_attached":
-					// AppendTab({ tab: message.tab, ParentId: message.ParentId, Append: true, AdditionalClass: "selected"});
 					AppendTab({ tab: message.tab, ParentId: message.ParentId, Append: true});
 					RefreshGUI();
 				break;

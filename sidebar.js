@@ -28,9 +28,7 @@ function RestorePinListRowSettings() {
 	} else {
 		$("#pin_list").css({"white-space": "", "overflow-x": ""});
 	}
-	// setTimeout(function() {
-		RefreshGUI();
-	// },100);
+	RefreshGUI();
 }
 	
 function Run() {
@@ -77,7 +75,11 @@ function Initialize() {
 
 
 		if (theme.ToolbarShow) {
-			$("#toolbar").html(theme.toolbar);
+			if (theme.theme_version == DefaultTheme.theme_version) {
+				$("#toolbar").html(theme.toolbar);
+			} else {
+				$("#toolbar").html(DefaultToolbar);
+			}
 		}
 		
 
@@ -97,22 +99,22 @@ function Initialize() {
 		});
 
 		for (var ti = 0; ti < tc; ti++) {
-			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].p)[0] && $("#"+bgtabs[tabs[ti].id].p).is(".group")) {
-				$("#"+bgtabs[tabs[ti].id].p).append($("#"+tabs[ti].id));
+			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].parent)[0] && $("#"+bgtabs[tabs[ti].id].parent).is(".group")) {
+				$("#"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
 			}
 		}
 		
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				if ($("#"+bgtabs[tabs[ti].id].p).length > 0 && $("#"+bgtabs[tabs[ti].id].p).is(".tab") && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].p)).length == 0) {
-					$("#ch"+bgtabs[tabs[ti].id].p).append($("#"+tabs[ti].id));
+				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 && $("#"+bgtabs[tabs[ti].id].parent).is(".tab") && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
+					$("#ch"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
 				}
 			}
 		}
 		
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].o);
+				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].expand);
 			}
 		}
 

@@ -2,8 +2,6 @@ TOP PRIORITY:
 
 Add a shortcut to open tree tabs sidebar
 
-fix options page (almost there)
-
 undo close to restore trees (will work ONLY in firefox)
 
 
@@ -12,7 +10,6 @@ LOW PRIORITY:
 tabs count in titles
 option for scrollbar on the left
 folders
-save/load sessions
 
 unread state?
 

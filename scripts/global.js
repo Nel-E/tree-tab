@@ -17,7 +17,7 @@ var GroupDragNode;
 
 
 
-var DragAndDrop = {Dropped: false, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0};
+var DragAndDrop = {Dropped: false, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
 var DropTargetsInFront = false;
 
 
@@ -50,6 +50,7 @@ var DefaultToolbar =
 		'<div class=button id=button_search><div class=button_img></div></div>'+
 		'<div class=button id=button_tools><div class=button_img></div></div>'+
 		'<div class=button id=button_groups><div class=button_img></div></div>'+
+		'<div class=button id=button_backup><div class=button_img></div></div>'+
 		// '<div class=button id=button_folders><div class=button_img></div></div>'+
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_search>'+
@@ -65,9 +66,6 @@ var DefaultToolbar =
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_shelf_tools>'+
 		'<div class=button id=button_options><div class=button_img></div></div>'+
-		'<div class=button id=button_load_bak1><div class=button_img></div></div>'+
-		'<div class=button id=button_load_bak2><div class=button_img></div></div>'+
-		'<div class=button id=button_load_bak3><div class=button_img></div></div>'+
 		(browserId != "F" ?
 		'<div class=button id=button_bookmarks><div class=button_img></div></div>'+
 		'<div class=button id=button_downloads><div class=button_img></div></div>'+
@@ -79,59 +77,31 @@ var DefaultToolbar =
 		'<div class=button id=button_move><div class=button_img></div></div>'+
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_shelf_groups>'+
-		'<div class=button id=groups_toolbar_hide><div class=button_img></div></div>'+
-		'<div class=button id=new_group><div class=button_img></div></div>'+
-		'<div class=button id=remove_group><div class=button_img></div></div>'+
-		'<div class=button id=edit_group><div class=button_img></div></div>'+
+		'<div class=button id=button_groups_toolbar_hide><div class=button_img></div></div>'+
+		'<div class=button id=button_new_group><div class=button_img></div></div>'+
+		'<div class=button id=button_remove_group><div class=button_img></div></div>'+
+		'<div class=button id=button_edit_group><div class=button_img></div></div>'+
+		'<div class=button id=button_import_group><div class=button_img></div></div>'+
+		'<div class=button id=button_export_group><div class=button_img></div></div>'+
+	'</div>'+
+	'<div class=toolbar_shelf id=toolbar_shelf_backup>'+
+		'<div class=button id=button_import_bak><div class=button_img></div></div>'+
+		'<div class=button id=button_import_merge_bak><div class=button_img></div></div>'+
+		'<div class=button id=button_export_bak><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak1><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak2><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak3><div class=button_img></div></div>'+
 	'</div>';
 	// '<div class=toolbar_shelf id=toolbar_shelf_folders>'+
 	// '</div>'+
 	
 var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
-var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "faster_scroll": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
+var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
 
 
 
 
 // *******************             GLOBAL FUNCTIONS                 ************************
-
-// autosave every 10 minutes
-async function AutoSaveBackup() {
-	setTimeout(function() {
-		AutoSaveBackup();
-		localStorage["tabs_BAK3"] = JSON.stringify(LoadData("tabs_BAK2", []));
-		localStorage["windows_BAK3"] = JSON.stringify(LoadData("windows_BAK2", []));
-
-		localStorage["tabs_BAK2"] = JSON.stringify(LoadData("tabs_BAK1", []));
-		localStorage["windows_BAK2"] = JSON.stringify(LoadData("windows_BAK1", []));
-
-		localStorage["tabs_BAK1"] = JSON.stringify(LoadData("tabs", []));
-		localStorage["windows_BAK1"] = JSON.stringify(LoadData("windows", []));
-	}, 600000);
-}
-// autosaves
-// async function SaveBackup1() {
-	// setTimeout(function() {
-		// SaveBackup1();
-		// localStorage["tabs_BAK1"] = JSON.stringify(LoadData("tabs", []));
-		// localStorage["windows_BAK1"] = JSON.stringify(LoadData("windows", []));
-	// }, 600000);
-// }
-// async function SaveBackup2() {
-	// setTimeout(function() {
-		// SaveBackup2();
-		// localStorage["tabs_BAK2"] = JSON.stringify(LoadData("tabs_BAK1", []));
-		// localStorage["windows_BAK2"] = JSON.stringify(LoadData("windows_BAK1", []));
-	// }, 1200000);
-// }
-// async function SaveBackup3() {
-	// setTimeout(function() {
-		// SaveBackup3();
-		// localStorage["tabs_BAK3"] = JSON.stringify(LoadData("tabs_BAK2", []));
-		// localStorage["windows_BAK3"] = JSON.stringify(LoadData("windows_BAK2", []));
-	// }, 1800000);
-// }
-
 function LoadData(KeyName, ExpectReturnDefaultType) {
 	var data = ExpectReturnDefaultType;
 	try {
@@ -209,3 +179,31 @@ function LoadDefaultPreferences() {
 		opt[parameter] = DefaultPreferences[parameter];
 	}
 }
+function SavePreferences() {
+	localStorage["preferences"] = JSON.stringify(opt);
+	setTimeout(function() {
+		chrome.runtime.sendMessage({command: "reload_options"});
+	},200);
+}
+function ShowOpenFileDialog(id, extension) {
+	let body = document.getElementById("body");
+	let inp = document.createElement("input");
+	inp.id = id;
+	inp.type = "file";
+	inp.accept = extension;
+	inp.style.display = "none";
+	body.appendChild(inp);
+	$("#"+id).click();
+}
+function SaveFile(filename, data) {
+	let d = JSON.stringify(data);
+	let body = document.getElementById("body");
+	let link = document.createElement("a");
+	link.target = "_self";
+	link.download = filename;
+	link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(d);
+	body.appendChild(link);
+	link.click();
+	link.remove();
+}
+

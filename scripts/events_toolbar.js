@@ -37,8 +37,12 @@ function RestoreToolbarShelf() {
 			$("#toolbar_shelf_groups").removeClass("hidden");
 			$("#button_groups").addClass("on");
 		}
+		if (response == "backup" && $("#button_backup").length != 0) {
+			$("#toolbar_shelf_backup").removeClass("hidden");
+			$("#button_backup").addClass("on");
+		}
 		if (response == "folders" && $("#button_folders").length != 0) {
-			$("#button_folders").removeClass("hidden");
+			$("#toolbar_shelf_folders").removeClass("hidden");
 			$("#button_folders").addClass("on");
 		}
 		
@@ -70,7 +74,7 @@ function RestoreToolbarShelf() {
 
 function SetToolbarShelfToggle(click_type) {
 	// tools and search buttons toggle
-	$(document).on(click_type, "#button_tools, #button_search, #button_groups, #button_folders", function(event) {
+	$(document).on(click_type, "#button_tools, #button_search, #button_groups, #button_backup, #button_folders", function(event) {
 		if (event.button != 0) {
 			return;
 		}
@@ -91,6 +95,10 @@ function SetToolbarShelfToggle(click_type) {
 			if ($(this).is("#button_groups")) {
 				$("#toolbar_shelf_groups").removeClass("hidden");
 				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "groups", windowId: CurrentWindowId});
+			}
+			if ($(this).is("#button_backup")) {
+				$("#toolbar_shelf_backup").removeClass("hidden");
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "backup", windowId: CurrentWindowId});
 			}
 			if ($(this).is("#button_folders")) {
 				$("#toolbar_shelf_folders").removeClass("hidden");
@@ -164,16 +172,14 @@ function SetToolbarEvents() {
 		chrome.sessions.getRecentlyClosed( null, function(sessions) {
 			if (sessions.length > 0) {
 				chrome.sessions.restore(null, function(restored) {
-					if (browserId == "F") {
-						if (restored.tab != undefined) {
-							let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
-
-// TODO RESTORE TREE IF POSSIBLE
-
+					// if (browserId == "F") {
+						// if (restored.tab != undefined) {
+							// let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
+								// TODO RESTORE TREE IF POSSIBLE
 								// console.log(TTId);
-							});
-						}
-					}
+							// });
+						// }
+					// }
 				});
 			}
 		});
@@ -284,6 +290,12 @@ function SetToolbarEvents() {
 			DiscardTabs(tabsIds);
 		});
 	});
+
+
+
+
+
+
 	// load backups
 	$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
 		if (event.button != 0) {
@@ -303,5 +315,27 @@ function SetToolbarEvents() {
 		chrome.runtime.sendMessage({command: "reload"});
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
 		location.reload();
+		
 	});
+
+	// import-export backups
+	$(document).on("mousedown", "#button_export_bak", function(event) {
+		ExportTabs("Session.tt_session");
+	});
+	
+	$(document).on("mousedown", "#button_import_bak", function(event) {
+		ShowOpenFileDialog("file_import_backup", ".tt_session");
+	});
+	$(document).on("change", "#file_import_backup", function(event) {
+		ImportTabs();
+	});
+
+
+	$(document).on("mousedown", "#button_import_merge_bak", function(event) {
+		ShowOpenFileDialog("file_import_merge_backup", ".tt_session");
+	});
+	$(document).on("change", "#file_import_merge_backup", function(event) {
+		ImportMergeTabs();
+	});
+
 }

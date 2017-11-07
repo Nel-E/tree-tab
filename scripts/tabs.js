@@ -13,9 +13,9 @@ async function UpdateData() {
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
-						p: "pin_list",
-						i: $(this).index(),
-						o: "n"
+						parent: "pin_list",
+						index: $(this).index(),
+						expand: "n"
 					}
 				});
 			});
@@ -24,9 +24,9 @@ async function UpdateData() {
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
-						p: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab")[0].id,
-						i: $(this).index(),
-						o: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
+						parent: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab")[0].id,
+						index: $(this).index(),
+						expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
 					}
 				});
 			});
@@ -63,14 +63,14 @@ async function RearrangeBrowserTabs(tabIds, tabIndex) {
 
 function RearrangeTreeTabs(tabs, bgtabs, first_run) {
 	tabs.forEach(function(Tab) {
-		if (bgtabs[Tab.id] && $("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].i)[0]) {
-			if ($("#"+Tab.id).index() > bgtabs[Tab.id].i) {
-				$("#"+Tab.id).insertBefore($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].i));
+		if (bgtabs[Tab.id] && $("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index)[0]) {
+			if ($("#"+Tab.id).index() > bgtabs[Tab.id].index) {
+				$("#"+Tab.id).insertBefore($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index));
 			} else {
-				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].i));
+				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index));
 			}
 		}
-		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].i && first_run) {
+		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].index && first_run) {
 			RearrangeTreeTabs(tabs, bgtabs, false);
 		}
 	});
@@ -228,13 +228,9 @@ function DetachTabs(tabsIds) {
 		if (window.tabs.length == 1) {
 			return;
 		}
-		chrome.windows.create({state:window.state}, function(new_window) {
+		chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
 			(tabsIds).forEach(function(tabId) {
-				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(DetachedTab) {
-					if (DetachedTab.id == tabsIds[tabsIds.length-1] && new_window.tabs[0]) {
-						chrome.tabs.remove(new_window.tabs[0].id, null);
-					}
-				});
+				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1});
 			});
 		})
 	});
@@ -322,6 +318,30 @@ function ActivateNextTab() {
 		}
 	}
 }
+
+// .class or #id
+// function ActivatePrevTab(Id_Class) {
+	// if ($(".pin"+Id_Class)[0]) {
+		// if ($(".pin"+Id_Class).prev(".pin")[0]) {
+			// chrome.tabs.update(parseInt($(".pin"+Id_Class).prev(".pin")[0].id), { active: true });
+		// } 
+	// }
+	
+	// if ($(".tab"+Id_Class+":visible")[0]) {
+		// if ($(".tab"+Id_Class+":visible").prev().find(".tab").length > 0) {
+			// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").prev().find(".tab").last()[0].id), { active: true });
+		// } else {
+			// if ($(".tab"+Id_Class+":visible").prev(".tab")[0]) {
+				// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").prev(".tab")[0].id), { active: true });
+			// } else {
+				// if ($(".tab"+Id_Class+":visible").parent().is(".children") && $(".tab"+Id_Class+":visible").parent().parent(".tab")[0]) {
+					// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").parent().parent(".tab")[0].id), { active: true });
+				// }
+			// }
+		// }
+
+	// }
+// }
 
 function ActivatePrevTab() {
 	if ($(".pin.active")[0]) {

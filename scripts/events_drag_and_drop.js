@@ -57,13 +57,20 @@ function SetDragAndDropEvents() {
 		DragAndDrop.SelectedTabsIds.splice(0, DragAndDrop.SelectedTabsIds.length);
 		DragAndDrop.TabsIds.splice(0, DragAndDrop.TabsIds.length);
 		DragAndDrop.Parents.splice(0, DragAndDrop.Parents.length);
-
+		
+		DragAndDrop.Depth = 0;
+		$(".selected:visible").find(".tab").each(function() {
+			if ($(this).parents(".tab").length > DragAndDrop.Depth) { DragAndDrop.Depth = $(this).parents(".tab").length; }
+		});
+		DragAndDrop.Depth -= $(this).parents(".tab").length-1;
+		if (DragAndDrop.Depth < 0) {
+			DragAndDrop.Depth = 0;
+		}
+		
 		$(".selected:visible").each(function() {
-			
 			DragAndDrop.SelectedTabsIds.push(parseInt(this.id));
 			DragAndDrop.TabsIds.push(parseInt(this.id));
 			DragAndDrop.Parents.push($(this).parent()[0].id);
-			
 			if ($("#ch" + this.id).children().length > 0) {
 				$($("#ch" + this.id).find(".tab")).each(function() {
 					DragAndDrop.TabsIds.push(parseInt(this.id));
@@ -71,7 +78,7 @@ function SetDragAndDropEvents() {
 				});
 			}
 		});
-		chrome.runtime.sendMessage({command: "drag_drop", SelectedTabsIds: DragAndDrop.SelectedTabsIds, TabsIds: DragAndDrop.TabsIds, Parents: DragAndDrop.Parents, ComesFromWindowId: CurrentWindowId});
+		chrome.runtime.sendMessage({command: "drag_drop", SelectedTabsIds: DragAndDrop.SelectedTabsIds, TabsIds: DragAndDrop.TabsIds, Parents: DragAndDrop.Parents, ComesFromWindowId: CurrentWindowId, Depth: DragAndDrop.Depth});
 	});
 	
 	// REMOVE DROP TARGET WHEN DRAG LEAVES
@@ -84,9 +91,13 @@ function SetDragAndDropEvents() {
 	$(document).on("dragenter", ".drag_entered_top:not(.highlighted_drop_target), .drag_entered_bottom:not(.highlighted_drop_target), .drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
 		if ($(".selected:visible").find($(this)).length > 0) { return; }
-		if (opt.max_tree_drag_drop) {
-			if ($(this).is(".drag_enter_center") && opt.max_tree_depth == 0) { return; }
-			if ($(this).parents(".tab").length > opt.max_tree_depth && opt.max_tree_depth > 0) { return; }
+		if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
+			if ($(this).is(".drag_enter_center")) {
+				if (opt.max_tree_depth == 0) { return; }
+				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth) { return; }
+			} else {
+				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth+1) { return; }
+			}
 		}
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		$(this).addClass("highlighted_drop_target");
@@ -132,7 +143,7 @@ function SetDragAndDropEvents() {
 							});
 						},500);
 						setTimeout(function() {
-							if (browserId != "F") { // FUCKING FIREFOX SHIT AINT WORKING, SO I HAVE TO EXLUDE THIS
+							if (browserId != "F") { // I HAVE TO EXLUDE THIS
 								for (var tabsIdsIndex = 1; tabsIdsIndex < (DragAndDrop.TabsIds).length; tabsIdsIndex++) {
 									if ($("#"+DragAndDrop.TabsIds[tabsIdsIndex])[0] && $("#"+DragAndDrop.Parents[tabsIdsIndex])[0]){
 										$("#"+DragAndDrop.Parents[tabsIdsIndex]).append($("#"+DragAndDrop.TabsIds[tabsIdsIndex]));
@@ -147,12 +158,12 @@ function SetDragAndDropEvents() {
 							}
 							HandleDrop();
 						},1000);
-						setTimeout(function() {
-							if (browserId == "F") { // FUCKING FIREFOX SHIT AINT WORKING, SO I HAVE TO EXLUDE THIS
-								chrome.runtime.sendMessage({command: "reload_sidebar"});
-								window.location.reload();
-							}
-						},2000);
+						// setTimeout(function() {
+							// if (browserId == "F") {
+								// chrome.runtime.sendMessage({command: "reload_sidebar"});
+								// window.location.reload();
+							// }
+						// },2000);
 					}
 				});
 			});
@@ -164,10 +175,12 @@ function SetDragAndDropEvents() {
 		if (DragAndDrop.Dropped && MouseHoverOver != "" && $(".highlighted_drop_target")[0] != undefined) {
 			HandleDrop();
 		} else {
-			if (!DragAndDrop.Dropped && MouseHoverOver == "" && $(".highlighted_drop_target")[0] == undefined) {
-				DetachTabs(DragAndDrop.TabsIds);
-				HandleDrop();
-			}
+			setTimeout(function() {
+				if (!DragAndDrop.Dropped && MouseHoverOver == "" && $(".highlighted_drop_target")[0] == undefined) {
+					DetachTabs(DragAndDrop.TabsIds);
+					HandleDrop();
+				}
+			},50);
 		}
 	});
 }

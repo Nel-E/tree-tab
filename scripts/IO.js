@@ -22,9 +22,7 @@ function BindTabsSwitchingToMouseWheel() {
 
 function SetIOEvents() {
 
-	if (opt.switch_with_scroll) {
-		BindTabsSwitchingToMouseWheel();
-	} else {
+	if (!opt.switch_with_scroll) {
 		// scroll horizontally on pin list
 		$("#pin_list").bind("mousewheel DOMMouseScroll", function(event) {
 			event = event.originalEvent;
@@ -44,52 +42,8 @@ function SetIOEvents() {
 				multiplier--;
 			}
 		});
-		
-		// this is for faster scrolling in firefox, for some reason its default scrolling is slow
-		if (opt.faster_scroll) {
-			$(".group").bind("mousewheel DOMMouseScroll", function(event) {
-				event = event.originalEvent;
-				var delta = event.wheelDelta > 0 || event.detail < 0 ? -1.5 : 1.5;
-				var multiplier = 1;
-				for (var t = 1; t < 40; t++) {
-					setTimeout(function() {
-						$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
-					}, t);
-					multiplier++;
-				}
-				multiplier = 40;
-				for (var t = 41; t < 80; t++) {
-					setTimeout(function() {
-						$(".group").scrollTop($(".group").scrollTop()+(delta*multiplier));
-					}, t);
-					multiplier--;
-				}
-			});
-		}
 	}
 	
-	// scroll groups list
-	// $("#group_list").bind("mousewheel DOMMouseScroll", function(event) {
-		// event = event.originalEvent;
-		// var delta = event.wheelDelta > 0 || event.detail < 0 ? -1 : 1;
-		// var multiplier = 1;
-		// for (var t = 1; t < 20; t++) {
-			// setTimeout(function() {
-				// log($("#group_list").position().top+(delta*multiplier));
-				// $("#group_list").position().top = $("#group_list").position().top+(delta*multiplier);
-			// }, t);
-			// multiplier++;
-		// }
-		// multiplier = 20;
-		// for (var t = 21; t < 40; t++) {
-			// setTimeout(function() {
-				// $("#group_list").position().top = $("#group_list").position().top+(delta*multiplier);
-			// }, t);
-			// multiplier--;
-		// }
-	// });
-	
-
 	// catch keyboard keys
 	$(document).keydown(function(event) {
 		if (MouseHoverOver == "pin_list") {
@@ -115,10 +69,6 @@ function SetIOEvents() {
 		RefreshGUI();
 	});
 
-	// $(document).on("dragenter", "#toolbar_groups, #toolbar, #pin_list, .group", function(event) { // set mouse over id
-		// MouseHoverOver = this.id;
-	// });
-	
 	// remove middle mouse and set hiding menu
 	document.body.onmousedown = function(event) {
 		if (event.button == 1 && opt.close_with_MMB == true) {
