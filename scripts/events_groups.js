@@ -166,19 +166,20 @@ function SetGroupEvents() {
 	$(document).on("dragstart", ".group_drag_box", function(event) {
 		event.originalEvent.dataTransfer.setData("null", "null");
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-		GroupDragNode = $(this).parent();
+		DragAndDrop.DragNodeClass = "group";
+		DragAndDrop.DragNode = $(this).parent();
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 	});
 
 
 	// when dragging the group, move it up or down
 	$(document).on("dragenter", ".group_drag_box", function(event) {
-		if (GroupDragNode != undefined && $(this).parent() != GroupDragNode) {
-			if (   $(this).parent().index() <= GroupDragNode.index()  ) {
-				GroupDragNode.insertBefore($(this).parent());
+		if (DragAndDrop.DragNode != undefined && DragAndDrop.DragNodeClass == "group" && $(this).parent() != DragAndDrop.DragNode) {
+			if (   $(this).parent().index() <= DragAndDrop.DragNode.index()  ) {
+				DragAndDrop.DragNode.insertBefore($(this).parent());
 			} else {
-				if ($(this).parent().index() > GroupDragNode.index()) {
-					GroupDragNode.insertAfter($(this).parent());
+				if ($(this).parent().index() > DragAndDrop.DragNode.index()) {
+					DragAndDrop.DragNode.insertAfter($(this).parent());
 				}
 			}
 			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
@@ -193,7 +194,8 @@ function SetGroupEvents() {
 
 	// when finished dragging the group
 	$(document).on("dragend", ".group_drag_box", function(event) {
-		GroupDragNode = undefined;
+		DragAndDrop.DragNodeClass = "";
+		DragAndDrop.DragNode = undefined;
 		UpdateBgGroupsOrder();
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 	});

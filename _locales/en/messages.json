@@ -90,7 +90,7 @@
 		"message": "Import session"
 	},
 	"button_import_merge_bak": {
-		"message": "Import and merge session"
+		"message": "Import and merge session.\nImporter will try to match current tabs with those from saved session, instead of opening a new window."
 	},
 	"button_export_bak": {
 		"message": "Export session"

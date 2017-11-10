@@ -272,7 +272,7 @@ function ReplaceParents(oldTabId, newTabId) {
 	// TO DO FOLDERS
 }
 
-var DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA = {};
+var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
 
 // start all listeners
 function FirefoxListeners() {
@@ -291,10 +291,10 @@ function FirefoxListeners() {
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
 		chrome.tabs.get(tabId, function(tab) {
 			ReplaceParents(tabId, tab.id);
-			DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabId] = tab.id;
+			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] = tab.id;
 			tabs[tab.id] = tabs[tabId];
 			AppendTabTTId(tab.id);
-			// let ParentId = DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabs[tabId].parent] ? DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabs[tabId].parent] : tabs[tabId].parent;
+			// let ParentId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabs[tabId].parent] ? DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabs[tabId].parent] : tabs[tabId].parent;
 			// chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: ParentId});
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: tabs[tabId].parent});
 			schedule_save++;
@@ -303,10 +303,10 @@ function FirefoxListeners() {
 	
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		let detachTabId =  tabId;
-		if (DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabId] != undefined) {
-			detachTabId = DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabId];
+		if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
+			detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
 			setTimeout(function() {
-				delete DETACHEDTABSBug1402742WTFAREYOUDOINGMOZILLA[tabId];
+				delete DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
 			},2000);
 		}
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: detachTabId});
@@ -327,9 +327,6 @@ function FirefoxListeners() {
 		}
 		chrome.runtime.sendMessage({command: "tab_updated", windowId: tab.windowId, tab: tab, tabId: tabId, changeInfo: changeInfo});
 	});
-	
-	// chrome.tabs.onMoved.addListener(function(tabId, moveInfo) {
-	// });
 	
 	chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
 		chrome.tabs.get(addedTabId, function(tab) {
@@ -418,7 +415,7 @@ function FirefoxMessageListeners() {
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;
-			case "is_bg_is_busy":
+			case "is_bg_busy":
 				sendResponse(hold);
 			break;
 			case "update_tab":

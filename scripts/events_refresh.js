@@ -48,7 +48,7 @@ function RefreshGUI() {
 	$("#_gtetab_list")[0].innerText = caption_ungrouped_group + " (" + $("#tab_list").children().length + ")";
 	
 	$(".group_button").each(function(){
-		$(this).css({ "height": $(this).children(0).outerWidth() + 12 });
+		$(this).css({ "height": $(this).children(0).innerWidth() });
 	});
 
 	$("#groups").css({ "top": $("#toolbar")[0].getBoundingClientRect().height + $("#pin_list")[0].getBoundingClientRect().height, "left": $("#toolbar_groups").outerWidth(), "height": $(window).height() - $("#pin_list")[0].getBoundingClientRect().height - $("#toolbar").outerHeight(), "width": $(window).width() - $("#toolbar_groups").outerWidth() });
@@ -154,7 +154,7 @@ function GetFaviconAndTitle(tabId) {
 					$("#tab_title" + tab.id)[0].textContent = title;
 					$("#tab_header" + tab.id).attr("title", title);
 					setTimeout(function() {
-						if ($("#" + tabId).length != 0) GetFaviconAndTitle(tabId);
+						if ($("#" + tabId)[0]) GetFaviconAndTitle(tabId);
 					}, 1000);
 				}
 			}

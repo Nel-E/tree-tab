@@ -5,7 +5,7 @@
 
 function AddNewFolder() {
 	var ID = GenerateNewFolderID();
-	AppendFolder({id: ID});
+	AppendFolder({id: ID, name: "untitled"});
 }
 
 function AppendFolder(param) {
@@ -14,8 +14,14 @@ function AppendFolder(param) {
 	var dt = document.createElement("div"); dt.className = "drop_target drag_entered_top"; dt.id = "du"+param.id; fd.appendChild(dt); // DROP TARGET TOP
 	var db = document.createElement("div"); db.className = "drop_target drag_entered_bottom"; db.id = "dd"+param.id; fd.appendChild(db); // DROP TARGET BOTTOM
 
-	var th = document.createElement("div"); th.className = "tab_header"; th.id = "tab_header"+param.id; th.draggable = true; fd.appendChild(th); // HEADER
+	var fh = document.createElement("div"); fh.className = "folder_header"; fh.id = "tab_header"+param.id; fh.draggable = true; fh.textContent = param.name; fd.appendChild(fh); // HEADER
+					// $("#tab_title" + tab.id)[0].textContent = title;
+					// $("#tab_header" + tab.id).attr("title", title);
 
+	
+	
+	
+	var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.id; fd.appendChild(ch);
 	// var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+param.tab.id; th.appendChild(tt); // TITLE
 
 	$("#"+active_group).append(fd);

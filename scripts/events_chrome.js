@@ -8,11 +8,15 @@ function StartChromeListeners(){
 
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "drag_drop") {
+			DragAndDrop.DragNodeClass = message.DragNodeClass;
 			DragAndDrop.SelectedTabsIds = message.SelectedTabsIds;
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.Parents = message.Parents;
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.Depth = message.Depth;
+		}
+		if (message.command == "drag_dropped") {
+			DragAndDrop.Dropped = message.Dropped;
 		}
 		if (message.command == "reload_sidebar") {
 			window.location.reload();
@@ -117,12 +121,14 @@ function StartChromeListeners(){
 					RefreshGUI();
 				break;
 				case "tab_removed":
-					if (opt.promote_children && $("#"+message.tabId).is(".tab")) {
-						$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
-					} else {
-						$("#"+message.tabId).find(".tab").each(function() {
-							chrome.tabs.remove(parseInt(this.id));
-						});
+					if ($(".tab#"+message.tabId)[0]) {
+						if (opt.promote_children) {
+							$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+						} else {
+							$("#"+message.tabId).find(".tab").each(function() {
+								chrome.tabs.remove(parseInt(this.id));
+							});
+						}
 					}
 					RemoveTabFromList(message.tabId);
 					RefreshExpandStates();

@@ -127,16 +127,24 @@ function SetTabEvents() {
 			// hide tab that will be closed
 			$("#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
 
+
+			chrome.tabs.update(tabId, {muted:true, pinned: false});
+
 			// repeated what is in chrome events on tab_removed event, to avoid lag
-			if (opt.promote_children && $(this).is(".tab")) {
-				$("#ch"+tabId).children().insertAfter($("#"+tabId));
+			if ($(this).is(".tab")) {
+				if (opt.promote_children) {
+					$("#ch"+tabId).children().insertAfter($(this));
+				} else {
+					$(this).find(".tab").each(function() {
+						chrome.tabs.remove(parseInt(this.id));
+					});
+				}
 			}
-			
+
 			// delayed tab removal, so ActivatePrevTab() or ActivateNextTab() will not activate wrong tab
 			setTimeout(function() {
-				chrome.tabs.update(tabId, { pinned: false });
-				chrome.tabs.remove(tabId);
-			}, 500);
+				if ($("#"+tabId)[0]) chrome.tabs.remove(tabId);
+			}, 1000);
 		}
 	});
 

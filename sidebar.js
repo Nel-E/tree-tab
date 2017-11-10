@@ -35,7 +35,7 @@ function Run() {
 	LoadPreferences();
 	chrome.windows.getCurrent({populate: false}, function(window) {
 		CurrentWindowId = window.id;
-		chrome.runtime.sendMessage({command: "is_bg_is_busy"}, function(response) {
+		chrome.runtime.sendMessage({command: "is_bg_busy"}, function(response) {
 			hold = response;
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 				bgtabs = Object.assign({}, response);
@@ -157,11 +157,6 @@ function Initialize() {
 		if (browserId == "V") {
 			VivaldiRefreshMediaIcons();
 		}
-		
-		// if (browserId == "F") {
-			// browser.sidebarAction.open();
-		// }
-
 			
 	});			
 }

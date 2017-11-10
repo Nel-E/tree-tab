@@ -13,11 +13,9 @@ var windows = {};
 var tabs = {};
 
 var MouseHoverOver = "";
-var GroupDragNode;
 
 
-
-var DragAndDrop = {Dropped: false, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
+var DragAndDrop = {DragNode: undefined, DragNodeClass: "", Dropped: true, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
 var DropTargetsInFront = false;
 
 

@@ -7,39 +7,30 @@
 function BindTabsSwitchingToMouseWheel() {
 	// switch tabs with mouse scroll
 	$("#pin_list, .group").bind("mousewheel DOMMouseScroll", function(event) {
-		e = event.originalEvent;
-		var delta = e.wheelDelta > 0 || e.detail < 0 ? -1 : 1;
-		if (delta < 0) {
+		let prev = event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0;
+		if (prev) {
 			ActivatePrevTab();
 		} else {
-			if (delta > 0) {
-				ActivateNextTab();
-			}
+			ActivateNextTab();
 		}
 		event.preventDefault();
 	});
 }
 
 function SetIOEvents() {
-
 	if (!opt.switch_with_scroll) {
-		// scroll horizontally on pin list
 		$("#pin_list").bind("mousewheel DOMMouseScroll", function(event) {
-			event = event.originalEvent;
-			var delta = event.wheelDelta > 0 || event.detail < 0 ? -1 : 1;
-			var multiplier = 1;
-			for (var t = 1; t < 20; t++) {
+			let direction = (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) ? -1 : 1;
+			let speed = 0.1;
+			for (let t = 1; t < 40; t++) {
 				setTimeout(function() {
-					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
+					if (t < 30) {
+						speed = speed+0.1; // accelerate
+					} else {
+						speed = speed-0.3; // decelerate
+					}
+					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(direction*speed));
 				}, t);
-				multiplier++;
-			}
-			multiplier = 20;
-			for (var t = 21; t < 40; t++) {
-				setTimeout(function() {
-					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+(delta*multiplier));
-				}, t);
-				multiplier--;
 			}
 		});
 	}
@@ -59,7 +50,7 @@ function SetIOEvents() {
 		if (MouseHoverOver.match("g_|tab_list") !== null) {
 			// ctrl+a to select all
 			if (event.ctrlKey && event.which == 65) {
-				$(".tab:visible").addClass("selected");
+				$("#"+active_group).children(".tab:visible").addClass("selected");
 			}
 			// ctrl+i to invert selection
 			if (event.ctrlKey && event.which == 73) {

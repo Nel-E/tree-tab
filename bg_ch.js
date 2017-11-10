@@ -327,7 +327,7 @@ function ChromeMessageListeners() {
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;
-			case "is_bg_is_busy":
+			case "is_bg_busy":
 				sendResponse(hold);
 			break;
 			case "update_tab":

@@ -1,8 +1,5 @@
 /* SCROLLBARS */
 
-body {
-	background-color: var(--tab_list_background);
-}
 
 .group::-webkit-scrollbar,
 #pin_list::-webkit-scrollbar {
@@ -28,6 +25,9 @@ body {
 
 div {
 	background-repeat: no-repeat;
+}
+.sidebar_body {
+	background-color: var(--tab_list_background);
 }
 
 
@@ -380,9 +380,12 @@ div {
 }
 
 .group_title {
-	position: relative;
+
+	padding-right: 5px;
+	padding-left: 6px;
 	display: inline-block;
-	transform: rotateZ(-90deg) translateX(calc(-100% - 5px)) translateY(1.5px);
+	position: absolute;
+	transform: rotateZ(-90deg) translateX(-100%) translateY(1.5px);
 	transform-origin: top left;
 
 	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
@@ -1145,6 +1148,202 @@ div {
 	display: none;
 	z-index: 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* FOLDERS */
+.folder_title {
+	z-index: 5;
+	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	width: auto;
+	overflow: hidden;
+	padding-right: 3px;
+	padding-left: var(--tab_title_text_padding_left);
+	font-size: var(--title_font_size);
+}
+
+.folder {
+	position: relative;
+	display: block;
+	left: 0px;
+	height: auto;
+	width: auto;
+	border-top: 1px solid transparent;
+}
+.folder>.folder_header {
+	z-index: 10;
+	position: relative;
+	top: 0px;
+	left: 1px;
+	height: var(--tab_height);
+	line-height: var(--tab_height_line);
+	width: calc(100% - 4px);
+	background-image: url(../theme/empty.svg);
+	background-size: var(--favicon_size);
+	background-position: var(--favicon_left), center;
+}
+
+.drop_target {
+	display: none;
+	position: absolute;
+}
+
+.folder>.drag_enter_center {
+	border-radius: var(--tab_header_border_radius);
+	z-index: 11;
+	top: -1px;
+	left: 1px;
+	height: calc(var(--tab_height) + 2px);
+	width: calc(100% - 4px);
+	border: 1px solid transparent;
+}
+
+.folder>.drag_enter_center.highlighted_drop_target {
+	border: 1px solid var(--drag_indicator);
+}
+
+.folder>.drag_entered_top {
+	border-radius: var(--tab_header_border_radius);
+	z-index: 15;
+	top: -1px;
+	left: 1px;
+	width: calc(100% - 2px);
+	height: var(--drag_area_top);
+	border-top: 1px solid transparent;
+}
+.folder>.drag_entered_top.highlighted_drop_target {
+	border-top: 1px solid var(--drag_indicator);
+}
+
+.folder>.drag_entered_bottom {
+	border-radius: var(--tab_header_border_radius);
+	z-index: 20;
+	bottom: -1px;
+	left: 1px;
+	width: calc(100% - 2px);
+	height: var(--drag_area_bottom);
+	border-bottom: 1px solid transparent;
+}
+.folder>.drag_entered_bottom.highlighted_drop_target {
+	bottom: -1px;
+	border-bottom: 1px solid var(--drag_indicator);
+}
+
+.children>.folder:last-child>.drag_entered_bottom {
+	z-index: 19;
+	bottom: 3px;
+	border-bottom: 1px solid transparent;
+}
+.children>.folder:last-child>.drag_entered_bottom.highlighted_drop_target {
+	bottom: -1px;
+	height: calc(var(--drag_area_bottom) + 4px);
+	border-bottom: 1px solid var(--drag_indicator);
+}
+
+
+
+.c>.folder_header,
+.o>.folder_header {
+	background-position: calc(var(--favicon_left) + 8px), center;
+}
+.c>.folder_header>.tab_title,
+.o>.folder_header>.tab_title {
+	padding-left: calc(var(--tab_title_text_padding_left) + 8px);
+}
+.expand {
+	z-index: 200;
+	position: absolute;
+	top: calc(var(--tab_height)/2 - 8px);
+	left: 0px;
+	width: 24px;
+	height: 16px;
+}
+
+.children {
+	position: relative;
+	padding-left: var(--children_padding_left);
+}
+
+.o>.children {
+	height: auto;
+}
+
+.c>.children {
+	display: none;
+	height: 0px;
+}
+
+.c>.folder_header>.expand.hover,
+.o>.folder_header>.expand.hover {
+	background-color: var(--expand_hover_background);
+}
+
+.c>.folder_header>.expand {
+	background-size: 24px 16px;
+	background-position: 0px center;
+	background-color: var(--expand_closed_background);
+	-webkit-mask-box-image: url(../theme/expand_closed.svg);
+	mask-image: url(../theme/expand_closed.svg);
+}
+
+.o>.folder_header>.expand {
+	background-size: 24px 16px;
+	background-position: 0px center;
+	background-color: var(--expand_open_background);
+	-webkit-mask-box-image: url(../theme/expand_open.svg);
+	mask-image: url(../theme/expand_open.svg);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* MENU */
