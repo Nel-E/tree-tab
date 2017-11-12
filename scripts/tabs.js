@@ -24,7 +24,7 @@ async function UpdateData() {
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
-						parent: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab")[0].id,
+						parent: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab, .folder")[0].id,
 						index: $(this).index(),
 						expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
 					}
@@ -175,10 +175,7 @@ function SetTabClass(param) {
 		$("#"+param.id).removeClass("tab").removeClass("n").removeClass("o").removeClass("c").addClass("pin");
 	} else {
 		$("#"+active_group).prepend($("#"+param.id));
-		
 		$("#"+param.id).removeClass("pin").removeClass("attention").addClass("tab");
-
-
 		RefreshExpandStates();
 	}
 	chrome.tabs.update(parseInt(param.id), {pinned: param.pin});
@@ -319,30 +316,6 @@ function ActivateNextTab() {
 	}
 }
 
-// .class or #id
-// function ActivatePrevTab(Id_Class) {
-	// if ($(".pin"+Id_Class)[0]) {
-		// if ($(".pin"+Id_Class).prev(".pin")[0]) {
-			// chrome.tabs.update(parseInt($(".pin"+Id_Class).prev(".pin")[0].id), { active: true });
-		// } 
-	// }
-	
-	// if ($(".tab"+Id_Class+":visible")[0]) {
-		// if ($(".tab"+Id_Class+":visible").prev().find(".tab").length > 0) {
-			// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").prev().find(".tab").last()[0].id), { active: true });
-		// } else {
-			// if ($(".tab"+Id_Class+":visible").prev(".tab")[0]) {
-				// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").prev(".tab")[0].id), { active: true });
-			// } else {
-				// if ($(".tab"+Id_Class+":visible").parent().is(".children") && $(".tab"+Id_Class+":visible").parent().parent(".tab")[0]) {
-					// chrome.tabs.update(parseInt($(".tab"+Id_Class+":visible").parent().parent(".tab")[0].id), { active: true });
-				// }
-			// }
-		// }
-
-	// }
-// }
-
 function ActivatePrevTab() {
 	if ($(".pin.active")[0]) {
 		if ($(".pin.active").prev(".pin")[0]) {
@@ -377,4 +350,160 @@ function DropTargetsSendToBack() {
 		$(".drop_target").hide();
 		DropTargetsInFront = false;
 	}
+}
+
+
+// **********		  TABS EVENTS		  ***************
+
+function SetTabEvents() {
+	
+	// double click to create tab
+	$(document).on("dblclick", ".group, #pin_list, .tab", function(event) {
+		if (event.button == 0 && $(event.target).is(this)) {
+			if (event.target.id == "pin_list") {
+				chrome.tabs.create({ pinned: true });
+			} else {
+				chrome.tabs.create({});
+			}
+		}
+	});
+
+	$(document).on("mouseenter", ".close", function(event) {
+		$(this).addClass("close_hover");
+	});
+
+	$(document).on("mouseleave", ".close", function(event) {
+		$(".close_hover").removeClass("close_hover");
+	});
+
+	$(document).on("mouseenter", ".expand", function(event) {
+		$(this).addClass("hover");
+	});
+
+	$(document).on("mouseleave", ".expand", function(event) {
+		$(".expand.hover").removeClass("hover");
+	});
+
+	$(document).on("mouseover", ".tab_header", function(event) {
+		$(this).addClass("tab_header_hover");
+
+		if (opt.always_show_close == false) {
+			$(this).addClass("close_show");
+		}
+	});
+
+	$(document).on("mouseleave", ".tab_header", function(event) {
+		$(this).removeClass("tab_header_hover");
+
+		if (opt.always_show_close == false) {
+			$(this).removeClass("close_show");
+		}
+	});
+
+	// EXPAND BOX - EXPAND / COLLAPSE
+	$(document).on("mousedown", ".expand", function(event) {
+		event.stopPropagation();
+		if (event.button == 0) {
+			if ($(this).parent().parent().is(".o")) {
+				$(this).parent().parent().removeClass("o").addClass("c");
+				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "c" } });
+			} else {
+				if ($(this).parent().parent().is(".c")) {
+					$(this).parent().parent().removeClass("c").addClass("o");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "o" } });
+					if (opt.close_other_trees) {
+						$(".o:visible:not(#"+$(this).parent().parent()[0].id+")").removeClass("o").addClass("c");
+						$(this).parents(".tab").each(function() {
+							$(this).removeClass("n").removeClass("c").addClass("o");
+							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "o" } });
+						});
+						$(".c").each(function() {
+							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "c" } });
+						});
+					}
+				}
+			}
+		}
+	});
+
+	// SELECT OR CLOSE TAB/PIN
+	$(document).on("mousedown", ".tab, .pin", function(event) {
+		if ($(".menu").is(":visible")) {
+			return;
+		}
+		event.stopPropagation();
+
+		DropTargetsSendToBack();
+		let tabId = parseInt(this.id);
+		
+		if (event.button == 0) {
+			// SET SELECTION WITH SHIFT
+			if (event.shiftKey) {
+				$(".pin, .tab:visible").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly");
+				if ($(this).index() >= $(".active:visible").index()) {
+					$(".active:visible").nextUntil($(this), ":visible").add($(".active:visible")).add($(this)).addClass("selected");
+				} else {
+					$(".active:visible").prevUntil($(this), ":visible").add($(".active:visible")).add($(this)).addClass("selected");
+				}
+			}
+
+			// TOGGLE SELECTION WITH CTRL
+			if (event.ctrlKey) {
+				// if ($(".active:visible").is(":not(.selected)")) {
+					// $(".active:visible").addClass("selected");
+				// }
+				$(this).toggleClass("selected");
+			}
+		}
+
+		// CLOSE TAB
+		if (
+			(
+			($(this).is(".tab") && $(event.target).is(":not(.expand)")) && ((event.button == 1 && opt.close_with_MMB == true)
+			|| (event.button == 0 && $(event.target).is(".close, .close_img"))))
+			|| ($(this).is(".pin") && event.button == 1 && opt.close_with_MMB == true && opt.allow_pin_close == true)
+		) {
+			if ($(this).is(".active:visible") && opt.after_closing_active_tab != "browser") {
+				if (opt.after_closing_active_tab == "above") {
+					ActivatePrevTab();
+				}
+				if (opt.after_closing_active_tab == "below") {
+					ActivateNextTab();
+				}
+			}
+			
+			// hide tab that will be closed
+			$("#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
+
+			chrome.tabs.update(tabId, {muted:true, pinned: false});
+
+			// repeated what is in chrome events on tab_removed event, to avoid lag
+			if ($(this).is(".tab")) {
+				if (opt.promote_children) {
+					$("#ch"+tabId).children().insertAfter($(this));
+				} else {
+					$(this).find(".tab").each(function() {
+						chrome.tabs.remove(parseInt(this.id));
+					});
+				}
+			}
+
+			// delayed tab removal, so ActivatePrevTab() or ActivateNextTab() will not activate wrong tab
+			setTimeout(function() {
+				if ($("#"+tabId)[0]) chrome.tabs.remove(tabId);
+			}, 1000);
+		}
+	});
+
+	// SINGLE CLICK TO ACTIVATE TAB
+	$(document).on("click", ".tab_header", function(event) {
+		if ($(".menu").is(":visible")) {
+			return;
+		}
+		event.stopPropagation();
+		if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+			SetActiveTab($(this).parent()[0].id);
+			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
+		}
+	});
 }

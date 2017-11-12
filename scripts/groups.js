@@ -107,41 +107,22 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 	$("#_"+groupId).addClass("active_group");
 	$(".tab, .group").hide();
 	$("#"+groupId).show();
-	$("#"+groupId).find(".tab").show();
+	$("#"+groupId+" .tab").show();
 	active_group = groupId;
 	RefreshGUI();
 	$("#group_edit").hide();
-	if ($("#"+groupId).find(".active")[0]){
-		chrome.tabs.update(parseInt($("#"+groupId).find(".active")[0].id), {active: true});
-		ScrollToTab($("#"+groupId).find(".active")[0].id);
+	
+	if (switch_to_active_in_group && $("#"+groupId+" .active")[0]){
+		chrome.tabs.update(parseInt($("#"+groupId+" .active")[0].id), {active: true});
+	}
+	if (scroll_to_active){
+		ScrollToTab($("#"+groupId+" .active")[0].id);
 	}
 	if (groupId == "tab_list" && $("#button_edit_group")[0]) {
 		$("#button_remove_group, #button_edit_group").addClass("disabled");
 	} else {
 		$("#button_remove_group, #button_edit_group").removeClass("disabled");
 	}
-	
-	
-	// setTimeout(function() {
-		// let grp = document.getElementById(groupId);
-		// let scrll = grp.getElementsByTagName("scrollbar")[0];
-		// scrll.setAttribute("increment", 100);
-
-		// var gsb = document.createElement("scrollbar"); gsb.setAttribute("increment", 100); grp.appendChild(gsb);
-	
-	
-	
-	// }, 400);
-	
-	// let gr = $("#"+groupId+" scrollbar");
-	// let scrll = $("#"+groupId+" scrollbar");
-	// .getElementsByTagName(")[0];
-	// let gr = document.getElementById("groups");
-	// let scrll = gr.getElementsByTagName("scrollbar");
-	// let scrll = document.getElementsByTagName("scrollbar");
-	// let scrll = document.getElementById(groupId).childNodes;
-	// console.log(scrll);
-	
 	chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
 }
 
@@ -213,3 +194,102 @@ function GroupEditConfirm() {
 	// }
 	// $("#move_to_group_menu").css({"display": "block", "top": y-24, "left": x-20});
 // }
+
+
+// **********         GROUPS EVENTS         ***************
+
+function RestoreStateOfGroupsToolbar() {
+	chrome.runtime.sendMessage({command: "get_group_bar", windowId: CurrentWindowId}, function(response) {
+		$("#toolbar_groups").css({"display": "inline-block"});
+		if (response == true) {
+			$("#toolbar_groups").removeClass("hidden");
+			$("#toolbar_groups").css({"width": "19px", "border-right": "1px solid var(--group_list_borders)"});
+		} else {
+			$("#toolbar_groups").addClass("hidden");
+			$("#toolbar_groups").css({"width": "0px", "border-right": "none"});
+		}
+	});
+}
+
+function SetGroupEvents() {
+			
+	// activate group
+	$(document).on("mousedown", ".group_button", function(event) {
+		menuGroupId = (this.id).substr(1);
+		if (event.button == 0) {
+			SetActiveGroup((this.id).substr(1), true, true);
+		}
+	});
+
+	// show/hide groups toolbar
+	$(document).on("mousedown", "#button_groups_toolbar_hide", function(event) {
+		if (event.button == 0) {
+			// $("#toolbar_groups").toggleClass("hidden");
+			$("#toolbar_groups").toggleClass("hidden");
+			if ($("#toolbar_groups").is(".hidden")) {
+				$("#toolbar_groups").css({"width": "0px", "border-right": "none"});
+				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: false, windowId: CurrentWindowId});
+			} else {
+				$("#toolbar_groups").css({"width": "19px", "border-right": "1px solid var(--group_list_borders)"});
+				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: true, windowId: CurrentWindowId});
+			}
+			RefreshGUI();
+		}
+	});
+
+
+	// edit group dialog box
+	$(document).on("mousedown", "#group_edit_discard", function(event) {
+		$("#group_edit").hide(0);
+	});
+	$("#group_edit_name").keyup(function(e) {
+		if (e.keyCode == 13) {
+			GroupEditConfirm();
+		}
+	});
+	$(document).on("mousedown", "#group_edit_confirm", function(event) {
+		GroupEditConfirm();
+	});
+
+	// show color picker
+	$(document).on("mousedown", "#group_edit_font, #group_edit_background", function(event) {
+		event.stopPropagation();
+		PickColor = this.id;
+		$("#color_picker")[0].value = "#"+RGBtoHex($(this).css("background-color"));
+		$("#color_picker").focus();
+		$("#color_picker").click();
+	});
+	
+	$(document).on("input", "#color_picker", function(event) {
+		$("#"+PickColor).css({"background-color": $("#color_picker")[0].value});
+	});	
+
+	// scroll groups
+	// $(document).on("mousedown", "#scroll_group_up, #scroll_group_down", function(event) {
+		// IOKeys.LMB = true;
+		// ScrollGroupList($(this).is("#scroll_group_up"));
+	// });
+	// $(document).on("mouseleave", "#scroll_group_up, #scroll_group_down", function(event) {
+		// IOKeys.LMB = false;
+	// });
+
+	// remove tabs from group button
+	// $(document).on("mousedown", "#remove_tabs_from_group", function(event) {
+		// if (event.button == 0 && vt.ActiveGroup.match("at|ut") == null) {
+			// AppendTabsToGroup({tabsIds: $(".tab.selected:visible").map(function() {return parseInt(this.id);}).toArray(), groupId: "ut", SwitchTabIfHasActive: true, insertAfter: true, moveTabs: true});
+		// }
+	// });
+
+
+	// remove group
+	// $(document).on("mousedown", ".group", function(event) {
+		// if (event.button == 1 || IOKeys.Shift) {
+			// if (IOKeys.Shift) {
+				// GroupRemove($(this)[0].id, true);
+			// } else {
+				// GroupRemove($(this)[0].id, false);
+			// }
+		// }
+	// });
+
+}

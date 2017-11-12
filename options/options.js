@@ -607,7 +607,7 @@ function SetEvents() {
 			// event.preventDefault();
 		// }
 	// });
-	$(document).on("mousedown", "*", function(event) {
+	// $(document).on("mousedown", "*", function(event) {
 	// $(document).on("mousedown", ".pick_col", function(event) {
 		// event.stopPropagation();
 		// if (event.button == 0 && event.shiftKey) {
@@ -623,8 +623,8 @@ function SetEvents() {
 			// $(this).css({ "top": $(this).position().top+1 });
 		// }
 		// console.log(this.id + " top: " + $(this).position().top + "px; left: " + $(this).position().left + "px;");
-		console.log(this.id);
-	});
+		// console.log(this.id);
+	// });
 }
 
 

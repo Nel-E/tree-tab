@@ -2,7 +2,9 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-if (browserId == "F" && localStorage.getItem("t0") == null) {
+if (localStorage.getItem("t0") !== null){
+	LoadV015(0);
+} else {
 	LoadPreferences();
 	FirefoxStart();
 	FirefoxMessageListeners();

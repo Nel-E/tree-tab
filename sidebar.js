@@ -73,6 +73,10 @@ function Initialize() {
 
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
 
+// AddNewFolder();			
+// AddNewFolder();			
+// AddNewFolder();			
+// AddNewFolder();			
 
 		if (theme.ToolbarShow) {
 			if (theme.theme_version == DefaultTheme.theme_version) {
@@ -81,22 +85,11 @@ function Initialize() {
 				$("#toolbar").html(DefaultToolbar);
 			}
 		}
-		
 
 		let tc = tabs.length;
 		for (var ti = 0; ti < tc; ti++) {
 			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
 		}
-		
-		for (var group in bggroups) {
-			if ($("#"+bggroups[group].activetab)[0]) {
-				$("#"+bggroups[group].activetab).addClass("active");
-			}
-		}
-		
-		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-			SetActiveGroup(response, true, true);
-		});
 
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].parent)[0] && $("#"+bgtabs[tabs[ti].id].parent).is(".group")) {
@@ -118,6 +111,16 @@ function Initialize() {
 			}
 		}
 
+		for (var group in bggroups) {
+			if ($("#"+group+" #"+bggroups[group].activetab)[0]) {
+				$("#"+bggroups[group].activetab).addClass("active");
+			}
+		}
+		
+		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+			SetActiveGroup(response, true, true);
+		});
+
 		RearrangeTreeTabs(tabs, bgtabs, true);
 		RefreshExpandStates();
 		
@@ -131,6 +134,7 @@ function Initialize() {
 		SetTRefreshEvents();
 		SetGroupEvents();
 		SetTabEvents();
+		SetFolderEvents();
 		SetMenu();
 		SetDragAndDropEvents();
 
@@ -145,7 +149,7 @@ function Initialize() {
 			delete theme;
 		},5000);
 		
-		if ($(".active").length == 0) {
+		if ($(".active:visible").length == 0) {
 			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
 				if (tabs[0]) {
 					SetActiveTab(tabs[0].id);
@@ -153,7 +157,6 @@ function Initialize() {
 			});
 		}
 		
-// AddNewFolder();			
 		if (browserId == "V") {
 			VivaldiRefreshMediaIcons();
 		}

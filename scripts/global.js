@@ -15,11 +15,10 @@ var tabs = {};
 var MouseHoverOver = "";
 
 
-var DragAndDrop = {DragNode: undefined, DragNodeClass: "", Dropped: true, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
+var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", Dropped: true, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
 var DropTargetsInFront = false;
 
 
-var timeout = false;
 var menuTabId = 0;
 var CurrentWindowId = 0;
 var SearchIndex = 0;

@@ -292,6 +292,41 @@ function SetToolbarEvents() {
 	});
 
 
+	// new group button
+	$(document).on("mousedown", "#button_new_group", function(event) {
+		if (event.button == 0) {
+			AddNewGroup({});
+		}
+	});
+
+	// new group button
+	$(document).on("mousedown", "#button_remove_group", function(event) {
+		let close_tabs = event.shiftKey;
+		if (event.button == 0) {
+			if (active_group != "tab_list") {
+				GroupRemove(active_group, close_tabs);
+			}
+		}
+	});
+
+	// EDIT GROUP
+	$(document).on("mousedown", "#button_edit_group", function(event) {
+		if (active_group != "tab_list") {
+			ShowGroupEditWindow(active_group);
+		}
+	});
+	
+	// import-export group
+	$(document).on("mousedown", "#button_export_group", function(event) {
+		ExportGroup(bggroups[active_group].name+".tt_group");
+	});
+
+	$(document).on("mousedown", "#button_import_group", function(event) {
+		ShowOpenFileDialog("file_import_group", ".tt_group");
+	});
+	$(document).on("change", "#file_import_group", function(event) {
+		ImportGroup();
+	});
 
 
 
