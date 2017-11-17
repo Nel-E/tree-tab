@@ -15,14 +15,6 @@
 		"16": "icons/16.png"
 	},
 	"permissions": [ "tabs", "sessions", "<all_urls>" ],
-	"commands": {
-		"open_sidebar": {
-			"suggested_key": {
-				"default": "Alt+Ctrl+6"
-			},
-			"description": "__MSG_OpenSidebar__"
-		}
-	},
 	"sidebar_action": {
 		"default_icon": {
 			"16": "icons/16.png",
