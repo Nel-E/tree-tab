@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"default_locale": "en",
 	"background": {
-		"scripts": [ "background.js" ],
+		"page": "background.html",
 		"persistent": true
 	},
 	"name": "Tree Tabs",
@@ -15,20 +15,6 @@
 		"16": "icons/16.png"
 	},
 	"permissions": [ "tabs", "sessions", "<all_urls>" ],
-	"commands": {
-		"goto_tab_above": {
-			"suggested_key": {
-				"default": "Alt+1"
-			},
-			"description": "Go to tab above"
-		},
-		"goto_tab_below": {
-			"suggested_key": {
-				"default": "Alt+2"
-			},
-			"description": "Go to tab below"
-		}
-	},
 	"options_ui": {
 		"page": "options.html",
 		"open_in_tab": false

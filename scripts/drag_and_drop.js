@@ -107,29 +107,47 @@ function SetDragAndDropEvents() {
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 	});
 	
-	// SET DROP TARGET WHEN ENTERING PINS AND TABS
-	$(document).on("dragenter", ".tab>.drag_entered_top:not(.highlighted_drop_target), .tab>.drag_entered_bottom:not(.highlighted_drop_target), .tab>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
+	// SET DROP TARGET WHEN ENTERING PINS
+	$(document).on("dragenter", ".pin>.drag_entered_top:not(.highlighted_drop_target), .pin>.drag_entered_bottom:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
-		if ($(".selected:visible").find($(this)).length > 0 || DragAndDrop.DragNodeClass != "tab") { return; }
-		if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
-			if ($(this).is(".drag_enter_center")) {
-				if (opt.max_tree_depth == 0) { return; }
-				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth) { return; }
-			} else {
+		if (DragAndDrop.DragNodeClass == "tab") {
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			$(this).addClass("highlighted_drop_target");
+		}
+	});
+	
+	// SET DROP TARGET WHEN ENTERING TABS
+	$(document).on("dragenter", ".tab>.drag_entered_top:not(.highlighted_drop_target), .tab>.drag_entered_bottom:not(.highlighted_drop_target)", function(event) {
+		event.stopPropagation();
+		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab") {
+			if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
 				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth+1) { return; }
 			}
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			$(this).addClass("highlighted_drop_target");
 		}
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$(this).addClass("highlighted_drop_target");
 	});
+	$(document).on("dragenter", ".tab>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
+		event.stopPropagation();
+		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab") {
+			if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
+				if (opt.max_tree_depth == 0) { return; }
+				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth) { return; }
+			}
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			$(this).addClass("highlighted_drop_target");
+		}
+	});
+
 	
 	// SET DROP TARGET WHEN ENTERING FOLDERS
 	$(document).on("dragenter", ".folder>.drag_entered_top:not(.highlighted_drop_target), .folder>.drag_entered_bottom:not(.highlighted_drop_target), .folder>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
-		if (DragAndDrop.DragNodeClass == "group") { return; }
-		// if (/* $(".selected:visible").find($(this)).length > 0 ||  */  DragAndDrop.DragNodeClass != "folder") { return; }
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$(this).addClass("highlighted_drop_target");
+		if (DragAndDrop.DragNodeClass != "group") {
+			// if (/* $(".selected:visible").find($(this)).length > 0 ||  */  DragAndDrop.DragNodeClass != "folder") { return; }
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			$(this).addClass("highlighted_drop_target");
+		}
 	});
 	
 	// SET DROP TARGET, PIN_LIST, TAB_LIST, GROUP OR GROUP_BUTTON
@@ -303,6 +321,28 @@ function DropToTarget(TargetNode) {
 	
 	$(".highlighted_selected").addClass("selected").removeClass("highlighted_selected");
 	
+
+
+
+
+
+	// if ($(".tab.active:visible")[0] == undefined) {
+		// bggroups[$("#"+tabId).parents(".group")[0].id].activetab = parseInt(tabId);
+		
+		// if ($("#"+tabId).parents(".group")[0].id != active_group) {
+			// SetActiveGroup($("#"+tabId).parents(".group")[0].id, false, true);
+		// }
+		
+		
+		// chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
+		
+		
+		
+	// }
+
+
+
+
 	RefreshExpandStates();
 	DragAndDrop.timeout = false;
 	RefreshGUI();

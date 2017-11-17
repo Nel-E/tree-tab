@@ -5,7 +5,7 @@
 // **********       TABS FUNCTIONS          ***************
 
 async function UpdateData() {
-	setTimeout(function() {
+	setInterval(function() {
 		if (schedule_update_data > 1) {schedule_update_data = 1;}
 		if (schedule_update_data > 0) {
 			$(".pin").each(function() {
@@ -32,13 +32,11 @@ async function UpdateData() {
 			});
 			schedule_update_data--;
 		}
-		UpdateData();
-	},1000);
+	}, 1000);
 }
 
 function RearrangeBrowserTabsCheck() {
-	setTimeout(function() {
-		RearrangeBrowserTabsCheck();
+	setInterval(function() {
 		if (opt.syncro_tabbar_tabs_order) {
 			if (schedule_rearrange_tabs > 1) {schedule_rearrange_tabs = 1;}
 			if (schedule_rearrange_tabs > 0) {
@@ -47,7 +45,7 @@ function RearrangeBrowserTabsCheck() {
 				schedule_rearrange_tabs--;
 			}
 		}
-	},1000);
+	}, 1000);
 }
 
 async function RearrangeBrowserTabs(tabIds, tabIndex) {
@@ -56,7 +54,9 @@ async function RearrangeBrowserTabs(tabIds, tabIndex) {
 			if (tab && tabIndex != tab.index) {
 				chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
 			}
-			RearrangeBrowserTabs( tabIds, (tabIndex-1) );
+			setTimeout(function() {
+				RearrangeBrowserTabs( tabIds, (tabIndex-1) );
+			}, 1);
 		});
 	}
 }
@@ -80,7 +80,7 @@ function RearrangeTreeTabs(tabs, bgtabs, first_run) {
 // param.Append - if true Appends tab at the end of tree if false or prepends
 function AppendTab(param) {
 	if ($("#"+param.tab.id).length > 0) {
-		GetFaviconAndTitle(param.tab.id);
+		GetFaviconAndTitle(param.tab.id, param.addCounter);
 		return;
 	}	
 	
@@ -142,8 +142,9 @@ function AppendTab(param) {
 		}
 	}
  
-	GetFaviconAndTitle(param.tab.id);
+	GetFaviconAndTitle(param.tab.id, param.addCounter);
 	RefreshMediaIcon(param.tab.id);
+
 
 	if (param.tab.active && param.SkipSetActive == undefined) {
 		SetActiveTab(param.tab.id);
@@ -187,7 +188,7 @@ function SetActiveTab(tabId) {
 		$(".active:visible").removeClass("active").removeClass("selected");
 		$(".pin, .tab:visible").removeClass("active").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$("#"+tabId).removeClass("attention").addClass("active")/* .addClass("selected") */;
+		$("#"+tabId).removeClass("attention").addClass("active");
 		ScrollToTab(tabId);
 		SetActiveTabInActiveGroup(tabId);
 	}
@@ -270,7 +271,7 @@ function CloseTabs(tabsIds) {
 	});
 	setTimeout(function() {
 		chrome.tabs.remove(tabsIds, null);
-	},100);
+	}, 100);
 }
 
 
@@ -285,7 +286,7 @@ function DiscardTabs(tabsIds) {
 	if (tabsIds.length > 0) {
 		setTimeout(function() {
 			DiscardTabs(tabsIds);
-		},delay);
+		}, delay);
 	}
 }
 
@@ -294,9 +295,12 @@ function ActivateNextTab() {
 	if ($(".pin.active:visible")[0]) {
 		if ($(".pin.active").next(".pin")[0]) {
 			chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
-		} 
+		} else {
+			if ($(".pin.active").prev(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+			}
+		}
 	}
-	
 	if ($(".tab.active:visible")[0]) {
 		if ($(".active:visible").children().last().children(".tab")[0]) {
 			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
@@ -309,6 +313,10 @@ function ActivateNextTab() {
 				} else {
 					if ($(".active:visible").parents(".tab").last().next(".tab")[0]) {
 						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
+					} else {
+						if ($(".tab:visible").length > 1) {
+							ActivatePrevTab();
+						}
 					}
 				}
 			}
@@ -320,9 +328,12 @@ function ActivatePrevTab() {
 	if ($(".pin.active")[0]) {
 		if ($(".pin.active").prev(".pin")[0]) {
 			chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
-		} 
+		} else {
+			if ($(".pin.active").next(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+			}
+		}
 	}
-	
 	if ($(".tab.active:visible")[0]) {
 		if ($(".active:visible").prev().find(".tab").length > 0) {
 			chrome.tabs.update(parseInt($(".active:visible").prev().find(".tab").last()[0].id), { active: true });
@@ -332,6 +343,10 @@ function ActivatePrevTab() {
 			} else {
 				if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
 					chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+				} else {
+					if ($(".tab:visible").length > 1) {
+						ActivateNextTab();
+					}
 				}
 			}
 		}
@@ -402,7 +417,7 @@ function SetTabEvents() {
 
 	// EXPAND BOX - EXPAND / COLLAPSE
 	$(document).on("mousedown", ".expand", function(event) {
-		event.stopPropagation();
+		// event.stopPropagation();
 		if (event.button == 0) {
 			if ($(this).parent().parent().is(".o")) {
 				$(this).parent().parent().removeClass("o").addClass("c");
@@ -472,26 +487,10 @@ function SetTabEvents() {
 				}
 			}
 			
-			// hide tab that will be closed
+			// hide tab before it will be closed by listener
 			$("#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
-
-			chrome.tabs.update(tabId, {muted:true, pinned: false});
-
-			// repeated what is in chrome events on tab_removed event, to avoid lag
-			if ($(this).is(".tab")) {
-				if (opt.promote_children) {
-					$("#ch"+tabId).children().insertAfter($(this));
-				} else {
-					$(this).find(".tab").each(function() {
-						chrome.tabs.remove(parseInt(this.id));
-					});
-				}
-			}
-
-			// delayed tab removal, so ActivatePrevTab() or ActivateNextTab() will not activate wrong tab
-			setTimeout(function() {
-				if ($("#"+tabId)[0]) chrome.tabs.remove(tabId);
-			}, 1000);
+			chrome.tabs.update(tabId, {pinned: false});
+			if ($("#"+tabId)[0]) chrome.tabs.remove(tabId);
 		}
 	});
 

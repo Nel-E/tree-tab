@@ -5,6 +5,9 @@
 	"extDesc": {
 		"message": "Manage your tabs in the sidebar!"
 	},
+	"OpenSidebar": {
+		"message": "Open Tree Tabs"
+	},
 
 
 	"button_new": {
@@ -212,6 +215,11 @@
 	"options_promote_children": {
 		"message": "promote children tabs on close, if disabled, when closing the parent of a tree structure, all tabs will be closed (be careful, because undo close tab will not recover the trees structure)"
 	},
+
+	"options_promote_children_in_first_child": {
+		"message": "promote first child tab as a parent"
+	},
+
 	"options_skip_load": {
 		"message": "discard tree structure after browser's restart, this option is for those who don't use browser's session. Basically it disables loading database at startup."
 	},
@@ -270,10 +278,31 @@
 	"options_max_tree_drag_drop": {
 		"message": "Limit Drag&Drop to tree's maximum depth as well"
 	},
+	"options_show_counter_tabs": {
+		"message": "Show children tabs count on tab's title"
+	},
+	"options_show_counter_tabs_hints": {
+		"message": "Show children tabs count in tab's hint"
+	},
 
 	"options_max_tree_depth": {
 		"message": "maximum tree depth: set it to -1 for unlimited branches, 0 for flat tabs placement (no trees), any number above 0 will be its maximum"
 	},
+
+
+
+	"options_groups": {
+		"message": "Groups"
+	},
+
+	"options_show_counter_groups": {
+		"message": "Show tabs count on groups"
+	},
+
+	"options_groups_toolbar_default": {
+		"message": "Show groups toolbar in new windows"
+	},
+
 
 
 
@@ -582,7 +611,7 @@
 	
 	
 	"caption_ungrouped_group": {
-		"message": "Ungrouped tabs"
+		"message": "Ungrouped"
 	},
 	"caption_noname_group": {
 		"message": "untitled"

@@ -5,7 +5,6 @@
 // **********         CHROME EVENTS         ***************
 
 function StartChromeListeners(){
-
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "drag_drop") {
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
@@ -42,12 +41,10 @@ function StartChromeListeners(){
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {
 				case "tab_created":
-				
 					// if set to treat unparented tabs as active tab's child
 					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $(".active:visible")[0]) {
 						message.tab.openerTabId = $(".active:visible")[0].id;
 					}
-			
 					// child case
 					if (message.tab.openerTabId) {
 						// append to tree
@@ -59,7 +56,6 @@ function StartChromeListeners(){
 								AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: true, Scroll: true });
 							}
 						}
-						
 						// if reached depth limit of the tree
 						if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) {
 							if (opt.append_child_tab_after_limit == "after") {
@@ -72,7 +68,6 @@ function StartChromeListeners(){
 								AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: true, Scroll: true });
 							}
 						}
-
 						// place tabs flat, (should I merge it with orphans case?)
 						if (opt.max_tree_depth == 0) {
 							if (opt.append_child_tab_after_limit == "after") {
@@ -109,12 +104,20 @@ function StartChromeListeners(){
 					RefreshGUI();
 				break;
 				case "tab_detached":
-					if (opt.promote_children && $("#"+message.tabId).is(".tab")) {
-						$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
-					} else {
-						$("#"+message.tabId).find(".tab").each(function() {
-							RemoveTabFromList(this.id);
-						});
+					if ($(".tab#"+message.tabId)[0]) {
+						if (opt.promote_children == true) {
+							if (opt.promote_children_in_first_child == true && $("#ch"+message.tabId).children().length > 1) {
+								let FirstChild = $("#ch"+message.tabId).children()[0];
+								$(FirstChild).insertAfter($("#"+message.tabId));
+								$("#ch"+FirstChild.id).append($("#ch"+message.tabId).children());
+							} else {
+								$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+							}
+						} else {
+							$("#ch"+message.tabId).find(".tab").each(function() {
+								RemoveTabFromList(this.id);
+							});
+						}
 					}
 					RemoveTabFromList(message.tabId);
 					setTimeout(function() { schedule_update_data++; },300);
@@ -122,10 +125,16 @@ function StartChromeListeners(){
 				break;
 				case "tab_removed":
 					if ($(".tab#"+message.tabId)[0]) {
-						if (opt.promote_children) {
-							$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+						if (opt.promote_children == true) {
+							if (opt.promote_children_in_first_child == true && $("#ch"+message.tabId).children().length > 1) {
+								let FirstChild = $("#ch"+message.tabId).children()[0];
+								$(FirstChild).insertAfter($("#"+message.tabId));
+								$("#ch"+FirstChild.id).append($("#ch"+message.tabId).children());
+							} else {
+								$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+							}
 						} else {
-							$("#"+message.tabId).find(".tab").each(function() {
+							$("#ch"+message.tabId).find(".tab").each(function() {
 								chrome.tabs.remove(parseInt(this.id));
 							});
 						}
@@ -143,12 +152,15 @@ function StartChromeListeners(){
 				break;
 				case "tab_updated":
 					if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
-						setTimeout(function() { GetFaviconAndTitle(message.tabId); },100);
+						setTimeout(function() {
+							GetFaviconAndTitle(message.tabId, true);
+						},100);
 					}
 					if (message.changeInfo.title != undefined) {
-						setTimeout(function() { GetFaviconAndTitle(message.tabId); },1000);
+						setTimeout(function() {
+							GetFaviconAndTitle(message.tabId, true);
+						},1000);
 					}
-					
 					if (message.changeInfo.audible != undefined || message.changeInfo.mutedInfo != undefined) {
 						RefreshMediaIcon(message.tabId);
 					}

@@ -305,8 +305,15 @@ function SetEvents() {
 	});
 
 	// options that need reload
-	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees", function(event) {
+	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees, #show_counter_tabs, #show_counter_tabs_hints", function(event) {
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
+	});
+	
+	// options that need a total reload
+	$(document).on("click", "#groups_toolbar_default", function(event) {
+		chrome.runtime.sendMessage({command: "reload"});
+		chrome.runtime.sendMessage({command: "reload_sidebar"});
+		location.reload();
 	});
 
 	// set dropdown menu options

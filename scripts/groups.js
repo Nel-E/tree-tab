@@ -111,14 +111,13 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 	active_group = groupId;
 	RefreshGUI();
 	$("#group_edit").hide();
-	
 	if (switch_to_active_in_group && $("#"+groupId+" .active")[0]){
 		chrome.tabs.update(parseInt($("#"+groupId+" .active")[0].id), {active: true});
 	}
-	if (scroll_to_active){
+	if (scroll_to_active && $("#"+groupId+" .active")[0]){
 		ScrollToTab($("#"+groupId+" .active")[0].id);
 	}
-	if (groupId == "tab_list" && $("#button_edit_group")[0]) {
+	if (groupId == "tab_list") {
 		$("#button_remove_group, #button_edit_group").addClass("disabled");
 	} else {
 		$("#button_remove_group, #button_edit_group").removeClass("disabled");
@@ -127,8 +126,11 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 }
 
 function SetActiveTabInActiveGroup(tabId) {
-	if (bggroups[active_group] != undefined) {
-		bggroups[active_group].activetab = parseInt(tabId);
+	if ($("#"+tabId).parents(".group")[0] && bggroups[active_group] != undefined) {
+		bggroups[$("#"+tabId).parents(".group")[0].id].activetab = parseInt(tabId);
+		if ($("#"+tabId).parents(".group")[0].id != active_group) {
+			SetActiveGroup($("#"+tabId).parents(".group")[0].id, false, true);
+		}
 		chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	}
 }
@@ -224,7 +226,6 @@ function SetGroupEvents() {
 	// show/hide groups toolbar
 	$(document).on("mousedown", "#button_groups_toolbar_hide", function(event) {
 		if (event.button == 0) {
-			// $("#toolbar_groups").toggleClass("hidden");
 			$("#toolbar_groups").toggleClass("hidden");
 			if ($("#toolbar_groups").is(".hidden")) {
 				$("#toolbar_groups").css({"width": "0px", "border-right": "none"});
@@ -263,6 +264,16 @@ function SetGroupEvents() {
 	$(document).on("input", "#color_picker", function(event) {
 		$("#"+PickColor).css({"background-color": $("#color_picker")[0].value});
 	});	
+
+
+	// edit group
+	$(document).on("dblclick", ".group_button:not(#_tab_list)", function(event) {
+		if (event.button == 0) {
+			ShowGroupEditWindow((this.id).substr(1));
+		}
+	});
+
+
 
 	// scroll groups
 	// $(document).on("mousedown", "#scroll_group_up, #scroll_group_down", function(event) {

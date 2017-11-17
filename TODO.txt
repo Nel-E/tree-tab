@@ -5,6 +5,20 @@ Add a shortcut to open tree tabs sidebar
 undo close to restore trees (will work ONLY in firefox)
 
 
+
+Loading data using message
+
+Close tab on Middle mouse click and not On Middle mouse down
+
+Split Pin size in theme
+
+
+add textbox for ungrouped name in options
+
+
+
+
+
 LOW PRIORITY:
 
 tabs count in titles
@@ -28,3 +42,8 @@ click on active to return to previous tab
 sort tabs/tree
 
 maybe filter tabs on search
+
+
+make tabs border width configurable, including size 0
+
+make tab spacing confiogurable, including 0 size

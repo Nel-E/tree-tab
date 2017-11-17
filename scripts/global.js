@@ -5,7 +5,7 @@
 // **********         GLOBAL VARIABLES FOR BACKGROUND, OPTIONS AND SIDEBAR         ***************
 
 
-var hold = true;
+var running = false;
 var schedule_save = 0;
 var schedule_update_indexes = 0;
 var schedule_rearrange_tabs = 0;
@@ -93,7 +93,7 @@ var DefaultToolbar =
 	// '</div>'+
 	
 var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
-var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true };
+var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "promote_children_in_first_child": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true, "show_counter_groups": true, "show_counter_tabs": true, "show_counter_tabs_hints": true, "groups_toolbar_default": true };
 
 
 
@@ -180,7 +180,7 @@ function SavePreferences() {
 	localStorage["preferences"] = JSON.stringify(opt);
 	setTimeout(function() {
 		chrome.runtime.sendMessage({command: "reload_options"});
-	},200);
+	}, 200);
 }
 function ShowOpenFileDialog(id, extension) {
 	let body = document.getElementById("body");
