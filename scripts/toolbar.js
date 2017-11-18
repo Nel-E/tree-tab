@@ -139,9 +139,6 @@ function SetToolbarEvents() {
 
 	// new tab
 	$(document).on("mousedown", "#button_new", function(event) {
-		if (event.button == 0) {
-			chrome.tabs.create({});
-		}
 		if (event.button == 1 && $(".active:visible")[0]) {
 			chrome.tabs.duplicate(parseInt($(".active:visible")[0].id), function(tab) {
 				setTimeout(function() {
@@ -153,6 +150,11 @@ function SetToolbarEvents() {
 		}
 		if (event.button == 2 && $(".active:visible")[0]) {
 			ScrollToTab($(".active:visible")[0].id);
+		}
+	});
+	$(document).on("click", "#button_new", function(event) {
+		if (event.button == 0) {
+				chrome.tabs.create({});
 		}
 	});
 	// pin tab

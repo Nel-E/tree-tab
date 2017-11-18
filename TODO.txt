@@ -21,7 +21,6 @@ add textbox for ungrouped name in options
 
 LOW PRIORITY:
 
-tabs count in titles
 option for scrollbar on the left
 folders
 

@@ -99,6 +99,11 @@ var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_lis
 
 
 // *******************             GLOBAL FUNCTIONS                 ************************
+// function LoadData(KeyName, ExpectReturnDefaultType) {
+	// chrome.runtime.sendMessage({command: "load_data", K: KeyName, T: ExpectReturnDefaultType}, function(response) {
+		// return response;
+	// });
+// }
 function LoadData(KeyName, ExpectReturnDefaultType) {
 	var data = ExpectReturnDefaultType;
 	try {

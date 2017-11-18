@@ -264,11 +264,11 @@ var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
 // start all listeners
 function FirefoxListeners() {
 	
-	browser.commands.onCommand.addListener(function(command) {
-		if (command == "open_sidebar") {
-			browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
-			browser.sidebarAction.open();
-		}
+	// browser.commands.onCommand.addListener(function(command) {
+		// if (command == "open_sidebar") {
+			// browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
+			// browser.sidebarAction.open();
+		// }
 			// chrome.windows.getLastFocused({windowTypes: ["normal"]}, function(window) {
 			// if (CurrentWindowId == window.id) {
 				// if (command == "open_sidebar") {
@@ -276,7 +276,7 @@ function FirefoxListeners() {
 				// }
 			// }
 		// });
-	});
+	// });
 
 	browser.browserAction.onClicked.addListener(function() {
 		browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });

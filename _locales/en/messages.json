@@ -276,13 +276,13 @@
 		"message": "at the bottom"
 	},
 	"options_max_tree_drag_drop": {
-		"message": "Limit Drag&Drop to tree's maximum depth as well"
+		"message": "limit Drag&Drop to tree's maximum depth as well"
 	},
 	"options_show_counter_tabs": {
-		"message": "Show children tabs count on tab's title"
+		"message": "show children tabs count on tab's title"
 	},
 	"options_show_counter_tabs_hints": {
-		"message": "Show children tabs count in tab's hint"
+		"message": "show children tabs count in tab's hint"
 	},
 
 	"options_max_tree_depth": {
@@ -296,11 +296,11 @@
 	},
 
 	"options_show_counter_groups": {
-		"message": "Show tabs count on groups"
+		"message": "show tabs count on groups"
 	},
 
 	"options_groups_toolbar_default": {
-		"message": "Show groups toolbar in new windows"
+		"message": "show groups toolbar in new windows"
 	},
 
 
