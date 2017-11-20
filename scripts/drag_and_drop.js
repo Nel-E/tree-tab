@@ -75,14 +75,14 @@ function SetDragAndDropEvents() {
 		DragAndDrop.Parents.splice(0, DragAndDrop.Parents.length);
 		
 		DragAndDrop.Depth = 0;
-		$(".selected:visible").find(".tab").each(function() {
-			if ($(this).parents(".tab").length > DragAndDrop.Depth) { DragAndDrop.Depth = $(this).parents(".tab").length; }
+		$(".selected:visible").find(".pin, .tab").each(function() {
+			if ($(this).parents(".pin, .tab").length > DragAndDrop.Depth) { DragAndDrop.Depth = $(this).parents(".pin, .tab").length; }
 		});
-		DragAndDrop.Depth -= $(this).parents(".tab").length-1;
+		DragAndDrop.Depth -= $(this).parents(".pin, .tab").length-1;
 		if (DragAndDrop.Depth < 0) {
 			DragAndDrop.Depth = 0;
 		}
-		
+		console.log(DragAndDrop.Depth);
 		$(".selected:visible").each(function() {
 			DragAndDrop.SelectedTabsIds.push(parseInt(this.id));
 			DragAndDrop.TabsIds.push(parseInt(this.id));
@@ -124,8 +124,8 @@ function SetDragAndDropEvents() {
 	});
 	$(document).on("dragenter", ".tab>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
-		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab") {
-			if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
+		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab" && opt.max_tree_depth != 0) {
+			if (opt.max_tree_drag_drop) {
 				if (opt.max_tree_depth == 0) { return; }
 				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth) { return; }
 			}

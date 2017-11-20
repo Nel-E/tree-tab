@@ -7,6 +7,8 @@ if (browserId == "F") {
 	FirefoxStart();
 	FirefoxMessageListeners();
 }
+
+
 function FirefoxStart() {
 	var SafeToRun = true;
 	chrome.tabs.query({}, function(t) {
@@ -18,7 +20,15 @@ function FirefoxStart() {
 			}
 			if (tabIndex == t.length-1) {
 				if (SafeToRun) {
-					FirefoxLoadTabs(0);
+					if (localStorage.getItem("t0") !== null){
+						LoadV015(0);
+					} else {
+						if (localStorage.getItem("tabs") !== null){
+							FirefoxLoadV100(0);
+						} else {
+							FirefoxLoadTabs(0);
+						}
+					}
 				} else {
 					setTimeout(function() {
 						FirefoxStart();
@@ -31,34 +41,16 @@ function FirefoxStart() {
 
 function FirefoxLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
-
 		var tt_ids = {};
-		
-		
-		
 		var tabs_matched = 0;
 		var tabs_count = 0;
 		for (var wIndex = 0; wIndex < w.length; wIndex++) {
 			tabs_count += w[wIndex].tabs.length;
 		}
 
-		// load tabs and windows from hdd
-		var LoadedWindows = LoadData("windows", []);
-		var LoadedTabs = LoadData("tabs", []);
-
-		// if loaded tabs mismatch by 50%, then try to load back
-		if (LoadedTabs.length < tabs_count*0.5 || retry > 0) {
-			LoadedTabs = LoadData("tabs_BAK"+retry, []);
-		}
-		// if loaded windows mismatch, then try to load back
-		if (LoadedWindows.length < w.length || retry > 0) {
-			LoadedWindows = LoadData("windows_BAK"+retry, []);
-		}
 		// CACHED COUNTS AND STUFF
 		var lastWinId = w[w.length-1].id;
 		var lastTabId = w[w.length-1].tabs[w[w.length-1].tabs.length-1].id;
-		var LoadedWinCount = LoadedWindows.length;
-		var LoadedTabsCount = LoadedTabs.length;
 		var WinCount = w.length;
 
 		for (var wIndex = 0; wIndex < WinCount; wIndex++) {
@@ -67,10 +59,10 @@ function FirefoxLoadTabs(retry) {
 			let tabsCount = w[winIndex].tabs.length;
 
 			// LOAD TTID FROM FIREFOX GET WINDOW VALUE
-			let win = Promise.resolve(browser.sessions.getWindowValue(winId, "TTdata")).then(function(data) {
-			
-				if (data != undefined) {
-					windows[winId] = Object.assign({}, data);
+			let win = Promise.resolve(browser.sessions.getWindowValue(winId, "TTdata")).then(function(WindowData) {
+				
+				if (opt.skip_load == false && WindowData != undefined) {
+					windows[winId] = Object.assign({}, WindowData);
 				} else {
 					windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
 				}
@@ -81,8 +73,8 @@ function FirefoxLoadTabs(retry) {
 					let tabPinned = w[winIndex].tabs[tabIndex].pinned;
 
 					// LOAD TTID FROM FIREFOX GET TAB VALUE
-					let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTId")).then(function(TabData) {
-						if (TabData != undefined) {
+					let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTdata")).then(function(TabData) {
+						if (opt.skip_load == false && TabData != undefined) {
 							tabs[tabId] = Object.assign({}, TabData);
 							tt_ids[tabs[tabId].ttid] = tabId;
 							tabs_matched++;
@@ -121,13 +113,11 @@ function FirefoxLoadTabs(retry) {
 
 							// TODO
 							// replace parent tab ids for each folder using reference_tabs, unless tabs will be nested ONLY in tabs and folders ONLY in folders, I did not decide yet
-							console.log(windows);
-							console.log(tabs);
 
 							// will try to find tabs for 3 times
 							if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
 								running = true;
-								FirefoxAutoSaveData("", 1000);
+								FirefoxAutoSaveData();
 								FirefoxListeners();
 							} else {
 								setTimeout(function() {FirefoxLoadTabs(retry+1);}, 2000);
@@ -141,68 +131,32 @@ function FirefoxLoadTabs(retry) {
 	});
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 // save every second if there is anything to save obviously
-async function FirefoxAutoSaveData(BackupName, LoopTimer) {
+async function FirefoxAutoSaveData() {
 	setInterval(function() {
-		if (schedule_save > 1 || BackupName != "") {schedule_save = 1;}
+		if (schedule_save > 1) {schedule_save = 1;}
 		if (running && schedule_save > 0 && Object.keys(tabs).length > 1) {
 			chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 				var WinCount = w.length;
-				// var t_count = 0;
-				// var counter = 0;
-				// var Windows = [];
-				// var Tabs = [];
-
-				// for (var wIndex = 0; wIndex < WinCount; wIndex++) {
-					// t_count = t_count + w[wIndex].tabs.length;
-				// }
-
 				for (var wIndex = 0; wIndex < WinCount; wIndex++) {
 					let winId = w[wIndex].id;
 					if (windows[winId] != undefined && windows[winId].ttid != undefined && windows[winId].group_bar != undefined && windows[winId].search_filter != undefined && windows[winId].active_shelf != undefined && windows[winId].active_group != undefined && windows[winId].groups != undefined && windows[winId].folders != undefined) {
-						// Windows.push({ttid: windows[winId].ttid, group_bar: windows[winId].group_bar, search_filter: windows[winId].search_filter, active_shelf: windows[winId].active_shelf, active_group: windows[winId].active_group, groups: windows[winId].groups, folders: windows[winId].folders});
-						
 						browser.sessions.setWindowValue(winId, "TTdata", windows[winId]   );
-
-						
 					}
-
 					let TabsCount = w[wIndex].tabs.length;
 					for (var tabIndex = 0; tabIndex < TabsCount; tabIndex++) {
 						let tabId = w[wIndex].tabs[tabIndex].id;
 						if (tabs[tabId] != undefined && tabs[tabId].ttid != undefined && tabs[tabId].parent != undefined && tabs[tabId].index != undefined && tabs[tabId].expand != undefined) {
-							// Tabs.push({id: tabId, ttid: tabs[tabId].ttid, parent: tabs[tabId].parent, index: tabs[tabId].index, expand: tabs[tabId].expand});
-							
-							
-							browser.sessions.setTabValue( tabId, "TTId", tabs[tabId] );
-
-							
-							// counter++;
+							browser.sessions.setTabValue( tabId, "TTdata", tabs[tabId] );
 						}
 					}
-					
-					// if (counter == t_count && Tabs.length > 1) {
-						// localStorage["windows"+BackupName] = JSON.stringify(Windows);
-						// localStorage["tabs"+BackupName] = JSON.stringify(Tabs);
-					// }
 				}
 				schedule_save--;
 			});
 		}
-	}, LoopTimer);
+	}, 1000);
 }
+
 function GenerateNewWindowID(){
 	var newID = "w_"+GenerateRandomID();
 	var newIdAvailable = true;
@@ -240,7 +194,7 @@ function AppendTabTTId(tabId){
 	} else {
 		tabs[tabId] = {ttid: NewTTTabId, parent: "tab_list", parent_ttid: "", index: 0, expand: "n"};
 	}
-	browser.sessions.setTabValue( tabId, "TTId", tabs[tabId] );
+	browser.sessions.setTabValue( tabId, "TTdata", tabs[tabId] );
 }
 
 function AppendWinTTId(windowId){
