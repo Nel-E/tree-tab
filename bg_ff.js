@@ -248,7 +248,7 @@ function AppendWinTTId(windowId){
 	if (windows[windowId] != undefined) {
 		windows[windowId].ttid = NewTTWindowId;
 	} else {
-		windows[windowId] = {ttid: NewTTWindowId, group_bar: true, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
+		windows[windowId] = {ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
 	}
 	browser.sessions.setWindowValue( windowId, "TTdata", windows[windowId] );
 }
