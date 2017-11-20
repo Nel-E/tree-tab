@@ -15,7 +15,7 @@ var tabs = {};
 var MouseHoverOver = "";
 
 
-var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", Dropped: true, SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
+var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, Depth: 0};
 var DropTargetsInFront = false;
 
 
@@ -85,9 +85,11 @@ var DefaultToolbar =
 		'<div class=button id=button_import_bak><div class=button_img></div></div>'+
 		'<div class=button id=button_import_merge_bak><div class=button_img></div></div>'+
 		'<div class=button id=button_export_bak><div class=button_img></div></div>'+
+		(browserId != "F" ?
 		'<div class=button id=button_load_bak1><div class=button_img></div></div>'+
 		'<div class=button id=button_load_bak2><div class=button_img></div></div>'+
-		'<div class=button id=button_load_bak3><div class=button_img></div></div>'+
+		'<div class=button id=button_load_bak3><div class=button_img></div></div>'
+		: '')+
 	'</div>';
 	// '<div class=toolbar_shelf id=toolbar_shelf_folders>'+
 	// '</div>'+

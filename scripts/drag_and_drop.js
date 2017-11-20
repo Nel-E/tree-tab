@@ -38,25 +38,20 @@ function SetDragAndDropEvents() {
 	// SET FOLDER DRAG SOURCE
 	$(document).on("dragstart", ".folder_header", function(event) {
 		DragAndDrop.DragNodeClass = "folder";
-		DragAndDrop.Dropped = false;
 		event.stopPropagation();
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 		event.originalEvent.dataTransfer.setData("text", "");
-
 
 		DragAndDrop.ComesFromWindowId = CurrentWindowId;
 		DragAndDrop.SelectedTabsIds.splice(0, DragAndDrop.SelectedTabsIds.length);
 		DragAndDrop.TabsIds.splice(0, DragAndDrop.TabsIds.length);
 		DragAndDrop.Parents.splice(0, DragAndDrop.Parents.length);
-		
-		// chrome.runtime.sendMessage({command: "drag_drop", DragNodeClass: "tab", SelectedTabsIds: DragAndDrop.SelectedTabsIds, TabsIds: DragAndDrop.TabsIds, Parents: DragAndDrop.Parents, ComesFromWindowId: CurrentWindowId, Depth: DragAndDrop.Depth});
 	});
 
 
 	// SET TAB DRAG SOURCE
 	$(document).on("dragstart", ".tab_header", function(event) {
 		DragAndDrop.DragNodeClass = "tab";
-		DragAndDrop.Dropped = false;
 		event.stopPropagation();
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 		event.originalEvent.dataTransfer.setData("text", "");
@@ -175,15 +170,10 @@ function SetDragAndDropEvents() {
 
 	// DROP
 	$(document).on("drop", "*", function(event) {
-		DragAndDrop.Dropped = true;
-		chrome.runtime.sendMessage({command: "drag_dropped", DragAndDrop: true});
 		event.stopPropagation();
-
-		if (DragAndDrop.ComesFromWindowId == CurrentWindowId && MouseHoverOver != "" && $(".highlighted_drop_target")[0] != undefined) {
+		if (DragAndDrop.ComesFromWindowId == CurrentWindowId /* && ($(window).width() > event.clientX || $(window).height() > event.clientY) */) {
 			DropToTarget($(".highlighted_drop_target"));
-		}
-
-		if (DragAndDrop.ComesFromWindowId != CurrentWindowId && $(".highlighted_drop_target")[0] != undefined) {
+		} else {
 			$(".selected").addClass("selected_frozen").removeClass("selected");
 			let target = $(".highlighted_drop_target");
 			let counter = DragAndDrop.TabsIds.length;
@@ -217,11 +207,14 @@ function SetDragAndDropEvents() {
 
 	// DETACH
 	$(document).on("dragend", ".tab_header", function(event) {
-		setTimeout(function() {
-			if (DragAndDrop.Dropped == false && MouseHoverOver == "" && $(".highlighted_drop_target")[0] == undefined) {
+		if (DragAndDrop.ComesFromWindowId == CurrentWindowId) {
+			if (browserId == "F" && (event.screenX < event.view.mozInnerScreenX ||  event.screenX > (event.view.mozInnerScreenX + $(window).width()) || (event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + $(window).height())))) {
 				DetachTabs(DragAndDrop.TabsIds);
 			}
-		},1100);
+			if (browserId != "F" && (event.pageX < 0 || event.pageX > $(window).width() || event.pageY < 0 || event.pageY > $(window).height())) {
+				DetachTabs(DragAndDrop.TabsIds);
+			}
+		}
 	});
 
 

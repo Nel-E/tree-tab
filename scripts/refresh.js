@@ -198,18 +198,20 @@ function RefreshExpandStates() {
 }
 
 function RefreshTabCounter(tabId) {
-	if (opt.show_counter_tabs) {
-		if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-			$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")";
-		} else {
-			$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title");
+	if ($("#"+tabId).data("title")) {
+		if (opt.show_counter_tabs) {
+			if ($(".c#"+tabId+", .o#"+tabId)[0]) {
+				$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")";
+			} else {
+				$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title");
+			}
 		}
-	}
-	if (opt.show_counter_tabs_hints) {
-		if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-			$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")");
-		} else {
-			$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title"));
+		if (opt.show_counter_tabs_hints) {
+			if ($(".c#"+tabId+", .o#"+tabId)[0]) {
+				$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")");
+			} else {
+				$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title"));
+			}
 		}
 	}
 }

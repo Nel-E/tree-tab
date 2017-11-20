@@ -35,13 +35,16 @@ function Run() {
 				bgtabs = Object.assign({}, response);
 				chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
 					bggroups = Object.assign({}, response);
-					setTimeout(function() {
-						if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && running == true) {
-							Initialize();
-						} else {
-							Run();
-						}
-					},200);
+					chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
+						theme = response;
+						setTimeout(function() {
+							if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && running == true) {
+								Initialize();
+							} else {
+								Run();
+							}
+						},200);
+					});
 				});
 			});
 		});
@@ -50,7 +53,7 @@ function Run() {
 function Initialize() {
 	// THEME
 	RestoreStateOfGroupsToolbar();
-	var theme = LoadData(("theme"+localStorage["current_theme"]), {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
+	// var theme = LoadData(("theme"+localStorage["current_theme"]), {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
 	// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
 	if (browserId == "F") {
 		if (theme.TabsSizeSetNumber > 1) {
@@ -62,6 +65,11 @@ function Initialize() {
 	if (theme.ToolbarShow) {
 		if (theme.theme_version == DefaultTheme.theme_version) {
 			$("#toolbar").html(theme.toolbar);
+			
+			if (browserId == "F") {
+				$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
+			}
+			
 		} else {
 			$("#toolbar").html(DefaultToolbar);
 		}

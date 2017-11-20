@@ -441,17 +441,15 @@ function SetTabEvents() {
 		}
 	});
 
-	// SELECT OR CLOSE TAB/PIN
+	// SELECT TAB/PIN
 	$(document).on("mousedown", ".tab, .pin", function(event) {
 		if ($(".menu").is(":visible")) {
 			return;
 		}
 		event.stopPropagation();
-
-		DropTargetsSendToBack();
-		let tabId = parseInt(this.id);
-		
 		if (event.button == 0) {
+			DropTargetsSendToBack();
+			let tabId = parseInt(this.id);
 			// SET SELECTION WITH SHIFT
 			if (event.shiftKey) {
 				$(".pin, .tab:visible").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly");
@@ -461,7 +459,6 @@ function SetTabEvents() {
 					$(".active:visible").prevUntil($(this), ":visible").add($(".active:visible")).add($(this)).addClass("selected");
 				}
 			}
-
 			// TOGGLE SELECTION WITH CTRL
 			if (event.ctrlKey) {
 				// if ($(".active:visible").is(":not(.selected)")) {
@@ -470,15 +467,17 @@ function SetTabEvents() {
 				$(this).toggleClass("selected");
 			}
 		}
+	});
 
-		// CLOSE TAB
-		if (
-			(
-			($(this).is(".tab") && $(event.target).is(":not(.expand)")) && ((event.button == 1 && opt.close_with_MMB == true)
-			|| (event.button == 0 && $(event.target).is(".close, .close_img"))))
-			|| ($(this).is(".pin") && event.button == 1 && opt.close_with_MMB == true && opt.allow_pin_close == true)
-		) {
-			if ($(this).is(".active:visible") && opt.after_closing_active_tab != "browser") {
+
+	// CLOSE TAB/PIN
+	$(document).on("mousedown", ".tab_header", function(event) {
+		if ($(".menu").is(":visible")) {
+			return;
+		}
+		let tabId = parseInt($(this).parent()[0].id);
+		if ((event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".tab")) || (event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".pin") && opt.allow_pin_close == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))) {
+			if ($(this).parent().is(".active:visible") && opt.after_closing_active_tab != "browser") {
 				if (opt.after_closing_active_tab == "above") {
 					ActivatePrevTab();
 				}
@@ -486,13 +485,14 @@ function SetTabEvents() {
 					ActivateNextTab();
 				}
 			}
-			
-			// hide tab before it will be closed by listener
-			$("#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
+			// hide pin before it will be closed by listener
+			$(".pin#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
 			chrome.tabs.update(tabId, {pinned: false});
 			if ($("#"+tabId)[0]) chrome.tabs.remove(tabId);
 		}
 	});
+
+
 
 	// SINGLE CLICK TO ACTIVATE TAB
 	$(document).on("click", ".tab_header", function(event) {

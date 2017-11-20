@@ -57,7 +57,7 @@ function GenerateNewGroupID(){
 
 function AddNewGroup(p) {
 	var newId = GenerateNewGroupID();
-	bggroups[newId] = { id: newId, index: 0, activetab: 0, name: (p.name ? p.name : caption_noname_group), font:  (p.font ? p.font : "")  };
+	bggroups[newId] = { id: newId, index: 0, activetab: 0, activetab_ttid: "", name: (p.name ? p.name : caption_noname_group), font:  (p.font ? p.font : "")  };
 	AppendGroupToList(newId, bggroups[newId].name, bggroups[newId].font);
 	UpdateBgGroupsOrder();
 	return newId;

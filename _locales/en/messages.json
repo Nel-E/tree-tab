@@ -192,7 +192,7 @@
 		"message": " Tabs "
 	},
 	"options_syncro_tabbar_tabs_order": {
-		"message": "synchronise TabBar tabs order with Tree Tabs (with too many tabs, after moving tabs, Tree Tabs may be unresponsive for a second)"
+		"message": "synchronise browser tabs order with Tree Tabs, with too many tabs, Tree Tabs may be unresponsive for a second after drag&drop, but this option is needed for correct ctrl+tab and ctrl+shift+tab switching"
 	},
 	"options_switch_with_scroll": {
 		"message": "switch tabs with mouse wheel"

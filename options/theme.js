@@ -14,6 +14,9 @@ function LoadTheme(themeName) {
 			$("#toolbar").html(SelectedTheme.toolbar);
 			$("#toolbar_unused_buttons").html(SelectedTheme.unused_buttons);
 			
+			if (browserId == "F") {
+				$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
+			}
 			// expand toolbar options
 			SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
 			$("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});

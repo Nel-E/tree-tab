@@ -6,7 +6,7 @@
 
 
 
-function RestoreToolbarSearchFilter() {
+function RestoreToolbarSearchFilterBAK() {
 	let filter_type = "url";
 	if (localStorage.getItem("filter_type") !== null) {
 		filter_type = localStorage["filter_type"];
@@ -18,11 +18,26 @@ function RestoreToolbarSearchFilter() {
 	}
 }	
 
+
+
+function RestoreToolbarSearchFilter() {
+	chrome.runtime.sendMessage({command: "get_search_filter", windowId: CurrentWindowId}, function(response) {
+		if (response == "url") {
+			$("#button_filter_type").addClass("url").removeClass("title");
+		} else {
+			$("#button_filter_type").addClass("title").removeClass("url");
+		}
+	});
+}	
+
+
+
+
+
 function RestoreToolbarShelf() {
 	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
 		$("#filter_box").attr("placeholder", caption_searchbox);
 		$("#filter_box").css({"opacity": 1});
-		
 		$(".on").removeClass("on");
 		$(".toolbar_shelf").addClass("hidden");
 		if (response == "search" && $("#button_search").length != 0) {
@@ -46,26 +61,28 @@ function RestoreToolbarShelf() {
 			$("#button_folders").addClass("on");
 		}
 		
-		let bak1 = LoadData("windows_BAK1", []);
-		let bak2 = LoadData("windows_BAK2", []);
-		let bak3 = LoadData("windows_BAK3", []);
-		
-		if (bak1.length && $(".button#button_load_bak1")[0]) {
-			$(".button#button_load_bak1").removeClass("disabled");
-		} else {
-			$(".button#button_load_bak1").addClass("disabled");
-		}
-		
-		if (bak2.length && $(".button#button_load_bak2")[0]) {
-			$(".button#button_load_bak2").removeClass("disabled");
-		} else {
-			$(".button#button_load_bak2").addClass("disabled");
-		}
-		
-		if (bak3.length && $(".button#button_load_bak3")[0]) {
-			$(".button#button_load_bak3").removeClass("disabled");
-		} else {
-			$(".button#button_load_bak3").addClass("disabled");
+		if (browserId != "F") {
+			let bak1 = LoadData("windows_BAK1", []);
+			let bak2 = LoadData("windows_BAK2", []);
+			let bak3 = LoadData("windows_BAK3", []);
+			
+			if (bak1.length && $(".button#button_load_bak1")[0]) {
+				$(".button#button_load_bak1").removeClass("disabled");
+			} else {
+				$(".button#button_load_bak1").addClass("disabled");
+			}
+			
+			if (bak2.length && $(".button#button_load_bak2")[0]) {
+				$(".button#button_load_bak2").removeClass("disabled");
+			} else {
+				$(".button#button_load_bak2").addClass("disabled");
+			}
+			
+			if (bak3.length && $(".button#button_load_bak3")[0]) {
+				$(".button#button_load_bak3").removeClass("disabled");
+			} else {
+				$(".button#button_load_bak3").addClass("disabled");
+			}
 		}
 		
 		RefreshGUI();
@@ -220,7 +237,15 @@ function SetToolbarEvents() {
 		}
 		$("#button_filter_type").toggleClass("url").toggleClass("title");
 		FindTab($("#filter_box")[0].value);
-		localStorage["filter_type"] = $(this).is(".url") ? "url" : "title";
+		
+		
+		chrome.runtime.sendMessage({command: "set_search_filter", search_filter:  ($(this).is(".url") ? "url" : "title"), windowId: CurrentWindowId});
+		
+		// localStorage["filter_type"] = $(this).is(".url") ? "url" : "title";
+		
+		
+		
+		
 	});
 	// clear filter button
 	$(document).on("mousedown", "#button_filter_clear", function(event) {
@@ -332,28 +357,29 @@ function SetToolbarEvents() {
 
 
 
-
-	// load backups
-	$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
-		let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
-		
-		if (wins.length) {
-			localStorage["windows"] = JSON.stringify(wins);
-		}
-		if (tabs.length) {
-			localStorage["tabs"] = JSON.stringify(tabs);
-			alert("Loaded backup");
-		}
-		
-		chrome.runtime.sendMessage({command: "reload"});
-		chrome.runtime.sendMessage({command: "reload_sidebar"});
-		location.reload();
-		
-	});
+	if (browserId != "F") {
+		// load backups
+		$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
+			if (event.button != 0) {
+				return;
+			}
+			let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
+			let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
+			
+			if (wins.length) {
+				localStorage["windows"] = JSON.stringify(wins);
+			}
+			if (tabs.length) {
+				localStorage["tabs"] = JSON.stringify(tabs);
+				alert("Loaded backup");
+			}
+			
+			chrome.runtime.sendMessage({command: "reload"});
+			chrome.runtime.sendMessage({command: "reload_sidebar"});
+			location.reload();
+			
+		});
+	}
 
 	// import-export backups
 	$(document).on("mousedown", "#button_export_bak", function(event) {

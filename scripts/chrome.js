@@ -14,9 +14,6 @@ function StartChromeListeners(){
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.Depth = message.Depth;
 		}
-		if (message.command == "drag_dropped") {
-			DragAndDrop.Dropped = message.Dropped;
-		}
 		if (message.command == "reload_sidebar") {
 			window.location.reload();
 		}
