@@ -15,6 +15,7 @@
 		"16": "icons/16.png"
 	},
 	"permissions": [ "tabs", "sessions", "<all_urls>" ],
+
 	"sidebar_action": {
 		"default_icon": {
 			"16": "icons/16.png",
