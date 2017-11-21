@@ -8,13 +8,12 @@ if (browserId == "F") {
 	FirefoxMessageListeners();
 }
 
-
 function FirefoxStart() {
 	var SafeToRun = true;
 	chrome.tabs.query({}, function(t) {
 		// will loop forever if session restore tab is found
 		for (var tabIndex = 0; tabIndex < t.length; tabIndex++) {
-			if (t[tabIndex].url.match("about:sessionrestore") && t.length < 10) {
+			if (t[tabIndex].url.match("about:sessionrestore")) {
 				SafeToRun = false;
 				chrome.tabs.update(t[tabIndex].id, { active: true });
 			}
@@ -222,20 +221,6 @@ var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
 // start all listeners
 function FirefoxListeners() {
 	
-	// browser.commands.onCommand.addListener(function(command) {
-		// if (command == "open_sidebar") {
-			// browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
-			// browser.sidebarAction.open();
-		// }
-			// chrome.windows.getLastFocused({windowTypes: ["normal"]}, function(window) {
-			// if (CurrentWindowId == window.id) {
-				// if (command == "open_sidebar") {
-					// ActivatePrevTab();
-				// }
-			// }
-		// });
-	// });
-
 	browser.browserAction.onClicked.addListener(function() {
 		browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
 		browser.sidebarAction.open();

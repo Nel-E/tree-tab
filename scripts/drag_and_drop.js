@@ -82,7 +82,6 @@ function SetDragAndDropEvents() {
 		if (DragAndDrop.Depth < 0) {
 			DragAndDrop.Depth = 0;
 		}
-		console.log(DragAndDrop.Depth);
 		$(".selected:visible").each(function() {
 			DragAndDrop.SelectedTabsIds.push(parseInt(this.id));
 			DragAndDrop.TabsIds.push(parseInt(this.id));
@@ -116,7 +115,7 @@ function SetDragAndDropEvents() {
 		event.stopPropagation();
 		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab") {
 			if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
-				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth+1) { return; }
+				if ($(this).parents(".tab").length + DragAndDrop.Depth-1 > opt.max_tree_depth) { return; }
 			}
 			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 			$(this).addClass("highlighted_drop_target");
@@ -125,8 +124,7 @@ function SetDragAndDropEvents() {
 	$(document).on("dragenter", ".tab>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
 		if ($(".selected:visible").find($(this)).length == 0 && DragAndDrop.DragNodeClass == "tab" && opt.max_tree_depth != 0) {
-			if (opt.max_tree_drag_drop) {
-				if (opt.max_tree_depth == 0) { return; }
+			if (opt.max_tree_drag_drop && opt.max_tree_depth > 0) {
 				if ($(this).parents(".tab").length + DragAndDrop.Depth > opt.max_tree_depth) { return; }
 			}
 			$(".highlighted_drop_target").removeClass("highlighted_drop_target");

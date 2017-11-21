@@ -5,6 +5,15 @@
 // **********         CHROME EVENTS         ***************
 
 function StartChromeListeners(){
+		
+	if (browserId == "F") {
+		browser.browserAction.onClicked.addListener(function(tab) {
+			if (tab.windowId == CurrentWindowId) {
+				browser.sidebarAction.close();
+			}
+		});
+	}
+	
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "drag_drop") {
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
