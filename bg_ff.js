@@ -2,40 +2,30 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
+
+
 if (browserId == "F") {
+	FirefoxStart(0);
 	LoadPreferences();
-	FirefoxStart();
 	FirefoxMessageListeners();
 }
 
-function FirefoxStart() {
-	var SafeToRun = true;
-	chrome.tabs.query({}, function(t) {
-		// will loop forever if session restore tab is found
-		for (var tabIndex = 0; tabIndex < t.length; tabIndex++) {
-			if (t[tabIndex].url.match("about:sessionrestore")) {
-				SafeToRun = false;
-				chrome.tabs.update(t[tabIndex].id, { active: true });
+function FirefoxStart(retry) {
+	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
+		FirefoxLoadTabs(0);
+		if (w[0].tabs.length == 1 && (w[0].tabs[0].url == "about:blank" || w[0].tabs[0].url == "about:sessionrestore")) {
+			setTimeout(function() {
+				FirefoxStart(retry+1);
+			}, 2000);
+		} else {
+			if (retry > 0) {
+				chrome.runtime.sendMessage({command: "reload_sidebar"});
 			}
-			if (tabIndex == t.length-1) {
-				if (SafeToRun) {
-					if (localStorage.getItem("t0") !== null){
-						LoadV015(0);
-					} else {
-						if (localStorage.getItem("tabs") !== null){
-							FirefoxLoadV100(0);
-						} else {
-							FirefoxLoadTabs(0);
-						}
-					}
-				} else {
-					setTimeout(function() {
-						FirefoxStart();
-					}, 1000);
-				}
-			}
+			setTimeout(function() {
+				schedule_save = 0;
+			}, 2000);
 		}
-	});
+	});			
 }
 
 function FirefoxLoadTabs(retry) {
@@ -109,14 +99,15 @@ function FirefoxLoadTabs(retry) {
 									}
 								}
 							}
-
 							// TODO
 							// replace parent tab ids for each folder using reference_tabs, unless tabs will be nested ONLY in tabs and folders ONLY in folders, I did not decide yet
 
 							// will try to find tabs for 3 times
 							if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
 								running = true;
+								// setInterval(function() {
 								FirefoxAutoSaveData();
+								// }, 10000);
 								FirefoxListeners();
 							} else {
 								setTimeout(function() {FirefoxLoadTabs(retry+1);}, 2000);
@@ -193,7 +184,7 @@ function AppendTabTTId(tabId){
 	} else {
 		tabs[tabId] = {ttid: NewTTTabId, parent: "tab_list", parent_ttid: "", index: 0, expand: "n"};
 	}
-	browser.sessions.setTabValue( tabId, "TTdata", tabs[tabId] );
+	// if (schedule_save > 0) browser.sessions.setTabValue( tabId, "TTdata", tabs[tabId] );
 }
 
 function AppendWinTTId(windowId){
@@ -203,7 +194,7 @@ function AppendWinTTId(windowId){
 	} else {
 		windows[windowId] = {ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
 	}
-	browser.sessions.setWindowValue( windowId, "TTdata", windows[windowId] );
+	// if (schedule_save > 0) browser.sessions.setWindowValue( windowId, "TTdata", windows[windowId] );
 }
 
 function ReplaceParents(oldTabId, newTabId) {

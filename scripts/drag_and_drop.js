@@ -42,6 +42,9 @@ function SetDragAndDropEvents() {
 		event.originalEvent.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 		event.originalEvent.dataTransfer.setData("text", "");
 
+		$(this).parent().addClass("selected_temporarly").addClass("selected");
+		$(".selected:not(:visible)").addClass("selected_frozen").removeClass("selected");
+
 		DragAndDrop.ComesFromWindowId = CurrentWindowId;
 		DragAndDrop.SelectedTabsIds.splice(0, DragAndDrop.SelectedTabsIds.length);
 		DragAndDrop.TabsIds.splice(0, DragAndDrop.TabsIds.length);
@@ -136,7 +139,15 @@ function SetDragAndDropEvents() {
 	// SET DROP TARGET WHEN ENTERING FOLDERS
 	$(document).on("dragenter", ".folder>.drag_entered_top:not(.highlighted_drop_target), .folder>.drag_entered_bottom:not(.highlighted_drop_target), .folder>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
 		event.stopPropagation();
-		if (DragAndDrop.DragNodeClass != "group") {
+		if (DragAndDrop.DragNodeClass == "folder") {
+			// if (/* $(".selected:visible").find($(this)).length > 0 ||  */  DragAndDrop.DragNodeClass != "folder") { return; }
+			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+			$(this).addClass("highlighted_drop_target");
+		}
+	});
+	$(document).on("dragenter", ".folder>.drag_enter_center:not(.highlighted_drop_target)", function(event) {
+		event.stopPropagation();
+		if (DragAndDrop.DragNodeClass == "tab") {
 			// if (/* $(".selected:visible").find($(this)).length > 0 ||  */  DragAndDrop.DragNodeClass != "folder") { return; }
 			$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 			$(this).addClass("highlighted_drop_target");
@@ -276,7 +287,7 @@ function DropToTarget(TargetNode) {
 		if (TargetNode.parent().is(".selected")) {
 			TargetNode.parent().addClass("highlighted_selected").removeClass("selected");
 		}
-		$(".selected").each(function() {
+		$(".pin.selected, .tab.selected").each(function() {
 			SetTabClass({ id: this.id, pin: false });
 		});
 		if (TargetNode.is(".drag_entered_top")) {
@@ -309,6 +320,12 @@ function DropToTarget(TargetNode) {
 		});
 		$("#"+TargetNode[0].id.substr(1)).append($($(".selected").get().reverse()));
 	}	
+
+
+	// dropped on folder
+	// if (TargetNode.is(".folder")) {
+
+	// }	
 	
 	$(".highlighted_selected").addClass("selected").removeClass("highlighted_selected");
 	

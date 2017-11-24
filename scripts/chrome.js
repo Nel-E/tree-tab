@@ -5,7 +5,6 @@
 // **********         CHROME EVENTS         ***************
 
 function StartChromeListeners(){
-		
 	if (browserId == "F") {
 		browser.browserAction.onClicked.addListener(function(tab) {
 			if (tab.windowId == CurrentWindowId) {

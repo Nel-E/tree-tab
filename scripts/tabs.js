@@ -195,27 +195,28 @@ function SetActiveTab(tabId) {
 }
 
 function ScrollToTab(tabId) {
-	if ($("#"+tabId).length == 0) {
-		return false;
-	}
-	if ($("#"+tabId).is(":not(:visible)")) {
-		$("#"+tabId).parents(".tab").removeClass("c").addClass("o");
-	}
-	if ($("#"+tabId).is(".pin")) {
-		if ($("#"+tabId).position().left+$("#"+tabId).outerWidth() > $("#pin_list").innerWidth()) {
-			$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left+$("#"+tabId).outerWidth()-$("#pin_list").innerWidth());
-		} else {
-			if ($("#"+tabId).position().left < 0) {
-				$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left);
+	if ($("#"+tabId)[0]) {
+		if ($("#"+tabId).is(".pin")) {
+			if ($("#"+tabId).position().left+$("#"+tabId).outerWidth() > $("#pin_list").innerWidth()) {
+				$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left+$("#"+tabId).outerWidth()-$("#pin_list").innerWidth());
+			} else {
+				if ($("#"+tabId).position().left < 0) {
+					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left);
+				}
 			}
 		}
-	}
-	if ($("#"+tabId).is(".tab")) {
-		if ($("#"+tabId).offset().top - $("#"+active_group).offset().top < 0) {
-			$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top);
-		} else {
-			if ($("#"+tabId).offset().top - $("#"+active_group).offset().top > $("#"+active_group).innerHeight() - $(".tab_header").outerHeight()) {
-				$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top - $("#"+active_group).innerHeight() + $(".tab_header").outerHeight() + 4);
+		if ($("#"+tabId).is(".tab")) {
+			if ($("#"+active_group+" #"+tabId)[0]) {
+				if ($("#"+tabId).is(":not(:visible)")) {
+					$("#"+tabId).parents(".tab").removeClass("c").addClass("o");
+				}
+				if ($("#"+tabId).offset().top - $("#"+active_group).offset().top < 0) {
+					$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top);
+				} else {
+					if ($("#"+tabId).offset().top - $("#"+active_group).offset().top > $("#"+active_group).innerHeight() - $(".tab_header").outerHeight()) {
+						$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top - $("#"+active_group).innerHeight() + $(".tab_header").outerHeight() + 4);
+					}
+				}
 			}
 		}
 	}
@@ -291,6 +292,76 @@ function DiscardTabs(tabsIds) {
 }
 
 
+function ActivateNextTabAfterClose() {
+	if ($(".pin.active:visible")[0]) {
+		if ($(".pin.active").next(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+		} else {
+			if ($(".pin.active").prev(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+			}
+		}
+	}
+	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active:visible").children().last().children(".tab")[0]) {
+			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
+		} else {
+			if ($(".active:visible").next(".tab")[0]) {
+				chrome.tabs.update(parseInt($(".active:visible").next(".tab")[0].id), { active: true });
+			} else {
+				if ($(".active:visible").prev(".tab")[0]) {
+					chrome.tabs.update(parseInt($(".active:visible").prev(".tab")[0].id), { active: true });
+				} else {
+					if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
+						chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+					} else {
+						if ($(".active:visible").parents(".tab").last().next(".tab")[0]) {
+							chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
+						} else {
+							ActivatePrevTab();
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function ActivatePrevTabAfterClose() {
+	if ($(".pin.active")[0]) {
+		if ($(".pin.active").prev(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+		} else {
+			if ($(".pin.active").next(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+			}
+		}
+	}
+	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active:visible").children().last().children(".tab")[0]) {
+			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
+		} else {
+			if ($(".active:visible").prev(".tab:visible")[0]) {
+				chrome.tabs.update(parseInt($(".active:visible").prev(".tab:visible")[0].id), { active: true });
+			} else {
+				if ($(".active:visible").next(".tab:visible")[0]) {
+					chrome.tabs.update(parseInt($(".active:visible").next(".tab:visible")[0].id), { active: true });
+				} else {
+					if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
+						chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+					} else {
+						if ($(".active:visible").parents(".tab").last().prev(".tab:visible")[0]) {
+							chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().prev(".tab:visible")[0].id), { active: true });
+						} else {
+							ActivateNextTab();
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 function ActivateNextTab() {
 	if ($(".pin.active:visible")[0]) {
 		if ($(".pin.active").next(".pin")[0]) {
@@ -301,22 +372,20 @@ function ActivateNextTab() {
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0]) {
+	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
 		if ($(".active:visible").children().last().children(".tab")[0]) {
 			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
 		} else {
-			if ($(".active:visible").next(".tab")[0]) {
-				chrome.tabs.update(parseInt($(".active:visible").next(".tab")[0].id), { active: true });
+			if ($(".active:visible").next(".tab:visible")[0]) {
+				chrome.tabs.update(parseInt($(".active:visible").next(".tab:visible")[0].id), { active: true });
 			} else {
-				if ($(".active:visible").parent().parent().next(".tab")[0]) {
-					chrome.tabs.update(parseInt($(".active:visible").parent().parent().next(".tab")[0].id), { active: true });
+				if ($(".active:visible").parent().parent().next(".tab:visible")[0]) {
+					chrome.tabs.update(parseInt($(".active:visible").parent().parent().next(".tab:visible")[0].id), { active: true });
 				} else {
-					if ($(".active:visible").parents(".tab").last().next(".tab")[0]) {
-						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
+					if ($(".active:visible").parents(".tab").last().next(".tab:visible")[0]) {
+						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab:visible")[0].id), { active: true });
 					} else {
-						if ($(".tab:visible").length > 1) {
-							ActivatePrevTab();
-						}
+						ActivatePrevTab();
 					}
 				}
 			}
@@ -334,7 +403,7 @@ function ActivatePrevTab() {
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0]) {
+	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
 		if ($(".active:visible").prev().find(".tab").length > 0) {
 			chrome.tabs.update(parseInt($(".active:visible").prev().find(".tab").last()[0].id), { active: true });
 		} else {
@@ -344,9 +413,7 @@ function ActivatePrevTab() {
 				if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
 					chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
 				} else {
-					if ($(".tab:visible").length > 1) {
-						ActivateNextTab();
-					}
+					ActivateNextTab();
 				}
 			}
 		}
@@ -417,7 +484,6 @@ function SetTabEvents() {
 
 	// EXPAND BOX - EXPAND / COLLAPSE
 	$(document).on("mousedown", ".expand", function(event) {
-		// event.stopPropagation();
 		if (event.button == 0) {
 			if ($(this).parent().parent().is(".o")) {
 				$(this).parent().parent().removeClass("o").addClass("c");
@@ -479,9 +545,16 @@ function SetTabEvents() {
 		if ((event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".tab")) || (event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".pin") && opt.allow_pin_close == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))) {
 			if ($(this).parent().is(".active:visible") && opt.after_closing_active_tab != "browser") {
 				if (opt.after_closing_active_tab == "above") {
-					ActivatePrevTab();
+					ActivatePrevTabAfterClose();
 				}
 				if (opt.after_closing_active_tab == "below") {
+					ActivateNextTabAfterClose();
+				}
+
+				if (opt.after_closing_active_tab == "above_seek_in_parent") {
+					ActivatePrevTab();
+				}
+				if (opt.after_closing_active_tab == "below_seek_in_parent") {
 					ActivateNextTab();
 				}
 			}
@@ -496,11 +569,11 @@ function SetTabEvents() {
 
 	// SINGLE CLICK TO ACTIVATE TAB
 	$(document).on("click", ".tab_header", function(event) {
-		if ($(".menu").is(":visible")) {
+		if ($(".menu").is(":visible")  || ($(this).parent().is(".c, .o") && $(event.target).is(".expand")) || $(event.target).is(".close, .close_img, .tab_mediaicon")) {
 			return;
 		}
 		event.stopPropagation();
-		if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.close, .close_img, .expand, .tab_mediaicon)")) {
+		if (event.button == 0 && !event.shiftKey && !event.ctrlKey) {
 			SetActiveTab($(this).parent()[0].id);
 			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
 		}

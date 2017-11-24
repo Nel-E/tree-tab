@@ -259,8 +259,14 @@
 	"options_after_closing_active_tab_go_down": {
 		"message": "activate tab below"
 	},
+	"options_after_closing_active_tab_go_up_seek_in_parent": {
+		"message": "activate tab above or activate previous tab if active tab was a root of the tree"
+	},
+	"options_after_closing_active_tab_go_down_seek_in_parent": {
+		"message": "activate tab below or activate next parent tab if active tab was last in the tree"
+	},
 	"options_after_closing_active_tab_go_browser": {
-		"message": "let browser handle which tab to activate"
+		"message": "let browser activate tab"
 	},
 
 	"options_append_child_tab_after_limit": {

@@ -6,8 +6,8 @@
 
 
 var running = false;
-var schedule_save = 0;
-var schedule_update_indexes = 0;
+var schedule_save = -999;
+var schedule_update_data = 0;
 var schedule_rearrange_tabs = 0;
 var windows = {};
 var tabs = {};
@@ -22,7 +22,6 @@ var DropTargetsInFront = false;
 var menuTabId = 0;
 var CurrentWindowId = 0;
 var SearchIndex = 0;
-var schedule_update_data = 0;
 var active_group = "tab_list";
 var PickColor = "";
 

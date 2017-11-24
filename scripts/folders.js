@@ -45,7 +45,7 @@ function GenerateNewFolderID(){
 
 function SetFolderEvents() {
 	// EXPAND BOX - EXPAND / COLLAPSE
-	$(document).on("mousedown", ".folder_icon", function(event) {
+	$(document).on("click", ".folder_icon", function(event) {
 		event.stopPropagation();
 		if (event.button == 0) {
 			if ($(this).parent().parent().is(".o")) {

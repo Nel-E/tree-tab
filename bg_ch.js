@@ -92,7 +92,7 @@ function ChromeLoadTabs(retry) {
 		}
 		// will try to find tabs for 3 times
 		if (opt.skip_load == true || retry > 2 || (tabs_matched > t_count*0.5)) {
-			schedule_save++;
+			schedule_save = 1;
 			running = true;
 			ChromeAutoSaveData("", 1000);
 			ChromeAutoSaveData("_BAK1", 300000);
