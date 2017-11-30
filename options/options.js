@@ -153,6 +153,10 @@ function SetEvents() {
 // --------------------------------DONATIONS------------------------------------------------------------------------------
 	
 	// Donate
+	$(document).on("click", "#options_share_theme_link", function(event) {
+		chrome.tabs.create({url: "https://drive.google.com/drive/folders/0B3jXQpRtOfvSelFrTEVHZEx3Nms?usp=sharing"});
+	});
+	
 	$(document).on("click", "#donate_paypal", function(event) {
 		chrome.tabs.create({url: "https://www.paypal.me/KarolJagiello/1"});
 	});

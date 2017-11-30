@@ -50,7 +50,7 @@ function SetIOEvents() {
 		if (MouseHoverOver.match("g_|tab_list") !== null) {
 			// ctrl+a to select all
 			if (event.ctrlKey && event.which == 65) {
-				$("#"+active_group).children(".tab:visible").addClass("selected");
+				$("#ch"+active_group).children(".tab:visible").addClass("selected");
 			}
 			// ctrl+i to invert selection
 			if (event.ctrlKey && event.which == 73) {

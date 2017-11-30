@@ -38,7 +38,7 @@ function ImportGroup() {
 				if (LTab[0] == lastId) {
 					setTimeout(function() {
 						LoadedGroup[1].forEach(function(LTab){
-							$("#"+NewGroupId).append($("#"+LTab[0]));
+							$("#ch"+NewGroupId).append($("#"+LTab[0]));
 						});
 					}, 2000);
 					setTimeout(function() {
@@ -54,6 +54,7 @@ function ImportGroup() {
 							RearrangeTreeTabs(tabs, newTabs, true);
 							RefreshExpandStates();
 							RefreshGUI();
+							RefreshCounters();
 						});
 					}, 4000);
 				}	

@@ -15,12 +15,15 @@ function StartChromeListeners(){
 	
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "drag_drop") {
+			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
 			DragAndDrop.SelectedTabsIds = message.SelectedTabsIds;
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.Parents = message.Parents;
-			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.Depth = message.Depth;
+		}
+		if (message.command == "dropped") {
+			DragAndDrop.DroppedToWindowId = message.DroppedToWindowId;
 		}
 		if (message.command == "reload_sidebar") {
 			window.location.reload();
@@ -47,8 +50,8 @@ function StartChromeListeners(){
 			switch(message.command) {
 				case "tab_created":
 					// if set to treat unparented tabs as active tab's child
-					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $(".active:visible")[0]) {
-						message.tab.openerTabId = $(".active:visible")[0].id;
+					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $(".active_tab:visible")[0]) {
+						message.tab.openerTabId = $(".active_tab:visible")[0].id;
 					}
 					// child case
 					if (message.tab.openerTabId) {
@@ -88,7 +91,7 @@ function StartChromeListeners(){
 					// orphan case
 					} else {
 						if (opt.append_orphan_tab == "after_active") {
-							AppendTab({ tab: message.tab, InsertAfterId: $(".active:visible")[0] ? $(".active:visible")[0].id : undefined, Append: false });
+							AppendTab({ tab: message.tab, InsertAfterId: $(".active_tab:visible")[0] ? $(".active_tab:visible")[0].id : undefined, Append: false });
 						}
 						if (opt.append_orphan_tab == "top") {
 							AppendTab({ tab: message.tab, Append: false });
@@ -103,6 +106,7 @@ function StartChromeListeners(){
 					RefreshExpandStates();
 					schedule_update_data++;
 					RefreshGUI();
+					RefreshCounters();
 				break;
 				case "tab_attached":
 					AppendTab({ tab: message.tab, ParentId: message.ParentId, Append: true});
@@ -148,6 +152,7 @@ function StartChromeListeners(){
 					RefreshExpandStates();
 					setTimeout(function() { schedule_update_data++; },300);
 					RefreshGUI();
+					RefreshCounters();
 				break;
 				case "tab_activated":
 					setTimeout(function() { SetActiveTab(message.tabId); },100);

@@ -30,6 +30,8 @@ function RearrangeGroups(stack) {
 function AppendGroupToList(groupId, group_name, font_color) {
 	if ($("#"+groupId).length == 0 && $("#groups")[0]) {
 		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; $("#groups")[0].appendChild(grp);
+		var gct = document.createElement("div"); gct.className = "children_tabs"; gct.id = "ch"+groupId; grp.appendChild(gct);
+		var gcf = document.createElement("div"); gcf.className = "children_folders"; gcf.id = "cf"+groupId; grp.appendChild(gcf);
 	}
 	if ($("#_"+groupId).length == 0) {
 		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
@@ -57,7 +59,7 @@ function GenerateNewGroupID(){
 
 function AddNewGroup(p) {
 	var newId = GenerateNewGroupID();
-	bggroups[newId] = { id: newId, index: 0, activetab: 0, activetab_ttid: "", name: (p.name ? p.name : caption_noname_group), font:  (p.font ? p.font : "")  };
+	bggroups[newId] = { id: newId, index: 0, active_tab: 0, active_tab_ttid: "", name: (p.name ? p.name : caption_noname_group), font:  (p.font ? p.font : "")  };
 	AppendGroupToList(newId, bggroups[newId].name, bggroups[newId].font);
 	UpdateBgGroupsOrder();
 	return newId;
@@ -73,7 +75,7 @@ function GroupRemove(groupId, close_tabs) {
 		CloseTabs($("#"+active_group).find(".tab").map(function() {return parseInt(this.id);}).toArray());
 	} else {
 		$("#"+groupId).children().each(function() {
-			$("#tab_list").append(this);
+			$("#chtab_list").append(this);
 		});
 	}
 	delete bggroups[groupId];
@@ -100,37 +102,41 @@ function UpdateBgGroupsOrder() {
 }
 
 function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
-	if ($("#"+groupId)[0] == undefined) {
-		return;
+	if ($("#"+groupId)[0]) {
+		active_group = groupId;
+		$(".group_button").removeClass("active_group");
+		$("#_"+groupId).addClass("active_group");
+		$(".tab, .group").hide();
+		$("#"+groupId).show();
+		$("#"+groupId+" .tab").show();
+		RefreshGUI();
+		$("#group_edit").hide();
+		if (switch_to_active_in_group && $("#"+groupId+" .active_tab")[0]){
+			chrome.tabs.update(parseInt($("#"+groupId+" .active_tab")[0].id), {active: true});
+		}
+		if (scroll_to_active && $("#"+groupId+" .active_tab")[0]){
+			ScrollToTab($("#"+groupId+" .active_tab")[0].id);
+		}
+		if (groupId == "tab_list") {
+			$("#button_remove_group, #button_edit_group").addClass("disabled");
+		} else {
+			$("#button_remove_group, #button_edit_group").removeClass("disabled");
+		}
+		chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
+		RefreshExpandStates();
+		RefreshCounters();
 	}
-	$(".group_button").removeClass("active_group");
-	$("#_"+groupId).addClass("active_group");
-	$(".tab, .group").hide();
-	$("#"+groupId).show();
-	$("#"+groupId+" .tab").show();
-	active_group = groupId;
-	RefreshGUI();
-	$("#group_edit").hide();
-	if (switch_to_active_in_group && $("#"+groupId+" .active")[0]){
-		chrome.tabs.update(parseInt($("#"+groupId+" .active")[0].id), {active: true});
-	}
-	if (scroll_to_active && $("#"+groupId+" .active")[0]){
-		ScrollToTab($("#"+groupId+" .active")[0].id);
-	}
-	if (groupId == "tab_list") {
-		$("#button_remove_group, #button_edit_group").addClass("disabled");
-	} else {
-		$("#button_remove_group, #button_edit_group").removeClass("disabled");
-	}
-	chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
 }
 
-function SetActiveTabInActiveGroup(tabId) {
-	if ($("#"+tabId).parents(".group")[0] && bggroups[active_group] != undefined) {
-		bggroups[$("#"+tabId).parents(".group")[0].id].activetab = parseInt(tabId);
-		if ($("#"+tabId).parents(".group")[0].id != active_group) {
-			SetActiveGroup($("#"+tabId).parents(".group")[0].id, false, true);
+function SetActiveTabInGroup(GroupId, tabId) {
+	if ($(".tab#"+tabId)[0] /* && $("#"+tabId).parents(".group")[0] */ && bggroups[GroupId] != undefined) {
+		// bggroups[$("#"+tabId).parents(".group")[0].id].active_tab = parseInt(tabId);
+		// if ($("#"+tabId).parents(".group")[0].id != active_group) {
+		if (GroupId != active_group) {
+			// SetActiveGroup($("#"+tabId).parents(".group")[0].id, false, true);
+			SetActiveGroup(GroupId, false, true);
 		}
+		bggroups[GroupId].active_tab = parseInt(tabId);
 		chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 	}
 }
@@ -170,7 +176,7 @@ function GroupEditConfirm() {
 	$("#group_edit_name")[0].value = $("#group_edit_name")[0].value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
 	bggroups[active_group].name = $("#group_edit_name")[0].value;
 	bggroups[active_group].font = RGBtoHex($("#group_edit_font").css("background-color"));
-	$("#group_edit").hide(0);
+	$(".edit_dialog").hide(0);
 	$(".group_title#_gte" +active_group).css({"color": "#"+bggroups[active_group].font});
 	RefreshGUI();
 	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
@@ -241,7 +247,7 @@ function SetGroupEvents() {
 
 	// edit group dialog box
 	$(document).on("mousedown", "#group_edit_discard", function(event) {
-		$("#group_edit").hide(0);
+		$(".edit_dialog").hide(0);
 	});
 	$("#group_edit_name").keyup(function(e) {
 		if (e.keyCode == 13) {

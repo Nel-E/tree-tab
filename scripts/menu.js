@@ -21,11 +21,11 @@ function SetMenu() {
 			if ($(this).is(".tab, .pin")) {
 				menuTabId = parseInt($(this)[0].id);
 			} else {
-				if ($(".active:visible")[0]) {
-					menuTabId = parseInt($(".active:visible")[0].id);
+				if ($(".active_tab:visible")[0]) {
+					menuTabId = parseInt($(".active_tab:visible")[0].id);
 				} else {
-					if ($(".active")[0]) {
-						menuTabId = parseInt($(".active")[0].id);
+					if ($(".active_tab")[0]) {
+						menuTabId = parseInt($(".active_tab")[0].id);
 					}
 				}
 			}
@@ -96,8 +96,22 @@ function SetMenu() {
 				}
 				break;
 			case "tab_move":
-				if ($("#" + menuTabId).is(".selected")) {
-					DetachTabs($(".selected:visible").map(function() { return parseInt(this.id); }).toArray());
+				if ($("#" + menuTabId).is(".selected, .active_tab")) {
+					
+					
+					let tabsArr = [];
+					$(".active_tab:visible, .selected:visible").each(function() {
+						tabsArr.push(parseInt(this.id));
+						if ($("#ch"+this.id).children().length > 0) {
+							$($("#ch"+this.id).find(".tab")).each(function() {
+								tabsArr.push(parseInt(this.id));
+							});
+						}
+					});
+					DetachTabs(tabsArr);
+								
+					
+					// DetachTabs($(".selected:visible").map(function() { return parseInt(this.id); }).toArray());
 				} else {
 					DetachTabs([menuTabId]);
 				}

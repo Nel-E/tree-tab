@@ -192,7 +192,7 @@
 		"message": " Tabs "
 	},
 	"options_syncro_tabbar_tabs_order": {
-		"message": "synchronise browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop, but this option is needed for correct ctrl+tab switching"
+		"message": "synchronize browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop, but this option is needed for correct ctrl+tab switching"
 	},
 	"options_switch_with_scroll": {
 		"message": "switch tabs with mouse wheel"
@@ -339,6 +339,9 @@
 	},
 	"options_export_theme_button": {
 		"message": "Export"
+	},
+	"options_share_theme_link": {
+		"message": "Get more!"
 	},
 
 	
@@ -607,6 +610,16 @@
 	},
 	
 	"group_edit_button_confirm": {
+		"message": "Ok"
+	},
+	
+
+
+	"folder_edit_button_cancel": {
+		"message": "Cancel"
+	},
+	
+	"folder_edit_button_confirm": {
 		"message": "Ok"
 	},
 	

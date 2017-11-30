@@ -33,7 +33,7 @@ function ChromeLoadTabs(retry) {
 				let winId = w[wIndex].id;
 				let url1 = w[wIndex].tabs[0].url;
 				let url2 = w[wIndex].tabs[w[wIndex].tabs.length-1].url;
-				windows[winId] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+				windows[winId] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 				for (var LwIndex = 0; LwIndex < LoadedWinCount; LwIndex++) {
 					if (LoadedWindows[LwIndex].url1 == url1 || LoadedWindows[LwIndex].url2 == url2) {
 						if (LoadedWindows[LwIndex].group_bar) { windows[winId].group_bar = LoadedWindows[LwIndex].group_bar; }
@@ -85,8 +85,8 @@ function ChromeLoadTabs(retry) {
 		// replace active tab ids for each group using refTabs
 		for (var windowId in windows) {
 			for (var group in windows[windowId].groups) {
-				if (refTabs[windows[windowId].groups[group].activetab]) {
-					windows[windowId].groups[group].activetab = refTabs[windows[windowId].groups[group].activetab];
+				if (refTabs[windows[windowId].groups[group].active_tab]) {
+					windows[windowId].groups[group].active_tab = refTabs[windows[windowId].groups[group].active_tab];
 				}
 			}
 		}
@@ -238,7 +238,7 @@ function ChromeListeners() {
 	});
 	
 	chrome.windows.onCreated.addListener(function(window) {
-		windows[window.id] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+		windows[window.id] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 		schedule_save++;
 	});
 	
@@ -261,6 +261,15 @@ function ChromeMessageListeners() {
 			case "get_windows":
 				sendResponse(windows);
 			break;
+			case "get_folders":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].folders);
+				}
+			break;
+			case "save_folders":
+				windows[message.windowId].folders = Object.assign({}, message.folders);
+				schedule_save++;
+			break;
 			case "get_groups":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].groups);
@@ -270,7 +279,6 @@ function ChromeMessageListeners() {
 				windows[message.windowId].groups = Object.assign({}, message.groups);
 				schedule_save++;
 			break;
-			
 			case "set_active_group":
 				windows[message.windowId].active_group = message.active_group;
 				schedule_save++;
@@ -280,11 +288,6 @@ function ChromeMessageListeners() {
 					sendResponse(windows[message.windowId].active_group);
 				}
 			break;
-			
-			
-			
-			
-			
 			case "set_search_filter":
 				windows[message.windowId].search_filter = message.search_filter;
 				schedule_save++;
@@ -294,10 +297,6 @@ function ChromeMessageListeners() {
 					sendResponse(windows[message.windowId].search_filter);
 				}
 			break;			
-			
-			
-			
-			
 			case "set_active_shelf":
 				windows[message.windowId].active_shelf = message.active_shelf;
 				schedule_save++;

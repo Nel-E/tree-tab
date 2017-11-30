@@ -24,7 +24,8 @@ async function UpdateData() {
 					command: "update_tab",
 					tabId: parseInt(this.id),
 					tab: {
-						parent: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab, .folder")[0].id,
+						// parent: $(this).parent(".group")[0] ? $(this).parent()[0].id : $(this).parent().parent(".tab, .folder")[0].id,
+						parent: $(this).parent().parent()[0].id,
 						index: $(this).index(),
 						expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
 					}
@@ -112,15 +113,15 @@ function AppendTab(param) {
 		param.ParentId = "pin_list";
 	} else {
 		if (param.ParentId == undefined || $("#"+param.ParentId).is(".pin, #pin_list") || $("#"+param.ParentId).length == 0) {
-			param.ParentId = active_group;
+			param.ParentId = "ch"+active_group;
 		} else {
-			if($("#"+param.ParentId).is(".tab")) {
+			// if($("#"+param.ParentId).is(".tab") || $("#"+param.ParentId).is(".group")) { /* GROUP PART IS LEGACY */
 				if ($("#ch"+param.ParentId).children().length == 0) {
 					$("#"+param.ParentId).addClass("o").removeClass("n").removeClass("c");
 				}
 				
 				param.ParentId = "ch"+param.ParentId;
-			}
+			/* } */
 		}
 	}	
 
@@ -185,12 +186,24 @@ function SetTabClass(param) {
 
 function SetActiveTab(tabId) {
 	if ($("#"+tabId).length > 0) {
-		$(".active:visible").removeClass("active").removeClass("selected");
-		$(".pin, .tab:visible").removeClass("active").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
+		if ($("#"+tabId).is(".tab")) {
+			SetActiveTabInGroup($("#"+tabId).parents(".group")[0].id, tabId);
+		}
+		$(".active_folder").removeClass("active_folder");
+		$(".pin, #"+active_group+" .tab").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
+		// console.log($("#"+tabId).parents(".group")[0].id);
+		// if ($("#"+tabId).is(".tab")) {
+			// $("#"+($("#"+tabId).parents(".group")[0].id)+" .tab").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
+		// }
+		// $(".pin").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$("#"+tabId).removeClass("attention").addClass("active");
+		$("#"+tabId).removeClass("attention").addClass("active_tab");
 		ScrollToTab(tabId);
-		SetActiveTabInActiveGroup(tabId);
+		
+		
+
+		
+		
 	}
 }
 
@@ -227,11 +240,37 @@ function DetachTabs(tabsIds) {
 		if (window.tabs.length == 1) {
 			return;
 		}
-		chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
-			(tabsIds).forEach(function(tabId) {
-				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1});
+		if (browserId == "F") { // AGAIN BUG 1398272 - MOZILLA!
+			let counter = 0;
+			let Parents = [];
+			tabsIds.forEach(function(tabId) {
+				if ($("#"+tabId)[0]){
+					Parents.push(parseInt($("#"+tabId).parent().parent()[0].id));
+				} else {
+					Parents.push(0);
+				}
 			});
-		})
+			chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
+				if (Parents.indexOf(tabsIds[counter]) != -1){
+					chrome.runtime.sendMessage({command: "update_tab", tabId: tabsIds[Parents.indexOf(tabsIds[counter])], tab: {parent: new_window.tabs[0].id}});
+				}
+				(tabsIds).forEach(function(tabId) {
+					chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
+						if (MovedTab && Parents.indexOf(tabsIds[counter]) != -1){
+							chrome.runtime.sendMessage({command: "update_tab", tabId: tabsIds[Parents.indexOf(tabsIds[counter])], tab: {parent: MovedTab[0].id}});
+						}
+						counter++;						
+					});
+				});
+				// chrome.tabs.remove(new_window.tabs[0].id, null);
+			});
+		} else {
+			chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
+				(tabsIds).forEach(function(tabId) {
+					chrome.tabs.move(tabId, {windowId: new_window.id, index:-1});
+				});
+			});
+		}
 	});
 }
 
@@ -293,32 +332,35 @@ function DiscardTabs(tabsIds) {
 
 
 function ActivateNextTabAfterClose() {
-	if ($(".pin.active:visible")[0]) {
-		if ($(".pin.active").next(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+	if ($(".pin.active_tab:visible")[0]) {
+		if ($(".pin.active_tab").next(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active").prev(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+			if ($(".pin.active_tab").prev(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
-		if ($(".active:visible").children().last().children(".tab")[0]) {
-			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
+	if ($(".tab.active_tab:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active_tab:visible").children().last().children(".tab")[0]) {
+			chrome.tabs.update(parseInt($(".active_tab:visible").children().last().children(".tab")[0].id), { active: true });
 		} else {
-			if ($(".active:visible").next(".tab")[0]) {
-				chrome.tabs.update(parseInt($(".active:visible").next(".tab")[0].id), { active: true });
+			if ($(".active_tab:visible").next(".tab")[0]) {
+				chrome.tabs.update(parseInt($(".active_tab:visible").next(".tab")[0].id), { active: true });
 			} else {
-				if ($(".active:visible").prev(".tab")[0]) {
-					chrome.tabs.update(parseInt($(".active:visible").prev(".tab")[0].id), { active: true });
+				if ($(".active_tab:visible").prev(".tab")[0]) {
+					chrome.tabs.update(parseInt($(".active_tab:visible").prev(".tab")[0].id), { active: true });
 				} else {
-					if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
-						chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+					if ($(".tab.active_tab:visible").parent().is(".children") && $(".tab.active_tab:visible").parent().parent(".tab")[0]) {
+						chrome.tabs.update(parseInt($(".tab.active_tab:visible").parent().parent(".tab")[0].id), { active: true });
 					} else {
-						if ($(".active:visible").parents(".tab").last().next(".tab")[0]) {
-							chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
+						if ($(".active_tab:visible").parents(".tab").last().next(".tab")[0]) {
+							chrome.tabs.update(parseInt($(".active_tab:visible").parents(".tab").last().next(".tab")[0].id), { active: true });
 						} else {
-							ActivatePrevTab();
+							if ($(".tab:visible:last")[0]) {
+								chrome.tabs.update(parseInt($(".tab:visible:last")[0].id), { active: true });
+							}
+							// ActivatePrevTab();
 						}
 					}
 				}
@@ -328,32 +370,36 @@ function ActivateNextTabAfterClose() {
 }
 
 function ActivatePrevTabAfterClose() {
-	if ($(".pin.active")[0]) {
-		if ($(".pin.active").prev(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+	if ($(".pin.active_tab")[0]) {
+		if ($(".pin.active_tab").prev(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active").next(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+			if ($(".pin.active_tab").next(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
-		if ($(".active:visible").children().last().children(".tab")[0]) {
-			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
+	if ($(".tab.active_tab:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active_tab:visible").children().last().children(".tab")[0]) {
+			chrome.tabs.update(parseInt($(".active_tab:visible").children().last().children(".tab")[0].id), { active: true });
 		} else {
-			if ($(".active:visible").prev(".tab:visible")[0]) {
-				chrome.tabs.update(parseInt($(".active:visible").prev(".tab:visible")[0].id), { active: true });
+			if ($(".active_tab:visible").prev(".tab:visible")[0]) {
+				chrome.tabs.update(parseInt($(".active_tab:visible").prev(".tab:visible")[0].id), { active: true });
 			} else {
-				if ($(".active:visible").next(".tab:visible")[0]) {
-					chrome.tabs.update(parseInt($(".active:visible").next(".tab:visible")[0].id), { active: true });
+				if ($(".active_tab:visible").next(".tab:visible")[0]) {
+					chrome.tabs.update(parseInt($(".active_tab:visible").next(".tab:visible")[0].id), { active: true });
 				} else {
-					if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
-						chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+					if ($(".tab.active_tab:visible").parent().is(".children") && $(".tab.active_tab:visible").parent().parent(".tab")[0]) {
+						chrome.tabs.update(parseInt($(".tab.active_tab:visible").parent().parent(".tab")[0].id), { active: true });
 					} else {
-						if ($(".active:visible").parents(".tab").last().prev(".tab:visible")[0]) {
-							chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().prev(".tab:visible")[0].id), { active: true });
+						if ($(".active_tab:visible").parents(".tab").last().prev(".tab:visible")[0]) {
+							chrome.tabs.update(parseInt($(".active_tab:visible").parents(".tab").last().prev(".tab:visible")[0].id), { active: true });
 						} else {
-							ActivateNextTab();
+							if ($(".tab:visible:last")[0]) {
+								chrome.tabs.update(parseInt($(".tab:visible:last")[0].id), { active: true });
+							}
+							// console.log($(".tab:visible:")[0].id);
+							// ActivateNextTab();
 						}
 					}
 				}
@@ -363,27 +409,27 @@ function ActivatePrevTabAfterClose() {
 }
 
 function ActivateNextTab() {
-	if ($(".pin.active:visible")[0]) {
-		if ($(".pin.active").next(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+	if ($(".pin.active_tab:visible")[0]) {
+		if ($(".pin.active_tab").next(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active").prev(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+			if ($(".pin.active_tab").prev(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
-		if ($(".active:visible").children().last().children(".tab")[0]) {
-			chrome.tabs.update(parseInt($(".active:visible").children().last().children(".tab")[0].id), { active: true });
+	if ($(".tab.active_tab:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active_tab:visible").children().last().children(".tab")[0]) {
+			chrome.tabs.update(parseInt($(".active_tab:visible").children().last().children(".tab")[0].id), { active: true });
 		} else {
-			if ($(".active:visible").next(".tab:visible")[0]) {
-				chrome.tabs.update(parseInt($(".active:visible").next(".tab:visible")[0].id), { active: true });
+			if ($(".active_tab:visible").next(".tab:visible")[0]) {
+				chrome.tabs.update(parseInt($(".active_tab:visible").next(".tab:visible")[0].id), { active: true });
 			} else {
-				if ($(".active:visible").parent().parent().next(".tab:visible")[0]) {
-					chrome.tabs.update(parseInt($(".active:visible").parent().parent().next(".tab:visible")[0].id), { active: true });
+				if ($(".active_tab:visible").parent().parent().next(".tab:visible")[0]) {
+					chrome.tabs.update(parseInt($(".active_tab:visible").parent().parent().next(".tab:visible")[0].id), { active: true });
 				} else {
-					if ($(".active:visible").parents(".tab").last().next(".tab:visible")[0]) {
-						chrome.tabs.update(parseInt($(".active:visible").parents(".tab").last().next(".tab:visible")[0].id), { active: true });
+					if ($(".active_tab:visible").parents(".tab").last().next(".tab:visible")[0]) {
+						chrome.tabs.update(parseInt($(".active_tab:visible").parents(".tab").last().next(".tab:visible")[0].id), { active: true });
 					} else {
 						ActivatePrevTab();
 					}
@@ -394,24 +440,24 @@ function ActivateNextTab() {
 }
 
 function ActivatePrevTab() {
-	if ($(".pin.active")[0]) {
-		if ($(".pin.active").prev(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active").prev(".pin")[0].id), { active: true });
+	if ($(".pin.active_tab")[0]) {
+		if ($(".pin.active_tab").prev(".pin")[0]) {
+			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active").next(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active").next(".pin")[0].id), { active: true });
+			if ($(".pin.active_tab").next(".pin")[0]) {
+				chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 			}
 		}
 	}
-	if ($(".tab.active:visible")[0] && $(".tab:visible").length > 1) {
-		if ($(".active:visible").prev().find(".tab").length > 0) {
-			chrome.tabs.update(parseInt($(".active:visible").prev().find(".tab").last()[0].id), { active: true });
+	if ($(".tab.active_tab:visible")[0] && $(".tab:visible").length > 1) {
+		if ($(".active_tab:visible").prev().find(".tab").length > 0) {
+			chrome.tabs.update(parseInt($(".active_tab:visible").prev().find(".tab").last()[0].id), { active: true });
 		} else {
-			if ($(".active:visible").prev(".tab")[0]) {
-				chrome.tabs.update(parseInt($(".active:visible").prev(".tab")[0].id), { active: true });
+			if ($(".active_tab:visible").prev(".tab")[0]) {
+				chrome.tabs.update(parseInt($(".active_tab:visible").prev(".tab")[0].id), { active: true });
 			} else {
-				if ($(".tab.active:visible").parent().is(".children") && $(".tab.active:visible").parent().parent(".tab")[0]) {
-					chrome.tabs.update(parseInt($(".tab.active:visible").parent().parent(".tab")[0].id), { active: true });
+				if ($(".tab.active_tab:visible").parent().is(".children") && $(".tab.active_tab:visible").parent().parent(".tab")[0]) {
+					chrome.tabs.update(parseInt($(".tab.active_tab:visible").parent().parent(".tab")[0].id), { active: true });
 				} else {
 					ActivateNextTab();
 				}
@@ -519,16 +565,16 @@ function SetTabEvents() {
 			// SET SELECTION WITH SHIFT
 			if (event.shiftKey) {
 				$(".pin, .tab:visible").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly");
-				if ($(this).index() >= $(".active:visible").index()) {
-					$(".active:visible").nextUntil($(this), ":visible").add($(".active:visible")).add($(this)).addClass("selected");
+				if ($(this).index() >= $(".active_tab:visible").index()) {
+					$(".active_tab:visible").nextUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected");
 				} else {
-					$(".active:visible").prevUntil($(this), ":visible").add($(".active:visible")).add($(this)).addClass("selected");
+					$(".active_tab:visible").prevUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected");
 				}
 			}
 			// TOGGLE SELECTION WITH CTRL
 			if (event.ctrlKey) {
-				// if ($(".active:visible").is(":not(.selected)")) {
-					// $(".active:visible").addClass("selected");
+				// if ($(".active_tab:visible").is(":not(.selected)")) {
+					// $(".active_tab:visible").addClass("selected");
 				// }
 				$(this).toggleClass("selected");
 			}
@@ -543,7 +589,7 @@ function SetTabEvents() {
 		}
 		let tabId = parseInt($(this).parent()[0].id);
 		if ((event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".tab")) || (event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".pin") && opt.allow_pin_close == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))) {
-			if ($(this).parent().is(".active:visible") && opt.after_closing_active_tab != "browser") {
+			if ($(this).parent().is(".active_tab:visible") && opt.after_closing_active_tab != "browser") {
 				if (opt.after_closing_active_tab == "above") {
 					ActivatePrevTabAfterClose();
 				}

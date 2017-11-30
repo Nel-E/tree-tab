@@ -196,15 +196,17 @@
 		
 		<fieldset class="field" id="field_theme" style="width:850px;">
 			<legend class="label" id="options_theme"></legend>
-			
+		
 			<select id="theme_list" style="padding-right:6px;"></select>
 			<input type="text" id="new_theme_name" name="untitled" value="untitled"></input>
-			<button class="set_button" type="button" id="options_rename_theme_button" style="margin:10px;">Rename</button>
-			<button class="set_button" type="button" id="options_add_theme_button" style="margin:10px;">Add new</button>
-			<button class="set_button" type="button" id="options_remove_theme_button" style="margin:10px;">Remove</button>
-			<button class="set_button" type="button" id="options_import_theme_button" style="margin:10px;">Import</button>
-			<button class="set_button" type="button" id="options_export_theme_button" style="margin:10px;">Export</button>
-							
+			<button class="set_button" type="button" id="options_rename_theme_button" style="margin:6px;">Rename</button>
+			<button class="set_button" type="button" id="options_add_theme_button" style="margin:6px;">Add new</button>
+			<button class="set_button" type="button" id="options_remove_theme_button" style="margin:6px;">Remove</button>
+			<button class="set_button" type="button" id="options_import_theme_button" style="margin:6px;">Import</button>
+			<button class="set_button" type="button" id="options_export_theme_button" style="margin:6px;">Export</button>
+			<button class="set_button" type="button" id="options_share_theme_link" style="margin:6px;">Export</button>
+			<br>
+			<br>
 			<fieldset class="field" id="field_show_toolbar" style="position: relative; width:816px;">
 				<legend id="toolbar_legend">
 					<input type="checkbox" style="position:relative; top:-1px;" id="show_toolbar"></input>
@@ -287,7 +289,9 @@
 				<div class="pick_col color_bucket" id="scrollbar_track"></div>
 
 				<div class="pin_list" id="pin_list"></div>
-				<div class="group" id="tab_list"></div>
+				<div class="group" id="tab_list">
+					<div class="children_tabs" id="chtab_list"></div>
+				</div>
 				<div id="pin_list_scrollbar"><div id="pin_list_scrollbar_thumb"></div></div>
 				<div id="group_scrollbar"><div id="group_scrollbar_thumb"></div></div>
 				

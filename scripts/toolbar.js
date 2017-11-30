@@ -92,39 +92,38 @@ function RestoreToolbarShelf() {
 function SetToolbarShelfToggle(click_type) {
 	// tools and search buttons toggle
 	$(document).on(click_type, "#button_tools, #button_search, #button_groups, #button_backup, #button_folders", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			if ($(this).is(".on")) {
+				$(".on").removeClass("on");
+				$(".toolbar_shelf").addClass("hidden");
+				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "", windowId: CurrentWindowId});
+			} else {
+				$(".toolbar_shelf").addClass("hidden");
+				if ($(this).is("#button_tools")) {
+					$("#toolbar_shelf_tools").removeClass("hidden");
+					chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "tools", windowId: CurrentWindowId});
+				}
+				if ($(this).is("#button_search")) {
+					$("#toolbar_search").removeClass("hidden");
+					chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "search", windowId: CurrentWindowId});
+				}
+				if ($(this).is("#button_groups")) {
+					$("#toolbar_shelf_groups").removeClass("hidden");
+					chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "groups", windowId: CurrentWindowId});
+				}
+				if ($(this).is("#button_backup")) {
+					$("#toolbar_shelf_backup").removeClass("hidden");
+					chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "backup", windowId: CurrentWindowId});
+				}
+				if ($(this).is("#button_folders")) {
+					$("#toolbar_shelf_folders").removeClass("hidden");
+					chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "folders", windowId: CurrentWindowId});
+				}
+				$(".button").removeClass("on");
+				$(this).addClass("on");
+			}
+			RefreshGUI();
 		}
-		if ($(this).is(".on")) {
-			$(".on").removeClass("on");
-			$(".toolbar_shelf").addClass("hidden");
-			chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "", windowId: CurrentWindowId});
-		} else {
-			$(".toolbar_shelf").addClass("hidden");
-			if ($(this).is("#button_tools")) {
-				$("#toolbar_shelf_tools").removeClass("hidden");
-				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "tools", windowId: CurrentWindowId});
-			}
-			if ($(this).is("#button_search")) {
-				$("#toolbar_search").removeClass("hidden");
-				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "search", windowId: CurrentWindowId});
-			}
-			if ($(this).is("#button_groups")) {
-				$("#toolbar_shelf_groups").removeClass("hidden");
-				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "groups", windowId: CurrentWindowId});
-			}
-			if ($(this).is("#button_backup")) {
-				$("#toolbar_shelf_backup").removeClass("hidden");
-				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "backup", windowId: CurrentWindowId});
-			}
-			if ($(this).is("#button_folders")) {
-				$("#toolbar_shelf_folders").removeClass("hidden");
-				chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: "folders", windowId: CurrentWindowId});
-			}
-			$(".button").removeClass("on");
-			$(this).addClass("on");
-		}
-		RefreshGUI();
 	});
 }
 
@@ -153,20 +152,20 @@ function SetToolbarEvents() {
 		ScrollToTab($(".tab.filtered")[SearchIndex].id);
 		$($(".tab.filtered")[SearchIndex]).addClass("highlighted_search");
 	});
-
 	// new tab
 	$(document).on("mousedown", "#button_new", function(event) {
-		if (event.button == 1 && $(".active:visible")[0]) {
-			chrome.tabs.duplicate(parseInt($(".active:visible")[0].id), function(tab) {
+		if (event.button == 1 && $(".active_tab:visible")[0]) {
+			chrome.tabs.duplicate(parseInt($(".active_tab:visible")[0].id), function(tab) {
 				setTimeout(function() {
-					$("#"+tab.id).insertAfter($(".active:visible")[0]);
+					$("#"+tab.id).insertAfter($(".active_tab:visible")[0]);
 					RefreshExpandStates();
 					schedule_update_data++;
+					RefreshCounters();
 				}, 100);
 			});
 		}
-		if (event.button == 2 && $(".active:visible")[0]) {
-			ScrollToTab($(".active:visible")[0].id);
+		if (event.button == 2 && $(".active_tab:visible")[0]) {
+			ScrollToTab($(".active_tab:visible")[0].id);
 		}
 	});
 	$(document).on("click", "#button_new", function(event) {
@@ -176,55 +175,51 @@ function SetToolbarEvents() {
 	});
 	// pin tab
 	$(document).on("mousedown", "#button_pin", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			$(".active_tab:visible, .selected:visible").each(function() {
+				chrome.tabs.update(parseInt(this.id), { pinned: ($(this).is(".pin") ? false : true) });
+			});
 		}
-		$(".active:visible, .selected:visible").each(function() {
-			chrome.tabs.update(parseInt(this.id), { pinned: ($(this).is(".pin") ? false : true) });
-		});
 	});
 	// undo close
 	$(document).on("mousedown", "#button_undo", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.sessions.getRecentlyClosed( null, function(sessions) {
-			if (sessions.length > 0) {
-				chrome.sessions.restore(null, function(restored) {
-					// if (browserId == "F") {
-						// if (restored.tab != undefined) {
-							// let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
-								// TODO RESTORE TREE IF POSSIBLE
-								// console.log(TTId);
-							// });
+		if (event.button == 0) {
+			chrome.sessions.getRecentlyClosed( null, function(sessions) {
+				if (sessions.length > 0) {
+					chrome.sessions.restore(null, function(restored) {
+						// if (browserId == "F") {
+							// if (restored.tab != undefined) {
+								// let t = Promise.resolve(browser.sessions.getTabValue(restored.tab.id, "TTId")).then(function(TTId) {
+									// TODO RESTORE TREE IF POSSIBLE
+									// console.log(TTId);
+								// });
+							// }
 						// }
-					// }
-				});
-			}
-		});
+					});
+				}
+			});
+		}
 	});
 	// move tab to new window (detach)
 	$(document).on("mousedown", "#button_move", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			var tabsArr = [];
+			$(".active_tab:visible, .selected:visible").each(function() {
+				tabsArr.push(parseInt(this.id));
+				if ($("#ch"+this.id).children().length > 0) {
+					$($("#ch"+this.id).find(".tab")).each(function() {
+						tabsArr.push(parseInt(this.id));
+					});
+				}
+			});
+			DetachTabs(tabsArr);
 		}
-		var tabsArr = [];
-		$(".active:visible, .selected:visible").each(function() {
-			tabsArr.push(parseInt(this.id));
-			if ($("#ch"+this.id).children().length > 0) {
-				$($("#ch"+this.id).find(".tab")).each(function() {
-					tabsArr.push(parseInt(this.id));
-				});
-			}
-		});
-		DetachTabs(tabsArr);
 	});
 	// move tab to new window (detach)
 	$(document).on("mousedown", "#repeat_search", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			FindTab($("#filter_box")[0].value);
 		}
-		FindTab($("#filter_box")[0].value);
 	});
 	// filter on input
 	$("#filter_box").on("input", function() {
@@ -232,101 +227,38 @@ function SetToolbarEvents() {
 	});
 	// change filtering type
 	$(document).on("mousedown", "#button_filter_type", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			$("#button_filter_type").toggleClass("url").toggleClass("title");
+			FindTab($("#filter_box")[0].value);
+			chrome.runtime.sendMessage({command: "set_search_filter", search_filter:  ($(this).is(".url") ? "url" : "title"), windowId: CurrentWindowId});
 		}
-		$("#button_filter_type").toggleClass("url").toggleClass("title");
-		FindTab($("#filter_box")[0].value);
-		
-		
-		chrome.runtime.sendMessage({command: "set_search_filter", search_filter:  ($(this).is(".url") ? "url" : "title"), windowId: CurrentWindowId});
-		
-		// localStorage["filter_type"] = $(this).is(".url") ? "url" : "title";
-		
-		
-		
-		
 	});
 	// clear filter button
 	$(document).on("mousedown", "#button_filter_clear", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
+			FindTab("");
 		}
-		$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
-		FindTab("");
 	});
 	// sort tabs
-	$(document).on("mousedown", "#button_sort", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		SortTabs();
-	});
-	// bookmarks
-	$(document).on("mousedown", "#button_bookmarks", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.create({url: "chrome://bookmarks/"});
-	});
-	// downloads
-	$(document).on("mousedown", "#button_downloads", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.create({url: "chrome://downloads/"});
-	});
-	// history
-	$(document).on("mousedown", "#button_history", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.create({url: "chrome://history/"});
-	});
-	// extensions
-	$(document).on("mousedown", "#button_extensions", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.create({url: "chrome://extensions"});
-	});
-	// settings
-	$(document).on("mousedown", "#button_settings", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.create({url: "chrome://settings/"});
-	});
+	// $(document).on("mousedown", "#button_sort", function(event) {
+		// if (event.button == 0) {
+			// SortTabs();
+		// }
+	// });
 	// vertical tabs options
 	$(document).on("mousedown", "#button_options", function(event) {
-		if (event.button != 0) {
-			return;
+		if (event.button == 0) {
+			chrome.tabs.create({url: "options.html" });
 		}
-		chrome.tabs.create({url: "options.html" });
 	});
-	// discard tabs
-	$(document).on("mousedown", "#button_discard", function(event) {
-		if (event.button != 0) {
-			return;
-		}
-		chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
-			var tabsIds = [];
-			tabs.forEach(function(Tab) {
-				tabsIds.push(Tab.id);
-			});
-			DiscardTabs(tabsIds);
-		});
-	});
-
-
-	// new group button
+	// new group
 	$(document).on("mousedown", "#button_new_group", function(event) {
 		if (event.button == 0) {
 			AddNewGroup({});
 		}
 	});
-
-	// new group button
+	// remove group
 	$(document).on("mousedown", "#button_remove_group", function(event) {
 		let close_tabs = event.shiftKey;
 		if (event.button == 0) {
@@ -335,49 +267,110 @@ function SetToolbarEvents() {
 			}
 		}
 	});
-
-	// EDIT GROUP
+	// edit group
 	$(document).on("mousedown", "#button_edit_group", function(event) {
-		if (active_group != "tab_list") {
+		if (event.button == 0 && active_group != "tab_list") {
 			ShowGroupEditWindow(active_group);
 		}
 	});
-	
 	// import-export group
 	$(document).on("mousedown", "#button_export_group", function(event) {
-		ExportGroup(bggroups[active_group].name+".tt_group");
+		if (event.button == 0) {
+			ExportGroup(bggroups[active_group].name+".tt_group");
+		}
 	});
-
 	$(document).on("mousedown", "#button_import_group", function(event) {
-		ShowOpenFileDialog("file_import_group", ".tt_group");
+		if (event.button == 0) {
+			ShowOpenFileDialog("file_import_group", ".tt_group");
+		}
 	});
 	$(document).on("change", "#file_import_group", function(event) {
-		ImportGroup();
+		if (event.button == 0) {
+			ImportGroup();
+		}
 	});
 
 
+	// new folder
+	$(document).on("mousedown", "#button_new_folder", function(event) {
+		if (event.button == 0) {
+			AddNewFolder();
+		}
+	});
+	// rename folder
+	$(document).on("mousedown", "#button_edit_folder", function(event) {
+		if (event.button == 0 && $(".active_folder:visible")[0]) {
+			ShowRenameFolderDialog($(".active_folder:visible")[0].id);
+		}
+	});
+	// remove folder
+	$(document).on("mousedown", "#button_remove_folder", function(event) {
+		// let close_tabs = event.shiftKey;
+		if (event.button == 0 && $(".active_folder:visible")[0]) {
+			RemoveFolder($(".active_folder:visible")[0].id);
+		}
+	});
 
 	if (browserId != "F") {
+		// bookmarks
+		$(document).on("mousedown", "#button_bookmarks", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.create({url: "chrome://bookmarks/"});
+			}
+		});
+		// downloads
+		$(document).on("mousedown", "#button_downloads", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.create({url: "chrome://downloads/"});
+			}
+		});
+		// history
+		$(document).on("mousedown", "#button_history", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.create({url: "chrome://history/"});
+			}
+		});
+		// extensions
+		$(document).on("mousedown", "#button_extensions", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.create({url: "chrome://extensions"});
+			}
+		});
+		// settings
+		$(document).on("mousedown", "#button_settings", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.create({url: "chrome://settings/"});
+			}
+		});
+		// discard tabs
+		$(document).on("mousedown", "#button_discard", function(event) {
+			if (event.button == 0) {
+				chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
+					var tabsIds = [];
+					tabs.forEach(function(Tab) {
+						tabsIds.push(Tab.id);
+					});
+					DiscardTabs(tabsIds);
+				});
+			}
+		});
 		// load backups
 		$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
-			if (event.button != 0) {
-				return;
+			if (event.button == 0) {
+				let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
+				let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
+				
+				if (wins.length) {
+					localStorage["windows"] = JSON.stringify(wins);
+				}
+				if (tabs.length) {
+					localStorage["tabs"] = JSON.stringify(tabs);
+					alert("Loaded backup");
+				}
+				chrome.runtime.sendMessage({command: "reload"});
+				chrome.runtime.sendMessage({command: "reload_sidebar"});
+				location.reload();
 			}
-			let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
-			let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
-			
-			if (wins.length) {
-				localStorage["windows"] = JSON.stringify(wins);
-			}
-			if (tabs.length) {
-				localStorage["tabs"] = JSON.stringify(tabs);
-				alert("Loaded backup");
-			}
-			
-			chrome.runtime.sendMessage({command: "reload"});
-			chrome.runtime.sendMessage({command: "reload_sidebar"});
-			location.reload();
-			
 		});
 	}
 

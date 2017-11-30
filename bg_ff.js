@@ -53,7 +53,7 @@ function FirefoxLoadTabs(retry) {
 				if (opt.skip_load == false && WindowData != undefined) {
 					windows[winId] = Object.assign({}, WindowData);
 				} else {
-					windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
+					windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
 				}
 				
 				for (var tIndex = 0; tIndex < tabsCount; tIndex++) {
@@ -94,8 +94,8 @@ function FirefoxLoadTabs(retry) {
 							// OK, SAME THING FOR ACTIVE TABS IN GROUPS
 							for (var ThisSessonWinId in windows) {
 								for (var group in windows[ThisSessonWinId].groups) {
-									if (tt_ids[windows[ThisSessonWinId].groups[group].activetab_ttid] != undefined) {
-										windows[ThisSessonWinId].groups[group].activetab = tt_ids[windows[ThisSessonWinId].groups[group].activetab_ttid];
+									if (tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid] != undefined) {
+										windows[ThisSessonWinId].groups[group].active_tab = tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid];
 									}
 								}
 							}
@@ -192,7 +192,7 @@ function AppendWinTTId(windowId){
 	if (windows[windowId] != undefined) {
 		windows[windowId].ttid = NewTTWindowId;
 	} else {
-		windows[windowId] = {ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, activetab: 0, activetab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
+		windows[windowId] = {ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
 	}
 	// if (schedule_save > 0) browser.sessions.setWindowValue( windowId, "TTdata", windows[windowId] );
 }
@@ -200,7 +200,6 @@ function AppendWinTTId(windowId){
 function ReplaceParents(oldTabId, newTabId) {
 	for (var tabId in tabs) {
 		if (tabs[tabId].parent == oldTabId) {
-			console.log("replaced tab id "+oldTabId+" with "+newTabId);
 			tabs[tabId].parent = newTabId;
 		}
 	}
@@ -218,38 +217,48 @@ function FirefoxListeners() {
 	});
 	
 	chrome.tabs.onCreated.addListener(function(tab) {
-		AppendTabTTId(tab.id);
+		let t = Promise.resolve(browser.sessions.getTabValue(tab.id, "TTdata")).then(function(TabData) {
+			if (TabData != undefined) {
+				tabs[tab.id] = Object.assign({}, TabData);
+			} else {
+				AppendTabTTId(tab.id);
+			}
+			schedule_save++;
+		});
 		chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id});
 		schedule_save++;
 	});
 	
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
-		chrome.tabs.get(tabId, function(tab) {
-			ReplaceParents(tabId, tab.id);
-			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] = tab.id;
-			tabs[tab.id] = tabs[tabId];
-			AppendTabTTId(tab.id);
-			// let ParentId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabs[tabId].parent] ? DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabs[tabId].parent] : tabs[tabId].parent;
-			// chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: ParentId});
-			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: tabs[tabId].parent});
+		let oldId = tabId;
+		chrome.tabs.get(oldId, function(tab) {
+			ReplaceParents(oldId, tab.id);
+			tabs[tab.id] = tabs[oldId];
+			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[oldId] = tab.id;
+			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tab.id] = oldId;
+			browser.sessions.setTabValue( tab.id, "TTdata", tabs[oldId] );
+			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tab.id, ParentId: tabs[tab.id].parent});
 			schedule_save++;
 		});
 	});
 	
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
-		let detachTabId =  tabId;
+		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
+		let detachTabId = tabId;
 		if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
 			detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
-			setTimeout(function() {
-				delete DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
-			},2000);
+			chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
 		}
-		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: detachTabId});
 	});
 	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
-		setTimeout(function() { chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId}); },5);
-		delete tabs[tabId];
+		setTimeout(function() {
+			if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
+				chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
+			}
+			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
+		},5);
+		// delete tabs[tabId];
 		schedule_save++;
 	});
 	
@@ -276,7 +285,7 @@ function FirefoxListeners() {
 				ReplaceParents(tabId, tab.id);
 				chrome.runtime.sendMessage({command: "tab_removed", windowId: tab.windowId, tabId: removedTabId});
 				chrome.runtime.sendMessage({command: "tab_attached", windowId: tab.windowId, tab: tab, tabId: addedTabId, ParentId: tabs[addedTabId].parent});
-				delete tabs[removedTabId];
+				// delete tabs[removedTabId];
 			}
 			setTimeout(function() {
 				AppendTabTTId(addedTabId);
@@ -291,12 +300,18 @@ function FirefoxListeners() {
 	});
 	
 	chrome.windows.onCreated.addListener(function(window) {
-		AppendWinTTId(window.id);
-		schedule_save++;
+		let win = Promise.resolve(browser.sessions.getWindowValue(window.id, "TTdata")).then(function(WindowData) {
+			if (WindowData != undefined) {
+				windows[winId] = Object.assign({}, WindowData);
+			} else {
+				AppendWinTTId(window.id);
+			}
+			schedule_save++;
+		});
 	});
 	
 	chrome.windows.onRemoved.addListener(function(windowId) {
-		delete windows[windowId];
+		// delete windows[windowId];
 		schedule_save++;
 	});
 }
@@ -310,6 +325,15 @@ function FirefoxMessageListeners() {
 			case "get_windows":
 				sendResponse(windows);
 			break;
+			case "get_folders":
+				if (windows[message.windowId]) {
+					sendResponse(windows[message.windowId].folders);
+				}
+			break;
+			case "save_folders":
+				windows[message.windowId].folders = Object.assign({}, message.folders);
+				schedule_save++;
+			break;
 			case "get_groups":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].groups);
@@ -318,8 +342,8 @@ function FirefoxMessageListeners() {
 			case "save_groups":
 				windows[message.windowId].groups = Object.assign({}, message.groups);
 				for (var group in windows[message.windowId].groups) {
-					if (tabs[windows[message.windowId].groups[group].activetab]) {
-						windows[message.windowId].groups[group].activetab_ttid = tabs[windows[message.windowId].groups[group].activetab].ttid;
+					if (tabs[windows[message.windowId].groups[group].active_tab]) {
+						windows[message.windowId].groups[group].active_tab_ttid = tabs[windows[message.windowId].groups[group].active_tab].ttid;
 					}
 				}				
 				schedule_save++;

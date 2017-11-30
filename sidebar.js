@@ -13,7 +13,7 @@ function Loadi18n() {
 		$(this).text(chrome.i18n.getMessage(this.id));
 	});
 	// edit group dialog labels
-	$(".group_edit_button").each(function() {
+	$(".edit_dialog_button").each(function() {
 		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
 	});
 }
@@ -33,17 +33,20 @@ function Run() {
 			running = response;
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 				bgtabs = Object.assign({}, response);
-				chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
-					bggroups = Object.assign({}, response);
-					chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
-						theme = response;
-						setTimeout(function() {
-							if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && running == true) {
-								Initialize();
-							} else {
-								Run();
-							}
-						},200);
+				chrome.runtime.sendMessage({command: "get_folders", windowId: CurrentWindowId}, function(response) {
+					bgfolders = Object.assign({}, response);
+					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
+						bggroups = Object.assign({}, response);
+						chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
+							theme = response;
+							setTimeout(function() {
+								if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && running == true) {
+									Initialize();
+								} else {
+									Run();
+								}
+							},200);
+						});
 					});
 				});
 			});
@@ -77,20 +80,32 @@ function Initialize() {
 	// APPEND GROUPS
 	AppendAllGroups();
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
-		// AddNewFolder();AddNewFolder();AddNewFolder();AddNewFolder();AddNewFolder();
+		
+		
+		
+		// AddNewFolder();
+		
+		
+		for (var folderId in bgfolders) {
+			AppendFolder({id: folderId, ParentId: bgfolders[folderId].parent, name: bgfolders[folderId].name, expand: bgfolders[folderId].expand});
+		}
+		
+		
+		
 		// APPEND TABS
 		let tc = tabs.length;
 		for (var ti = 0; ti < tc; ti++) {
-			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
+			AppendTab({tab: tabs[ti], ttid: bgtabs[tabs[ti].id].ttid, Append: true, SkipSetActive: true});
+			// console.log(bgtabs[tabs[ti].id].ttid);
 		}
-		for (var ti = 0; ti < tc; ti++) {
-			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].parent)[0] && $("#"+bgtabs[tabs[ti].id].parent).is(".group")) {
-				$("#"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
-			}
-		}
+		// for (var ti = 0; ti < tc; ti++) {
+			// if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].parent)[0] && $("#"+bgtabs[tabs[ti].id].parent).is(".group")) {
+				// $("#"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
+			// }
+		// }
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 && $("#"+bgtabs[tabs[ti].id].parent).is(".tab") && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
+				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 /* && $("#"+bgtabs[tabs[ti].id].parent).is(".tab, .folder") */ && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
 					$("#ch"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
 				}
 			}
@@ -102,8 +117,8 @@ function Initialize() {
 		}
 		// SET ACTIVE IN EACH GROUP
 		for (var group in bggroups) {
-			if ($("#"+group+" #"+bggroups[group].activetab)[0]) {
-				$("#"+bggroups[group].activetab).addClass("active");
+			if ($("#"+group+" #"+bggroups[group].active_tab)[0]) {
+				$("#"+bggroups[group].active_tab).addClass("active_tab");
 			}
 		}
 		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
@@ -127,13 +142,14 @@ function Initialize() {
 		RestorePinListRowSettings();
 		setTimeout(function() {
 			RefreshExpandStates();
+			RefreshCounters();
 		}, 1000);
 		setTimeout(function() {
 			UpdateData();
 			delete bgtabs;
 			delete theme;
 		}, 5000);
-		if ($(".active:visible").length == 0) {
+		if ($(".active_tab:visible").length == 0) {
 			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
 				if (tabs[0]) {
 					SetActiveTab(tabs[0].id);
