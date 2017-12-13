@@ -62,7 +62,7 @@ async function RearrangeBrowserTabs(tabIds, tabIndex) {
 	}
 }
 
-function RearrangeTreeTabs(tabs, bgtabs, first_run) {
+function RearrangeTreeTabs(tabs, bgtabs, first_loop) {
 	tabs.forEach(function(Tab) {
 		if (bgtabs[Tab.id] && $("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index)[0]) {
 			if ($("#"+Tab.id).index() > bgtabs[Tab.id].index) {
@@ -71,7 +71,7 @@ function RearrangeTreeTabs(tabs, bgtabs, first_run) {
 				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index));
 			}
 		}
-		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].index && first_run) {
+		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].index && first_loop) {
 			RearrangeTreeTabs(tabs, bgtabs, false);
 		}
 	});
@@ -100,6 +100,7 @@ function AppendTab(param) {
 	var th = document.createElement("div"); th.className = opt.always_show_close ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+param.tab.id; th.draggable = true; tb.appendChild(th); // HEADER
 	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+param.tab.id; th.appendChild(ex); // EXPAND ARROW
 	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+param.tab.id; th.appendChild(tt); // TITLE
+	// var tc = document.createElement("div"); tc.className = "tab_counter"; tc.id = "tab_counter"+param.tab.id; th.appendChild(tc); // TABS COUNTER
 
 	if (!opt.never_show_close) {
 		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+param.tab.id; th.appendChild(cl); // CLOSE BUTTON
@@ -176,7 +177,7 @@ function SetTabClass(param) {
 		}
 		$("#"+param.id).removeClass("tab").removeClass("n").removeClass("o").removeClass("c").addClass("pin");
 	} else {
-		$("#"+active_group).prepend($("#"+param.id));
+		$("#ch"+active_group).prepend($("#"+param.id));
 		$("#"+param.id).removeClass("pin").removeClass("attention").addClass("tab");
 		RefreshExpandStates();
 	}
@@ -189,21 +190,15 @@ function SetActiveTab(tabId) {
 		if ($("#"+tabId).is(".tab")) {
 			SetActiveTabInGroup($("#"+tabId).parents(".group")[0].id, tabId);
 		}
-		$(".active_folder").removeClass("active_folder");
-		$(".pin, #"+active_group+" .tab").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
-		// console.log($("#"+tabId).parents(".group")[0].id);
+		$(".selected_folder").removeClass("selected_folder");
+		$(".pin, #"+active_group+" .tab").removeClass("active_tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		// if ($("#"+tabId).is(".tab")) {
-			// $("#"+($("#"+tabId).parents(".group")[0].id)+" .tab").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
+			// $("#"+($("#"+tabId).parents(".group")[0].id)+" .tab").removeClass("active_tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		// }
-		// $(".pin").removeClass("active_tab").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
+		// $(".pin").removeClass("active_tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		$("#"+tabId).removeClass("attention").addClass("active_tab");
 		ScrollToTab(tabId);
-		
-		
-
-		
-		
 	}
 }
 
@@ -221,7 +216,7 @@ function ScrollToTab(tabId) {
 		if ($("#"+tabId).is(".tab")) {
 			if ($("#"+active_group+" #"+tabId)[0]) {
 				if ($("#"+tabId).is(":not(:visible)")) {
-					$("#"+tabId).parents(".tab").removeClass("c").addClass("o");
+					$("#"+tabId).parents(".folder, .tab").removeClass("c").addClass("o");
 				}
 				if ($("#"+tabId).offset().top - $("#"+active_group).offset().top < 0) {
 					$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top);
@@ -276,7 +271,7 @@ function DetachTabs(tabsIds) {
 
 // find and select tabs
 function FindTab(input) {
-	$(".filtered").removeClass("filtered").removeClass("selected");
+	$(".filtered").removeClass("filtered").removeClass("selected_tab");
 	$(".highlighted_search").removeClass("highlighted_search");
 	if (input.length == 0) {
 		$("#filter_box")[0].value = "";
@@ -290,10 +285,10 @@ function FindTab(input) {
 	chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
 		tabs.forEach(function(Tab) {
 			if ($("#button_filter_type").is(".url") && Tab.url.toLowerCase().match(input.toLowerCase())) {
-				$("#"+Tab.id).addClass("filtered").addClass("selected");
+				$("#"+Tab.id).addClass("filtered").addClass("selected_tab");
 			}
 			if ($("#button_filter_type").is(".title") && Tab.title.toLowerCase().match(input.toLowerCase())) {
-				$("#"+Tab.id).addClass("filtered").addClass("selected");
+				$("#"+Tab.id).addClass("filtered").addClass("selected_tab");
 			}
 		});
 	});
@@ -316,7 +311,7 @@ function CloseTabs(tabsIds) {
 
 
 function DiscardTabs(tabsIds) {
-	var delay = 400;
+	var delay = 100;
 	if ($("#"+tabsIds[0]).is(".discarded")) {
 		delay = 5;
 	} else {
@@ -398,7 +393,6 @@ function ActivatePrevTabAfterClose() {
 							if ($(".tab:visible:last")[0]) {
 								chrome.tabs.update(parseInt($(".tab:visible:last")[0].id), { active: true });
 							}
-							// console.log($(".tab:visible:")[0].id);
 							// ActivateNextTab();
 						}
 					}
@@ -430,9 +424,10 @@ function ActivateNextTab() {
 				} else {
 					if ($(".active_tab:visible").parents(".tab").last().next(".tab:visible")[0]) {
 						chrome.tabs.update(parseInt($(".active_tab:visible").parents(".tab").last().next(".tab:visible")[0].id), { active: true });
-					} else {
-						ActivatePrevTab();
 					}
+					// else {
+						// ActivatePrevTab();
+					// }
 				}
 			}
 		}
@@ -458,9 +453,10 @@ function ActivatePrevTab() {
 			} else {
 				if ($(".tab.active_tab:visible").parent().is(".children") && $(".tab.active_tab:visible").parent().parent(".tab")[0]) {
 					chrome.tabs.update(parseInt($(".tab.active_tab:visible").parent().parent(".tab")[0].id), { active: true });
-				} else {
-					ActivateNextTab();
 				}
+				// else {
+					// ActivateNextTab();
+				// }
 			}
 		}
 
@@ -564,19 +560,19 @@ function SetTabEvents() {
 			let tabId = parseInt(this.id);
 			// SET SELECTION WITH SHIFT
 			if (event.shiftKey) {
-				$(".pin, .tab:visible").removeClass("selected").removeClass("selected_frozen").removeClass("selected_temporarly");
+				$(".pin, .tab:visible").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
 				if ($(this).index() >= $(".active_tab:visible").index()) {
-					$(".active_tab:visible").nextUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected");
+					$(".active_tab:visible").nextUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected_tab");
 				} else {
-					$(".active_tab:visible").prevUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected");
+					$(".active_tab:visible").prevUntil($(this), ":visible").add($(".active_tab:visible")).add($(this)).addClass("selected_tab");
 				}
 			}
 			// TOGGLE SELECTION WITH CTRL
 			if (event.ctrlKey) {
-				// if ($(".active_tab:visible").is(":not(.selected)")) {
-					// $(".active_tab:visible").addClass("selected");
+				// if ($(".active_tab:visible").is(":not(.selected_tab)")) {
+					// $(".active_tab:visible").addClass("selected_tab");
 				// }
-				$(this).toggleClass("selected");
+				$(this).toggleClass("selected_tab");
 			}
 		}
 	});

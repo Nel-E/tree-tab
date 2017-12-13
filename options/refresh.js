@@ -9,16 +9,12 @@ function RefreshFields() {
 	} else {
 		$("#field_theme").css({"height": ""});
 	}
-	if (browserId != "F") {
-		$("#faster_scroll_for_firefox").hide();
-	}
 	if (browserId == "F") {
-		$("#scrollbar_size_indicator").hide();
+		$("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").hide();
 	}
 	if (browserId == "V") {
 		$("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
 		$("#url_for_web_panel").prop("readonly", true);
-		// $("#url_for_web_panel").select();
 	} else{
 		$("#field_vivaldi").hide();
 	}

@@ -32,6 +32,7 @@ menu: copy urls of the selected tabs
 menu: bookmark selected tabs/tree
 menu: select all
 menu: invert selection
+menu: close above/close below
 
 options: Customising the context menu
 

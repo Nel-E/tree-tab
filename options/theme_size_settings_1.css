@@ -138,9 +138,9 @@
 
 
 /* CLOSE TAB BUTTON OPTIONS */
-#expand_hover_background { top: 1px; left: calc(var(--children_padding_left) + 4px); background-size: var(--row_image_size);}
-#expand_closed_background { top: 1px; left: calc(var(--children_padding_left) + 4px); background-size: var(--row_image_size);}
-#expand_open_background { top: 1px; left: 4px; background-size: var(--row_image_size);}
+#expand_hover_background { top: 1px; left: calc(var(--children_padding_left) - 18px); background-size: var(--row_image_size);}
+#expand_closed_background { top: 1px; left: calc(var(--children_padding_left) - 18px); background-size: var(--row_image_size);}
+#expand_open_background { top: 1px; left: -12px; background-size: var(--row_image_size);}
 
 
 #tab_list_background { top: 835px; left: 50px; }

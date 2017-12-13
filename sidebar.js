@@ -26,11 +26,21 @@ function RestorePinListRowSettings() {
 	RefreshGUI();
 }
 function Run() {
-	LoadPreferences();
+	chrome.runtime.sendMessage({command: "is_bg_ready"}, function(response) {
+		setTimeout(function() {
+			if (response == true) {
+				Load();
+			} else {
+				Run();
+			}
+		},200);
+	});
+}
+function Load() {
 	chrome.windows.getCurrent({populate: false}, function(window) {
 		CurrentWindowId = window.id;
-		chrome.runtime.sendMessage({command: "is_bg_running"}, function(response) {
-			running = response;
+		chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
+			opt = Object.assign({}, response);
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 				bgtabs = Object.assign({}, response);
 				chrome.runtime.sendMessage({command: "get_folders", windowId: CurrentWindowId}, function(response) {
@@ -38,14 +48,8 @@ function Run() {
 					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
 						bggroups = Object.assign({}, response);
 						chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
-							theme = response;
-							setTimeout(function() {
-								if (opt != undefined && browserId != undefined && bgtabs != undefined && bggroups != undefined && running == true) {
-									Initialize();
-								} else {
-									Run();
-								}
-							},200);
+							ApplyTheme(response);
+							Initialize();
 						});
 					});
 				});
@@ -54,58 +58,19 @@ function Run() {
 	});
 }
 function Initialize() {
-	// THEME
-	RestoreStateOfGroupsToolbar();
-	// var theme = LoadData(("theme"+localStorage["current_theme"]), {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
-	// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-	if (browserId == "F") {
-		if (theme.TabsSizeSetNumber > 1) {
-			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-		}
-	}
-	ApplySizeSet(theme["TabsSizeSetNumber"]);
-	ApplyColorsSet(theme["ColorsSet"]);
-	if (theme.ToolbarShow) {
-		if (theme.theme_version == DefaultTheme.theme_version) {
-			$("#toolbar").html(theme.toolbar);
-			
-			if (browserId == "F") {
-				$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
-			}
-			
-		} else {
-			$("#toolbar").html(DefaultToolbar);
-		}
-	}
 	// APPEND GROUPS
-	AppendAllGroups();
+	AppendGroups(bggroups);
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
-		
-		
-		
-		// AddNewFolder();
-		
-		
-		for (var folderId in bgfolders) {
-			AppendFolder({id: folderId, ParentId: bgfolders[folderId].parent, name: bgfolders[folderId].name, expand: bgfolders[folderId].expand});
-		}
-		
-		
-		
+		// APPEND FOLDERS
+		AppendFolders(bgfolders);
 		// APPEND TABS
 		let tc = tabs.length;
 		for (var ti = 0; ti < tc; ti++) {
-			AppendTab({tab: tabs[ti], ttid: bgtabs[tabs[ti].id].ttid, Append: true, SkipSetActive: true});
-			// console.log(bgtabs[tabs[ti].id].ttid);
+			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
 		}
-		// for (var ti = 0; ti < tc; ti++) {
-			// if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && $("#"+bgtabs[tabs[ti].id].parent)[0] && $("#"+bgtabs[tabs[ti].id].parent).is(".group")) {
-				// $("#"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
-			// }
-		// }
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 /* && $("#"+bgtabs[tabs[ti].id].parent).is(".tab, .folder") */ && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
+				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
 					$("#ch"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
 				}
 			}
@@ -125,8 +90,7 @@ function Initialize() {
 			SetActiveGroup(response, true, true);
 		});
 		RearrangeTreeTabs(tabs, bgtabs, true);
-		RestoreToolbarShelf();
-		RestoreToolbarSearchFilter();
+		RearrangeFolders(true);
 		SetToolbarShelfToggle("mousedown");
 		StartChromeListeners();
 		SetIOEvents();
@@ -138,7 +102,6 @@ function Initialize() {
 		SetMenu();
 		SetDragAndDropEvents();
 		RearrangeBrowserTabsCheck();
-		Loadi18n();
 		RestorePinListRowSettings();
 		setTimeout(function() {
 			RefreshExpandStates();
@@ -160,7 +123,4 @@ function Initialize() {
 			VivaldiRefreshMediaIcons();
 		}
 	});			
-}
-function log(m) {
-	chrome.runtime.sendMessage({command: "console_log", m: m});
 }

@@ -9,15 +9,23 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="24"
-   height="16"
-   viewBox="0 0 24 16"
+   width="20"
+   height="20"
+   viewBox="0 0 20 20"
    id="svg4216"
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="expand_open.svg">
   <defs
-     id="defs4218" />
+     id="defs4218">
+    <pattern
+       y="0"
+       x="0"
+       height="6"
+       width="6"
+       patternUnits="userSpaceOnUse"
+       id="EMFhbasepattern" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -25,9 +33,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.627417"
-     inkscape:cx="9.3043716"
-     inkscape:cy="9.9894317"
+     inkscape:zoom="16"
+     inkscape:cx="-7.480915"
+     inkscape:cy="12.038524"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -57,12 +65,11 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1036.3622)">
+     transform="translate(0,-1032.3622)">
     <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 4,1042.3622 6,0 -3,6 z"
-       id="path4141"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccc" />
+       id="path4159"
+       d="m 1,1034.3622 18,0 -9,18 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none" />
   </g>
 </svg>

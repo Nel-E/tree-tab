@@ -88,11 +88,11 @@ body {
 	overflow: hidden;
 	margin-bottom:15px;
 }
-ul:not(#tabs_menu) {
+ul:not(.menu) {
 	padding-left: 22px;
 }
 
-ul:not(#tabs_menu) li {
+ul:not(.menu) li {
 	margin: 5px;
 }
 .label {

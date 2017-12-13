@@ -40,21 +40,21 @@ function SetIOEvents() {
 		if (MouseHoverOver == "pin_list") {
 			// ctrl+a to select all
 			if (event.ctrlKey && event.which == 65) {
-				$(".pin").addClass("selected");
+				$(".pin").addClass("selected_tab");
 			}
 			// ctrl+i to invert selection
 			if (event.ctrlKey && event.which == 73) {
-				$(".pin").toggleClass("selected");
+				$(".pin").toggleClass("selected_tab");
 			}
 		}
 		if (MouseHoverOver.match("g_|tab_list") !== null) {
 			// ctrl+a to select all
 			if (event.ctrlKey && event.which == 65) {
-				$("#ch"+active_group).children(".tab:visible").addClass("selected");
+				$("#ch"+active_group).children(".tab:visible").addClass("selected_tab");
 			}
 			// ctrl+i to invert selection
 			if (event.ctrlKey && event.which == 73) {
-				$(".tab:visible").toggleClass("selected");
+				$(".tab:visible").toggleClass("selected_tab");
 			}
 		}
 		RefreshGUI();

@@ -4,32 +4,36 @@
 
 // **********      OPTIONS       ***************
 
+var current_theme = "";
 var themes = [];
 var SelectedTheme = Object.assign({}, DefaultTheme);
 var dragged_button;
 active_group = "tab_list";
 
 document.addEventListener("DOMContentLoaded", function() {
-	LoadPreferences();
 	document.title = "Tree Tabs";
-
-	themes = LoadData("themes", []);
-	if (localStorage.getItem("current_theme") != null) {
-		LoadTheme(localStorage["current_theme"]);
-	}
-
-	GetOptions();
-	RefreshFields();
-	SetEvents();
-	SetToolbarShelfToggle("click");
-	
-	AppendGroupToList("tab_list", caption_ungrouped_group, "");
-	AppendGroupToList("tab_list2", caption_ungrouped_group, "");
-
-	AppendSampleTabs();
-
+	chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
+		opt = Object.assign({}, response);
+		chrome.storage.local.get(null, function(items) {
+			if (items["themes"]) {
+				for (var themeName in items["themes"]) {
+					themes.push(themeName);
+				}
+			}
+			if (items["current_theme"]) {
+				current_theme = items["current_theme"];
+				LoadTheme(items["current_theme"]);
+			}
+			GetOptions();
+			RefreshFields();
+			SetEvents();
+			SetToolbarShelfToggle("click");
+			AppendGroupToList("tab_list", caption_ungrouped_group, "");
+			AppendGroupToList("tab_list2", caption_noname_group, "");
+			AppendSampleTabs();
+		});
+	});
 });
-
 
 // document events
 function GetOptions() {
@@ -59,10 +63,10 @@ function GetOptions() {
 		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
 	});
 
-
-
-
 	// get language for color pick labels
+	$("#close_x, #close_hover_x").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	});
 	$(".color_border").each(function() {
 		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_border"));
 	});
@@ -82,9 +86,6 @@ function GetOptions() {
 	$("#filter_clear_icon").each(function() {
 		$(this).attr("title", chrome.i18n.getMessage("options_color_pick_filter_clear_icon"));
 	});
-
-	
-	
 	
 	// get options for append child tab
 	for (var i = 0; i < $("#append_child_tab")[0].options.length; i++) {
@@ -132,14 +133,12 @@ function GetOptions() {
 	
 	// select current theme in dropdown list
 	for (var i = 0; i < $("#theme_list")[0].options.length; i++) {
-		if ($("#theme_list")[0].options[i].value == localStorage["current_theme"]) {
+		if ($("#theme_list")[0].options[i].value == current_theme) {
 			$("#theme_list")[0].selectedIndex = i;
 			break;
 		}
 	}
 }
-
-
 
 function RemoveRedPreview() {
 	if (document.styleSheets[document.styleSheets.length-1].cssRules.length) {
@@ -170,8 +169,6 @@ function SetEvents() {
 		copyStringToClipboard("0x70B05eAD03bF08220d5aF4E1E868C351bfe145D6");
 		alert(chrome.i18n.getMessage("options_copied_wallet_address"));
 	});
-	
-	
 	
 	
 // --------------------------------COPY VIVALDI LINK----------------------------------------------------------------------	
@@ -283,7 +280,6 @@ function SetEvents() {
 	// show color picker
 	$(document).on("click", ".pick_col", function(event) {
 		RemoveRedPreview();
-		// if (event.shiftKey || event.ctrlKey) return;
 		event.stopPropagation();
 		PickColor = this.id;
 		let bod = document.getElementById("body");
@@ -298,8 +294,6 @@ function SetEvents() {
 		SaveTheme($("#theme_list").val());
 	});	
 	
-
-
 	
 // ----------------------------------EVENTS FOR CHECKBOXES AND DROPDOWN MENUS---------------------------------------------	
 	// set checkbox options on/off and save
@@ -439,8 +433,8 @@ function SetEvents() {
 	
 	// select theme from list
 	$("#theme_list").change(function() {
-		localStorage["current_theme"] = $(this).val();
 		LoadTheme($(this).val());
+		chrome.storage.local.set({current_theme: $(this).val()});
 	});
 
 	// import theme preset button
@@ -464,9 +458,6 @@ function SetEvents() {
 	$(document).on("click", "#options_rename_theme_button", function(event) {
 		RenameSelectedTheme();
 	});
-
-
-
 
 
 // -------------------------------INDENTATION ADJUSTMENT------------------------------------------------------------------	
@@ -599,43 +590,13 @@ function SetEvents() {
 
 // ----------------------CLEAR DATA BUTTON--------------------------------------------------------------------------------	
 
-
 	// clear data
 	$(document).on("click", "#options_clear_data", function(event) {
-		localStorage.clear();
+		chrome.storage.local.clear();
 		chrome.runtime.sendMessage({command: "reload"});
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
 		location.reload();
 	});
-
-
-
-	
-// THIIIIIIIIIIIS IS TO MOVE ICONS FOR SETUP OPTIONS PAGE	
-	
-	// $(document).bind("contextmenu", function(event) {
-		// if (event.ctrlKey || event.shiftKey) {
-			// event.preventDefault();
-		// }
-	// });
-	// $(document).on("mousedown", "*", function(event) {
-	// $(document).on("mousedown", ".pick_col", function(event) {
-		// event.stopPropagation();
-		// if (event.button == 0 && event.shiftKey) {
-			// $(this).css({ "left": $(this).position().left-1 });
-		// }
-		// if (event.button == 2 && event.shiftKey) {
-			// $(this).css({ "left": $(this).position().left+1 });
-		// }
-		// if (event.button == 0 && event.ctrlKey) {
-			// $(this).css({ "top": $(this).position().top-1 });
-		// }
-		// if (event.button == 2 && event.ctrlKey) {
-			// $(this).css({ "top": $(this).position().top+1 });
-		// }
-		// console.log(this.id + " top: " + $(this).position().top + "px; left: " + $(this).position().left + "px;");
-		// console.log(this.id);
-	// });
 }
 
 

@@ -45,7 +45,7 @@ function RefreshGUI() {
 	$(".group_title").each(function(){
 		$(this)[0].innerText = (bggroups[(this.id).substr(4)] ? bggroups[(this.id).substr(4)].name : caption_noname_group) + (opt.show_counter_groups ? " (" + $("#" + (this.id).substr(4) +" .tab").length + ")" : "");
 	});
-	$("#_gtetab_list")[0].innerText = caption_ungrouped_group + (opt.show_counter_groups ? " (" + $("#tab_list .tab").length + ")" : "");
+	// $("#_gtetab_list")[0].innerText = caption_ungrouped_group + (opt.show_counter_groups ? " (" + $("#tab_list .tab").length + ")" : "");
 	
 	$(".group_button").each(function(){
 		$(this).css({ "height": $(this).children(0).innerWidth() });
@@ -146,7 +146,7 @@ function GetFaviconAndTitle(tabId, addCounter) {
 								$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
 							};
 							img.onerror = function() {
-								$("#tab_header" + tab.id).css({ "background-image": ((tab.url == "" || browserId == "F") ? "url(./theme/empty.svg)" : ("url(chrome://favicon/" + tab.url + ")")) });
+								$("#tab_header" + tab.id).css({ "background-image": ((tab.url == "" || browserId == "F") ? "url(./theme/icon_empty.svg)" : ("url(chrome://favicon/" + tab.url + ")")) });
 								// $("#tab_header" + tab.id).css({ "background-image": "url(" + tab.url + ")" });
 							}
 						}
@@ -163,8 +163,8 @@ function GetFaviconAndTitle(tabId, addCounter) {
 						if ($("#" + tabId)[0]) GetFaviconAndTitle(tabId, addCounter);
 					}, 1000);
 				}
-				if (addCounter) {
-					RefreshTabCounter(tabId && (opt.show_counter_tabs || opt.show_counter_tabs_hints));
+				if (addCounter && (opt.show_counter_tabs || opt.show_counter_tabs_hints)) {
+					RefreshTabCounter(tabId);
 				}
 		
 			}
@@ -195,62 +195,62 @@ function RefreshExpandStates() {
 		// }
 	// });
 
-
-
-	$(".tab:visible, .folder:visible").each(function() {
+	$(".folder:visible").each(function() {
 		if ($("#ch"+this.id).children().length == 0 && $("#cf"+this.id).children().length == 0) {
 			$(this).removeClass("o").removeClass("c").addClass("n");
-			// if ($("#tab_title"+this.id)[0]) {
-				// $("#tab_title"+this.id)[0].textContent = $(this).data("title");
-			// }
 		} else {
 			if ($(this).is(":not(.o, .c)")) {
 				$(this).addClass("o").removeClass("n");
 			}
-			// if ($("#tab_title"+this.id)[0]) {
-				// if (opt.show_counter_tabs) {
-					// $("#tab_title"+this.id)[0].textContent = $(this).data("title") + " ("+$("#"+this.id+" .tab").length+")";
-				// }
-				// if (opt.show_counter_tabs_hints) {
-					// $("#tab_header"+this.id).attr("title", $(this).data("title") + " ("+$("#"+this.id+" .tab").length+")");
-				// }
-			// }
 		}
 	});
 
-
+	$(".tab:visible").each(function() {
+		if ($("#ch"+this.id).children().length == 0) {
+			$(this).removeClass("o").removeClass("c").addClass("n");
+		} else {
+			if ($(this).is(":not(.o, .c)")) {
+				$(this).addClass("o").removeClass("n");
+			}
+		}
+	});
 }
 
 function RefreshCounters() {
-	$(".c.tab:visible, .o.tab:visible").each(function() {
-		if (opt.show_counter_tabs) {
-			$("#tab_title"+this.id)[0].textContent = $(this).data("title") + " ("+$("#"+this.id+" .tab").length+")";
-		}
-		if (opt.show_counter_tabs_hints) {
-			$("#tab_header"+this.id).attr("title", $(this).data("title") + " ("+$("#"+this.id+" .tab").length+")");
-		}
-	});
-	$(".n.tab:visible").each(function() {
-		if ($("#tab_title"+this.id)[0]) {
-			$("#tab_title"+this.id)[0].textContent = $(this).data("title");
-		}
-	});
+	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
+		$(".tab.n:visible").each(function() {
+			if ($("#tab_title"+this.id)[0]) {
+				$("#tab_title"+this.id)[0].textContent = $(this).data("title");
+			}
+		});
+		$(".tab.c:visible, .tab.o:visible").each(function() {
+			if (opt.show_counter_tabs) {
+				$("#tab_title"+this.id)[0].textContent = ("("+$("#"+this.id+" .tab").length+") ") + $(this).data("title");
+			}
+			if (opt.show_counter_tabs_hints) {
+				$("#tab_header"+this.id).attr("title", ("("+$("#"+this.id+" .tab").length+") ") + $(this).data("title"));
+			}
+		});
+	}
 }
 
 function RefreshTabCounter(tabId) {
-	if ($("#"+tabId).data("title")) {
-		if (opt.show_counter_tabs) {
-			if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-				$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")";
-			} else {
-				$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title");
+	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
+		if ($("#"+tabId).data("title")) {
+			if (opt.show_counter_tabs) {
+				if ($(".c#"+tabId+", .o#"+tabId)[0]) {
+					// $("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")";
+					$("#tab_title"+tabId)[0].textContent = ("("+$("#ch"+tabId+" .tab").length+") ") + $("#"+tabId).data("title");
+				} else {
+					$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title");
+				}
 			}
-		}
-		if (opt.show_counter_tabs_hints) {
-			if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-				$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title") + " ("+$("#ch"+tabId+" .tab").length+")");
-			} else {
-				$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title"));
+			if (opt.show_counter_tabs_hints) {
+				if ($(".c#"+tabId+", .o#"+tabId)[0]) {
+					$("#tab_header"+tabId).attr("title", ("("+$("#ch"+tabId+" .tab").length+") ") + $("#"+tabId).data("title"));
+				} else {
+					$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title"));
+				}
 			}
 		}
 	}

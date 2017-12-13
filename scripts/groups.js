@@ -4,10 +4,10 @@
 
 // **********       GROUPS FUNCTIONS        ***************
 
-function AppendAllGroups() {
+function AppendGroups(Groups) {
 	// var scroll = $("#group_list").scrollTop();
-	for (var group in bggroups) {
-		AppendGroupToList(bggroups[group].id, bggroups[group].name, bggroups[group].font);
+	for (var group in Groups) {
+		AppendGroupToList(Groups[group].id, Groups[group].name, Groups[group].font);
 	}
 	RearrangeGroups(0);
 }
@@ -30,8 +30,8 @@ function RearrangeGroups(stack) {
 function AppendGroupToList(groupId, group_name, font_color) {
 	if ($("#"+groupId).length == 0 && $("#groups")[0]) {
 		var grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; $("#groups")[0].appendChild(grp);
-		var gct = document.createElement("div"); gct.className = "children_tabs"; gct.id = "ch"+groupId; grp.appendChild(gct);
 		var gcf = document.createElement("div"); gcf.className = "children_folders"; gcf.id = "cf"+groupId; grp.appendChild(gcf);
+		var gct = document.createElement("div"); gct.className = "children_tabs"; gct.id = "ch"+groupId; grp.appendChild(gct);
 	}
 	if ($("#_"+groupId).length == 0) {
 		var gbn = document.createElement("div"); gbn.className = "group_button"; gbn.id = "_"+groupId; $("#group_list")[0].appendChild(gbn);
@@ -165,19 +165,19 @@ function SetActiveTabInGroup(GroupId, tabId) {
 // }
 
 // Edit group popup
-function ShowGroupEditWindow(GroupId) {
-	$("#group_edit_name")[0].value = bggroups[GroupId].name;
+function ShowGroupEditWindow() {
+	$("#group_edit_name")[0].value = bggroups[menuItemId].name;
 	$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 8, "left": 22});
-	$("#group_edit_font").css({"background-color": bggroups[GroupId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[GroupId].font});
+	$("#group_edit_font").css({"background-color": bggroups[menuItemId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[menuItemId].font});
 }
 
 // when pressed OK in group popup
 function GroupEditConfirm() {
 	$("#group_edit_name")[0].value = $("#group_edit_name")[0].value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
-	bggroups[active_group].name = $("#group_edit_name")[0].value;
-	bggroups[active_group].font = RGBtoHex($("#group_edit_font").css("background-color"));
+	bggroups[menuItemId].name = $("#group_edit_name")[0].value;
+	bggroups[menuItemId].font = RGBtoHex($("#group_edit_font").css("background-color"));
 	$(".edit_dialog").hide(0);
-	$(".group_title#_gte" +active_group).css({"color": "#"+bggroups[active_group].font});
+	$(".group_title#_gte" +menuItemId).css({"color": "#"+bggroups[menuItemId].font});
 	RefreshGUI();
 	chrome.runtime.sendMessage({command: "save_groups", groups: bggroups, windowId: CurrentWindowId});
 }
@@ -223,7 +223,7 @@ function SetGroupEvents() {
 			
 	// activate group
 	$(document).on("mousedown", ".group_button", function(event) {
-		menuGroupId = (this.id).substr(1);
+		// menuGroupId = (this.id).substr(1);
 		if (event.button == 0) {
 			SetActiveGroup((this.id).substr(1), true, true);
 		}
@@ -275,7 +275,8 @@ function SetGroupEvents() {
 	// edit group
 	$(document).on("dblclick", ".group_button:not(#_tab_list)", function(event) {
 		if (event.button == 0) {
-			ShowGroupEditWindow((this.id).substr(1));
+			menuItemId = (this.id).substr(1);
+			ShowGroupEditWindow();
 		}
 	});
 
@@ -293,7 +294,7 @@ function SetGroupEvents() {
 	// remove tabs from group button
 	// $(document).on("mousedown", "#remove_tabs_from_group", function(event) {
 		// if (event.button == 0 && vt.ActiveGroup.match("at|ut") == null) {
-			// AppendTabsToGroup({tabsIds: $(".tab.selected:visible").map(function() {return parseInt(this.id);}).toArray(), groupId: "ut", SwitchTabIfHasActive: true, insertAfter: true, moveTabs: true});
+			// AppendTabsToGroup({tabsIds: $(".tab.selected_tab:visible").map(function() {return parseInt(this.id);}).toArray(), groupId: "ut", SwitchTabIfHasActive: true, insertAfter: true, moveTabs: true});
 		// }
 	// });
 

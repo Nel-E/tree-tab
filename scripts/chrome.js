@@ -29,22 +29,22 @@ function StartChromeListeners(){
 			window.location.reload();
 		}
 		if (message.command == "reload_options") {
-			LoadPreferences();
-			setTimeout(function() {
-				RestorePinListRowSettings();
-			},200);
+			chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
+				opt = Object.assign({}, response);
+				// LoadPreferences();
+				setTimeout(function() {
+					RestorePinListRowSettings();
+				}, 200);
+			});
 		}
 		if (message.command == "reload_theme") {
-			let theme = LoadData(message.themeName, DefaultTheme);
-			ApplySizeSet(theme["TabsSizeSetNumber"]);
-			ApplyColorsSet(theme["ColorsSet"]);
-			if (theme.ToolbarShow) {
-				$("#toolbar").html(theme.toolbar);
-			} else {
-				$("#toolbar").html("");
-			}
-			RestoreToolbarSearchFilter();
-			RestoreToolbarShelf();
+			setTimeout(function() {
+				chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
+					RestorePinListRowSettings();
+					let theme = response;
+					ApplyTheme(theme);
+				});
+			}, 300);
 		}
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {
@@ -183,6 +183,28 @@ function StartChromeListeners(){
 							schedule_update_data++;
 						}
 						RefreshExpandStates();
+					}
+				break;
+				case "remotely_append_groups":
+					if (message.groups) {
+						for (var group in message.groups) {
+							bggroups[group] = Object.assign({}, message.groups[group]);
+						}
+						AppendGroups(bggroups);
+					}
+				break;
+				case "remotely_append_folders":
+					if (message.folders) {
+						for (var folder in message.folders) {
+							bgfolders[folder] = Object.assign({}, message.folders[folder]);
+						}
+						AppendFolders(bgfolders);
+					}
+				break;
+				case "remotely_append_tab_to_parent":
+					if ($("#"+message.tabId)[0] && $("#ch"+message.parentId)[0]) {
+						$("#ch"+message.parentId).append($("#"+message.tabId));
+						RefreshGUI();
 					}
 				break;
 			}

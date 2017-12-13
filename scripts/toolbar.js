@@ -4,22 +4,6 @@
 
 // **********             TOOLBAR           ***************
 
-
-
-function RestoreToolbarSearchFilterBAK() {
-	let filter_type = "url";
-	if (localStorage.getItem("filter_type") !== null) {
-		filter_type = localStorage["filter_type"];
-	}
-	if (filter_type == "url") {
-		$("#button_filter_type").addClass("url").removeClass("title");
-	} else {
-		$("#button_filter_type").addClass("title").removeClass("url");
-	}
-}	
-
-
-
 function RestoreToolbarSearchFilter() {
 	chrome.runtime.sendMessage({command: "get_search_filter", windowId: CurrentWindowId}, function(response) {
 		if (response == "url") {
@@ -29,10 +13,6 @@ function RestoreToolbarSearchFilter() {
 		}
 	});
 }	
-
-
-
-
 
 function RestoreToolbarShelf() {
 	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
@@ -164,8 +144,8 @@ function SetToolbarEvents() {
 				}, 100);
 			});
 		}
-		if (event.button == 2 && $(".active_tab:visible")[0]) {
-			ScrollToTab($(".active_tab:visible")[0].id);
+		if (event.button == 2 && $("#"+active_group+" .active_tab")[0]) {
+			ScrollToTab($("#"+active_group+" .active_tab")[0].id);
 		}
 	});
 	$(document).on("click", "#button_new", function(event) {
@@ -176,7 +156,7 @@ function SetToolbarEvents() {
 	// pin tab
 	$(document).on("mousedown", "#button_pin", function(event) {
 		if (event.button == 0) {
-			$(".active_tab:visible, .selected:visible").each(function() {
+			$(".active_tab:visible, .selected_tab:visible").each(function() {
 				chrome.tabs.update(parseInt(this.id), { pinned: ($(this).is(".pin") ? false : true) });
 			});
 		}
@@ -204,7 +184,7 @@ function SetToolbarEvents() {
 	$(document).on("mousedown", "#button_move", function(event) {
 		if (event.button == 0) {
 			var tabsArr = [];
-			$(".active_tab:visible, .selected:visible").each(function() {
+			$(".active_tab:visible, .selected_tab:visible").each(function() {
 				tabsArr.push(parseInt(this.id));
 				if ($("#ch"+this.id).children().length > 0) {
 					$($("#ch"+this.id).find(".tab")).each(function() {
@@ -228,7 +208,11 @@ function SetToolbarEvents() {
 	// change filtering type
 	$(document).on("mousedown", "#button_filter_type", function(event) {
 		if (event.button == 0) {
-			$("#button_filter_type").toggleClass("url").toggleClass("title");
+			if ($("#button_filter_type").is(".url")) {
+				$("#button_filter_type").removeClass("url").addClass("title");
+			} else {
+				$("#button_filter_type").addClass("url").removeClass("title");
+			}
 			FindTab($("#filter_box")[0].value);
 			chrome.runtime.sendMessage({command: "set_search_filter", search_filter:  ($(this).is(".url") ? "url" : "title"), windowId: CurrentWindowId});
 		}
@@ -270,7 +254,8 @@ function SetToolbarEvents() {
 	// edit group
 	$(document).on("mousedown", "#button_edit_group", function(event) {
 		if (event.button == 0 && active_group != "tab_list") {
-			ShowGroupEditWindow(active_group);
+			menuItemId = active_group;
+			ShowGroupEditWindow();
 		}
 	});
 	// import-export group
@@ -299,15 +284,18 @@ function SetToolbarEvents() {
 	});
 	// rename folder
 	$(document).on("mousedown", "#button_edit_folder", function(event) {
-		if (event.button == 0 && $(".active_folder:visible")[0]) {
-			ShowRenameFolderDialog($(".active_folder:visible")[0].id);
+		if (event.button == 0 && $(".selected_folder:visible")[0]) {
+			ShowRenameFolderDialog($(".selected_folder:visible")[0].id);
 		}
 	});
 	// remove folder
 	$(document).on("mousedown", "#button_remove_folder", function(event) {
 		// let close_tabs = event.shiftKey;
-		if (event.button == 0 && $(".active_folder:visible")[0]) {
-			RemoveFolder($(".active_folder:visible")[0].id);
+		if (event.button == 0 && $(".selected_folder:visible")[0]) {
+			$("#"+active_group+" .selected_folder").each(function() {
+				RemoveFolder(this.id);
+			});
+			// RemoveFolder($(".selected_folder:visible")[0].id);
 		}
 	});
 

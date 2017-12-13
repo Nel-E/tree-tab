@@ -19,10 +19,10 @@ function AppendSampleTabs() {
 	$("#tab_title11")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_hover");
 	$("#tab_header11").addClass("tab_header_hover").addClass("close_show");
 
-	AppendTab({tab: {id: 12, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected"});
+	AppendTab({tab: {id: 12, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected_tab"});
 	$("#tab_title12")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected");
 	
-	AppendTab({tab: {id: 13, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected"});
+	AppendTab({tab: {id: 13, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "selected_tab"});
 	$("#tab_title13")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected_hover");
 	$("#tab_header13").addClass("tab_header_hover").addClass("close_show");
 	$("#close13").addClass("close_hover");
@@ -35,10 +35,10 @@ function AppendSampleTabs() {
 	$("#tab_title15")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_hover");
 	$("#tab_header15").addClass("tab_header_hover");
 	
-	AppendTab({tab: {id: 14, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected active_tab"});
+	AppendTab({tab: {id: 14, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected_tab active_tab"});
 	$("#tab_title14")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected");
 	
-	AppendTab({tab: {id: 16, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected active_tab"});
+	AppendTab({tab: {id: 16, pinned: false}, Append: true, ParentId: "2", AdditionalClass: "c selected_tab active_tab"});
 	$("#tab_title16")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected_hover");
 	$("#tab_header16").addClass("tab_header_hover");
 	$("#exp16").addClass("hover");
@@ -51,10 +51,10 @@ function AppendSampleTabs() {
 	$("#tab_title17")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_hover");
 	$("#tab_header17").addClass("tab_header_hover");
 
-	AppendTab({tab: {id: 19, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected"});
+	AppendTab({tab: {id: 19, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected_tab"});
 	$("#tab_title19")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected");
 	
-	AppendTab({tab: {id: 20, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected"});
+	AppendTab({tab: {id: 20, pinned: false, discarded: true}, Append: true, ParentId: "5", AdditionalClass: "selected_tab"});
 	$("#tab_title20")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected_hover");
 	$("#tab_header20").addClass("tab_header_hover");
 
@@ -75,18 +75,18 @@ function AppendSampleTabs() {
 
 
 	// search result selected
-	AppendTab({tab: {id: 8, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered"});
+	AppendTab({tab: {id: 8, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected_tab filtered"});
 	$("#tab_title8")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected");
 
-	AppendTab({tab: {id: 18, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered"});
+	AppendTab({tab: {id: 18, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected_tab filtered"});
 	$("#tab_title18")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_hover");
 	$("#tab_header18").addClass("tab_header_hover");
 
-	AppendTab({tab: {id: 25, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered active_tab"});
+	AppendTab({tab: {id: 25, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected_tab filtered active_tab"});
 	$("#tab_title25")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active");
 
 
-	AppendTab({tab: {id: 26, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected filtered active_tab"});
+	AppendTab({tab: {id: 26, pinned: false}, Append: true, ParentId: "6", AdditionalClass: "selected_tab filtered active_tab"});
 	$("#tab_title26")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active_hover");
 	$("#tab_header26").addClass("tab_header_hover");
 
@@ -105,18 +105,18 @@ function AppendSampleTabs() {
 	$("#tab_title33")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_active_hover");
 	$("#tab_header33").addClass("tab_header_hover");
 
-	AppendTab({tab: {id: 34, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected filtered highlighted_search"});
+	AppendTab({tab: {id: 34, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected_tab filtered highlighted_search"});
 	$("#tab_title34")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected");
 	
-	AppendTab({tab: {id: 35, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected filtered highlighted_search"});
+	AppendTab({tab: {id: 35, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected_tab filtered highlighted_search"});
 	$("#tab_title35")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_hover");
 	$("#tab_header35").addClass("tab_header_hover");
 
-	AppendTab({tab: {id: 36, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected filtered highlighted_search active_tab"});
+	AppendTab({tab: {id: 36, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected_tab filtered highlighted_search active_tab"});
 	$("#tab_title36")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_active");
 
 
-	AppendTab({tab: {id: 37, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected filtered highlighted_search active_tab"});
+	AppendTab({tab: {id: 37, pinned: false}, Append: true, ParentId: "30", AdditionalClass: "selected_tab filtered highlighted_search active_tab"});
 	$("#tab_title37")[0].textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_active_hover");
 	$("#tab_header37").addClass("tab_header_hover");
 	

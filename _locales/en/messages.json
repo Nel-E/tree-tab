@@ -76,7 +76,7 @@
 		"message": "Remove group.\nHold shift key to close tabs from this group"
 	},
 	"button_edit_group": {
-		"message": "Edit group"
+		"message": "Rename group"
 	},
 
 	"button_import_group": {
@@ -106,6 +106,23 @@
 	},
 	"button_load_bak3": {
 		"message": "EMERGENCY if lost groupings: Load oldest internal backup (autosave is made every 30 minutes)"
+	},
+
+
+	"button_folders": {
+		"message": "Folders"
+	},
+
+	"button_new_folder": {
+		"message": "New folder"
+	},
+
+	"button_remove_folder": {
+		"message": "Remove selected folder/s"
+	},
+
+	"button_edit_folder": {
+		"message": "Rename folder"
 	},
 
 
@@ -164,6 +181,32 @@
 	},
 	"tabs_menu_discard": {
 		"message": "Unload"
+	},
+
+
+
+	"folders_menu_new_folder": {
+		"message": "New folder"
+	},
+	"folders_menu_rename_folder": {
+		"message": "Rename folder"
+	},
+	"folders_menu_delete": {
+		"message": "Delete"
+	},
+
+	"groups_menu_new_group": {
+		"message": "New group"
+	},
+	"groups_menu_rename": {
+		"message": "Rename group"
+	},
+	"groups_menu_delete": {
+		"message": "Delete group"
+	},
+
+	"groups_menu_unload": {
+		"message": "Unload group"
 	},
 
 
@@ -484,6 +527,12 @@
 	 "message": "Clear search result x button color"
 	},
 
+	"close_x": {
+	 "message": "x inside the close button"
+	},
+	"close_hover_x": {
+	 "message": "x inside the close button on hover"
+	},
 	"options_color_pick_hover": {
 	 "message": "On hover"
 	},

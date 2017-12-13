@@ -64,25 +64,52 @@ function ImportGroup() {
 	}	 
 }
 
+// function ExportTabs(filename) {
+	// chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
+		// chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
+			// let tabs = Object.assign({}, response);
+			// chrome.runtime.sendMessage({command: "get_windows"}, function(response) {
+				// let windows = Object.assign({}, response);
+				// let WindowsToSave = [];
+				// w.forEach(function(CWin){
+					// if (windows[CWin.id] != undefined && windows[CWin.id].group_bar != undefined && windows[CWin.id].active_shelf != undefined && windows[CWin.id].active_group != undefined && windows[CWin.id].groups != undefined && windows[CWin.id].folders != undefined) {
+						// WindowsToSave.push([[], CWin.id, CWin.tabs[0].url, CWin.tabs[CWin.tabs.length-1].url, windows[CWin.id].group_bar, windows[CWin.id].group_bar, windows[CWin.id].active_shelf, windows[CWin.id].active_group, windows[CWin.id].groups, windows[CWin.id].folders, 0]);
+					// }
+				
+					// CWin.tabs.forEach(function(CTab){
+						// if (tabs[CTab.id] != undefined && tabs[CTab.id].parent != undefined && tabs[CTab.id].index != undefined && tabs[CTab.id].expand != undefined) {
+							// WindowsToSave[WindowsToSave.length-1][0].push([CTab.id, CTab.url, tabs[CTab.id].parent, tabs[CTab.id].index, tabs[CTab.id].expand]);
+						// }
+					// });
+				// });
+				// SaveFile(filename, WindowsToSave);
+			// });
+		// });
+	// });
+// }
+
 function ExportTabs(filename) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 			let tabs = Object.assign({}, response);
 			chrome.runtime.sendMessage({command: "get_windows"}, function(response) {
 				let windows = Object.assign({}, response);
-				let WindowsToSave = [];
+				// let WindowsToSave = [];
 				w.forEach(function(CWin){
-					if (windows[CWin.id] != undefined && windows[CWin.id].group_bar != undefined && windows[CWin.id].active_shelf != undefined && windows[CWin.id].active_group != undefined && windows[CWin.id].groups != undefined && windows[CWin.id].folders != undefined) {
-						WindowsToSave.push([[], CWin.id, CWin.tabs[0].url, CWin.tabs[CWin.tabs.length-1].url, windows[CWin.id].group_bar, windows[CWin.id].group_bar, windows[CWin.id].active_shelf, windows[CWin.id].active_group, windows[CWin.id].groups, windows[CWin.id].folders, 0]);
-					}
+					windows[CWin.id]["tabs"] = [];
+					// if (windows[CWin.id] != undefined && windows[CWin.id].group_bar != undefined && windows[CWin.id].active_shelf != undefined && windows[CWin.id].active_group != undefined && windows[CWin.id].groups != undefined && windows[CWin.id].folders != undefined) {
+						// WindowsToSave.push([[], CWin.id, CWin.tabs[0].url, CWin.tabs[CWin.tabs.length-1].url, windows[CWin.id].group_bar, windows[CWin.id].group_bar, windows[CWin.id].active_shelf, windows[CWin.id].active_group, windows[CWin.id].groups, windows[CWin.id].folders, 0]);
+					// }
 				
 					CWin.tabs.forEach(function(CTab){
-						if (tabs[CTab.id] != undefined && tabs[CTab.id].parent != undefined && tabs[CTab.id].index != undefined && tabs[CTab.id].expand != undefined) {
-							WindowsToSave[WindowsToSave.length-1][0].push([CTab.id, CTab.url, tabs[CTab.id].parent, tabs[CTab.id].index, tabs[CTab.id].expand]);
-						}
+						windows[CWin.id]["tabs"].push({id: CTab.id, url: CTab.url, parent: tabs[CTab.id].parent, index: tabs[CTab.id].index, expand: tabs[CTab.id].expand});
+						
+						// if (tabs[CTab.id] != undefined && tabs[CTab.id].parent != undefined && tabs[CTab.id].index != undefined && tabs[CTab.id].expand != undefined) {
+							// WindowsToSave[WindowsToSave.length-1][0].push([CTab.id, CTab.url, tabs[CTab.id].parent, tabs[CTab.id].index, tabs[CTab.id].expand]);
+						// }
 					});
 				});
-				SaveFile(filename, WindowsToSave);
+				SaveFile(filename, windows);
 			});
 		});
 	});
@@ -97,59 +124,124 @@ function ImportTabs() {
 	fr.onload = function() {
 		let data = fr.result;
 		file.remove();
-		chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
+		// chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 
-			//make global variables
-			LoadedWindows = JSON.parse(data);
-			RefsTabs = {};
-			TotalTabsCount = 0;
-			
-			LoadedWindows.forEach(function(LWin){
-				TotalTabsCount += LWin[0].length;
-			});
+		//make global variables
+		LoadedWindows = JSON.parse(data);
+		RefsTabs = {};
+		TotalTabsCount = 0;
+		// console.log(LoadedWindows);
+		// LoadedWindows.forEach(function(LWin){
+			// TotalTabsCount += LWin[0].length;
+		// });
 
-			LoadedWindows.forEach(function(LWin){
-				chrome.windows.create({}, function(new_window) {
-					LWin[1] = new_window.id;
-					LWin[2] = "";
-					LWin[3] = "";
-				
-					setTimeout(function() {
-						chrome.runtime.sendMessage({command: "save_groups", groups: LWin[8], windowId: new_window.id});
-					}, 1000);
+		for (var windowId in LoadedWindows) {
 
-					LWin[0].forEach(function(LTab){
-						chrome.tabs.create({url: LTab[1], pinned: (LTab[2] == "pin_list" ? true : false), windowId: new_window.id}, function(tab) {
-							RefsTabs[LTab[0]] = tab.id;
-							LTab[0] = tab.id;
-							LTab[1] = "";
-							TotalTabsCount--;
+		// LoadedWindows.forEach(function(LWin){
+			chrome.windows.create({}, function(new_window)
+			{
+				setTimeout(function() {
+					chrome.runtime.sendMessage({command: "remotely_append_groups", groups: LoadedWindows[windowId].groups, windowId: new_window.id});
+				}, 2000);
+				setTimeout(function() {
+					chrome.runtime.sendMessage({command: "remotely_append_folders", folders: LoadedWindows[windowId].folders, windowId: new_window.id});
+				}, 3000);
+				setTimeout(function() {
+					let index = ((LoadedWindows[windowId].tabs).length)-1;
+					var TabCreator = setInterval(function() {
+						if (index >= 0) {
+							let LoadTab = LoadedWindows[windowId].tabs[index];
+							chrome.tabs.create({url: LoadTab.url, pinned: (LoadTab.parent == "pin_list" ? true : false), windowId: new_window.id}, function(tab) {
+								if (tab) {
+									RefsTabs[LoadTab.id] = tab.id;
+									// LTab[0] = tab.id;
+									// LTab[1] = "";
+									// TotalTabsCount--;
+									
+									// if (TotalTabsCount < 2) {
+										// setTimeout(function() {
+											// chrome.runtime.sendMessage({command: "get_windows"}, function(response) {
+												// let windows = Object.assign({}, response);
+
+												// LoadedWindows.forEach(function(LWin){
+													// LWin[0].forEach(function(LTab){
+														// schedule_update_data -= 2;
+														// chrome.runtime.sendMessage({command: "update_tab", tabId: LTab[0], tab: {parent: (RefsTabs[LTab[2]] ? RefsTabs[LTab[2]] : LTab[2]), index: LTab[3], expand: LTab[4]}});
+													// });				
+												// });				
+									setTimeout(function() {
+
+										var datarr = setInterval(function() {
+											// console.log(LoadTab.parent);
+
+											if ((LoadTab.parent).match("g_|tab_list") != null) {
+												chrome.runtime.sendMessage({command: "remotely_append_tab_to_parent", tabId: tab.id, parentId: (LoadTab.parent), windowId: new_window.id});
+												// console.log("datarr");
+												clearInterval(datarr);
+											}
+										}, 1000);
+
+										var dataer = setInterval(function() {
+											// console.log(LoadTab.parent);
+											// if ((LoadTab.parent).match("g_") != null) {
+												// console.log(LoadTab.parent);
+
+											// }
+											if (RefsTabs[LoadTab.parent] != undefined/*  || (LoadTab.parent).match("g_") != null */) {
+												chrome.runtime.sendMessage({command: "remotely_append_tab_to_parent", tabId: tab.id, parentId: RefsTabs[LoadTab.parent], windowId: new_window.id});
+												// console.log("parent is there!");
+												clearInterval(dataer);
+											}
+										}, 2000);
+										var discarder = setInterval(function() {
+											if (tab.status != "loading") {
+												chrome.tabs.discard(tab.id);
+												// console.log("discarder");
+												clearInterval(discarder);
+											}
+										}, 10000);
+									}, 1000);
+
+								}
+							});
+						} else {
+							clearInterval(TabCreator);
+						}
+					// });
+						index--;
+					}, 10);
+					// LWin[0].forEach(function(LTab){
+						// chrome.tabs.create({url: LTab[1], pinned: (LTab[2] == "pin_list" ? true : false), windowId: new_window.id}, function(tab) {
+							// RefsTabs[LTab[0]] = tab.id;
+							// LTab[0] = tab.id;
+							// LTab[1] = "";
+							// TotalTabsCount--;
 							
-							if (TotalTabsCount < 2) {
-								setTimeout(function() {
-									chrome.runtime.sendMessage({command: "get_windows"}, function(response) {
-										let windows = Object.assign({}, response);
+							// if (TotalTabsCount < 2) {
+								// setTimeout(function() {
+									// chrome.runtime.sendMessage({command: "get_windows"}, function(response) {
+										// let windows = Object.assign({}, response);
 
-										LoadedWindows.forEach(function(LWin){
-											LWin[0].forEach(function(LTab){
-												schedule_update_data -= 2;
-												chrome.runtime.sendMessage({command: "update_tab", tabId: LTab[0], tab: {parent: (RefsTabs[LTab[2]] ? RefsTabs[LTab[2]] : LTab[2]), index: LTab[3], expand: LTab[4]}});
-											});				
-										});				
+										// LoadedWindows.forEach(function(LWin){
+											// LWin[0].forEach(function(LTab){
+												// schedule_update_data -= 2;
+												// chrome.runtime.sendMessage({command: "update_tab", tabId: LTab[0], tab: {parent: (RefsTabs[LTab[2]] ? RefsTabs[LTab[2]] : LTab[2]), index: LTab[3], expand: LTab[4]}});
+											// });				
+										// });				
 										
-										setTimeout(function() {
-											chrome.runtime.sendMessage({command: "reload_sidebar"});
-											location.reload();
-										}, 3000);
-									});
-									chrome.tabs.remove(new_window.tabs[0].id, null);
-								}, 1000);
-							}							
-						});
-					});
-				});
+										// setTimeout(function() {
+											// chrome.runtime.sendMessage({command: "reload_sidebar"});
+											// location.reload();
+										// }, 3000);
+									// });
+									// chrome.tabs.remove(new_window.tabs[0].id, null);
+								// }, 1000);
+							// }							
+						// });
+					// });
+				}, 4000);
 			});
-		});
+		}
 	}	 
 }
 

@@ -12,12 +12,21 @@ body {
 	
 	--title_font_size: 12px;
 
-	--tab_title_text_padding_left: 26px;
+	--tab_title_text_padding_left: 25px;
+	--tab_title_text_padding_exp_left: 37px;
 	--tab_title_text_padding_right_with_close_button: 24px;
 
-	--favicon_size: 16px 16px;
-	--favicon_left: 6px;
+	--favicon_width: 17px;
+	--favicon_height: 17px;
+	--favicon_left: 2px;
 
+	--expand_height: 21px;
+	--expand_width: 38px;
+
+	--expand_mask_top: 8px;
+	--expand_mask_left: 25px;
+	--expand_mask_height: 7px;
+	--expand_mask_width: 7px;
 
 	--drag_area_top: 8px;
 	--drag_area_bottom: 5px;
@@ -27,4 +36,9 @@ body {
 	--close_right: 3px;
 	--close_height: 13px;
 	--close_width: 13px;
+	
+	--tab_mediaicon_height: 12px;
+	--tab_mediaicon_width: 12px;
+	--tab_mediaicon_left: 1px;
+	--tab_mediaicon_bottom: 1px;
 }

@@ -19,7 +19,7 @@ var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", Selec
 var DropTargetsInFront = false;
 
 
-var menuTabId = 0;
+var menuItemId = 0;
 var CurrentWindowId = 0;
 var SearchIndex = 0;
 var active_group = "tab_list";
@@ -99,16 +99,104 @@ var DefaultToolbar =
 	
 var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
 var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "promote_children_in_first_child": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true, "show_counter_groups": true, "show_counter_tabs": true, "show_counter_tabs_hints": true, "groups_toolbar_default": true };
+var theme = {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar};
 
 
 
 
 // *******************             GLOBAL FUNCTIONS                 ************************
-// function LoadData(KeyName, ExpectReturnDefaultType) {
-	// chrome.runtime.sendMessage({command: "load_data", K: KeyName, T: ExpectReturnDefaultType}, function(response) {
-		// return response;
-	// });
-// }
+
+function ConvertLegacyStorage() {
+	if (
+		localStorage.getItem("current_theme") != null ||
+		localStorage.getItem("preferences") != null ||
+		localStorage.getItem("tabs") != null ||
+		localStorage.getItem("windows") != null
+	) {
+		let current_theme = "";
+		if (localStorage.getItem("current_theme") != null) {
+			current_theme = localStorage["current_theme"];
+		}
+		let LSthemes = [];
+		if (localStorage.getItem("themes") != null) {
+			LSthemes = LoadData("themes", []);
+		}
+		
+		SLThemes = {};
+		LSthemes.forEach(function(themeName) {
+			let them = LoadData("theme"+themeName, {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
+			SLThemes[themeName] = them;
+		});
+
+		let LSpreferences = Object.assign({}, DefaultPreferences);
+		if (localStorage.getItem("preferences") != null) {
+			LSpreferences = LoadData("preferences", {});
+		}
+
+		if (browserId != "F") {
+			let LStabs = {};
+			if (localStorage.getItem("tabs") != null) {
+				LStabs = LoadData("tabs", {});
+			}
+			let LSwindows = {};
+			if (localStorage.getItem("windows") != null) {
+				LSwindows = LoadData("windows", {});
+			}
+			let LStabs_BAK1 = {};
+			if (localStorage.getItem("tabs_BAK1") != null) {
+				LStabs_BAK1 = LoadData("tabs_BAK1", {});
+			}
+			let LStabs_BAK2 = {};
+			if (localStorage.getItem("tabs_BAK2") != null) {
+				LStabs_BAK2 = LoadData("tabs_BAK2", {});
+			}
+			let LStabs_BAK3 = {};
+			if (localStorage.getItem("tabs_BAK3") != null) {
+				LStabs_BAK3 = LoadData("tabs_BAK3", {});
+			}
+
+			let LSwindows_BAK1 = {};
+			if (localStorage.getItem("windows_BAK1") != null) {
+				LSwindows_BAK1 = LoadData("windows_BAK1", {});
+			}
+			let LSwindows_BAK2 = {};
+			if (localStorage.getItem("windows_BAK2") != null) {
+				LSwindows_BAK2 = LoadData("windows_BAK2", {});
+			}
+			let LSwindows_BAK3 = {};
+			if (localStorage.getItem("windows_BAK3") != null) {
+				LSwindows_BAK3 = LoadData("windows_BAK3", {});
+			}
+			
+			
+			let LSt_count = 0;
+			if (localStorage.getItem("t_count") != null) {
+				LSt_count = LoadData("t_count", {});
+			}
+			let LSw_count = 0;
+			if (localStorage.getItem("w_count") != null) {
+				LSw_count = LoadData("w_count", {});
+			}
+			chrome.storage.local.set({tabs: LStabs});
+			chrome.storage.local.set({windows: LSwindows});
+			chrome.storage.local.set({tabs_BAK1: LStabs_BAK1});
+			chrome.storage.local.set({tabs_BAK2: LStabs_BAK2});
+			chrome.storage.local.set({tabs_BAK3: LStabs_BAK3});
+
+			chrome.storage.local.set({windows_BAK1: LSwindows_BAK1});
+			chrome.storage.local.set({windows_BAK2: LSwindows_BAK2});
+			chrome.storage.local.set({windows_BAK3: LSwindows_BAK3});
+			chrome.storage.local.set({t_count: LSt_count});
+			chrome.storage.local.set({w_count: LSw_count});
+		}
+		chrome.storage.local.set({preferences: LSpreferences});
+		chrome.storage.local.set({current_theme: current_theme});
+		chrome.storage.local.set({themes: SLThemes});
+		localStorage.clear();
+		window.location.reload();
+	}
+}
+
 function LoadData(KeyName, ExpectReturnDefaultType) {
 	var data = ExpectReturnDefaultType;
 	try {
@@ -135,6 +223,39 @@ hex = hex.replace('#', ''); let r = parseInt(hex.length == 3 ? hex.slice(0, 1).r
 }
 
 
+function GetCurrentTheme() {
+	chrome.storage.local.get(null, function(items) {
+		if (items["current_theme"] && items["themes"] && items["themes"][items["current_theme"]]) {
+			theme = items["themes"][items["current_theme"]];
+		} else {
+			theme = Object.assign({}, DefaultTheme);
+		}
+	});
+}
+function ApplyTheme(theme) {
+	RestoreStateOfGroupsToolbar();
+	// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
+	if (browserId == "F") {
+		if (theme.TabsSizeSetNumber > 1) {
+			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+		}
+	}
+	ApplySizeSet(theme["TabsSizeSetNumber"]);
+	ApplyColorsSet(theme["ColorsSet"]);
+	if (theme.ToolbarShow) {
+		if (theme.theme_version == DefaultTheme.theme_version) {
+			$("#toolbar").html(theme.toolbar);
+			if (browserId == "F") {
+				$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
+			}
+		} else {
+			$("#toolbar").html(DefaultToolbar);
+		}
+	}	
+	RestoreToolbarShelf();
+	RestoreToolbarSearchFilter();
+	Loadi18n();
+}
 /* theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"} */
 function ApplyColorsSet(ThemeColors){
 	let css_variables = "";
@@ -170,27 +291,26 @@ function ApplySizeSet(size){
 }
 
 function LoadPreferences() {
-	var	LoadedPreferences = LoadData("preferences", {});
-
-	for (var parameter in DefaultPreferences) {
-		opt[parameter] = DefaultPreferences[parameter];
-	}
-	for (var parameter in LoadedPreferences) {
-		if (opt[parameter] != undefined) {
-			opt[parameter] = LoadedPreferences[parameter];
+	opt = Object.assign({}, DefaultPreferences);
+	chrome.storage.local.get(null, function(items) {
+		if (items["preferences"]) {
+			for (var parameter in items["preferences"]) {
+				if (opt[parameter] != undefined) {
+					opt[parameter] = items["preferences"][parameter];
+				}
+			}
 		}
-	}
+	});
 }
 function LoadDefaultPreferences() {
-	for (var parameter in DefaultPreferences) {
-		opt[parameter] = DefaultPreferences[parameter];
-	}
+	opt = Object.assign({}, DefaultPreferences);
 }
 function SavePreferences() {
-	localStorage["preferences"] = JSON.stringify(opt);
-	setTimeout(function() {
-		chrome.runtime.sendMessage({command: "reload_options"});
-	}, 200);
+	chrome.runtime.sendMessage({command: "save_preferences", opt: opt}, function(response) {
+		setTimeout(function() {
+			chrome.runtime.sendMessage({command: "reload_options"});
+		}, 300);
+	});
 }
 function ShowOpenFileDialog(id, extension) {
 	let body = document.getElementById("body");
@@ -214,3 +334,6 @@ function SaveFile(filename, data) {
 	link.remove();
 }
 
+function log(m) {
+	chrome.runtime.sendMessage({command: "console_log", m: m});
+}

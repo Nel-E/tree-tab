@@ -5,8 +5,10 @@
 
 
 if (browserId == "F") {
+	ConvertLegacyStorage();
 	FirefoxStart(0);
 	LoadPreferences();
+	GetCurrentTheme();
 	FirefoxMessageListeners();
 }
 
@@ -99,8 +101,6 @@ function FirefoxLoadTabs(retry) {
 									}
 								}
 							}
-							// TODO
-							// replace parent tab ids for each folder using reference_tabs, unless tabs will be nested ONLY in tabs and folders ONLY in folders, I did not decide yet
 
 							// will try to find tabs for 3 times
 							if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
@@ -203,7 +203,6 @@ function ReplaceParents(oldTabId, newTabId) {
 			tabs[tabId].parent = newTabId;
 		}
 	}
-	// TO DO FOLDERS
 }
 
 var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
@@ -258,7 +257,9 @@ function FirefoxListeners() {
 			}
 			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		},5);
-		// delete tabs[tabId];
+		// setTimeout(function() {
+			// delete tabs[tabId];
+		// },60000);
 		schedule_save++;
 	});
 	
@@ -321,6 +322,13 @@ function FirefoxMessageListeners() {
 		switch(message.command) {
 			case "reload":
 				window.location.reload();
+			break;
+			case "get_preferences":
+				sendResponse(opt);
+			break;
+			case "save_preferences":
+				opt = Object.assign({}, message.opt);
+				chrome.storage.local.set({preferences: message.opt});
 			break;
 			case "get_windows":
 				sendResponse(windows);
@@ -390,7 +398,7 @@ function FirefoxMessageListeners() {
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;
-			case "is_bg_running":
+			case "is_bg_ready":
 				sendResponse(running);
 			break;
 			case "update_tab":
@@ -413,8 +421,10 @@ function FirefoxMessageListeners() {
 				}
 			break;
 			case "get_theme":
-				let theme = LoadData(("theme"+localStorage["current_theme"]), {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
 				sendResponse(theme);
+			break;
+			case "reload_theme":
+				GetCurrentTheme();
 			break;
 		}
 	});
