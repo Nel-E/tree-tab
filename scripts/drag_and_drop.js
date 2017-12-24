@@ -27,9 +27,13 @@ function SetDragAndDropEvents() {
 		event.preventDefault();
 	});
 
-	// bring to front drop zones
+	// deny drag enter on drop_targets and allow clicks below them
+	$(document).on("mousedown", ".drop_target", function(event) {
+		$(".drop_target").css({"pointer-events": "none"});
+	});
+	// allow drag enter on drop_targets
 	$(document).on("dragenter", ".tab_header, .folder_header", function(event) {
-		DropTargetsSendToFront();
+		$(".drop_target").css({"pointer-events": "all"});
 	});
 
 	// SET FOLDER DRAG SOURCE
@@ -49,6 +53,9 @@ function SetDragAndDropEvents() {
 		DragAndDrop.SelectedTabsIds.splice(0, DragAndDrop.SelectedTabsIds.length);
 		DragAndDrop.TabsIds.splice(0, DragAndDrop.TabsIds.length);
 		DragAndDrop.Parents.splice(0, DragAndDrop.Parents.length);
+		
+		// DragAndDrop.Folders = Object.assign({}, {});
+		
 		DragAndDrop.Depth = 0;
 		chrome.runtime.sendMessage({
 			command: "drag_drop",
@@ -247,6 +254,7 @@ function SetDragAndDropEvents() {
 				});
 			});
 		}
+		$(".drop_target").css({"pointer-events": "none"});
 	});
 
 	// DETACH TABS
@@ -261,14 +269,15 @@ function SetDragAndDropEvents() {
 				}
 			}
 		},200);
+		$(".drop_target").css({"pointer-events": "none"});
 	});
 	
 	// SAVE FOLDERS
 	$(document).on("dragend", ".folder_header", function(event) {
 		setTimeout(function() {
 			SaveFolders();
-			DropTargetsSendToBack();
 		}, 500);
+		$(".drop_target").css({"pointer-events": "none"});
 	});
 
 
@@ -304,6 +313,8 @@ function SetDragAndDropEvents() {
 		DragAndDrop.DragNode = undefined;
 		UpdateBgGroupsOrder();
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
+		RearrangeGroupsLists();
+		$(".drop_target").css({"pointer-events": "none"});
 	});
 }
 
@@ -418,9 +429,10 @@ function DropToTarget(TargetNode) {
 	RefreshGUI();
 	RefreshCounters();
 	setTimeout(function() {
-		DropTargetsSendToBack();
-		schedule_update_data++;
 		schedule_rearrange_tabs++;
+	}, 10);
+	setTimeout(function() {
+		schedule_update_data++;
 	}, 500);
 	
 	

@@ -4,11 +4,61 @@
 
 // **********			 MENU		 ***************
 
-function ShowMenu() {
-	
-	
-	
+function ShowTabMenu(TabNode, event) {
+	$(".menu").hide(0);
+	menuItemId = parseInt(TabNode[0].id);
+	// MUTE TABS
+	if (TabNode.is(".muted")) {
+		$("#tabs_menu_mute").css({ "display": "none" });
+		$("#tabs_menu_unmute").css({ "display": "" });
+	} else {
+		$("#tabs_menu_mute").css({ "display": "" });
+		$("#tabs_menu_unmute").css({ "display": "none" });
+	}
+	if (TabNode.is(".pin")) {
+		if (!opt.allow_pin_close) {
+			$("#tabs_menu_close").css({ "display": "none" });
+		}
+		// show contextmenu with correct size position
+		if ($("#pins_menu").outerWidth() > $(window).width() - 10) {
+			$("#pins_menu").css({ "width": $(window).width() - 10 });
+		} else {
+			$("#pins_menu").css({ "width": "" });
+		}
+		var x = event.pageX >= $(window).width() - $("#pins_menu").outerWidth() ? $(window).width() - $("#pins_menu").outerWidth() : event.pageX;
+		var y = event.pageY >= $(window).height() - $("#pins_menu").outerHeight() - 10 ? $(window).height() - $("#pins_menu").outerHeight() - 10 : event.pageY;
+		$("#pins_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+	}
+	if (TabNode.is(".tab")) {
+		if ($("#" + menuItemId).is(".o, .c")) {
+			$("#tabs_menu_close_tree").css({ "display": "" });
+		} else {
+			$("#tabs_menu_close_tree").css({ "display": "none" });
+		}
+		if ($("#tabs_menu").outerWidth() > $(window).width() - 10) {
+			$("#tabs_menu").css({ "width": $(window).width() - 10 });
+		} else {
+			$("#tabs_menu").css({ "width": "" });
+		}
+		var x = event.pageX >= $(window).width() - $("#tabs_menu").outerWidth() ? $(window).width() - $("#tabs_menu").outerWidth() : event.pageX;
+		var y = event.pageY >= $(window).height() - $("#tabs_menu").outerHeight() - 10 ? $(window).height() - $("#tabs_menu").outerHeight() - 10 : event.pageY;
+		$("#tabs_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+	}
 }
+
+function ShowFolderMenu(FolderNode, event) {
+	$(".menu").hide(0);
+	menuItemId = FolderNode[0].id;
+	if ($("#folders_menu").outerWidth() > $(window).width() - 10) {
+		$("#folders_menu").css({ "width": $(window).width() - 10 });
+	} else {
+		$("#folders_menu").css({ "width": "" });
+	}
+	var x = event.pageX >= $(window).width() - $("#folders_menu").outerWidth() ? $(window).width() - $("#folders_menu").outerWidth() : event.pageX;
+	var y = event.pageY >= $(window).height() - $("#folders_menu").outerHeight() - 10 ? $(window).height() - $("#folders_menu").outerHeight() - 10 : event.pageY;
+	$("#folders_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+}
+
 function SetMenu() {
 	// trigger action when the contexmenu is about to be shown
 	$(document).bind("contextmenu", function(event) {
@@ -16,89 +66,6 @@ function SetMenu() {
 			event.preventDefault();
 		}
 	});
-
-	// show pins menu
-	$(document).on("mousedown", ".pin", function(event) {
-		event.stopPropagation();
-		if (event.button == 2) {
-			$(".menu").hide(0);
-			menuItemId = parseInt($(this)[0].id);
-
-			if (!opt.allow_pin_close) {
-				$("#tabs_menu_close").css({ "display": "none" });
-			}
-			// MUTE TABS
-			if ($("#" + menuItemId).is(".muted")) {
-				$("#tabs_menu_mute").css({ "display": "none" });
-				$("#tabs_menu_unmute").css({ "display": "" });
-			} else {
-				$("#tabs_menu_mute").css({ "display": "" });
-				$("#tabs_menu_unmute").css({ "display": "none" });
-			}
-
-			// show contextmenu with correct size position
-			if ($("#pins_menu").outerWidth() > $(window).width() - 10) {
-				$("#pins_menu").css({ "width": $(window).width() - 10 });
-			} else {
-				$("#pins_menu").css({ "width": "" });
-			}
-			var x = event.pageX >= $(window).width() - $("#pins_menu").outerWidth() ? $(window).width() - $("#pins_menu").outerWidth() : event.pageX;
-			var y = event.pageY >= $(window).height() - $("#pins_menu").outerHeight() - 10 ? $(window).height() - $("#pins_menu").outerHeight() - 10 : event.pageY;
-			$("#pins_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
-		}
-	});
-	
-	// show tabs menu
-	$(document).on("mousedown", ".tab", function(event) {
-		event.stopPropagation();
-		if (event.button == 2) {
-			$(".menu").hide(0);
-			menuItemId = parseInt($(this)[0].id);
-			if ($("#" + menuItemId).is(".o, .c")) {
-				$("#tabs_menu_close_tree").css({ "display": "" });
-			} else {
-				$("#tabs_menu_close_tree").css({ "display": "none" });
-			}
-
-			// MUTE TABS
-			if ($("#" + menuItemId).is(".muted")) {
-				$("#tabs_menu_mute").css({ "display": "none" });
-				$("#tabs_menu_unmute").css({ "display": "" });
-			} else {
-				$("#tabs_menu_mute").css({ "display": "" });
-				$("#tabs_menu_unmute").css({ "display": "none" });
-			}
-
-			if ($("#tabs_menu").outerWidth() > $(window).width() - 10) {
-				$("#tabs_menu").css({ "width": $(window).width() - 10 });
-			} else {
-				$("#tabs_menu").css({ "width": "" });
-			}
-			var x = event.pageX >= $(window).width() - $("#tabs_menu").outerWidth() ? $(window).width() - $("#tabs_menu").outerWidth() : event.pageX;
-			var y = event.pageY >= $(window).height() - $("#tabs_menu").outerHeight() - 10 ? $(window).height() - $("#tabs_menu").outerHeight() - 10 : event.pageY;
-			$("#tabs_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
-		}
-	});
-	
-	// show folders menu
-	$(document).on("mousedown", ".folder", function(event) {
-		event.stopPropagation();
-		if (event.button == 2) {
-			$(".menu").hide(0);
-			menuItemId = $(this)[0].id;
-			
-			if ($("#folders_menu").outerWidth() > $(window).width() - 10) {
-				$("#folders_menu").css({ "width": $(window).width() - 10 });
-			} else {
-				$("#folders_menu").css({ "width": "" });
-			}
-			var x = event.pageX >= $(window).width() - $("#folders_menu").outerWidth() ? $(window).width() - $("#folders_menu").outerWidth() : event.pageX;
-			var y = event.pageY >= $(window).height() - $("#folders_menu").outerHeight() - 10 ? $(window).height() - $("#folders_menu").outerHeight() - 10 : event.pageY;
-			$("#folders_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
-		}
-	});
-
-
 
 	// show global menu
 	$(document).on("mousedown", "#pin_list, .group", function(event) {
@@ -135,10 +102,10 @@ function SetMenu() {
 
 	// if the menu element is clicked
 	$(document).on("mousedown", ".menu li", function(event) {
+		event.stopPropagation();
 		if (event.button != 0) {
 			return;
 		}
-		event.stopPropagation();
 		switch ($(this).attr("data-action")) {
 			case "tab_new":
 				chrome.tabs.create({});
@@ -272,7 +239,7 @@ function SetMenu() {
 				schedule_update_data++;
 			break;
 			case "folder_new":
-				AddNewFolder();
+				AddNewFolder({});
 			break;
 			case "folder_rename":
 				if ($("#" + menuItemId).is(".selected_folder")) {

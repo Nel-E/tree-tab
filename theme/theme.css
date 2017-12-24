@@ -874,8 +874,8 @@ div {
 /* DRAG AND DROP TARGETS */
 
 .drop_target {
-	display: none;
 	position: absolute;
+	pointer-events: none;
 }
 
 .tab>.drag_enter_center {
@@ -948,10 +948,10 @@ div {
 	height: var(--expand_height);
 	width:  var(--expand_width);
 	
-	mask-size: var(--expand_mask_width) var(--expand_mask_height);
-	mask-position: var(--expand_mask_left) var(--expand_mask_top);
 	-webkit-mask-position: var(--expand_mask_left) var(--expand_mask_top);
 	-webkit-mask-size: var(--expand_mask_width) var(--expand_mask_height);
+	mask-size: var(--expand_mask_width) var(--expand_mask_height);
+	mask-position: var(--expand_mask_left) var(--expand_mask_top);
 }
 
 /* CHILDREN TABS */
@@ -977,13 +977,13 @@ div {
 .tab.c>.tab_header>.expand {
 	background-color: var(--expand_closed_background);
 	mask-image: url(../theme/expand_closed.svg);
-	-webkit-mask-image: url(../theme/expand_closed.svg);
+	-webkit-mask-image: url(../theme/expand_c.svg);
 }
 
 .tab.o>.tab_header>.expand {
 	background-color: var(--expand_open_background);
 	mask-image: url(../theme/expand_open.svg);
-	-webkit-mask-image: url(../theme/expand_open.svg);
+	-webkit-mask-image: url(../theme/expand_o.svg);
 }
 
 .o.tab>.tab_header>.tab_title,

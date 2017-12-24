@@ -270,16 +270,14 @@ function SetToolbarEvents() {
 		}
 	});
 	$(document).on("change", "#file_import_group", function(event) {
-		if (event.button == 0) {
-			ImportGroup();
-		}
+		ImportGroup();
 	});
 
 
 	// new folder
 	$(document).on("mousedown", "#button_new_folder", function(event) {
 		if (event.button == 0) {
-			AddNewFolder();
+			AddNewFolder({});
 		}
 	});
 	// rename folder
@@ -296,6 +294,12 @@ function SetToolbarEvents() {
 				RemoveFolder(this.id);
 			});
 			// RemoveFolder($(".selected_folder:visible")[0].id);
+		}
+	});
+	// discard tabs
+	$(document).on("mousedown", "#button_discard", function(event) {
+		if (event.button == 0) {
+			DiscardTabs($(".selected_tab")[0] ? ($(".selected_tab").map(function() { return parseInt(this.id); }).toArray()) : ($(".pin, .tab").map(function() { return parseInt(this.id); }).toArray())       );
 		}
 	});
 
@@ -330,48 +334,29 @@ function SetToolbarEvents() {
 				chrome.tabs.create({url: "chrome://settings/"});
 			}
 		});
-		// discard tabs
-		$(document).on("mousedown", "#button_discard", function(event) {
-			if (event.button == 0) {
-				chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
-					var tabsIds = [];
-					tabs.forEach(function(Tab) {
-						tabsIds.push(Tab.id);
-					});
-					DiscardTabs(tabsIds);
-				});
-			}
-		});
 		// load backups
 		$(document).on("mousedown", "#button_load_bak1:not(.disabled), #button_load_bak2:not(.disabled), #button_load_bak3:not(.disabled)", function(event) {
 			if (event.button == 0) {
-				let wins = LoadData("windows_BAK"+(this.id).substr(15), []);
-				let tabs = LoadData("tabs_BAK"+(this.id).substr(15), []);
-				
-				if (wins.length) {
-					localStorage["windows"] = JSON.stringify(wins);
-				}
-				if (tabs.length) {
-					localStorage["tabs"] = JSON.stringify(tabs);
-					alert("Loaded backup");
-				}
-				chrome.runtime.sendMessage({command: "reload"});
-				chrome.runtime.sendMessage({command: "reload_sidebar"});
-				location.reload();
+				let BakN = (this.id).substr(15);
+				chrome.storage.local.get(null, function(items) {
+					if (Object.keys(items["windows_BAK"+BakN]).length > 0) { chrome.storage.local.set({"windows": items["windows_BAK"+BakN]}); }
+					if (Object.keys(items["tabs_BAK"+BakN]).length > 0) { chrome.storage.local.set({"tabs": items["tabs_BAK"+BakN]}); alert("Loaded backup"); }
+					chrome.runtime.sendMessage({command: "reload"}); chrome.runtime.sendMessage({command: "reload_sidebar"}); location.reload();
+				});
 			}
 		});
 	}
 
 	// import-export backups
 	$(document).on("mousedown", "#button_export_bak", function(event) {
-		ExportTabs("Session.tt_session");
+		ExportSession("Session.tt_session");
 	});
 	
 	$(document).on("mousedown", "#button_import_bak", function(event) {
 		ShowOpenFileDialog("file_import_backup", ".tt_session");
 	});
 	$(document).on("change", "#file_import_backup", function(event) {
-		ImportTabs();
+		ImportSession();
 	});
 
 

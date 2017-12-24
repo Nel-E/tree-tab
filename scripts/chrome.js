@@ -14,10 +14,14 @@ function StartChromeListeners(){
 	}
 	
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+		if (message.command == "backup_available") {
+			$("#button_load_bak"+message.bak).removeClass("disabled");
+		}
 		if (message.command == "drag_drop") {
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
 			DragAndDrop.SelectedTabsIds = message.SelectedTabsIds;
+			// DragAndDrop.Folders = Object.assign({}, message.Folders);
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.Parents = message.Parents;
 			DragAndDrop.Depth = message.Depth;
@@ -31,7 +35,6 @@ function StartChromeListeners(){
 		if (message.command == "reload_options") {
 			chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
 				opt = Object.assign({}, response);
-				// LoadPreferences();
 				setTimeout(function() {
 					RestorePinListRowSettings();
 				}, 200);
@@ -185,27 +188,9 @@ function StartChromeListeners(){
 						RefreshExpandStates();
 					}
 				break;
-				case "remotely_append_groups":
-					if (message.groups) {
-						for (var group in message.groups) {
-							bggroups[group] = Object.assign({}, message.groups[group]);
-						}
-						AppendGroups(bggroups);
-					}
-				break;
-				case "remotely_append_folders":
-					if (message.folders) {
-						for (var folder in message.folders) {
-							bgfolders[folder] = Object.assign({}, message.folders[folder]);
-						}
-						AppendFolders(bgfolders);
-					}
-				break;
-				case "remotely_append_tab_to_parent":
-					if ($("#"+message.tabId)[0] && $("#ch"+message.parentId)[0]) {
-						$("#ch"+message.parentId).append($("#"+message.tabId));
-						RefreshGUI();
-					}
+				case "remotely_update_tabs":
+					RearrangeTreeStructure(message.groups, message.folders, message.tabs);
+					sendResponse(true);
 				break;
 			}
 		}

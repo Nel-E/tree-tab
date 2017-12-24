@@ -678,6 +678,9 @@
 
 	
 	
+	"warning_exporting_big_amount_of_tabs": {
+		"message": "Importing big amount of tabs can make your browser unresponsive even for hours! Consider dividing your tabs to groups and exporting each group separately."
+	},
 	"caption_ungrouped_group": {
 		"message": "Ungrouped"
 	},

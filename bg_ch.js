@@ -15,7 +15,7 @@ function ChromeLoadTabs(retry) {
 			var refTabs = {};
 			var tabs_matched = 0;
 			
-			// load tabs and windows from storage.loacal
+			// load tabs and windows from storage.local
 			var w_count = storage.w_count ? storage.w_count : 0;
 			var t_count = storage.t_count ? storage.t_count : 0;
 		
@@ -154,14 +154,17 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 						if (BAK == 1) {
 							chrome.storage.local.set({windows_BAK1: Windows});
 							chrome.storage.local.set({tabs_BAK1: Tabs});
+							chrome.runtime.sendMessage({command: "backup_available", bak: 1});
 						}
 						if (BAK == 2) {
 							chrome.storage.local.set({windows_BAK2: Windows});
 							chrome.storage.local.set({tabs_BAK2: Tabs});
+							chrome.runtime.sendMessage({command: "backup_available", bak: 2});
 						}
 						if (BAK == 3) {
 							chrome.storage.local.set({windows_BAK3: Windows});
 							chrome.storage.local.set({tabs_BAK3: Tabs});
+							chrome.runtime.sendMessage({command: "backup_available", bak: 3});
 						}
 					}
 				}

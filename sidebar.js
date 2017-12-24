@@ -47,6 +47,8 @@ function Load() {
 					bgfolders = Object.assign({}, response);
 					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
 						bggroups = Object.assign({}, response);
+// bggroups = { tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""},                        g_5MP2aO: {id: "g_5MP2aO", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}, g_8SMRw0: {id: "g_8SMRw0", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}, g_QYa3om: {id: "g_QYa3om", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}       };
+// console.log(bggroups);
 						chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
 							ApplyTheme(response);
 							Initialize();
@@ -80,14 +82,14 @@ function Initialize() {
 				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].expand);
 			}
 		}
-		// SET ACTIVE IN EACH GROUP
+		// SET ACTIVE TAB FOR EACH GROUP
 		for (var group in bggroups) {
 			if ($("#"+group+" #"+bggroups[group].active_tab)[0]) {
 				$("#"+bggroups[group].active_tab).addClass("active_tab");
 			}
-		}
+		}				
 		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-			SetActiveGroup(response, true, true);
+			SetActiveGroup(response, false, true);
 		});
 		RearrangeTreeTabs(tabs, bgtabs, true);
 		RearrangeFolders(true);
@@ -101,8 +103,23 @@ function Initialize() {
 		SetFolderEvents();
 		SetMenu();
 		SetDragAndDropEvents();
-		RearrangeBrowserTabsCheck();
+		RearrangeBrowserTabs();
 		RestorePinListRowSettings();
+		if (browserId == "V") {
+			VivaldiRefreshMediaIcons();
+		}
+		
+		var SetActiveLoop = setInterval(function() {
+			log("SetActiveTab");
+			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
+				if (tabs[0].pinned && $("#"+active_group+" .active_tab")[0]) {
+					SetActiveTab(tabs[0].id);
+				} else {
+					clearInterval(SetActiveLoop);
+				}
+			});
+		}, 1000);
+
 		setTimeout(function() {
 			RefreshExpandStates();
 			RefreshCounters();
@@ -112,15 +129,12 @@ function Initialize() {
 			delete bgtabs;
 			delete theme;
 		}, 5000);
-		if ($(".active_tab:visible").length == 0) {
-			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
-				if (tabs[0]) {
-					SetActiveTab(tabs[0].id);
-				}
+		if (browserId != "F") {
+			chrome.storage.local.get(null, function(items) {
+				if (Object.keys(items["windows_BAK1"]).length > 0) { $("#button_load_bak1").removeClass("disabled"); }
+				if (Object.keys(items["windows_BAK2"]).length > 0) { $("#button_load_bak2").removeClass("disabled"); }
+				if (Object.keys(items["windows_BAK3"]).length > 0) { $("#button_load_bak3").removeClass("disabled"); }
 			});
-		}
-		if (browserId == "V") {
-			VivaldiRefreshMediaIcons();
 		}
 	});			
 }

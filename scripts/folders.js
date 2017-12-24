@@ -3,30 +3,62 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 
+function AddNewFolder(p) {
+	var newId = GenerateNewFolderID();
+	bgfolders[newId] = { id: newId, parent: (p.ParentId ? p.ParentId : ""), index: (p.index ? p.index : 0), name: (p.name ? p.name : caption_noname_group), expand: (p.expand ? p.expand : "n") };
+	AppendFolder({id: newId, ParentId: (p.ParentId ? p.ParentId : ""), name: caption_noname_group});
+	SaveFolders();
+	RefreshCounters();
+	return newId;
+}
+function AppendFolder(param) {
+	if ($("#"+param.id).length == 0) {
+		var fd = document.createElement("div"); fd.className = "folder ";  if (param.expand) { fd.className += param.expand }  fd.id = param.id;// FOLDER
+		var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+param.id; fd.appendChild(dc); // DROP TARGET CENTER
+		var dt = document.createElement("div"); dt.className = "drop_target drag_entered_top"; dt.id = "du"+param.id; fd.appendChild(dt); // DROP TARGET TOP
+		var db = document.createElement("div"); db.className = "drop_target drag_entered_bottom"; db.id = "dd"+param.id; fd.appendChild(db); // DROP TARGET BOTTOM
+		var fh = document.createElement("div"); fh.className = opt.always_show_close ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+param.id; fh.draggable = true; fd.appendChild(fh); // HEADER
+		var ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+param.id; fh.appendChild(ex);
+		var ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+param.id; ft.textContent = param.name; fh.appendChild(ft); // TITLE
+		var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.id; fd.appendChild(ch);
+		var cf = document.createElement("div"); cf.className = "children"; cf.id = "cf"+param.id; fd.appendChild(cf);
+		if (!opt.never_show_close) {
+			var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+param.id; fh.appendChild(cl); // CLOSE BUTTON
+			var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+param.id; cl.appendChild(ci);
+		}
+		if (param.ParentId == "" || param.ParentId == undefined || $("#cf"+param.ParentId).length == 0) {
+			$("#cf"+active_group).append(fd);
+		} else {
+			$("#cf"+param.ParentId).append(fd);
+		}
+	}
+}
+function GenerateNewFolderID(){
+	var newID = "f_"+GenerateRandomID();
+	if ($("#"+newID)[0]) {
+		GenerateNewFolderID();
+	} else {
+		return newID;
+	}
+}
 function AppendFolders(Folders) {
 	for (var folderId in Folders) {
 		AppendFolder({id: folderId, ParentId: Folders[folderId].parent, name: Folders[folderId].name, expand: Folders[folderId].expand});
 	}
 	// APPEND FOLDERS TO PARENTS
 	for (var folderId in Folders) {
-		if (Folders[folderId].parent != $("#"+folderId).parent()[0].id) {
-			$("#"+Folders[folderId].parent).append($("#"+folderId));
+		if ($("#"+folderId)[0] && Folders[folderId].parent != $("#"+folderId).parent().parent()[0].id) {
+			$("#cf"+Folders[folderId].parent).append($("#"+folderId));
 		}
 	}
 }
 function SaveFolders() {
 	$(".folder").each(function() {
-		bgfolders[this.id].parent = $(this).parent()[0].id;
+		bgfolders[this.id].parent = $(this).parent().parent()[0].id;
 		bgfolders[this.id].index = $(this).index();
 		bgfolders[this.id].expand = ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"));
 	});
 	chrome.runtime.sendMessage({command: "save_folders", folders: bgfolders, windowId: CurrentWindowId});
-}
-function AddNewFolder() {
-	var newId = GenerateNewFolderID();
-	bgfolders[newId] = { parent: "", index: 0, name: caption_noname_group, expand: "n" };
-	AppendFolder({id: newId, name: caption_noname_group});
-	SaveFolders();
 }
 function RearrangeFolders(first_loop) {
 	$(".folder").each(function() {
@@ -71,33 +103,6 @@ function RemoveFolder(FolderId) {
 		chrome.runtime.sendMessage({command: "save_folders", folders: bgfolders, windowId: CurrentWindowId});
 	}
 }
-function AppendFolder(param) {
-	var fd = document.createElement("div"); fd.className = "folder ";  if (param.expand) { fd.className += param.expand }  fd.id = param.id;// FOLDER
-	var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+param.id; fd.appendChild(dc); // DROP TARGET CENTER
-	var dt = document.createElement("div"); dt.className = "drop_target drag_entered_top"; dt.id = "du"+param.id; fd.appendChild(dt); // DROP TARGET TOP
-	var db = document.createElement("div"); db.className = "drop_target drag_entered_bottom"; db.id = "dd"+param.id; fd.appendChild(db); // DROP TARGET BOTTOM
-	var fh = document.createElement("div"); fh.className = opt.always_show_close ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+param.id; fh.draggable = true; fd.appendChild(fh); // HEADER
-	var ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+param.id; fh.appendChild(ex);
-	var ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+param.id; ft.textContent = param.name; fh.appendChild(ft); // TITLE
-	var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.id; fd.appendChild(ch);
-	var cf = document.createElement("div"); cf.className = "children"; cf.id = "cf"+param.id; fd.appendChild(cf);
-	if (!opt.never_show_close) {
-		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+param.id; fh.appendChild(cl); // CLOSE BUTTON
-		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+param.id; cl.appendChild(ci);
-	}
-	if (param.ParentId == undefined || $("#"+param.ParentId).length == 0) {
-		param.ParentId = "cf"+active_group;
-	}
-	$("#"+param.ParentId).append(fd);
-}
-function GenerateNewFolderID(){
-	var newID = "f_"+GenerateRandomID();
-	if ($("#"+newID)[0]) {
-		GenerateNewFolderID();
-	} else {
-		return newID;
-	}
-}
 function SetActiveFolder(FolderId) {
 	if ($("#"+FolderId).length > 0) {
 		$(".selected_folder").removeClass("selected_folder");
@@ -117,6 +122,7 @@ function FolderRenameConfirm() {
 	$("#folder_title"+$("#folder_edit_name").data("FolderId"))[0].innerText = $("#folder_edit_name")[0].value;
 	$(".edit_dialog").hide(0);
 	chrome.runtime.sendMessage({command: "save_folders", folders: bgfolders, windowId: CurrentWindowId});
+	RefreshCounters();
 }
 function SetFolderEvents() {
 	// EXPAND BOX - EXPAND / COLLAPSE
@@ -137,9 +143,6 @@ function SetFolderEvents() {
 	});
 	// SINGLE CLICK TO ACTIVATE FOLDER
 	$(document).on("click", ".folder_header", function(event) {
-		if ($(".menu").is(":visible")) {
-			return;
-		}
 		event.stopPropagation();
 		if (event.button == 0 && !event.shiftKey) {
 			if (!event.ctrlKey) {
@@ -151,11 +154,12 @@ function SetFolderEvents() {
 	});
 	// CLOSE TAB/PIN
 	$(document).on("mousedown", ".folder_header", function(event) {
-		if ($(".menu").is(":visible")) {
-			return;
-		}
 		if ((event.button == 1 && opt.close_with_MMB == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))) {
 			RemoveFolder($(this).parent()[0].id);
+		}
+		if (event.button == 2) {
+			event.stopPropagation();
+			ShowFolderMenu($(this).parent(), event);
 		}
 	});
 	// edit folder dialog box

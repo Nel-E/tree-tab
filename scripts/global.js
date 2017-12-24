@@ -15,9 +15,7 @@ var tabs = {};
 var MouseHoverOver = "";
 
 
-var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", SelectedTabsIds: [], TabsIds: [], Parents: [], ComesFromWindowId: 0, DroppedToWindowId: 0, Depth: 0};
-var DropTargetsInFront = false;
-
+var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", SelectedTabsIds: [], TabsIds: [], Parents: [], Folders: {}, ComesFromWindowId: 0, DroppedToWindowId: 0, Depth: 0};
 
 var menuItemId = 0;
 var CurrentWindowId = 0;
@@ -68,9 +66,9 @@ var DefaultToolbar =
 		'<div class=button id=button_downloads><div class=button_img></div></div>'+
 		'<div class=button id=button_history><div class=button_img></div></div>'+
 		'<div class=button id=button_settings><div class=button_img></div></div>'+
-		'<div class=button id=button_extensions><div class=button_img></div></div>'+
-		'<div class=button id=button_discard><div class=button_img></div></div>'
+		'<div class=button id=button_extensions><div class=button_img></div></div>'
 		: '')+
+		'<div class=button id=button_discard><div class=button_img></div></div>'+
 		'<div class=button id=button_move><div class=button_img></div></div>'+
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_shelf_groups>'+
@@ -234,12 +232,6 @@ function GetCurrentTheme() {
 }
 function ApplyTheme(theme) {
 	RestoreStateOfGroupsToolbar();
-	// I have no idea what is going on in latest build, but why top position for various things is different in firefox?????
-	if (browserId == "F") {
-		if (theme.TabsSizeSetNumber > 1) {
-			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-		}
-	}
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
 	if (theme.ToolbarShow) {
