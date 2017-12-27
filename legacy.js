@@ -251,3 +251,99 @@ function FirefoxLoadV100(retry) {
 		}
 	});
 }
+
+
+function ConvertLegacyStorage() {
+	if (localStorage.getItem("current_theme") != null || localStorage.getItem("preferences") != null || localStorage.getItem("tabs") != null || localStorage.getItem("windows") != null) {
+		let current_theme = "";
+		if (localStorage.getItem("current_theme") != null) {
+			current_theme = localStorage["current_theme"];
+		}
+		let LSthemes = [];
+		if (localStorage.getItem("themes") != null) {
+			LSthemes = LoadData("themes", []);
+		}
+		SLThemes = {};
+		LSthemes.forEach(function(themeName) {
+			let them = LoadData("theme"+themeName, {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
+			SLThemes[themeName] = them;
+		});
+
+		let LSpreferences = Object.assign({}, DefaultPreferences);
+		if (localStorage.getItem("preferences") != null) {
+			LSpreferences = LoadData("preferences", {});
+		}
+
+		if (browserId != "F") {
+			let LStabs = {};
+			if (localStorage.getItem("tabs") != null) {
+				LStabs = LoadData("tabs", {});
+			}
+			let LSwindows = {};
+			if (localStorage.getItem("windows") != null) {
+				LSwindows = LoadData("windows", {});
+			}
+			let LStabs_BAK1 = {};
+			if (localStorage.getItem("tabs_BAK1") != null) {
+				LStabs_BAK1 = LoadData("tabs_BAK1", {});
+			}
+			let LStabs_BAK2 = {};
+			if (localStorage.getItem("tabs_BAK2") != null) {
+				LStabs_BAK2 = LoadData("tabs_BAK2", {});
+			}
+			let LStabs_BAK3 = {};
+			if (localStorage.getItem("tabs_BAK3") != null) {
+				LStabs_BAK3 = LoadData("tabs_BAK3", {});
+			}
+
+			let LSwindows_BAK1 = {};
+			if (localStorage.getItem("windows_BAK1") != null) {
+				LSwindows_BAK1 = LoadData("windows_BAK1", {});
+			}
+			let LSwindows_BAK2 = {};
+			if (localStorage.getItem("windows_BAK2") != null) {
+				LSwindows_BAK2 = LoadData("windows_BAK2", {});
+			}
+			let LSwindows_BAK3 = {};
+			if (localStorage.getItem("windows_BAK3") != null) {
+				LSwindows_BAK3 = LoadData("windows_BAK3", {});
+			}
+			
+			
+			let LSt_count = 0;
+			if (localStorage.getItem("t_count") != null) {
+				LSt_count = LoadData("t_count", {});
+			}
+			let LSw_count = 0;
+			if (localStorage.getItem("w_count") != null) {
+				LSw_count = LoadData("w_count", {});
+			}
+			chrome.storage.local.set({tabs: LStabs});
+			chrome.storage.local.set({windows: LSwindows});
+			chrome.storage.local.set({tabs_BAK1: LStabs_BAK1});
+			chrome.storage.local.set({tabs_BAK2: LStabs_BAK2});
+			chrome.storage.local.set({tabs_BAK3: LStabs_BAK3});
+
+			chrome.storage.local.set({windows_BAK1: LSwindows_BAK1});
+			chrome.storage.local.set({windows_BAK2: LSwindows_BAK2});
+			chrome.storage.local.set({windows_BAK3: LSwindows_BAK3});
+			chrome.storage.local.set({t_count: LSt_count});
+			chrome.storage.local.set({w_count: LSw_count});
+		}
+		chrome.storage.local.set({preferences: LSpreferences});
+		chrome.storage.local.set({current_theme: current_theme});
+		chrome.storage.local.set({themes: SLThemes});
+		localStorage.clear();
+		window.location.reload();
+	}
+}
+
+function LoadData(KeyName, ExpectReturnDefaultType) {
+	var data = ExpectReturnDefaultType;
+	try {
+		data = JSON.parse(localStorage[KeyName]);
+		return data;
+	} catch(e) {
+		return ExpectReturnDefaultType;
+	}
+}

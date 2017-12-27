@@ -14,14 +14,11 @@ function ChromeLoadTabs(retry) {
 		chrome.storage.local.get(null, function(storage) {
 			var refTabs = {};
 			var tabs_matched = 0;
-			
 			// load tabs and windows from storage.local
 			var w_count = storage.w_count ? storage.w_count : 0;
 			var t_count = storage.t_count ? storage.t_count : 0;
-		
 			var LoadedWindows = storage.windows ? storage.windows : [];
 			var LoadedTabs = storage.tabs ? storage.tabs : [];
-			
 			// if loaded tabs mismatch by 50%, then try to load back
 			if (LoadedTabs.length < t_count*0.5 || retry > 0) {
 				LoadedTabs = storage["tabs_BAK"+retry] ? storage["tabs_BAK"+retry] : [];
@@ -30,7 +27,6 @@ function ChromeLoadTabs(retry) {
 			if (LoadedWindows.length < w_count || retry > 0) {
 				LoadedWindows =  storage["windows_BAK"+retry] ? storage["windows_BAK"+retry] : [];
 			}
-			
 			// CACHED COUNTS
 			var WinCount = w.length;
 			var LoadedWinCount = LoadedWindows.length;
@@ -62,10 +58,8 @@ function ChromeLoadTabs(retry) {
 					ChromeHashURL(w[wIndex].tabs[tabIndex]);
 				}
 			}
-			// compare saved tabs from storage to current session tabs, but can be skipped if set in options
-			if (opt.skip_load == false && LoadedTabs.length > 0) {
-				// match loaded tabs
-				for (var wIndex = 0; wIndex < WinCount; wIndex++) {
+			if (opt.skip_load == false && LoadedTabs.length > 0) { // compare saved tabs from storage to current session tabs, but can be skipped if set in options
+				for (var wIndex = 0; wIndex < WinCount; wIndex++) { // match loaded tabs
 					var TabsCount = w[wIndex].tabs.length;
 					for (var tabIndex = 0; tabIndex < TabsCount; tabIndex++) {
 						for (var LtabIndex = 0; LtabIndex < LoadedTabsCount; LtabIndex++) {
@@ -107,7 +101,9 @@ function ChromeLoadTabs(retry) {
 				ChromeAutoSaveData(3, 1800000);
 				ChromeListeners();
 			} else {
-				setTimeout(function() {ChromeLoadTabs(retry+1);}, 2000);
+				setTimeout(function() {
+					ChromeLoadTabs(retry+1);
+				}, 2000);
 			}
 		});
 	});
@@ -116,7 +112,9 @@ function ChromeLoadTabs(retry) {
 // Another reason is that Object does not preserve order in chrome, I've been told that in Firefox it is. But I can't trust that.
 async function ChromeAutoSaveData(BAK, LoopTimer) {
 	setInterval(function() {
-		if (schedule_save > 1 || BAK > 0) {schedule_save = 1;}
+		if (schedule_save > 1 || BAK > 0) {
+			schedule_save = 1;
+		}
 		if (running && schedule_save > 0 && Object.keys(tabs).length > 1) {
 			chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 				var WinCount = w.length;
@@ -124,17 +122,14 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 				var counter = 0;
 				var Windows = [];
 				var Tabs = [];
-
 				for (var wIndex = 0; wIndex < WinCount; wIndex++) {
 					t_count += w[wIndex].tabs.length;
 				}
-
 				for (var wIndex = 0; wIndex < WinCount; wIndex++) {
 					let winId = w[wIndex].id;
 					if (windows[winId] != undefined && windows[winId].group_bar != undefined && windows[winId].search_filter != undefined && windows[winId].active_shelf != undefined && windows[winId].active_group != undefined && windows[winId].groups != undefined && windows[winId].folders != undefined) {
 						Windows.push({url1: w[wIndex].tabs[0].url, url2: w[wIndex].tabs[w[wIndex].tabs.length-1].url, group_bar: windows[winId].group_bar, search_filter: windows[winId].search_filter, active_shelf: windows[winId].active_shelf, active_group: windows[winId].active_group, groups: windows[winId].groups, folders: windows[winId].folders});
 					}
-
 					let TabsCount = w[wIndex].tabs.length;
 					for (var tabIndex = 0; tabIndex < TabsCount; tabIndex++) {
 						let tabId = w[wIndex].tabs[tabIndex].id;
@@ -173,17 +168,16 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 		}
 	}, LoopTimer);
 }
-function ChromeHashURL(tab){
+function ChromeHashURL(tab) {
 	if (tabs[tab.id] == undefined) {
 		tabs[tab.id] = {hash: 0, parent: tab.pinned ? "pin_list" : "tab_list", index: tab.index, expand: "n"};
 	}
 	var hash = 0;
-	for (var charIndex = 0; charIndex < tab.url.length; charIndex++){
+	for (var charIndex = 0; charIndex < tab.url.length; charIndex++) {
 		hash += tab.url.charCodeAt(charIndex);
 	}
 	tabs[tab.id].hash = hash;
 }
-
 function ReplaceParents(oldTabId, newTabId) {
 	for (var tabId in tabs) {
 		if (tabs[tabId].parent == oldTabId) {
@@ -191,33 +185,27 @@ function ReplaceParents(oldTabId, newTabId) {
 		}
 	}
 }
-
-// start all listeners
-function ChromeListeners() {
+function ChromeListeners() { // start all listeners
 	chrome.tabs.onCreated.addListener(function(tab) {
 		ChromeHashURL(tab);
 		chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id});
 		schedule_save++;
 	});
-	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 		setTimeout(function() { chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId}); },5);
 		delete tabs[tabId];
 		schedule_save++;
 	});
-	
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
 		chrome.tabs.get(tabId, function(tab) {
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tabId, ParentId: tabs[tabId].parent});
 		});
 		schedule_save++;
 	});
-
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
 		schedule_save++;
 	});
-	
 	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 		if (tabs[tabId] == undefined || changeInfo.url != undefined) {
 			ChromeHashURL(tab);
@@ -233,11 +221,9 @@ function ChromeListeners() {
 		}
 		chrome.runtime.sendMessage({command: "tab_updated", windowId: tab.windowId, tab: tab, tabId: tabId, changeInfo: changeInfo});
 	});
-	
 	chrome.tabs.onMoved.addListener(function(tabId, moveInfo) {
 		schedule_save++;
 	});
-	
 	chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
 		chrome.tabs.get(addedTabId, function(tab) {
 			if (addedTabId == removedTabId) {
@@ -256,26 +242,21 @@ function ChromeListeners() {
 			schedule_save++;
 		});
 	});
-	
 	chrome.tabs.onActivated.addListener(function(activeInfo) {
 		chrome.runtime.sendMessage({command: "tab_activated", windowId: activeInfo.windowId, tabId: activeInfo.tabId});
 	});
-	
 	chrome.windows.onCreated.addListener(function(window) {
 		windows[window.id] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 		schedule_save++;
 	});
-	
 	chrome.windows.onRemoved.addListener(function(windowId) {
 		delete windows[windowId];
 		schedule_save++;
 	});
-	
 	chrome.runtime.onSuspend.addListener(function() {
 		running = false;
 	});
 }	
-	
 function ChromeMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		switch(message.command) {

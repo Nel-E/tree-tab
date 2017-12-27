@@ -4,7 +4,7 @@
 
 // **********         CHROME EVENTS         ***************
 
-function StartChromeListeners(){
+function StartChromeListeners() {
 	if (browserId == "F") {
 		browser.browserAction.onClicked.addListener(function(tab) {
 			if (tab.windowId == CurrentWindowId) {
@@ -12,7 +12,6 @@ function StartChromeListeners(){
 			}
 		});
 	}
-	
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "backup_available") {
 			$("#button_load_bak"+message.bak).removeClass("disabled");
@@ -20,14 +19,21 @@ function StartChromeListeners(){
 		if (message.command == "drag_drop") {
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
-			DragAndDrop.SelectedTabsIds = message.SelectedTabsIds;
-			// DragAndDrop.Folders = Object.assign({}, message.Folders);
-			DragAndDrop.TabsIds = message.TabsIds;
-			DragAndDrop.Parents = message.Parents;
 			DragAndDrop.Depth = message.Depth;
+			DragAndDrop.Folders = Object.assign({}, message.Folders);
+			DragAndDrop.FoldersSelected = message.FoldersSelected;
+			DragAndDrop.TabsIds = message.TabsIds;
+			DragAndDrop.TabsIdsParents = message.TabsIdsParents;
+			DragAndDrop.TabsIdsSelected = message.TabsIdsSelected;
 		}
 		if (message.command == "dropped") {
 			DragAndDrop.DroppedToWindowId = message.DroppedToWindowId;
+			if (Object.keys(DragAndDrop.Folders).length > 0 && message.DroppedToWindowId != CurrentWindowId) {
+				for (var folder in DragAndDrop.Folders)
+				{
+					RemoveFolder(DragAndDrop.Folders[folder].id);
+				}
+			}
 		}
 		if (message.command == "reload_sidebar") {
 			window.location.reload();
@@ -51,15 +57,12 @@ function StartChromeListeners(){
 		}
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {
-				case "tab_created":
-					// if set to treat unparented tabs as active tab's child
-					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $(".active_tab:visible")[0]) {
-						message.tab.openerTabId = $(".active_tab:visible")[0].id;
+				case "tab_created": // if set to treat unparented tabs as active tab's child
+					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $("#"+active_group+" .active_tab")[0]) {
+						message.tab.openerTabId = $("#"+active_group+" .active_tab")[0].id;
 					}
-					// child case
-					if (message.tab.openerTabId) {
-						// append to tree
-						if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length < opt.max_tree_depth)) {
+					if (message.tab.openerTabId) { // child case
+						if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length < opt.max_tree_depth)) { // append to tree
 							if (opt.append_child_tab == "top") {
 								AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: false, Scroll: true });
 							}
@@ -67,8 +70,7 @@ function StartChromeListeners(){
 								AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: true, Scroll: true });
 							}
 						}
-						// if reached depth limit of the tree
-						if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) {
+						if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) { // if reached depth limit of the tree
 							if (opt.append_child_tab_after_limit == "after") {
 								AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: true, Scroll: true });
 							}
@@ -79,8 +81,7 @@ function StartChromeListeners(){
 								AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: true, Scroll: true });
 							}
 						}
-						// place tabs flat, (should I merge it with orphans case?)
-						if (opt.max_tree_depth == 0) {
+						if (opt.max_tree_depth == 0) { // place tabs flat, (should I merge it with orphans case?)
 							if (opt.append_child_tab_after_limit == "after") {
 								AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: false, Scroll: true });
 							}
@@ -91,10 +92,9 @@ function StartChromeListeners(){
 								AppendTab({ tab: message.tab, Append: true, Scroll: true });
 							}
 						}
-					// orphan case
-					} else {
+					} else { // orphan case
 						if (opt.append_orphan_tab == "after_active") {
-							AppendTab({ tab: message.tab, InsertAfterId: $(".active_tab:visible")[0] ? $(".active_tab:visible")[0].id : undefined, Append: false });
+							AppendTab({ tab: message.tab, InsertAfterId: $("#"+active_group+" .active_tab")[0] ? $("#"+active_group+" .active_tab")[0].id : undefined, Append: false });
 						}
 						if (opt.append_orphan_tab == "top") {
 							AppendTab({ tab: message.tab, Append: false });
@@ -112,7 +112,7 @@ function StartChromeListeners(){
 					RefreshCounters();
 				break;
 				case "tab_attached":
-					AppendTab({ tab: message.tab, ParentId: message.ParentId, Append: true});
+					AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true});
 					RefreshGUI();
 				break;
 				case "tab_detached":
@@ -132,7 +132,9 @@ function StartChromeListeners(){
 						}
 					}
 					RemoveTabFromList(message.tabId);
-					setTimeout(function() { schedule_update_data++; },300);
+					setTimeout(function() {
+						schedule_update_data++;
+					}, 300);
 					RefreshGUI();
 				break;
 				case "tab_removed":
@@ -153,12 +155,16 @@ function StartChromeListeners(){
 					}
 					RemoveTabFromList(message.tabId);
 					RefreshExpandStates();
-					setTimeout(function() { schedule_update_data++; },300);
+					setTimeout(function() {
+						schedule_update_data++;
+					}, 300);
 					RefreshGUI();
 					RefreshCounters();
 				break;
 				case "tab_activated":
-					setTimeout(function() { SetActiveTab(message.tabId); },100);
+					setTimeout(function() {
+						SetActiveTab(message.tabId);
+					}, 200);
 				break;
 				case "tab_attention":
 					SetAttentionIcon(message.tabId);
@@ -167,12 +173,12 @@ function StartChromeListeners(){
 					if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
 						setTimeout(function() {
 							GetFaviconAndTitle(message.tabId, true);
-						},100);
+						}, 100);
 					}
 					if (message.changeInfo.title != undefined) {
 						setTimeout(function() {
 							GetFaviconAndTitle(message.tabId, true);
-						},1000);
+						}, 1000);
 					}
 					if (message.changeInfo.audible != undefined || message.changeInfo.mutedInfo != undefined) {
 						RefreshMediaIcon(message.tabId);
@@ -188,7 +194,7 @@ function StartChromeListeners(){
 						RefreshExpandStates();
 					}
 				break;
-				case "remotely_update_tabs":
+				case "remote_update":
 					RearrangeTreeStructure(message.groups, message.folders, message.tabs);
 					sendResponse(true);
 				break;

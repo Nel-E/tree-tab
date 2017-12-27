@@ -20,8 +20,8 @@ function AppendFolder(param) {
 		var fh = document.createElement("div"); fh.className = opt.always_show_close ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+param.id; fh.draggable = true; fd.appendChild(fh); // HEADER
 		var ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+param.id; fh.appendChild(ex);
 		var ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+param.id; ft.textContent = param.name; fh.appendChild(ft); // TITLE
-		var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.id; fd.appendChild(ch);
 		var cf = document.createElement("div"); cf.className = "children"; cf.id = "cf"+param.id; fd.appendChild(cf);
+		var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.id; fd.appendChild(ch);
 		if (!opt.never_show_close) {
 			var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+param.id; fh.appendChild(cl); // CLOSE BUTTON
 			var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+param.id; cl.appendChild(ci);
@@ -33,7 +33,7 @@ function AppendFolder(param) {
 		}
 	}
 }
-function GenerateNewFolderID(){
+function GenerateNewFolderID() {
 	var newID = "f_"+GenerateRandomID();
 	if ($("#"+newID)[0]) {
 		GenerateNewFolderID();
@@ -81,7 +81,6 @@ function RemoveFolder(FolderId) {
 				let FirstChild = $("#cf"+FolderId).children()[0];
 				$(FirstChild).insertAfter($("#"+FolderId));
 				$("#cf"+FirstChild.id).append($("#cf"+FolderId).children());
-				
 				if ($("#ch"+FolderId).children().length > 0) {
 					$("#ch"+FirstChild.id).append($("#ch"+FolderId).children());
 				}					
@@ -145,6 +144,7 @@ function SetFolderEvents() {
 	$(document).on("click", ".folder_header", function(event) {
 		event.stopPropagation();
 		if (event.button == 0 && !event.shiftKey) {
+			$("#"+active_group+" .tab").removeClass("selected_tab");
 			if (!event.ctrlKey) {
 				$(".selected_folder:not(#"+($(this).parent()[0].id)+")").removeClass("selected_folder");
 			}

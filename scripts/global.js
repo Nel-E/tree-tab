@@ -4,39 +4,29 @@
 
 // **********         GLOBAL VARIABLES FOR BACKGROUND, OPTIONS AND SIDEBAR         ***************
 
-
 var running = false;
 var schedule_save = -999;
 var schedule_update_data = 0;
 var schedule_rearrange_tabs = 0;
 var windows = {};
 var tabs = {};
-
 var MouseHoverOver = "";
-
-
-var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", SelectedTabsIds: [], TabsIds: [], Parents: [], Folders: {}, ComesFromWindowId: 0, DroppedToWindowId: 0, Depth: 0};
-
+var DragAndDrop = {timeout: false, DragNode: undefined, DragNodeClass: "", TabsIds: [], TabsIdsParents: [], TabsIdsSelected: [], Folders: {}, FoldersSelected: [], ComesFromWindowId: 0, DroppedToWindowId: 0, Depth: 0};
 var menuItemId = 0;
 var CurrentWindowId = 0;
 var SearchIndex = 0;
 var active_group = "tab_list";
 var PickColor = "";
-
 var opt = {};
 var browserId = navigator.userAgent.match("Opera") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
-
 var bgtabs = {};
 var bggroups = {};
 var bgfolders = {};
-
 var caption_clear_filter = chrome.i18n.getMessage("caption_clear_filter");
 var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
-
 var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
-
 var DefaultToolbar =
 	'<div id=toolbar_main>'+
 		'<div class=button id=button_new><div class=button_img></div></div>'+
@@ -94,116 +84,11 @@ var DefaultToolbar =
 		'<div class=button id=button_remove_folder><div class=button_img></div></div>'+
 		'<div class=button id=button_edit_folder><div class=button_img></div></div>'+
 	'</div>';
-	
 var DefaultTheme = { "ToolbarShow": true, "ColorsSet": {}, "TabsSizeSetNumber": 2, "theme_name": "untitled", "theme_version": 2, "toolbar": DefaultToolbar, "unused_buttons": "" };
 var DefaultPreferences = { "skip_load": false, "new_open_below": false, "pin_list_multi_row": false, "close_with_MMB": true, "always_show_close": false, "allow_pin_close": false, "append_child_tab": "bottom", "append_child_tab_after_limit": "after", "append_orphan_tab": "bottom", "after_closing_active_tab": "below", "close_other_trees": false, "promote_children": true, "promote_children_in_first_child": true, "open_tree_on_hover": true, "max_tree_depth": -1, "max_tree_drag_drop": true, "never_show_close": false, "switch_with_scroll": false, "syncro_tabbar_tabs_order": true, "show_counter_groups": true, "show_counter_tabs": true, "show_counter_tabs_hints": true, "groups_toolbar_default": true };
 var theme = {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar};
 
-
-
-
 // *******************             GLOBAL FUNCTIONS                 ************************
-
-function ConvertLegacyStorage() {
-	if (
-		localStorage.getItem("current_theme") != null ||
-		localStorage.getItem("preferences") != null ||
-		localStorage.getItem("tabs") != null ||
-		localStorage.getItem("windows") != null
-	) {
-		let current_theme = "";
-		if (localStorage.getItem("current_theme") != null) {
-			current_theme = localStorage["current_theme"];
-		}
-		let LSthemes = [];
-		if (localStorage.getItem("themes") != null) {
-			LSthemes = LoadData("themes", []);
-		}
-		
-		SLThemes = {};
-		LSthemes.forEach(function(themeName) {
-			let them = LoadData("theme"+themeName, {"TabsSizeSetNumber": 2, "ToolbarShow": true, "toolbar": DefaultToolbar});
-			SLThemes[themeName] = them;
-		});
-
-		let LSpreferences = Object.assign({}, DefaultPreferences);
-		if (localStorage.getItem("preferences") != null) {
-			LSpreferences = LoadData("preferences", {});
-		}
-
-		if (browserId != "F") {
-			let LStabs = {};
-			if (localStorage.getItem("tabs") != null) {
-				LStabs = LoadData("tabs", {});
-			}
-			let LSwindows = {};
-			if (localStorage.getItem("windows") != null) {
-				LSwindows = LoadData("windows", {});
-			}
-			let LStabs_BAK1 = {};
-			if (localStorage.getItem("tabs_BAK1") != null) {
-				LStabs_BAK1 = LoadData("tabs_BAK1", {});
-			}
-			let LStabs_BAK2 = {};
-			if (localStorage.getItem("tabs_BAK2") != null) {
-				LStabs_BAK2 = LoadData("tabs_BAK2", {});
-			}
-			let LStabs_BAK3 = {};
-			if (localStorage.getItem("tabs_BAK3") != null) {
-				LStabs_BAK3 = LoadData("tabs_BAK3", {});
-			}
-
-			let LSwindows_BAK1 = {};
-			if (localStorage.getItem("windows_BAK1") != null) {
-				LSwindows_BAK1 = LoadData("windows_BAK1", {});
-			}
-			let LSwindows_BAK2 = {};
-			if (localStorage.getItem("windows_BAK2") != null) {
-				LSwindows_BAK2 = LoadData("windows_BAK2", {});
-			}
-			let LSwindows_BAK3 = {};
-			if (localStorage.getItem("windows_BAK3") != null) {
-				LSwindows_BAK3 = LoadData("windows_BAK3", {});
-			}
-			
-			
-			let LSt_count = 0;
-			if (localStorage.getItem("t_count") != null) {
-				LSt_count = LoadData("t_count", {});
-			}
-			let LSw_count = 0;
-			if (localStorage.getItem("w_count") != null) {
-				LSw_count = LoadData("w_count", {});
-			}
-			chrome.storage.local.set({tabs: LStabs});
-			chrome.storage.local.set({windows: LSwindows});
-			chrome.storage.local.set({tabs_BAK1: LStabs_BAK1});
-			chrome.storage.local.set({tabs_BAK2: LStabs_BAK2});
-			chrome.storage.local.set({tabs_BAK3: LStabs_BAK3});
-
-			chrome.storage.local.set({windows_BAK1: LSwindows_BAK1});
-			chrome.storage.local.set({windows_BAK2: LSwindows_BAK2});
-			chrome.storage.local.set({windows_BAK3: LSwindows_BAK3});
-			chrome.storage.local.set({t_count: LSt_count});
-			chrome.storage.local.set({w_count: LSw_count});
-		}
-		chrome.storage.local.set({preferences: LSpreferences});
-		chrome.storage.local.set({current_theme: current_theme});
-		chrome.storage.local.set({themes: SLThemes});
-		localStorage.clear();
-		window.location.reload();
-	}
-}
-
-function LoadData(KeyName, ExpectReturnDefaultType) {
-	var data = ExpectReturnDefaultType;
-	try {
-		data = JSON.parse(localStorage[KeyName]);
-		return data;
-	} catch(e) {
-		return ExpectReturnDefaultType;
-	}
-}
 
 // generate random id
 function GenerateRandomID(){
@@ -273,7 +158,7 @@ function ApplySizeSet(size){
 		}
 	}
 	if (browserId == "F") {
-		// I have no idea what is going on, but why top position for various things is different in firefox?????
+		// for some reason top position for various things is different in firefox?????
 		if (size > 1) {
 			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
 		} else {

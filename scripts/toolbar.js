@@ -183,16 +183,15 @@ function SetToolbarEvents() {
 	// move tab to new window (detach)
 	$(document).on("mousedown", "#button_move", function(event) {
 		if (event.button == 0) {
-			var tabsArr = [];
-			$(".active_tab:visible, .selected_tab:visible").each(function() {
-				tabsArr.push(parseInt(this.id));
-				if ($("#ch"+this.id).children().length > 0) {
-					$($("#ch"+this.id).find(".tab")).each(function() {
-						tabsArr.push(parseInt(this.id));
-					});
-				}
-			});
-			DetachTabs(tabsArr);
+			if ($("#"+active_group+" .selected_tab")[0]){
+				let detach = GetSelectedTabs();
+				DetachTabs(detach.TabsIds, {});
+			} else {
+				if ($("#"+active_group+" .selected_folder")[0]){
+					let detach = GetSelectedFolders();
+					DetachTabs(detach.TabsIds, detach.Folders);
+				} 
+			}
 		}
 	});
 	// move tab to new window (detach)

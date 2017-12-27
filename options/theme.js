@@ -12,7 +12,6 @@ function LoadTheme(themeName) {
 			current_theme = "";
 		}
 		setTimeout(function() {
-	console.log(SelectedTheme);
 			$("#new_theme_name")[0].value = themeName;
 			setTimeout(function() {
 				ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);

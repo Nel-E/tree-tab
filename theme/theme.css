@@ -736,7 +736,7 @@ div {
 	border:1px solid var(--tab_filtered_selected_active_hover_border);
 	background-color:var(--tab_filtered_selected_active_hover_background);
 }
-.tab.filtered.selected_tab.active>.tab_header_hover>.tab_title{
+.tab.filtered.selected_tab.active_tab>.tab_header_hover>.tab_title{
 	color:var(--tab_filtered_selected_active_hover_title_font_color);
 	font-style:var(--tab_filtered_selected_active_hover_title_font_style);
 	font-weight:var(--tab_filtered_selected_active_hover_title_font_weight);
@@ -994,6 +994,10 @@ div {
 
 /* FOLDERS */
 
+/* .group>.children_folders{
+	background-color: var(--folder_list_background);
+} */
+
 .folder_title {
 	z-index: 5;
 	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
@@ -1161,6 +1165,10 @@ div {
 }
 
 
+
+.children_folders>:last-child {
+	margin-bottom: 1px;
+}
 
 
 

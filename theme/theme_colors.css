@@ -247,8 +247,10 @@ body {
 	--tab_filtered_selected_active_highlighted_search_hover_title_font_style: italic;
 	--tab_filtered_selected_active_highlighted_search_hover_title_font_weight: bold;
 
-
-
+	/* folders */
+	/* --folder_list_background: #fafafa; */
+	
+	
 	--expand_hover_background: #ffa500;
 	--expand_closed_background: #969696;
 	--expand_open_background: #339bf3;

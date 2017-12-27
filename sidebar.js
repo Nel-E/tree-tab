@@ -47,8 +47,6 @@ function Load() {
 					bgfolders = Object.assign({}, response);
 					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
 						bggroups = Object.assign({}, response);
-// bggroups = { tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""},                        g_5MP2aO: {id: "g_5MP2aO", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}, g_8SMRw0: {id: "g_8SMRw0", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}, g_QYa3om: {id: "g_QYa3om", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}       };
-// console.log(bggroups);
 						chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
 							ApplyTheme(response);
 							Initialize();
