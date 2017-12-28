@@ -108,6 +108,10 @@ function StartChromeListeners() {
 					if ($("#"+message.tab.openerTabId).is(".c")) {
 						$("#"+message.tab.openerTabId).removeClass("c").addClass("o");
 					}
+					
+					let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+					ChromeMoveTab(message.tab.id, TTtabsIndexes.indexOf(message.tab.id));
+					
 					RefreshExpandStates();
 					schedule_update_data++;
 					RefreshGUI();
