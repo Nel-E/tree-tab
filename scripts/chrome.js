@@ -13,6 +13,8 @@ function StartChromeListeners() {
 		});
 	}
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+		log("message to sidebar "+CurrentWindowId+": ");
+		log(message);
 		if (message.command == "backup_available") {
 			$("#button_load_bak"+message.bak).removeClass("disabled");
 		}

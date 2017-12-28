@@ -5,6 +5,7 @@
 // **********		  TABS EVENTS		  ***************
 
 function GetSelectedFolders() {
+	log("function: GetSelectedFolders");
 	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
 	$("#"+active_group+" .selected_folder").each(function() {
 		res.FoldersSelected.push(this.id);
@@ -19,9 +20,11 @@ function GetSelectedFolders() {
 			res.TabsIdsParents.push($(this).parent()[0].id);
 		});
 	});
+	log(res);
 	return res;
 }
 function GetSelectedTabs() {
+	log("function: GetSelectedTabs");
 	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
 	$("#"+active_group+" .selected_tab").each(function() {
 		res.TabsIds.push(parseInt(this.id));
@@ -34,6 +37,7 @@ function GetSelectedTabs() {
 			});
 		}
 	});
+	log(res);
 	return res;
 }
 function SetDragAndDropEvents() {

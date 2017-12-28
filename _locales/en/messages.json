@@ -204,6 +204,9 @@
 	"groups_menu_delete": {
 		"message": "Delete group"
 	},
+	"groups_menu_delete_tabs_close": {
+		"message": "Delete group with tabs"
+	},
 
 	"groups_menu_unload": {
 		"message": "Unload group"
@@ -642,6 +645,14 @@
 	
 	"options_clear_data": {
 	 "message": "Sidebar is not loading? Reset! ATTENTION! All options and saved Themes will be lost!"
+	},
+	
+	
+	"options_development": {
+	 "message": "Development"
+	},
+	"options_debug": {
+	 "message": "Debug"
 	},
 	
 	

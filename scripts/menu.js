@@ -87,10 +87,10 @@ function SetMenu() {
 			$(".menu").hide(0);
 			if (this.id == "-tab_list") {
 				menuItemId = "tab_list";
-				$("#groups_menu_rename, #groups_menu_delete").hide();
+				$("#groups_menu_rename, #groups_menu_delete, #groups_menu_delete_tabs_close").hide();
 			} else {
 				menuItemId = (this.id).substr(1);
-				$("#groups_menu_rename, #groups_menu_delete").show();
+				$("#groups_menu_rename, #groups_menu_delete, #groups_menu_delete_tabs_close").show();
 			}
 			var x = event.pageX >= $(window).width() - $("#groups_menu").outerWidth() ? $(window).width() - $("#groups_menu").outerWidth() : event.pageX;
 			var y = event.pageY >= $(window).height() - $("#groups_menu").outerHeight() - 10 ? $(window).height() - $("#groups_menu").outerHeight() - 10 : event.pageY;
@@ -266,7 +266,10 @@ function SetMenu() {
 				ShowGroupEditWindow();
 			break;
 			case "group_delete":
-				GroupRemove(menuItemId);
+				GroupRemove(menuItemId, false);
+			break;
+			case "group_delete_tabs_close":
+				GroupRemove(menuItemId, true);
 			break;
 			case "group_unload":
 				DiscardTabs($("#"+menuItemId+" .tab").map(function() { return parseInt(this.id); }).toArray());

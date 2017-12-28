@@ -294,6 +294,8 @@ function FirefoxListeners() {
 }
 function FirefoxMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+		log("message to background: ");
+		log(message);
 		switch(message.command) {
 			case "reload":
 				window.location.reload();
@@ -367,9 +369,9 @@ function FirefoxMessageListeners() {
 					sendResponse(windows[message.windowId].group_bar);
 				}
 			break;
-			case "console_log":
-				console.log(message.m);
-			break;
+			// case "console_log":
+				// console.log(message.m);
+			// break;
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;

@@ -175,12 +175,7 @@ function RearrangeTreeStructure(groups, folders, tabs) { // groups and folders a
 				$("#ch"+Tab.parent).append($("#"+Tab.id));
 				$("#"+Tab.id).addClass(Tab.expand);
 			}
-			// if (bgtabs[Tab.id]) {
 			bgtabs[Tab.id] = {index: Tab.index, parent: Tab.parent, expand: Tab.expand};
-				// bgtabs[Tab.id].index = Tab.index;
-				// bgtabs[Tab.id].parent = Tab.parent;
-				// bgtabs[Tab.id].expand = Tab.expand;
-			// }
 		});
 		RearrangeTreeTabs(ChromeTabs, bgtabs, true);
 		RearrangeFolders(true);

@@ -88,7 +88,7 @@ function AddNewGroup(p) {
 // remove group, delete tabs if close_tabs is true
 function GroupRemove(groupId, close_tabs) {
 	if (close_tabs) {
-		CloseTabs($("#"+active_group).find(".tab").map(function() {return parseInt(this.id);}).toArray());
+		CloseTabs($("#"+groupId).find(".tab").map(function() {return parseInt(this.id);}).toArray());
 		$("#"+groupId+" .folder").each(function() {
 			RemoveFolder(this.id);
 		});

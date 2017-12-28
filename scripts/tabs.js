@@ -202,18 +202,6 @@ function DetachTabs(tabsIds, Folders) {
 				Parents.push($("#"+tabId).parent().parent()[0].id);
 				Expands.push($("#"+tabId).is(".n") ? "n" : ($("#"+tabId).is(".c") ? "c" : "o"));
 			});
-			let Loop = 0;
-			var Append = setInterval(function() {
-				if (Loop < 30) {
-					chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
-						Loop = 999;
-					});
-				}
-				if (NewTabs.length == tabsIds.length || Loop > 100) {
-					clearInterval(Append);
-				}
-				Loop++;
-			}, 2000);
 			let Ind = 0;
 			tabsIds.forEach(function(tabId) {
 				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
@@ -227,6 +215,23 @@ function DetachTabs(tabsIds, Folders) {
 				});
 			});
 			chrome.tabs.remove(new_window.tabs[0].id, null);
+			let Loop = 0;
+			var Append = setInterval(function() {
+				chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
+					log("Detach - Remote Append and Update Loop, giving half second to attach each tab");
+				});
+				Loop++;
+				if (Loop > tabsIds.length) {
+					clearInterval(Append);
+				}
+			}, 500);
+			
+			if (Object.keys(Folders).length > 0) {
+				for (var folder in Folders) {
+					RemoveFolder(Folders[folder].id);
+				}
+			}			
+			
 		});
 	});
 }
@@ -362,7 +367,7 @@ function ActivateNextTabBeforeClose() {
 function ActivatePrevTabBeforeClose() {
 	log("function: ActivatePrevTabBeforeClose");
 	if ($(".pin.active_tab")[0]) {
-		log("active_group, active_tab is pin");
+		log("active_tab is pin");
 		if ($(".pin.active_tab").prev(".pin")[0]) {
 			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 		} else {
@@ -374,20 +379,26 @@ function ActivatePrevTabBeforeClose() {
 	if ($("#"+active_group+" .tab.active_tab")[0] && $("#"+active_group+" .tab").length > 1) {
 		log("active_group tabs length is > 1");
 		if ($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0]) {
+			log("activating first child, because active tab is root");
 			chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0].id), { active: true });
 		} else {
 			if ($("#"+active_group+" .tab.active_tab").prev(".tab")[0]) {
+				log("activating previous tab on same level");
 				chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").prev(".tab")[0].id), { active: true });
 			} else {
 				if ($("#"+active_group+" .tab.active_tab").next(".tab")[0]) {
+					log("previous tab not found, activating next one on same level");
 					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").next(".tab")[0].id), { active: true });
 				} else {
 					if ($("#"+active_group+" .tab.active_tab").parent().is(".children") && $(".tab.active_tab").parent().parent(".tab")[0]) {
+						log("previous and next tab not found, which means active tab is last on same level, activating parent");
 						chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0].id), { active: true });
 					} else {
 						if ($("#"+active_group+" .tab.active_tab").parents(".tab").last().prev(".tab")[0]) {
+							log("parent tab not found, which means we are on top in hierarchy, activating previous on top level");
 							chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parents(".tab").last().prev(".tab")[0].id), { active: true });
 						} else {
+							log("all attempts to find previous tab failed, lets activate next tab");
 							ActivateNextTab();
 						}
 					}
