@@ -11,37 +11,49 @@ async function UpdateData() {
 		}
 		if (schedule_update_data > 0) {
 			$(".pin").each(function() {
-				chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(this.id), tab: {parent: "pin_list", index: $(this).index(), expand: "n"}});
+				chrome.runtime.sendMessage({
+					command: "update_tab",
+					tabId: parseInt(this.id),
+					tab: {
+						parent: "pin_list",
+						index: $(this).index(),
+						expand: "n"
+					}
+				});
 			});
 			$(".tab").each(function() {
-				chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(this.id), tab: {parent: $(this).parent().parent()[0].id, index: $(this).index(), expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))}});
+				chrome.runtime.sendMessage({
+						command: "update_tab",
+						tabId: parseInt(this.id),
+						tab: {
+							parent: $(this).parent().parent()[0].id,
+							index: $(this).index(),
+							expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
+						}
+				});
 			});
 			schedule_update_data--;
 		}
 	}, 1000);
 }
-async function RearrangeBrowserTabs() {
+function RearrangeBrowserTabs() {
 	setInterval(function() {
-		if (opt.syncro_tabbar_tabs_order) {
-			if (schedule_rearrange_tabs > 1) {
-				schedule_rearrange_tabs = 1;
-			}
-			if (schedule_rearrange_tabs > 0) {
-				let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-				chrome.tabs.query({currentWindow: true}, function(tabs) {
-					for (var tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
-						if (tabIds[tabIndex] != tabs[tabIndex]) {
-							ChromeMoveTab(tabIds[tabIndex], tabIndex);
-						}
-					}			
-					schedule_rearrange_tabs--;
-				});
-			}
+		if (schedule_rearrange_tabs > 0) {
+			schedule_rearrange_tabs--;
+			let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+			RearrangeBrowserTabsLoop(tabIds, tabIds.length-1);
 		}
-	}, 2000);
+	}, 1000);
 }
-async function ChromeMoveTab(tabId, Index) {
-	chrome.tabs.move(tabId, {index: Index});
+async function RearrangeBrowserTabsLoop(tabIds, tabIndex) {
+	if (tabIndex >= 0 && schedule_rearrange_tabs == 0){
+		chrome.tabs.get(tabIds[tabIndex], function(tab1) {
+			if (tabIndex != tab1.index) {
+				chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
+			}
+			RearrangeBrowserTabsLoop( tabIds, (tabIndex-1) );
+		});
+	}
 }
 function RearrangeTreeTabs(tabs, bgtabs, first_loop) {
 	tabs.forEach(function(Tab) {

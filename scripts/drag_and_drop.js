@@ -300,6 +300,9 @@ function SetDragAndDropEvents() {
 		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
 		RearrangeGroupsLists();
 		$(".drop_target").css({"pointer-events": "none"});
+		if (opt.syncro_tabbar_groups_tabs_order) {
+			schedule_rearrange_tabs++;
+		}
 	});
 }
 function DropToTarget(TargetNode) {
@@ -390,9 +393,15 @@ function DropToTarget(TargetNode) {
 	DragAndDrop.timeout = false;
 	RefreshGUI();
 	RefreshCounters();
-	setTimeout(function() {
-		schedule_rearrange_tabs++;
-	}, 10);
+	
+	if (opt.syncro_tabbar_tabs_order) {
+		let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+		chrome.tabs.move(DragAndDrop.TabsIds, {index: TTtabsIndexes.indexOf(DragAndDrop.TabsIds[0])});
+		setTimeout(function() {
+			schedule_rearrange_tabs++;
+		}, 500);
+	}
+
 	setTimeout(function() {
 		schedule_update_data++;
 	}, 500);

@@ -13,11 +13,11 @@ function AppendGroups(Groups) {
 		AppendGroupToList(Groups[group].id, Groups[group].name, Groups[group].font);
 	}
 	setTimeout(function() {
-		RearrangeGroups(0);
+		RearrangeGroupsButtons(0);
 	}, 1000);
 }
 
-function RearrangeGroups(stack) {
+function RearrangeGroupsButtons(stack) {
 	$(".group_button").each(function() {
 		let groupId = (this.id).substr(1);
 		if (bggroups[groupId]) {
@@ -29,19 +29,20 @@ function RearrangeGroups(stack) {
 				}
 			}
 			if ($(this).index() != bggroups[groupId].index && stack < 10) {
-				RearrangeGroups(stack+1);
+				RearrangeGroupsButtons(stack+1);
 			}
 		}
 	});
 }
 function RearrangeGroupsLists() {
+	let scroll = $("#"+active_group).scrollTop();
 	$(".group_button").each(function() {
 		let groupId = (this.id).substr(1);
 		if ($("#"+groupId)[0]) {
 			$("#groups").append($("#"+groupId));
 		}
 	});
-	schedule_update_data++;
+	$("#"+active_group).scrollTop(scroll);
 }
 
 function AppendGroupToList(groupId, group_name, font_color) {
@@ -258,7 +259,7 @@ function RestoreStateOfGroupsToolbar() {
 function SetGroupEvents() {
 			
 	// activate group
-	$(document).on("mousedown", ".group_button", function(event) {
+	$(document).on("click", ".group_button", function(event) {
 		// menuGroupId = (this.id).substr(1);
 		if (event.button == 0) {
 			SetActiveGroup((this.id).substr(1), true, true);

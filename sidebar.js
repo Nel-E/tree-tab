@@ -101,7 +101,9 @@ function Initialize() {
 		SetFolderEvents();
 		SetMenu();
 		SetDragAndDropEvents();
-		RearrangeBrowserTabs();
+		if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
+			RearrangeBrowserTabs();
+		}
 		RestorePinListRowSettings();
 		if (browserId == "V") {
 			VivaldiRefreshMediaIcons();

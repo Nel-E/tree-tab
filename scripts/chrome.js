@@ -64,23 +64,27 @@ function StartChromeListeners() {
 						message.tab.openerTabId = $("#"+active_group+" .active_tab")[0].id;
 					}
 					if (message.tab.openerTabId) { // child case
-						if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length < opt.max_tree_depth)) { // append to tree
-							if (opt.append_child_tab == "top") {
-								AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: false, Scroll: true });
+						if (opt.append_child_tab == "after_active") {
+							AppendTab({ tab: message.tab, InsertAfterId: $("#"+active_group+" .active_tab")[0] ? $("#"+active_group+" .active_tab")[0].id : undefined, Append: false, Scroll: true  });
+						} else {
+							if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length < opt.max_tree_depth)) { // append to tree
+								if (opt.append_child_tab == "top") {
+									AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: false, Scroll: true });
+								}
+								if (opt.append_child_tab == "bottom") {
+									AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: true, Scroll: true });
+								}
 							}
-							if (opt.append_child_tab == "bottom") {
-								AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: true, Scroll: true });
-							}
-						}
-						if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) { // if reached depth limit of the tree
-							if (opt.append_child_tab_after_limit == "after") {
-								AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: true, Scroll: true });
-							}
-							if (opt.append_child_tab_after_limit == "top") {
-								AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: false, Scroll: true });
-							}
-							if (opt.append_child_tab_after_limit == "bottom") {
-								AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: true, Scroll: true });
+							if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) { // if reached depth limit of the tree
+								if (opt.append_child_tab_after_limit == "after") {
+									AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: true, Scroll: true });
+								}
+								if (opt.append_child_tab_after_limit == "top") {
+									AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: false, Scroll: true });
+								}
+								if (opt.append_child_tab_after_limit == "bottom") {
+									AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: true, Scroll: true });
+								}
 							}
 						}
 						if (opt.max_tree_depth == 0) { // place tabs flat, (should I merge it with orphans case?)
@@ -108,10 +112,10 @@ function StartChromeListeners() {
 					if ($("#"+message.tab.openerTabId).is(".c")) {
 						$("#"+message.tab.openerTabId).removeClass("c").addClass("o");
 					}
-					
-					let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-					ChromeMoveTab(message.tab.id, TTtabsIndexes.indexOf(message.tab.id));
-					
+					if (opt.syncro_tabbar_tabs_order) {
+						let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+						chrome.tabs.move(message.tab.id, {index: TTtabsIndexes.indexOf(message.tab.id)});
+					}
 					RefreshExpandStates();
 					schedule_update_data++;
 					RefreshGUI();

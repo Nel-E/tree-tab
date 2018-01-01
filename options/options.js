@@ -240,7 +240,7 @@ function SetEvents() {
 	
 	
 	
-// filter_box_font 
+	// filter_box_font 
 
 	$(document).on("mouseenter", "#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down", function(event) {
 		$("#group_scrollbar, #group_scrollbar_thumb").css({ "background-color": "red" });
@@ -303,7 +303,7 @@ function SetEvents() {
 	});
 
 	// options that need reload
-	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees, #show_counter_tabs, #show_counter_tabs_hints", function(event) {
+	$(document).on("click", "#syncro_tabbar_tabs_order, #allow_pin_close, #switch_with_scroll, #always_show_close, #never_show_close, #close_other_trees, #show_counter_tabs, #show_counter_tabs_hints, #syncro_tabbar_tabs_order, #syncro_tabbar_groups_tabs_order", function(event) {
 		chrome.runtime.sendMessage({command: "reload_sidebar"});
 	});
 	

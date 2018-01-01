@@ -229,49 +229,49 @@
 		"message": " Pinned tabs bar "
 	},
 	"options_pin_list_multi_row": {
-		"message": "multi row list"
+		"message": "Multi row list"
 	},
 	"option_allow_pin_close": {
-		"message": "allow to close pinned tabs"
+		"message": "Allow to close pinned tabs"
 	},
 	"options_tabs": {
 		"message": " Tabs "
 	},
 	"options_syncro_tabbar_tabs_order": {
-		"message": "synchronize browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop, but this option is needed for correct ctrl+tab switching"
+		"message": "Synchronize browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop. This option is needed for correct ctrl+tab switching"
 	},
 	"options_switch_with_scroll": {
-		"message": "switch tabs with mouse wheel"
+		"message": "Switch tabs with mouse wheel"
 	},
 	"options_close_with_MMB": {
-		"message": "close tabs with middle mouse button"
+		"message": "Close tabs with middle mouse button"
 	},
 	"options_always_show_close": {
-		"message": "show close button on all tabs"
+		"message": "Show close button on all tabs"
 	},
 	"options_never_show_close": {
-	 "message": "don't show close button (option above will be ignored)"
+	 "message": "Don't show close button (option above will be ignored)"
 	},
 	"options_close_other_trees": {
-		"message": "automatically collapse other trees on expand"
+		"message": "Automatically collapse other trees on expand"
 	},
 	"options_open_tree_on_hover": {
-		"message": "auto expand collapsed trees when dragging and holding for a second over them"
+		"message": "Auto expand collapsed trees when dragging and holding for a second over them"
 	},
 	"options_promote_children": {
-		"message": "promote children tabs on close, if disabled, when closing the parent of a tree structure, all tabs will be closed (be careful, because undo close tab will not recover the trees structure)"
+		"message": "Promote children tabs on close, if disabled, when closing the parent of a tree structure, all tabs will be closed (be careful, because undo close tab will not recover the trees structure)"
 	},
 
 	"options_promote_children_in_first_child": {
-		"message": "promote first child tab as a parent"
+		"message": "Promote first child tab as a parent"
 	},
 
 	"options_skip_load": {
-		"message": "discard tree structure after browser's restart, this option is for those who don't use browser's session. Basically it disables loading database at startup."
+		"message": "Discard tree structure after browser's restart, this option is for those who don't use browser's session. Basically it disables loading database at startup."
 	},
 
 	"options_append_child_tab": {
-		"message": "append children tabs at the"
+		"message": "Append children tabs at the"
 	},
 	"options_append_child_tab_top": {
 		"message": "top (reverse hierarchy)"
@@ -279,9 +279,12 @@
 	"options_append_child_tab_bottom": {
 		"message": "bottom"
 	},
+	"options_append_child_tab_after_active": {
+		"message": "after active"
+	},
 
 	"options_append_orphan_tab": {
-		"message": "append orphan tabs (new tabs, tabs opened from shortcuts or from bookmarks)"
+		"message": "Append orphan tabs (new tabs, tabs opened from shortcuts or from bookmarks)"
 	},
 	"options_append_orphan_tab_top": {
 		"message": "at the top"
@@ -297,7 +300,7 @@
 	},
 	
 	"options_after_closing_active_tab": {
-		"message": "after closing active tab,"
+		"message": "After closing active tab,"
 	},
 	"options_after_closing_active_tab_go_up": {
 		"message": "activate tab above"
@@ -306,17 +309,17 @@
 		"message": "activate tab below"
 	},
 	"options_after_closing_active_tab_go_up_seek_in_parent": {
-		"message": "activate tab above or activate previous tab if active tab was a root of the tree"
+		"message": "activate tab above if on the same level"
 	},
 	"options_after_closing_active_tab_go_down_seek_in_parent": {
-		"message": "activate tab below or activate next parent tab if active tab was last in the tree"
+		"message": "activate tab below if on the same level"
 	},
 	"options_after_closing_active_tab_go_browser": {
 		"message": "let browser activate tab"
 	},
 
 	"options_append_child_tab_after_limit": {
-		"message": "once reached tree depth, place tab on the same level, but"
+		"message": "Once reached tree depth, place tab on the same level, but"
 	},
 	"options_append_child_tab_after_limit_top": {
 		"message": "at the top"
@@ -328,17 +331,17 @@
 		"message": "at the bottom"
 	},
 	"options_max_tree_drag_drop": {
-		"message": "limit Drag&Drop to tree's maximum depth as well"
+		"message": "Limit Drag&Drop to tree's maximum depth as well"
 	},
 	"options_show_counter_tabs": {
-		"message": "show children tabs count on tab's title"
+		"message": "Show children tabs count on tab's title"
 	},
 	"options_show_counter_tabs_hints": {
-		"message": "show children tabs count in tab's hint"
+		"message": "Show children tabs count in tab's hint"
 	},
 
 	"options_max_tree_depth": {
-		"message": "maximum tree depth: set it to -1 for unlimited branches, 0 for flat tabs placement (no trees), any number above 0 will be its maximum"
+		"message": "Maximum tree depth: set it to -1 for unlimited branches, 0 for flat tabs placement (no trees), any number above 0 will be its maximum"
 	},
 
 
@@ -348,11 +351,14 @@
 	},
 
 	"options_show_counter_groups": {
-		"message": "show tabs count on groups"
+		"message": "Show tabs count on groups"
 	},
 
 	"options_groups_toolbar_default": {
-		"message": "show groups toolbar in new windows"
+		"message": "Show groups toolbar in new windows"
+	},
+	"options_syncro_tabbar_groups_tabs_order": {
+		"message": "Synchronize browser tabs order after drag&drop of the group tabs. Tabs will sort for a long time, if browser has a lot of tabs open. This option is needed for correct ctrl+tab switching"
 	},
 
 
