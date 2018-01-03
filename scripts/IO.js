@@ -56,6 +56,10 @@ function SetIOEvents() {
 			if (event.ctrlKey && event.which == 73) {
 				$(".tab:visible").toggleClass("selected_tab");
 			}
+			// alt+g to toggle group bar
+			if (event.altKey && event.which == 71) {
+				GroupsToolbarToggle();
+			}
 		}
 		RefreshGUI();
 	});

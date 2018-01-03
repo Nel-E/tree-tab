@@ -105,8 +105,6 @@ function LoadV015(retry){
 	});
 }
 
-
-
 function FirefoxLoadV100(retry) {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
 

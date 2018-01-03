@@ -30,10 +30,20 @@ function ShowTabMenu(TabNode, event) {
 		$("#pins_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
 	}
 	if (TabNode.is(".tab")) {
-		if ($("#" + menuItemId).is(".o, .c")) {
-			$("#tabs_menu_close_tree").css({ "display": "" });
+		if (TabNode.is(".o")) {
+			$("#tabs_menu #tabs_menu_expand_this").css({ "display": "none" });
+			$("#tabs_menu #tabs_menu_collapse_this").css({ "display": "" });
+		}
+		if (TabNode.is(".c")) {
+			$("#tabs_menu #tabs_menu_expand_this").css({ "display": "" });
+			$("#tabs_menu #tabs_menu_collapse_this").css({ "display": "none" });
+		}
+		if (TabNode.is(".o, .c")) {
+			$("#tabs_menu #tabs_menu_close_tree").css({ "display": "" });
+			$("#tabs_menu #tabs_menu_collapse_this").next().css({ "display": "" });
 		} else {
-			$("#tabs_menu_close_tree").css({ "display": "none" });
+			$("#tabs_menu_close_tree, #tabs_menu #tabs_menu_expand_this, #tabs_menu #tabs_menu_collapse_this").css({ "display": "none" });
+			$("#tabs_menu_collapse_this").next().css({ "display": "none" });
 		}
 		if ($("#tabs_menu").outerWidth() > $(window).width() - 10) {
 			$("#tabs_menu").css({ "width": $(window).width() - 10 });
@@ -49,6 +59,14 @@ function ShowTabMenu(TabNode, event) {
 function ShowFolderMenu(FolderNode, event) {
 	$(".menu").hide(0);
 	menuItemId = FolderNode[0].id;
+	if (FolderNode.is(".c")) {
+		$("#folders_menu #tabs_menu_expand_this").css({ "display": "" });
+		$("#folders_menu #tabs_menu_collapse_this").css({ "display": "none" });
+	} else {
+		$("#folders_menu #tabs_menu_expand_this").css({ "display": "none" });
+		$("#folders_menu #tabs_menu_collapse_this").css({ "display": "" });
+	}
+	$("#folders_menu #tabs_menu_collapse_this").next().css({ "display": "" });
 	if ($("#folders_menu").outerWidth() > $(window).width() - 10) {
 		$("#folders_menu").css({ "width": $(window).width() - 10 });
 	} else {
@@ -130,9 +148,9 @@ function SetMenu() {
 							});
 						}
 					});
-					DetachTabs(tabsArr);
+					Detach(tabsArr);
 				} else {
-					DetachTabs([menuItemId]);
+					Detach([menuItemId]);
 				}
 			break;
 			case "tab_reload":
@@ -230,12 +248,23 @@ function SetMenu() {
 			case "tab_settings":
 				chrome.tabs.create({ "url": "options.html" });
 			break;
-			case "tab_expand_all":
-				$(".tab.c").addClass("o").removeClass("c");
+			case "expand_all":
+				$("#"+active_group+" .folder.c, #"+active_group+" .tab.c").addClass("o").removeClass("c");
 				schedule_update_data++;
 			break;
-			case "tab_collapse_all":
-				$(".tab.o").addClass("c").removeClass("o");
+			case "collapse_all":
+				$("#"+active_group+" .folder.o, #"+active_group+" .tab.o").addClass("c").removeClass("o");
+				schedule_update_data++;
+			break;
+			case "expand_this":
+				$("#"+menuItemId+".folder").addClass("o").removeClass("c");
+				$("#"+menuItemId+".tab.c").addClass("o").removeClass("c");
+				$("#"+menuItemId+" .folder.c, #"+menuItemId+" .tab.c").addClass("o").removeClass("c");
+				schedule_update_data++;
+			break;
+			case "collapse_this":
+				$("#"+menuItemId+".o").addClass("c").removeClass("o");
+				$("#"+menuItemId+" .folder.o, #"+menuItemId+" .tab.o").addClass("c").removeClass("o");
 				schedule_update_data++;
 			break;
 			case "folder_new":
@@ -273,6 +302,9 @@ function SetMenu() {
 			break;
 			case "group_unload":
 				DiscardTabs($("#"+menuItemId+" .tab").map(function() { return parseInt(this.id); }).toArray());
+			break;
+			case "group_bookmark":
+				BookmarkGroup(menuItemId);
 			break;
 		}
 		$(".menu").hide(0);

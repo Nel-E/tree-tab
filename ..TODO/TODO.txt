@@ -1,49 +1,25 @@
 TOP PRIORITY:
 
-Add a shortcut to open tree tabs sidebar
-
 undo close to restore trees (will work ONLY in firefox)
-
-
-
-Loading data using message
-
 Close tab on Middle mouse click and not On Middle mouse down
-
 Split Pin size in theme
 
-
-add textbox for ungrouped name in options
-
-
-
-
-
 LOW PRIORITY:
-
+add groups scrolling arrows
+add textbox for ungrouped name in options
 option for scrollbar on the left
-folders
-
 unread state?
 
-menu: collapse entire tree
-menu: expand tree
 menu: copy urls of the selected tabs
 menu: bookmark selected tabs/tree
 menu: select all
 menu: invert selection
 menu: close above/close below
-
-options: Customising the context menu
-
+menu: Customising the context menu
 
 click on active to return to previous tab
-
 sort tabs/tree
-
 maybe filter tabs on search
 
-
 make tabs border width configurable, including size 0
-
-make tab spacing confiogurable, including 0 size
+make tab spacing configurable, including 0 size

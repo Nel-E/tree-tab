@@ -14,7 +14,7 @@
 		"19": "icons/16.png",
 		"16": "icons/16.png"
 	},
-	"permissions": [ "tabs", "sessions", "<all_urls>", "storage" ],
+	"permissions": [ "tabs", "sessions", "<all_urls>", "storage", "bookmarks" ],
 
 	"sidebar_action": {
 		"default_icon": {

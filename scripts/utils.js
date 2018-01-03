@@ -4,7 +4,7 @@
 
 
 // sort tabs main function
-function SortTabs(){
+function SortTabs() {
 	if ($(".tab").find(":visible:first")[0]){
 		chrome.tabs.query({windowId: vt.windowId}, function(tabs){
 			tabs.sort(function(tab_a, tab_b){
@@ -36,7 +36,7 @@ function SortTabs(){
 }
 
 // sort tabs sub function
-function SplitUrl(tab){
+function SplitUrl(tab) {
 	var tmp_url = new URL(tab.url);
 	if (tmp_url.protocol != "http:"){
 		tmp_url.protocol == "http:";
@@ -59,8 +59,83 @@ function SplitUrl(tab){
 }
 
 
+
+function BookmarkGroup(GroupId) {
+	let ToolbarId = browserId == "F" ? "toolbar_____" : "1";
+	chrome.bookmarks.get(ToolbarId, function(list) {
+		chrome.bookmarks.search("TreeTabs", function(list) {
+			let TreeTabsId;
+			for (var elem in list) {
+				if (list[elem].parentId == ToolbarId) {
+					TreeTabsId = list[elem].id;
+					break;
+				}
+			}
+			if (TreeTabsId == undefined) {
+				chrome.bookmarks.create({parentId: ToolbarId, title: "TreeTabs"}, function(TreeTabsNew) {
+					TreeTabsId = TreeTabsNew.id;
+				});
+				BookmarkGroup(GroupId);
+				return;
+			} else {
+				chrome.bookmarks.create({parentId: TreeTabsId, title: bggroups[GroupId].name}, function(GroupFolder) {
+					let GroupFolderId = GroupFolder.id;
+					let folders = {};
+					$($("#ch"+GroupId+" .tab").get().reverse()).each(function() {
+						chrome.tabs.get(parseInt(this.id), function(tab){
+							if (tab) {
+								chrome.bookmarks.create({parentId: GroupFolderId, title: tab.title, url: tab.url, index: 0 });
+							}
+						});
+					});					
+					$($("#"+GroupId+" .folder").get().reverse()).each(function() {
+						if (bgfolders[this.id]) {
+							let ttId = this.id;
+							chrome.bookmarks.create({parentId: GroupFolderId, title: bgfolders[ttId].name, index: 0}, function(folderId) {
+								folders[ttId] = {ttid: ttId, id: folderId.id, ttparent: bgfolders[ttId].parent, parent: GroupFolderId};
+								if (ttId == $("#"+GroupId+" .folder")[0].id) {
+									for (var elem in folders) {
+										let FolderTTId = folders[elem].ttid;
+										let BookmarkFolderId = folders[elem].id;
+										let TTParentId = folders[elem].ttparent;
+										if (folders[TTParentId]) {
+											folders[FolderTTId].parent = folders[TTParentId].id;
+										}
+									}
+									setTimeout(function() {
+										for (var elem in folders) {
+											let BookmarkFolderId = folders[elem].id;
+											let BookmarkFolderParentId = folders[elem].parent;
+											chrome.bookmarks.move(BookmarkFolderId, {parentId: BookmarkFolderParentId, index: 0}, function(folderId) {		});
+										}
+									}, 2000);
+									setTimeout(function() {
+										for (var elem in folders) {
+											let FolderTTId = folders[elem].ttid;
+											let BookmarkFolderId = folders[elem].id;
+											$("#ch"+FolderTTId+" .tab").each(function() {
+												chrome.tabs.get(parseInt(this.id), function(tab){
+													if (tab) {
+														chrome.bookmarks.create({parentId: BookmarkFolderId, title: tab.title, url: tab.url, });
+													}
+												});
+											});
+										}
+									}, 8000);
+								}
+							});
+						}
+					});
+				});
+			}
+		});
+	});
+}
+
+
+
 // bookmark main function
-function BookmarkTabs(tabs_array, FolderName){
+function BookmarkTabs(tabs_array, FolderName) {
 	var rootId;
 	var vertical_tabs_folderId;
 	chrome.bookmarks.getRootByName("bookmarks_bar", function(tree){
@@ -93,7 +168,7 @@ function BookmarkTabs(tabs_array, FolderName){
 }
 
 // bookmark sub function
-function SlowlyBookmarkTabs(tabs_array, group_folderId){
+function SlowlyBookmarkTabs(tabs_array, group_folderId) {
 	if (tabs_array.length > 0){
 		chrome.tabs.get(tabs_array[0], function(tab){
 			chrome.bookmarks.search({url: tab.url}, function(list){

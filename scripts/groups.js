@@ -15,6 +15,9 @@ function AppendGroups(Groups) {
 	setTimeout(function() {
 		RearrangeGroupsButtons(0);
 	}, 1000);
+	setTimeout(function() {
+		RearrangeGroupsLists();
+	}, 1500);
 }
 
 function RearrangeGroupsButtons(stack) {
@@ -203,6 +206,9 @@ function ShowGroupEditWindow() {
 		$("#group_edit_name")[0].value = bggroups[menuItemId].name;
 		$("#group_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 8, "left": 22});
 		$("#group_edit_font").css({"background-color": bggroups[menuItemId].font == "" ? "var(--button_icons, #808080)" : "#"+bggroups[menuItemId].font});
+		setTimeout(function(){
+			$("#group_edit_name")[0].select();
+		},5);
 	}
 }
 
@@ -256,6 +262,18 @@ function RestoreStateOfGroupsToolbar() {
 	});
 }
 
+function GroupsToolbarToggle() {
+	$("#toolbar_groups").toggleClass("hidden");
+	if ($("#toolbar_groups").is(".hidden")) {
+		$("#toolbar_groups").css({"width": "0px", "border-right": "none"});
+		chrome.runtime.sendMessage({command: "set_group_bar", group_bar: false, windowId: CurrentWindowId});
+	} else {
+		$("#toolbar_groups").css({"width": "19px", "border-right": "1px solid var(--group_list_borders)"});
+		chrome.runtime.sendMessage({command: "set_group_bar", group_bar: true, windowId: CurrentWindowId});
+	}
+	RefreshGUI();
+}
+
 function SetGroupEvents() {
 			
 	// activate group
@@ -265,23 +283,6 @@ function SetGroupEvents() {
 			SetActiveGroup((this.id).substr(1), true, true);
 		}
 	});
-
-	// show/hide groups toolbar
-	$(document).on("mousedown", "#button_groups_toolbar_hide", function(event) {
-		if (event.button == 0) {
-			$("#toolbar_groups").toggleClass("hidden");
-			if ($("#toolbar_groups").is(".hidden")) {
-				$("#toolbar_groups").css({"width": "0px", "border-right": "none"});
-				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: false, windowId: CurrentWindowId});
-			} else {
-				$("#toolbar_groups").css({"width": "19px", "border-right": "1px solid var(--group_list_borders)"});
-				chrome.runtime.sendMessage({command: "set_group_bar", group_bar: true, windowId: CurrentWindowId});
-			}
-			RefreshGUI();
-		}
-	});
-
-
 	// edit group dialog box
 	$(document).on("mousedown", "#group_edit_discard", function(event) {
 		$(".edit_dialog").hide(0);

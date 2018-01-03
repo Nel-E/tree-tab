@@ -26,7 +26,7 @@ function GetSelectedFolders() {
 function GetSelectedTabs() {
 	log("function: GetSelectedTabs");
 	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
-	$("#"+active_group+" .selected_tab").each(function() {
+	$("#pin_list .selected_tab, #"+active_group+" .selected_tab").each(function() {
 		res.TabsIds.push(parseInt(this.id));
 		res.TabsIdsParents.push($(this).parent()[0].id);
 		res.TabsIdsSelected.push(parseInt(this.id));
@@ -98,7 +98,7 @@ function SetDragAndDropEvents() {
 				$(this).parent().addClass("selected_temporarly").addClass("selected_tab");
 			}
 			$(".selected_tab:not(:visible)").addClass("selected_frozen").removeClass("selected_tab");
-			$("#"+active_group+" .selected_tab").find(".pin, .tab").each(function() {
+			$("#pin_list .selected_tab, #"+active_group+" .selected_tab").each(function() {
 				if ($(this).parents(".pin, .tab").length > DragAndDrop.Depth) {
 					DragAndDrop.Depth = $(this).parents(".pin, .tab").length;
 				}
@@ -217,16 +217,17 @@ function SetDragAndDropEvents() {
 			let target = $(".highlighted_drop_target");
 			let counter = 0;
 			(DragAndDrop.TabsIds).forEach(function(TabId) {
+				log("DragAndDrop: will now move tab: "+TabId);
 				chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-					if (browserId == "F") { // FIRFOX BUG 1398272 - HAVE TO REPLACE ORIGINAL ID
-						if ((DragAndDrop.TabsIdsParents).indexOf("ch"+DragAndDrop.TabsIds[counter]) != -1) {
-							DragAndDrop.TabsIdsParents[(DragAndDrop.TabsIdsParents).indexOf("ch"+DragAndDrop.TabsIds[counter])] = "ch"+MovedTab[0].id;
-						}
-						if ((DragAndDrop.TabsIdsSelected).indexOf(DragAndDrop.TabsIds[counter]) != -1) {
-							DragAndDrop.TabsIdsSelected[(DragAndDrop.TabsIdsSelected).indexOf(DragAndDrop.TabsIds[counter])] = MovedTab[0].id;
-						}
-						DragAndDrop.TabsIds[counter] = MovedTab[0].id;
-					}						
+/* MOZILLA BUG 1398272 */	if (browserId == "F") {
+/* MOZILLA BUG 1398272 */		if ((DragAndDrop.TabsIdsParents).indexOf("ch"+DragAndDrop.TabsIds[counter]) != -1) {
+/* MOZILLA BUG 1398272 */			DragAndDrop.TabsIdsParents[(DragAndDrop.TabsIdsParents).indexOf("ch"+DragAndDrop.TabsIds[counter])] = "ch"+MovedTab[0].id;
+/* MOZILLA BUG 1398272 */		}
+/* MOZILLA BUG 1398272 */		if ((DragAndDrop.TabsIdsSelected).indexOf(DragAndDrop.TabsIds[counter]) != -1) {
+/* MOZILLA BUG 1398272 */			DragAndDrop.TabsIdsSelected[(DragAndDrop.TabsIdsSelected).indexOf(DragAndDrop.TabsIds[counter])] = MovedTab[0].id;
+/* MOZILLA BUG 1398272 */		}
+/* MOZILLA BUG 1398272 */		DragAndDrop.TabsIds[counter] = MovedTab[0].id;
+/* MOZILLA BUG 1398272 */	}						
 					counter++;
 					if (counter == DragAndDrop.TabsIds.length) {
 						setTimeout(function() {
@@ -260,10 +261,10 @@ function SetDragAndDropEvents() {
 					||	(browserId != "F" && (event.pageX < 0 || event.pageX > $(window).width() || event.pageY < 0 || event.pageY > $(window).height()))
 				) {
 					if (DragAndDrop.DragNodeClass == "tab") {
-						DetachTabs(DragAndDrop.TabsIds, {});
+						Detach(DragAndDrop.TabsIds, {});
 					}
 					if (DragAndDrop.DragNodeClass == "folder") {
-						DetachTabs(DragAndDrop.TabsIds, DragAndDrop.Folders);
+						Detach(DragAndDrop.TabsIds, DragAndDrop.Folders);
 						setTimeout(function() {
 							SaveFolders();
 						}, 500);
@@ -394,8 +395,10 @@ function DropToTarget(TargetNode) {
 	RefreshGUI();
 	RefreshCounters();
 	
-	if (opt.syncro_tabbar_tabs_order) {
+	if (opt.syncro_tabbar_tabs_order && DragAndDrop.TabsIds[0] != undefined) {
 		let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+		log("After DropToTarget, will Syncro tabbar tabs order, TabsIds array is:");
+		log(DragAndDrop.TabsIds);
 		chrome.tabs.move(DragAndDrop.TabsIds, {index: TTtabsIndexes.indexOf(DragAndDrop.TabsIds[0])});
 		setTimeout(function() {
 			schedule_rearrange_tabs++;

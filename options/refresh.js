@@ -18,6 +18,14 @@ function RefreshFields() {
 	} else{
 		$("#field_vivaldi").hide();
 	}
+	if ($("#show_toolbar")[0].checked) {
+		$("#field_show_toolbar").css({"height": ""});
+		$("#options_available_buttons, #toolbar, #toolbar_colors").show();
+	} else{
+		$("#field_show_toolbar").css({"height": "6"});
+		$("#options_available_buttons, #toolbar, #toolbar_colors").hide();
+	}
+
 }
 
 function RefreshGUI() {

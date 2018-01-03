@@ -22,10 +22,12 @@ function LoadTheme(themeName) {
 				if (browserId == "F") {
 					$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
 				}
-				SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
-				$("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
-				SelectedTheme.ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
+				$("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
+				// SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
+				// $("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
+				// SelectedTheme.ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
 				$(".on").removeClass("on");
+				RefreshFields();
 				RefreshGUI();
 				chrome.runtime.sendMessage({command: "reload_theme", themeName: "theme"+themeName});
 			}, 200);

@@ -190,7 +190,7 @@ function ReplaceParents(oldTabId, newTabId) {
 		}
 	}
 }
-var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
+/* MOZILLA BUG 1398272 */	var DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};
 // start all listeners
 function FirefoxListeners() {
 	browser.browserAction.onClicked.addListener(function() {
@@ -214,8 +214,8 @@ function FirefoxListeners() {
 		chrome.tabs.get(oldId, function(tab) {
 			ReplaceParents(oldId, tab.id);
 			tabs[tab.id] = tabs[oldId];
-			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[oldId] = tab.id;
-			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tab.id] = oldId;
+/* MOZILLA BUG 1398272 */	DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[oldId] = tab.id;
+/* MOZILLA BUG 1398272 */	DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tab.id] = oldId;
 			browser.sessions.setTabValue( tab.id, "TTdata", tabs[oldId] );
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tab.id, ParentId: tabs[tab.id].parent});
 			schedule_save++;
@@ -225,17 +225,17 @@ function FirefoxListeners() {
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
 		let detachTabId = tabId;
-		if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
-			detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
-			chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
-		}
+/* MOZILLA BUG 1398272 */	if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
+/* MOZILLA BUG 1398272 */		detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];
+/* MOZILLA BUG 1398272 */		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
+/* MOZILLA BUG 1398272 */	}
 	});
 	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 		setTimeout(function() {
-			if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
-				chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
-			}
+/* MOZILLA BUG 1398272 */	if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {
+/* MOZILLA BUG 1398272 */		chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});
+/* MOZILLA BUG 1398272 */	}
 			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		}, 5);
 		// setTimeout(function() {
@@ -244,10 +244,12 @@ function FirefoxListeners() {
 		schedule_save++;
 	});
 	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-		if (changeInfo.pinned == true) {
+		if (changeInfo.pinned == true && tabs[tabId]) {
 			tabs[tabId].parent = "pin_list";
 			tabs[tabId].parent_ttid = "";
 			schedule_save++;
+		} else {
+			AppendTabTTId(tabId);
 		}
 		if (changeInfo.title != undefined && !tab.active) {
 			chrome.runtime.sendMessage({command: "tab_attention", windowId: tab.windowId, tabId: tabId});

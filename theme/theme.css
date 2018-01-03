@@ -1322,7 +1322,8 @@ div {
 	mask-position: center, center;
 }
 
-.close_show>.tab_title {
+.close_show>.tab_title,
+.close_show>.folder_title {
 	padding-right: var(--tab_title_text_padding_right_with_close_button);
 }
 

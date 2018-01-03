@@ -134,6 +134,12 @@
 	"tabs_menu_collapse_all": {
 		"message": "Collapse all trees"
 	},
+	"tabs_menu_expand_this": {
+		"message": "Expand this tree"
+	},
+	"tabs_menu_collapse_this": {
+		"message": "Collapse this tree"
+	},
 	"tabs_menu_new": {
 		"message": "New tab"
 	},
@@ -212,6 +218,10 @@
 		"message": "Unload group"
 	},
 
+	"groups_menu_bookmark": {
+		"message": "Bookmark group"
+	},
+
 
 
 
@@ -250,7 +260,7 @@
 		"message": "Show close button on all tabs"
 	},
 	"options_never_show_close": {
-	 "message": "Don't show close button (option above will be ignored)"
+	 "message": "Never show close button, even on hover (option above will be ignored)"
 	},
 	"options_close_other_trees": {
 		"message": "Automatically collapse other trees on expand"

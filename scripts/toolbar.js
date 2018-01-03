@@ -42,27 +42,29 @@ function RestoreToolbarShelf() {
 		}
 		
 		if (browserId != "F") {
-			let bak1 = LoadData("windows_BAK1", []);
-			let bak2 = LoadData("windows_BAK2", []);
-			let bak3 = LoadData("windows_BAK3", []);
-			
-			if (bak1.length && $(".button#button_load_bak1")[0]) {
-				$(".button#button_load_bak1").removeClass("disabled");
-			} else {
-				$(".button#button_load_bak1").addClass("disabled");
-			}
-			
-			if (bak2.length && $(".button#button_load_bak2")[0]) {
-				$(".button#button_load_bak2").removeClass("disabled");
-			} else {
-				$(".button#button_load_bak2").addClass("disabled");
-			}
-			
-			if (bak3.length && $(".button#button_load_bak3")[0]) {
-				$(".button#button_load_bak3").removeClass("disabled");
-			} else {
-				$(".button#button_load_bak3").addClass("disabled");
-			}
+			chrome.storage.local.get(null, function(storage) {
+				let bak1 = storage["windows_BAK1"] ? storage["windows_BAK1"] : [];
+				let bak2 = storage["windows_BAK2"] ? storage["windows_BAK2"] : [];
+				let bak3 = storage["windows_BAK3"] ? storage["windows_BAK3"] : [];
+				
+				if (bak1.length && $(".button#button_load_bak1")[0]) {
+					$(".button#button_load_bak1").removeClass("disabled");
+				} else {
+					$(".button#button_load_bak1").addClass("disabled");
+				}
+				
+				if (bak2.length && $(".button#button_load_bak2")[0]) {
+					$(".button#button_load_bak2").removeClass("disabled");
+				} else {
+					$(".button#button_load_bak2").addClass("disabled");
+				}
+				
+				if (bak3.length && $(".button#button_load_bak3")[0]) {
+					$(".button#button_load_bak3").removeClass("disabled");
+				} else {
+					$(".button#button_load_bak3").addClass("disabled");
+				}
+			});
 		}
 		
 		RefreshGUI();
@@ -185,11 +187,11 @@ function SetToolbarEvents() {
 		if (event.button == 0) {
 			if ($("#"+active_group+" .selected_tab")[0]){
 				let detach = GetSelectedTabs();
-				DetachTabs(detach.TabsIds, {});
+				Detach(detach.TabsIds, {});
 			} else {
 				if ($("#"+active_group+" .selected_folder")[0]){
 					let detach = GetSelectedFolders();
-					DetachTabs(detach.TabsIds, detach.Folders);
+					Detach(detach.TabsIds, detach.Folders);
 				} 
 			}
 		}
@@ -233,6 +235,12 @@ function SetToolbarEvents() {
 	$(document).on("mousedown", "#button_options", function(event) {
 		if (event.button == 0) {
 			chrome.tabs.create({url: "options.html" });
+		}
+	});
+	// show/hide groups toolbar
+	$(document).on("mousedown", "#button_groups_toolbar_hide", function(event) {
+		if (event.button == 0) {
+			GroupsToolbarToggle();
 		}
 	});
 	// new group

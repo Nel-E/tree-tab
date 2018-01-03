@@ -17,7 +17,7 @@ function AppendFolder(param) {
 		var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+param.id; fd.appendChild(dc); // DROP TARGET CENTER
 		var dt = document.createElement("div"); dt.className = "drop_target drag_entered_top"; dt.id = "du"+param.id; fd.appendChild(dt); // DROP TARGET TOP
 		var db = document.createElement("div"); db.className = "drop_target drag_entered_bottom"; db.id = "dd"+param.id; fd.appendChild(db); // DROP TARGET BOTTOM
-		var fh = document.createElement("div"); fh.className = opt.always_show_close ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+param.id; fh.draggable = true; fd.appendChild(fh); // HEADER
+		var fh = document.createElement("div"); fh.className = (opt.always_show_close && !opt.never_show_close) ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+param.id; fh.draggable = true; fd.appendChild(fh); // HEADER
 		var ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+param.id; fh.appendChild(ex);
 		var ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+param.id; ft.textContent = param.name; fh.appendChild(ft); // TITLE
 		var cf = document.createElement("div"); cf.className = "children"; cf.id = "cf"+param.id; fd.appendChild(cf);
@@ -113,6 +113,9 @@ function ShowRenameFolderDialog(FolderId) {
 	$("#folder_edit_name")[0].value = bgfolders[FolderId].name;
 	$("#folder_edit_name").data("FolderId", FolderId);
 	$("#folder_edit").css({"display": "block", "top": $("#toolbar_groups").offset().top + 8, "left": 22});
+	setTimeout(function(){
+		$("#folder_edit_name")[0].select();
+	},5);
 }
 // when pressed OK in folder popup
 function FolderRenameConfirm() {
@@ -182,13 +185,13 @@ function SetFolderEvents() {
 	});	
 	$(document).on("mouseover", ".folder_header", function(event) {
 		$(this).addClass("folder_header_hover");
-		if (opt.always_show_close == false) {
+		if (opt.never_show_close == false && opt.always_show_close == false) {
 			$(this).addClass("close_show");
 		}
 	});
 	$(document).on("mouseleave", ".folder_header", function(event) {
 		$(this).removeClass("folder_header_hover");
-		if (opt.always_show_close == false) {
+		if (opt.never_show_close == false && opt.always_show_close == false) {
 			$(this).removeClass("close_show");
 		}
 	});
