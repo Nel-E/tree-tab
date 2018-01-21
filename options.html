@@ -3,7 +3,6 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title></title>
-		<link type="text/css" rel="stylesheet" media="all" href="../options/options.css" id="main_body_css" />
 		
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_0.css" id="sizes_preset_0" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_1.css" id="sizes_preset_1" />
@@ -11,15 +10,17 @@
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_3.css" id="sizes_preset_3" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_4.css" id="sizes_preset_4" />
 		
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_0.css" id="tabs_margin_0" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_1.css" id="tabs_margin_1" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_2.css" id="tabs_margin_2" />
+
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_colors.css" id="theme_colors" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme.css" id="theme" />
 
-		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_0.css" id="size_settings_0" />
-		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_1.css" id="size_settings_1" />
-		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_2.css" id="size_settings_2" />
-		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_3.css" id="size_settings_3" />
-		<link type="text/css" rel="stylesheet" media="all" href="../options/theme_size_settings_4.css" id="size_settings_4" />
+		<link type="text/css" rel="stylesheet" media="all" href="../options/options.css" id="main_body_css" />
+
 		<style rel="stylesheet">	#red_higlights_go_here { background-color: transparent; } </style>
+		
 		<script type="text/javascript" src="../lib_jquery/jquery-3.2.1.min.js"></script>
 	</head>
 	<body id="body">
@@ -245,6 +246,8 @@
 			</fieldset>
 
 
+
+
 			<fieldset class="field" id="Tabs" style="position: relative; top: 6px; width:816px; height: 860px;">
 				<legend class="label" id="options_theme_tabs"></legend>
 				
@@ -315,6 +318,14 @@
 					<div class="scroll_group" id="scroll_group_down"></div>
 				</div>
 		
+				<div id="options_tabs_margins_indicator">
+					<form action="" id="tabs_margin_spacing" style="position:absolute; left:4px; top:12px;">
+					  <input type="radio" class="tabs_margin_spacing" id="options_tabs_margin_overlap" name="tabs_margin_spacing" value="overlap"></input>
+					  <input type="radio" class="tabs_margin_spacing" id="options_tabs_margin_0" name="tabs_margin_spacing" value="no_space"></input>
+					  <input type="radio" class="tabs_margin_spacing" id="options_tabs_margin_1" name="tabs_margin_spacing" value="1px_space"></input>
+					</form>
+				</div>
+				
 				<div id="options_tabs_indentation_indicator">
 					<div class="options_button_minus" id="options_tabs_indentation_down"></div>
 					<div class="options_button_plus" id="options_tabs_indentation_up"></div>

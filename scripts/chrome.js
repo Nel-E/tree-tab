@@ -13,12 +13,13 @@ function StartChromeListeners() {
 		});
 	}
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		log("message to sidebar "+CurrentWindowId+": ");
-		log(message);
 		if (message.command == "backup_available") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			$("#button_load_bak"+message.bak).removeClass("disabled");
 		}
 		if (message.command == "drag_drop") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			log(message);
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
 			DragAndDrop.Depth = message.Depth;
@@ -29,6 +30,8 @@ function StartChromeListeners() {
 			DragAndDrop.TabsIdsSelected = message.TabsIdsSelected;
 		}
 		if (message.command == "dropped") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			log(message);
 			DragAndDrop.DroppedToWindowId = message.DroppedToWindowId;
 			if (Object.keys(DragAndDrop.Folders).length > 0 && message.DroppedToWindowId != CurrentWindowId) {
 				for (var folder in DragAndDrop.Folders)
@@ -38,9 +41,12 @@ function StartChromeListeners() {
 			}
 		}
 		if (message.command == "reload_sidebar") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			log(message);
 			window.location.reload();
 		}
 		if (message.command == "reload_options") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
 				opt = Object.assign({}, response);
 				setTimeout(function() {
@@ -49,6 +55,7 @@ function StartChromeListeners() {
 			});
 		}
 		if (message.command == "reload_theme") {
+			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			setTimeout(function() {
 				chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
 					RestorePinListRowSettings();
@@ -60,6 +67,9 @@ function StartChromeListeners() {
 		if (message.windowId == CurrentWindowId) {
 			switch(message.command) {
 				case "tab_created": // if set to treat unparented tabs as active tab's child
+					log("tab_created");
+					log("openerTabId is: "+message.tab.openerTabId);
+					
 					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $("#"+active_group+" .active_tab")[0]) {
 						message.tab.openerTabId = $("#"+active_group+" .active_tab")[0].id;
 					}
@@ -122,6 +132,7 @@ function StartChromeListeners() {
 					RefreshCounters();
 				break;
 				case "tab_attached":
+					log(message);
 					AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true});
 					RefreshGUI();
 				break;

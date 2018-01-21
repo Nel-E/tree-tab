@@ -59,10 +59,15 @@ function GetOptions() {
 	});
 	
 	// get language dropdown menus
-	$(".bg_opt_drop_down_menu").each(function() {
-		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
+	$(".tabs_margin_spacing").each(function() {
+		$(this).attr("title", chrome.i18n.getMessage(this.id));
 	});
-
+	
+	// get language labels for tabs margins
+	$(".tabs_margin_spacing").each(function() {
+		$(this).text = chrome.i18n.getMessage(this.id);
+	});
+	
 	// get language for color pick labels
 	$("#close_x, #close_hover_x").each(function() {
 		$(this).attr("title", chrome.i18n.getMessage(this.id));
@@ -515,12 +520,27 @@ function SetEvents() {
 
 // -------------------------------SIZE ADJUSTMENT-------------------------------------------------------------------------	
 
+	// set tabs margins
+	$(document).on("change", "#tabs_margin_spacing", function(event) {
+		let size = "0";
+		if ($(this)[0]["1"].checked) {
+			size = "1";
+		} else {
+			if ($(this)[0]["2"].checked) {
+				size = "2";
+			}
+		}
+		SelectedTheme["TabsMargins"] = size;
+		ApplyTabsMargins(size);
+		SaveTheme($("#theme_list").val());
+	});
+
+
 	// change tabs size preset(down)
 	$(document).on("click", "#options_tabs_size_down", function(event) {
 		if (SelectedTheme["TabsSizeSetNumber"] > 0) {
 			SelectedTheme["TabsSizeSetNumber"]--;
 			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
 			SaveTheme($("#theme_list").val());
 		}
 	});
@@ -530,7 +550,6 @@ function SetEvents() {
 		if (SelectedTheme["TabsSizeSetNumber"] < 4) {
 			SelectedTheme["TabsSizeSetNumber"]++;
 			ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-			ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
 			SaveTheme($("#theme_list").val());
 		}
 	});

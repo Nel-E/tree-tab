@@ -189,7 +189,12 @@ function SetFolderEvents() {
 			$(this).addClass("close_show");
 		}
 	});
+	// $(document).on("mouseenter", ".folder_header", function(event) {
+		// $(".folder_header").css({ "z-index": "" });
+		// $(this).css({ "z-index": "9999" });
+	// });
 	$(document).on("mouseleave", ".folder_header", function(event) {
+		// $(".folder_header").css({ "z-index": "" });
 		$(this).removeClass("folder_header_hover");
 		if (opt.never_show_close == false && opt.always_show_close == false) {
 			$(this).removeClass("close_show");

@@ -58,6 +58,11 @@ function ImportGroup() {
 					RefsTabs[Tab.id] = new_tab.id;
 					Tab.id = new_tab.id;
 					NewTabs.push(Tab);
+					setTimeout(function() {
+						if ($("#"+new_tab.id)[0]) {
+							$("#ch"+NewGroupId).append($("#"+new_tab.id));
+						}
+					}, 1000);
 				}
 				if (NewTabs.length == LoadedGroup.tabs.length-1) {
 					setTimeout(function() {

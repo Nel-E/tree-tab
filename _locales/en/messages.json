@@ -434,6 +434,16 @@
 
 
 
+	"options_tabs_margin_overlap": {
+		"message": "Tabs spacing:\nOverlap 1px, best for themes with borders"
+	},
+	"options_tabs_margin_0": {
+		"message": "Tabs spacing:\nNo spacing, best for flat look"
+	},
+	"options_tabs_margin_1": {
+		"message": "Tabs spacing:\nDefault, 1px between tabs"
+	},
+
 
 
 

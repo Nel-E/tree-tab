@@ -60,6 +60,10 @@ function SetIOEvents() {
 			if (event.altKey && event.which == 71) {
 				GroupsToolbarToggle();
 			}
+			// esc to deselect tabs
+			if (event.which == 27) {
+				$(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
+			}
 		}
 		RefreshGUI();
 	});

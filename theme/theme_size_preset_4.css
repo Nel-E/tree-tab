@@ -4,7 +4,7 @@ body {
 	--scrollbar_width: 16px;
 	--button_size: 22px;
 	
-	--pin_width: 26px;
+	--pin_width: 27px;
 	--pin_height: 27px;
 
 	--tab_height: 23px;
@@ -39,6 +39,4 @@ body {
 	
 	--tab_mediaicon_height: 12px;
 	--tab_mediaicon_width: 12px;
-	--tab_mediaicon_left: 1px;
-	--tab_mediaicon_bottom: 1px;
 }

@@ -16,13 +16,20 @@ function LoadTheme(themeName) {
 			setTimeout(function() {
 				ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
 				ApplyColorsSet(SelectedTheme["ColorsSet"]);
-				ApplySizeOptionsSet(SelectedTheme["TabsSizeSetNumber"]);
 				$("#toolbar").html(SelectedTheme.toolbar);
 				$("#toolbar_unused_buttons").html(SelectedTheme.unused_buttons);
 				if (browserId == "F") {
 					$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
 				}
 				$("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
+
+				if (SelectedTheme["TabsMargins"]) {
+					$("#tabs_margin_spacing")[0][SelectedTheme["TabsMargins"]].checked = true;
+					ApplyTabsMargins(SelectedTheme["TabsMargins"]);
+				} else {
+					$("#tabs_margin_spacing")[0]["2"].checked = true;
+				}
+
 				// SelectedTheme.ToolbarShow = $("#show_toolbar")[0].checked = SelectedTheme.ToolbarShow;
 				// $("#field_show_toolbar").css({"height": $("#show_toolbar")[0].checked ? "" : "6"});
 				// SelectedTheme.ToolbarShow ? $("#options_available_buttons, #toolbar, #toolbar_colors").show() : $("#options_available_buttons, #toolbar, #toolbar_colors").hide();
@@ -171,15 +178,4 @@ function ImportTheme() {
 			chrome.storage.local.set({current_theme: current_theme});
 		}
 	}	 
-}
-function ApplySizeOptionsSet(size){
-	for (let si = 0; si < document.styleSheets.length; si++) {
-		if ((document.styleSheets[si].ownerNode.id).match("size_settings") != null) {
-			if (document.styleSheets[si].ownerNode.id == "size_settings_"+size) {
-				document.styleSheets.item(si).disabled = false;
-			} else {
-				document.styleSheets.item(si).disabled = true;
-			}
-		}
-	}
 }

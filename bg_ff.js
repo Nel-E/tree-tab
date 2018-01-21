@@ -3,10 +3,7 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 if (browserId == "F") {
-	ConvertLegacyStorage();
 	FirefoxStart(0);
-	LoadPreferences();
-	GetCurrentTheme();
 	FirefoxMessageListeners();
 }
 function FirefoxStart(retry) {
@@ -28,85 +25,102 @@ function FirefoxStart(retry) {
 }
 function FirefoxLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
-		var tt_ids = {};
-		var tabs_matched = 0;
-		var tabs_count = 0;
-		for (var wIndex = 0; wIndex < w.length; wIndex++) {
-			tabs_count += w[wIndex].tabs.length;
-		}
-		// CACHED COUNTS AND STUFF
-		var lastWinId = w[w.length-1].id;
-		var lastTabId = w[w.length-1].tabs[w[w.length-1].tabs.length-1].id;
-		var WinCount = w.length;
-		for (var wIndex = 0; wIndex < WinCount; wIndex++) {
-			let winIndex = wIndex;
-			let winId = w[winIndex].id;
-			let tabsCount = w[winIndex].tabs.length;
-
-			// LOAD TTID FROM FIREFOX GET WINDOW VALUE
-			let win = Promise.resolve(browser.sessions.getWindowValue(winId, "TTdata")).then(function(WindowData) {
-				if (opt.skip_load == false && WindowData != undefined) {
-					windows[winId] = Object.assign({}, WindowData);
-				} else {
-					windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
+		chrome.storage.local.get(null, function(storage) {
+			// LOAD PREFERENCES
+			opt = Object.assign({}, DefaultPreferences);
+			if (storage["preferences"]) {
+				for (var parameter in storage["preferences"]) {
+					if (opt[parameter] != undefined) {
+						opt[parameter] = storage["preferences"][parameter];
+					}
 				}
-				for (var tIndex = 0; tIndex < tabsCount; tIndex++) {
-					let tabIndex = tIndex;
-					let tabId = w[winIndex].tabs[tabIndex].id;
-					let tabPinned = w[winIndex].tabs[tabIndex].pinned;
-					// LOAD TTID FROM FIREFOX GET TAB VALUE
-					let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTdata")).then(function(TabData) {
-						if (opt.skip_load == false && TabData != undefined) {
-							tabs[tabId] = Object.assign({}, TabData);
-							tt_ids[tabs[tabId].ttid] = tabId;
-							tabs_matched++;
-						} else {
-							tabs[tabId] = {ttid: "", parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: "n"};
-						}
-						// IF ON LAST TAB AND LAST WINDOW, START MATCHING LOADED DATA
-						if (tabId == lastTabId && winId == lastWinId) {
-							for (var ThisSessonWinId in windows) {
-								if (windows[ThisSessonWinId].ttid == "") {
-									AppendWinTTId(parseInt(ThisSessonWinId));
-								}
+			}
+			// LOAD THEME
+			if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
+				theme = storage["themes"][storage["current_theme"]];
+			} else {
+				theme = Object.assign({}, DefaultTheme);
+			}
+			// CACHED COUNTS AND STUFF
+			var tt_ids = {};
+			var tabs_matched = 0;
+			var tabs_count = 0;
+			for (var wIndex = 0; wIndex < w.length; wIndex++) {
+				tabs_count += w[wIndex].tabs.length;
+			}
+			var lastWinId = w[w.length-1].id;
+			var lastTabId = w[w.length-1].tabs[w[w.length-1].tabs.length-1].id;
+			var WinCount = w.length;
+			for (var wIndex = 0; wIndex < WinCount; wIndex++) {
+				let winIndex = wIndex;
+				let winId = w[winIndex].id;
+				let tabsCount = w[winIndex].tabs.length;
+
+				// LOAD TTID FROM FIREFOX GET WINDOW VALUE
+				let win = Promise.resolve(browser.sessions.getWindowValue(winId, "TTdata")).then(function(WindowData) {
+					if (opt.skip_load == false && WindowData != undefined) {
+						windows[winId] = Object.assign({}, WindowData);
+					} else {
+						windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", name: caption_ungrouped_group, font: ""}}, folders: {}};
+					}
+					for (var tIndex = 0; tIndex < tabsCount; tIndex++) {
+						let tabIndex = tIndex;
+						let tabId = w[winIndex].tabs[tabIndex].id;
+						let tabPinned = w[winIndex].tabs[tabIndex].pinned;
+						// LOAD TTID FROM FIREFOX GET TAB VALUE
+						let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTdata")).then(function(TabData) {
+							if (opt.skip_load == false && TabData != undefined) {
+								tabs[tabId] = Object.assign({}, TabData);
+								tt_ids[tabs[tabId].ttid] = tabId;
+								tabs_matched++;
+							} else {
+								tabs[tabId] = {ttid: "", parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: "n"};
 							}
-							// OK, DONE WITH WINDOWS, START TABS LOOP
-							for (var ThisSessonTabId in tabs) {
-								if (tabs[ThisSessonTabId].ttid == "") {
-									AppendTabTTId(parseInt(ThisSessonTabId));
-								}
-							}
-							// OK, DONE, NOW REPLACE OLD PARENTS IDS WITH THIS SESSION IDS
-							for (var ThisSessonTabId in tabs) {
-								if (tt_ids[tabs[ThisSessonTabId].parent_ttid] != undefined) {
-									tabs[ThisSessonTabId].parent = tt_ids[tabs[ThisSessonTabId].parent_ttid];
-								}
-							}
-							// OK, SAME THING FOR ACTIVE TABS IN GROUPS
-							for (var ThisSessonWinId in windows) {
-								for (var group in windows[ThisSessonWinId].groups) {
-									if (tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid] != undefined) {
-										windows[ThisSessonWinId].groups[group].active_tab = tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid];
+							// IF ON LAST TAB AND LAST WINDOW, START MATCHING LOADED DATA
+							if (tabId == lastTabId && winId == lastWinId) {
+								for (var ThisSessonWinId in windows) {
+									if (windows[ThisSessonWinId].ttid == "") {
+										AppendWinTTId(parseInt(ThisSessonWinId));
 									}
 								}
+								// OK, DONE WITH WINDOWS, START TABS LOOP
+								for (var ThisSessonTabId in tabs) {
+									if (tabs[ThisSessonTabId].ttid == "") {
+										AppendTabTTId(parseInt(ThisSessonTabId));
+									}
+								}
+								// OK, DONE, NOW REPLACE OLD PARENTS IDS WITH THIS SESSION IDS
+								for (var ThisSessonTabId in tabs) {
+									if (tt_ids[tabs[ThisSessonTabId].parent_ttid] != undefined) {
+										tabs[ThisSessonTabId].parent = tt_ids[tabs[ThisSessonTabId].parent_ttid];
+									}
+								}
+								// OK, SAME THING FOR ACTIVE TABS IN GROUPS
+								for (var ThisSessonWinId in windows) {
+									for (var group in windows[ThisSessonWinId].groups) {
+										if (tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid] != undefined) {
+											windows[ThisSessonWinId].groups[group].active_tab = tt_ids[windows[ThisSessonWinId].groups[group].active_tab_ttid];
+										}
+									}
+								}
+								// will try to find tabs for 3 times
+								if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
+									running = true;
+									// setInterval(function() {
+									FirefoxAutoSaveData();
+									// }, 10000);
+									FirefoxListeners();
+								} else {
+									setTimeout(function() {
+										FirefoxLoadTabs(retry+1);
+									}, 2000);
+								}
 							}
-							// will try to find tabs for 3 times
-							if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
-								running = true;
-								// setInterval(function() {
-								FirefoxAutoSaveData();
-								// }, 10000);
-								FirefoxListeners();
-							} else {
-								setTimeout(function() {
-									FirefoxLoadTabs(retry+1);
-								}, 2000);
-							}
-						}
-					});
-				}
-			});			
-		}
+						});
+					}
+				});			
+			}
+		});
 	});
 }
 // save every second if there is anything to save obviously
@@ -296,8 +310,6 @@ function FirefoxListeners() {
 }
 function FirefoxMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		log("message to background: ");
-		log(message);
 		switch(message.command) {
 			case "reload":
 				window.location.reload();
@@ -318,8 +330,10 @@ function FirefoxMessageListeners() {
 				}
 			break;
 			case "save_folders":
-				windows[message.windowId].folders = Object.assign({}, message.folders);
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].folders = Object.assign({}, message.folders);
+					schedule_save++;
+				}
 			break;
 			case "get_groups":
 				if (windows[message.windowId]) {
@@ -327,17 +341,21 @@ function FirefoxMessageListeners() {
 				}
 			break;
 			case "save_groups":
-				windows[message.windowId].groups = Object.assign({}, message.groups);
-				for (var group in windows[message.windowId].groups) {
-					if (tabs[windows[message.windowId].groups[group].active_tab]) {
-						windows[message.windowId].groups[group].active_tab_ttid = tabs[windows[message.windowId].groups[group].active_tab].ttid;
-					}
-				}				
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].groups = Object.assign({}, message.groups);
+					for (var group in windows[message.windowId].groups) {
+						if (tabs[windows[message.windowId].groups[group].active_tab]) {
+							windows[message.windowId].groups[group].active_tab_ttid = tabs[windows[message.windowId].groups[group].active_tab].ttid;
+						}
+					}				
+					schedule_save++;
+				}
 			break;
 			case "set_active_group":
-				windows[message.windowId].active_group = message.active_group;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].active_group = message.active_group;
+					schedule_save++;
+				}
 			break;
 			case "get_active_group":
 				if (windows[message.windowId]) {
@@ -345,8 +363,10 @@ function FirefoxMessageListeners() {
 				}
 			break;
 			case "set_search_filter":
-				windows[message.windowId].search_filter = message.search_filter;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].search_filter = message.search_filter;
+					schedule_save++;
+				}
 			break;
 			case "get_search_filter":
 				if (windows[message.windowId]) {
@@ -354,8 +374,10 @@ function FirefoxMessageListeners() {
 				}
 			break;			
 			case "set_active_shelf":
-				windows[message.windowId].active_shelf = message.active_shelf;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].active_shelf = message.active_shelf;
+					schedule_save++;
+				}
 			break;
 			case "get_active_shelf":
 				if (windows[message.windowId]) {
@@ -363,17 +385,16 @@ function FirefoxMessageListeners() {
 				}
 			break;
 			case "set_group_bar":
-				windows[message.windowId].group_bar = message.group_bar;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].group_bar = message.group_bar;
+					schedule_save++;
+				}
 			break;
 			case "get_group_bar":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].group_bar);
 				}
 			break;
-			// case "console_log":
-				// console.log(message.m);
-			// break;
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;

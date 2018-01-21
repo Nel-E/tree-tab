@@ -3,18 +3,31 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 if (browserId != "F") {
-	ConvertLegacyStorage();
-	LoadPreferences();
-	GetCurrentTheme();
+	// ConvertLegacyStorage();
 	ChromeLoadTabs(0);
 	ChromeMessageListeners();
 }
 function ChromeLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.storage.local.get(null, function(storage) {
+			// LOAD PREFERENCES
+			opt = Object.assign({}, DefaultPreferences);
+			if (storage["preferences"]) {
+				for (var parameter in storage["preferences"]) {
+					if (opt[parameter] != undefined) {
+						opt[parameter] = storage["preferences"][parameter];
+					}
+				}
+			}
+			// LOAD THEME
+			if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
+				theme = storage["themes"][storage["current_theme"]];
+			} else {
+				theme = Object.assign({}, DefaultTheme);
+			}
+			// load tabs and windows from storage
 			var refTabs = {};
 			var tabs_matched = 0;
-			// load tabs and windows from storage.local
 			var w_count = storage.w_count ? storage.w_count : 0;
 			var t_count = storage.t_count ? storage.t_count : 0;
 			var LoadedWindows = storage.windows ? storage.windows : [];
@@ -259,8 +272,6 @@ function ChromeListeners() { // start all listeners
 }	
 function ChromeMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		log("message to background: ");
-		log(message);
 		switch(message.command) {
 			case "reload":
 				window.location.reload();
@@ -281,8 +292,10 @@ function ChromeMessageListeners() {
 				}
 			break;
 			case "save_folders":
-				windows[message.windowId].folders = Object.assign({}, message.folders);
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].folders = Object.assign({}, message.folders);
+					schedule_save++;
+				}
 			break;
 			case "get_groups":
 				if (windows[message.windowId]) {
@@ -290,12 +303,16 @@ function ChromeMessageListeners() {
 				}
 			break;
 			case "save_groups":
-				windows[message.windowId].groups = Object.assign({}, message.groups);
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].groups = Object.assign({}, message.groups);
+					schedule_save++;
+				}
 			break;
 			case "set_active_group":
-				windows[message.windowId].active_group = message.active_group;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].active_group = message.active_group;
+					schedule_save++;
+				}
 			break;
 			case "get_active_group":
 				if (windows[message.windowId]) {
@@ -303,8 +320,10 @@ function ChromeMessageListeners() {
 				}
 			break;
 			case "set_search_filter":
-				windows[message.windowId].search_filter = message.search_filter;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].search_filter = message.search_filter;
+					schedule_save++;
+				}
 			break;
 			case "get_search_filter":
 				if (windows[message.windowId]) {
@@ -312,8 +331,10 @@ function ChromeMessageListeners() {
 				}
 			break;			
 			case "set_active_shelf":
-				windows[message.windowId].active_shelf = message.active_shelf;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].active_shelf = message.active_shelf;
+					schedule_save++;
+				}
 			break;
 			case "get_active_shelf":
 				if (windows[message.windowId]) {
@@ -321,17 +342,16 @@ function ChromeMessageListeners() {
 				}
 			break;
 			case "set_group_bar":
-				windows[message.windowId].group_bar = message.group_bar;
-				schedule_save++;
+				if (windows[message.windowId]) {
+					windows[message.windowId].group_bar = message.group_bar;
+					schedule_save++;
+				}
 			break;
 			case "get_group_bar":
 				if (windows[message.windowId]) {
 					sendResponse(windows[message.windowId].group_bar);
 				}
 			break;
-			// case "console_log":
-				// console.log(message.m);
-			// break;
 			case "get_browser_tabs":
 				sendResponse(tabs);
 			break;

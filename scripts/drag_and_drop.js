@@ -62,8 +62,12 @@ function SetDragAndDropEvents() {
 	$(document).on("mousedown", ".drop_target", function(event) { // deny drag enter on drop_targets and allow clicks below them
 		$(".drop_target").css({"pointer-events": "none"});
 	});
+	// $(document).on("dragleave", ".tab_header, .folder_header", function(event) { // allow drag enter on drop_targets
+		// $(".tab_header, .folder_header").css({ "z-index": "" });
+	// });
 	$(document).on("dragenter", ".tab_header, .folder_header", function(event) { // allow drag enter on drop_targets
 		$(".drop_target").css({"pointer-events": "all"});
+		// $(this).css({ "z-index": "9999" });
 	});
 	$(document).on("dragstart", ".tab_header, .folder_header", function(event) { // SET DRAG SOURCE
 		event.stopPropagation();
@@ -202,9 +206,11 @@ function SetDragAndDropEvents() {
 		}
 	});
 	$(document).on("drop", "*", function(event) { // DROP
+		log("document drop");
 		chrome.runtime.sendMessage({command: "dropped", DroppedToWindowId: CurrentWindowId});
+		// log(event.originalEvent);
 		event.stopPropagation();
-		if (DragAndDrop.ComesFromWindowId == CurrentWindowId) {
+		if (parseInt(DragAndDrop.ComesFromWindowId) == CurrentWindowId) {
 			DropToTarget($(".highlighted_drop_target"));
 		} else {
 			if (Object.keys(DragAndDrop.Folders).length > 0) {
@@ -255,11 +261,14 @@ function SetDragAndDropEvents() {
 		$(".drop_target").css({"pointer-events": "none"});
 	});
 	$(document).on("dragend", ".tab_header, .folder_header", function(event) { // DETACH TABS
+		log("document dragend");
 		setTimeout(function() {
-			if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
+			log("200ms dragend delay");
+			if (parseInt(DragAndDrop.ComesFromWindowId) == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
 				if (	(browserId == "F" && (event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + $(window).width()) || (event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + $(window).height()))))
 					||	(browserId != "F" && (event.pageX < 0 || event.pageX > $(window).width() || event.pageY < 0 || event.pageY > $(window).height()))
 				) {
+					log("dragged outside sidebar");
 					if (DragAndDrop.DragNodeClass == "tab") {
 						Detach(DragAndDrop.TabsIds, {});
 					}

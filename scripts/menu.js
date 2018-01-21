@@ -306,6 +306,9 @@ function SetMenu() {
 			case "group_bookmark":
 				BookmarkGroup(menuItemId);
 			break;
+			case "tree_bookmark":
+				BookmarkTree(menuItemId);
+			break;
 		}
 		$(".menu").hide(0);
 	});

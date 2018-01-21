@@ -101,6 +101,7 @@ var DefaultTheme = {
 	"ToolbarShow": true,
 	"ColorsSet": {},
 	"TabsSizeSetNumber": 2,
+	"TabsMargins": "2",
 	"theme_name": "untitled",
 	"theme_version": 2,
 	"toolbar": DefaultToolbar,
@@ -108,7 +109,7 @@ var DefaultTheme = {
 };
 var DefaultPreferences = {
 	"skip_load": false,
-	"pin_list_multi_row": false,
+	"pin_list_multi_row": true,
 	"close_with_MMB": true,
 	"always_show_close": false,
 	"never_show_close": false,
@@ -134,6 +135,7 @@ var DefaultPreferences = {
 };
 var theme = {
 	"TabsSizeSetNumber": 2,
+	"TabsMargins": "2",
 	"ToolbarShow": true,
 	"toolbar": DefaultToolbar
 };
@@ -173,6 +175,7 @@ function ApplyTheme(theme) {
 	RestoreStateOfGroupsToolbar();
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
+	ApplyTabsMargins(theme["TabsMargins"]);
 	if (theme.ToolbarShow) {
 		if (theme.theme_version == DefaultTheme.theme_version) {
 			$("#toolbar").html(theme.toolbar);
@@ -220,19 +223,30 @@ function ApplySizeSet(size){
 		}
 	}
 }
-
-function LoadPreferences() {
-	opt = Object.assign({}, DefaultPreferences);
-	chrome.storage.local.get(null, function(items) {
-		if (items["preferences"]) {
-			for (var parameter in items["preferences"]) {
-				if (opt[parameter] != undefined) {
-					opt[parameter] = items["preferences"][parameter];
-				}
+function ApplyTabsMargins(size){
+	for (let si = 0; si < document.styleSheets.length; si++) {
+		if ((document.styleSheets[si].ownerNode.id).match("tabs_margin") != null) {
+			if (document.styleSheets[si].ownerNode.id == "tabs_margin_"+size) {
+				document.styleSheets.item(si).disabled = false;
+			} else {
+				document.styleSheets.item(si).disabled = true;
 			}
 		}
-	});
+	}
 }
+
+// function LoadPreferences() {
+	// opt = Object.assign({}, DefaultPreferences);
+	// chrome.storage.local.get(null, function(items) {
+		// if (items["preferences"]) {
+			// for (var parameter in items["preferences"]) {
+				// if (opt[parameter] != undefined) {
+					// opt[parameter] = items["preferences"][parameter];
+				// }
+			// }
+		// }
+	// });
+// }
 function LoadDefaultPreferences() {
 	opt = Object.assign({}, DefaultPreferences);
 }

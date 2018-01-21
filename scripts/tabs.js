@@ -236,21 +236,22 @@ function Detach(tabsIds, Folders) {
 					if (Ind >= Parents.length-1) {
 						// chrome.tabs.remove(new_window.tabs[0].id, null);
 						let Confirmations = 0;
-						let GiveUpLimit = 600000;
+						let GiveUpLimit = 600;
 						log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
 						var Append = setInterval(function() {
-							chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
-								if (response) {
-									Confirmations++;
+							chrome.windows.get(new_window.id, function(confirm_new_window) {
+								chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
+									if (response) {
+										Confirmations++;
+									}
+								});
+								GiveUpLimit--;
+								log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
+								if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
+									clearInterval(Append);
 								}
 							});
-							GiveUpLimit--;
-							log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
-							if (Confirmations > 2 || GiveUpLimit < 0) {
-								clearInterval(Append);
-							}
 						}, 1000);
-						
 						if (Object.keys(Folders).length > 0) {
 							for (var folder in Folders) {
 								RemoveFolder(Folders[folder].id);
@@ -343,10 +344,10 @@ function ActionBeforeTabsClose() {
 	} else {
 		log("there are more tabs");
 		if (opt.after_closing_active_tab == "above") {
-			ActivatePrevTab();
+			ActivatePrevTab(true);
 		}
 		if (opt.after_closing_active_tab == "below") {
-			ActivateNextTab();
+			ActivateNextTab(true);
 		}
 		if (opt.after_closing_active_tab == "above_seek_in_parent") {
 			ActivatePrevTabBeforeClose();
@@ -434,14 +435,14 @@ function ActivatePrevTabBeforeClose() {
 		}
 	}		
 }
-function ActivateNextTab() {
+function ActivateNextTab(allow_reverse) {
 	log("function: ActivateNextTab");
 	if ($(".pin.active_tab")[0]) {
 		log("active_tab is pin");
 		if ($(".pin.active_tab").next(".pin")[0]) {
 			chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active_tab").prev(".pin")[0]) {
+			if ($(".pin.active_tab").prev(".pin")[0] && allow_reverse) {
 				chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 			}
 		}
@@ -458,20 +459,24 @@ function ActivateNextTab() {
 				} else {
 					if ($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0]) {
 						chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0].id), { active: true });
+					} else {
+						if (allow_reverse) {
+							ActivatePrevTab();
+						}
 					}
 				}
 			}
 		}
 	}
 }
-function ActivatePrevTab() {
+function ActivatePrevTab(allow_reverse) {
 	log("function: ActivatePrevTab");
 	if ($(".pin.active_tab")[0]) {
 		log("active_tab is pin");
 		if ($(".pin.active_tab").prev(".pin")[0]) {
 			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
 		} else {
-			if ($(".pin.active_tab").next(".pin")[0]) {
+			if ($(".pin.active_tab").next(".pin")[0] && allow_reverse) {
 				chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
 			}
 		}
@@ -485,6 +490,10 @@ function ActivatePrevTab() {
 			} else {
 				if ($("#"+active_group+" .tab.tab.active_tab").parent().is(".children") && $("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0]) {
 					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0].id), { active: true });
+				} else {
+					if (allow_reverse) {
+						ActivateNextTab();
+					}
 				}
 			}
 		}
@@ -513,13 +522,25 @@ function SetTabEvents() {
 	$(document).on("mouseleave", ".expand", function(event) {
 		$(".expand.hover").removeClass("hover");
 	});
-	$(document).on("mouseover", ".tab_header", function(event) {
+	$(document).on("mouseenter", ".pin", function(event) {
+		// $(".pin").css({ "z-index": "" });
+		$(this).css({ "z-index": "9999" });
+	});
+	$(document).on("mouseleave", ".pin", function(event) {
+		$(".pin").css({ "z-index": "" });
+	});
+	$(document).on("mouseenter", ".tab_header", function(event) {
 		$(this).addClass("tab_header_hover");
 		if (opt.never_show_close == false && opt.always_show_close == false) {
 			$(this).addClass("close_show");
 		}
 	});
+	// $(document).on("mouseenter", ".tab_header", function(event) {
+		// $(".tab_header").css({ "z-index": "" });
+		// $(this).css({ "z-index": "9999" });
+	// });
 	$(document).on("mouseleave", ".tab_header", function(event) {
+		// $(".tab_header").css({ "z-index": "" });
 		$(this).removeClass("tab_header_hover");
 		if (opt.never_show_close == false && opt.always_show_close == false) {
 			$(this).removeClass("close_show");
@@ -627,4 +648,10 @@ function SetTabEvents() {
 			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
 		}
 	});
+	// $(document).on("mousedown", ".group, #pin_list", function(event) { // DE-SELECT
+	// console.log($(event.target));
+		// if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.pin, .tab, .tab_header, .folder_header, .expand, .close, .close_img, .tab_mediaicon)")) {
+			// $(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
+		// }
+	// });
 }
