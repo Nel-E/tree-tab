@@ -11,25 +11,24 @@ var schedule_rearrange_tabs = 0;
 var schedule_rearrange_reverse = false;
 var windows = {};
 var tabs = {};
-var MouseHoverOver = "";
+var tt_ids = {};
 var DragAndDrop = {
 	timeout: false,
-	DragNode: undefined,
+	// Depth: 0,
+	// DragNode: undefined,
 	DragNodeClass: "",
 	TabsIds: [],
 	TabsIdsParents: [],
 	TabsIdsSelected: [],
 	Folders: {},
 	FoldersSelected: [],
-	ComesFromWindowId: 0,
-	DroppedToWindowId: 0,
-	Depth: 0
+	ComesFromWindowId: undefined,
+	DroppedToWindowId: 0
 };
-var menuItemId = 0;
+var menuItemNode;
 var CurrentWindowId = 0;
 var SearchIndex = 0;
 var active_group = "tab_list";
-var PickColor = "";
 var opt = {};
 var browserId = navigator.userAgent.match("Opera") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
 var bgtabs = {};
@@ -40,7 +39,7 @@ var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
-var DefaultToolbar =
+const DefaultToolbar =
 	'<div id=toolbar_main>'+
 		'<div class=button id=button_new><div class=button_img></div></div>'+
 		'<div class=button id=button_pin><div class=button_img></div></div>'+
@@ -71,8 +70,8 @@ var DefaultToolbar =
 		'<div class=button id=button_settings><div class=button_img></div></div>'+
 		'<div class=button id=button_extensions><div class=button_img></div></div>'
 		: '')+
-		'<div class=button id=button_discard><div class=button_img></div></div>'+
-		'<div class=button id=button_move><div class=button_img></div></div>'+
+		'<div class=button id=button_unload><div class=button_img></div></div>'+
+		'<div class=button id=button_detach><div class=button_img></div></div>'+
 	'</div>'+
 	'<div class=toolbar_shelf id=toolbar_shelf_groups>'+
 		'<div class=button id=button_groups_toolbar_hide><div class=button_img></div></div>'+
@@ -103,7 +102,7 @@ var DefaultTheme = {
 	"TabsSizeSetNumber": 2,
 	"TabsMargins": "2",
 	"theme_name": "untitled",
-	"theme_version": 2,
+	"theme_version": 3,
 	"toolbar": DefaultToolbar,
 	"unused_buttons": ""
 };
@@ -131,6 +130,8 @@ var DefaultPreferences = {
 	"show_counter_tabs_hints": true,
 	"groups_toolbar_default": true,
 	"syncro_tabbar_groups_tabs_order": true,
+	"dbclick_tab": "new_tab",
+	"dbclick_group": "new_tab",
 	"debug": false
 };
 var theme = {
@@ -139,20 +140,16 @@ var theme = {
 	"ToolbarShow": true,
 	"toolbar": DefaultToolbar
 };
-
 // *******************             GLOBAL FUNCTIONS                 ************************
-
 // generate random id
 function GenerateRandomID(){
 	var letters = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","R","S","T","Q","U","V","W","Y","Z","a","b","c","d","e","f","g","h","i","k","l","m","n","o","p","r","s","t","q","u","v","w","y","z"];
 	var random = ""; for (var letter = 0; letter < 6; letter++ ) {random += letters[Math.floor(Math.random() * letters.length)];} return random;
 }
-
 // color in format "rgb(r,g,b)" or simply "r,g,b" (can have spaces, but must contain "," between values)
 function RGBtoHex(color){
 	color = color.replace(/[rgb(]|\)|\s/g, ""); color = color.split(","); return color.map(function(v){ return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
 }
-
 function HexToRGB(hex, alpha){
 	hex = hex.replace('#', '');
 	let r = parseInt(hex.length == 3 ? hex.slice(0, 1).repeat(2) : hex.slice(0, 2), 16);
@@ -160,8 +157,6 @@ function HexToRGB(hex, alpha){
 	let b = parseInt(hex.length == 3 ? hex.slice(2, 3).repeat(2) : hex.slice(4, 6), 16);
 	if (alpha) { return 'rgba('+r+', '+g+', '+b+', '+alpha+')'; } else { return 'rgb('+r+', '+g+', '+b+')'; }
 }
-
-
 function GetCurrentTheme() {
 	chrome.storage.local.get(null, function(items) {
 		if (items["current_theme"] && items["themes"] && items["themes"][items["current_theme"]]) {
@@ -176,21 +171,35 @@ function ApplyTheme(theme) {
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
 	ApplyTabsMargins(theme["TabsMargins"]);
-	if (theme.ToolbarShow) {
+	if (theme.ToolbarShow == true) {
+		SetToolbarEvents(true, false, false, "");
 		if (theme.theme_version == DefaultTheme.theme_version) {
-			$("#toolbar").html(theme.toolbar);
+			document.getElementById("toolbar").innerHTML = theme.toolbar;
 			if (browserId == "F") {
-				$(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").remove();
+				document.querySelectorAll(".button#button_load_bak1, .button#button_load_bak2, .button#button_load_bak3").forEach(function(s){
+					s.parentNode.removeChild(s);
+				});
 			}
 		} else {
-			$("#toolbar").html(DefaultToolbar);
+			document.getElementById("toolbar").innerHTML = DefaultToolbar;
 		}
-	}	
-	RestoreToolbarShelf();
-	RestoreToolbarSearchFilter();
+		SetToolbarEvents(false, true, true, "mousedown");
+		RestoreToolbarShelf();
+		RestoreToolbarSearchFilter();
+	}	else {
+		document.getElementById("toolbar").innerHTML = "";
+		RefreshGUI();
+	}
+	
+	for (var groupId in bggroups) {
+		let groupTitle = document.getElementById("_gte"+groupId);
+		if (groupTitle != null && bggroups[groupId].font == "") {
+			groupTitle.style.color = "";
+		}
+	}
 	Loadi18n();
 }
-/* theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"} */
+// theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"}
 function ApplyColorsSet(ThemeColors){
 	let css_variables = "";
 	for (let css_variable in ThemeColors) {
@@ -203,7 +212,6 @@ function ApplyColorsSet(ThemeColors){
 		}
 	}
 }
-
 function ApplySizeSet(size){
 	for (let si = 0; si < document.styleSheets.length; si++) {
 		if ((document.styleSheets[si].ownerNode.id).match("sizes_preset") != null) {
@@ -234,19 +242,6 @@ function ApplyTabsMargins(size){
 		}
 	}
 }
-
-// function LoadPreferences() {
-	// opt = Object.assign({}, DefaultPreferences);
-	// chrome.storage.local.get(null, function(items) {
-		// if (items["preferences"]) {
-			// for (var parameter in items["preferences"]) {
-				// if (opt[parameter] != undefined) {
-					// opt[parameter] = items["preferences"][parameter];
-				// }
-			// }
-		// }
-	// });
-// }
 function LoadDefaultPreferences() {
 	opt = Object.assign({}, DefaultPreferences);
 }
@@ -265,23 +260,34 @@ function ShowOpenFileDialog(id, extension) {
 	inp.accept = extension;
 	inp.style.display = "none";
 	body.appendChild(inp);
-	$("#"+id).click();
+	inp.click();
+	return inp;
 }
 function SaveFile(filename, data) {
-	let d = JSON.stringify(data);
+	let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
 	let body = document.getElementById("body");
-	let link = document.createElement("a");
-	link.target = "_self";
-	link.download = filename;
-	link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(d);
-	body.appendChild(link);
-	link.click();
-	link.remove();
-}
-
-function log(m) {
-	if (opt.debug) {
-		console.log(m);
+	let savelink = document.createElement("a");
+	savelink.target = "_blank";
+	savelink.style.display = "none";
+	savelink.type = "file";
+	savelink.download = filename;
+	savelink.href = URL.createObjectURL(file);
+	body.appendChild(savelink);
+	savelink.click();
+	if (browserId != "F") {
+		window.open(savelink.href);
 	}
-	// chrome.runtime.sendMessage({command: "console_log", m: m});
+	savelink.parentNode.removeChild(savelink);
+}
+function EmptyDragAndDrop() {
+	DragAndDrop.timeout = false;
+	DragAndDrop.DragNodeClass = "";
+	DragAndDrop.DroppedToWindowId = 0;
+	DragAndDrop.ComesFromWindowId = undefined;
+	// DragAndDrop.Depth = 0;
+	DragAndDrop.TabsIds = [];
+	DragAndDrop.TabsIdsParents = [];
+	DragAndDrop.TabsIdsSelected = [];
+	DragAndDrop.Folders = {};
+	DragAndDrop.FoldersSelected = [];
 }

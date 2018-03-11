@@ -10,41 +10,33 @@ async function UpdateData() {
 			schedule_update_data = 1;
 		}
 		if (schedule_update_data > 0) {
-			$(".pin").each(function() {
-				chrome.runtime.sendMessage({
-					command: "update_tab",
-					tabId: parseInt(this.id),
-					tab: {
-						parent: "pin_list",
-						index: $(this).index(),
-						expand: "n"
-					}
-				});
+			if (opt.debug) console.log("function: update tabs");
+			let pins_data = [];
+			document.querySelectorAll(".pin").forEach(function(pin){
+				pins_data.push({id: pin.id, index: Array.from(pin.parentNode.children).indexOf(pin)});
 			});
-			$(".tab").each(function() {
-				chrome.runtime.sendMessage({
-						command: "update_tab",
-						tabId: parseInt(this.id),
-						tab: {
-							parent: $(this).parent().parent()[0].id,
-							index: $(this).index(),
-							expand: ($(this).is(".n") ? "n" : ($(this).is(".c") ? "c" : "o"))
-						}
-				});
+			let tabs_data = [];
+			document.querySelectorAll(".tab").forEach(function(tab){
+				tabs_data.push({id: tab.id, parent: tab.parentNode.parentNode.id, index: Array.from(tab.parentNode.children).indexOf(tab), expand: (tab.classList.contains("c") ? "c" : (tab.classList.contains("o") ? "o" : ""))});
 			});
+			chrome.runtime.sendMessage({command: "update_all_tabs", pins: pins_data, tabs: tabs_data});
 			schedule_update_data--;
 		}
 	}, 1000);
 }
+
 function RearrangeBrowserTabs() {
 	setInterval(function() {
 		if (schedule_rearrange_tabs > 0) {
 			schedule_rearrange_tabs--;
-			let tabIds = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
+			let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
+				return parseInt(s.id);
+			});
 			RearrangeBrowserTabsLoop(tabIds, tabIds.length-1);
 		}
 	}, 1000);
 }
+
 async function RearrangeBrowserTabsLoop(tabIds, tabIndex) {
 	if (tabIndex >= 0 && schedule_rearrange_tabs == 0){
 		chrome.tabs.get(tabIds[tabIndex], function(tab) {
@@ -55,189 +47,456 @@ async function RearrangeBrowserTabsLoop(tabIds, tabIndex) {
 		});
 	}
 }
+
 function RearrangeTreeTabs(tabs, bgtabs, first_loop) {
 	tabs.forEach(function(Tab) {
-		if (bgtabs[Tab.id] && $("#"+Tab.id)[0] && $("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index)[0]) {
-			if ($("#"+Tab.id).index() > bgtabs[Tab.id].index) {
-				$("#"+Tab.id).insertBefore($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index));
+		let t = document.getElementById(Tab.id);
+		if (bgtabs[Tab.id] && t != null && t.parentNode.childNodes[bgtabs[Tab.id].index]) {
+			let tInd = Array.from(t.parentNode.children).indexOf(t);
+			if (tInd > bgtabs[Tab.id].index) {
+				t.parentNode.childNodes[bgtabs[Tab.id].index].parentNode.insertBefore(t, t.parentNode.childNodes[bgtabs[Tab.id].index]);
 			} else {
-				$("#"+Tab.id).insertAfter($("#"+Tab.id).parent().children().eq(bgtabs[Tab.id].index));
+				if (t.parentNode.childNodes[bgtabs[Tab.id].index].nextSibling != null) {
+					t.parentNode.childNodes[bgtabs[Tab.id].index].parentNode.insertBefore(t, t.parentNode.childNodes[bgtabs[Tab.id].index].nextSibling);
+				} else {
+					t.parentNode.childNodes[bgtabs[Tab.id].index].parentNode.appendChild(t);
+				}				
 			}
-		}
-		if (bgtabs[Tab.id] && $("#"+Tab.id).index() != bgtabs[Tab.id].index && first_loop) {
-			RearrangeTreeTabs(tabs, bgtabs, false);
+			let newtInd = Array.from(t.parentNode.children).indexOf(t);
+			if (bgtabs[Tab.id] && newtInd != bgtabs[Tab.id].index && first_loop) {
+				RearrangeTreeTabs(tabs, bgtabs, false);
+			}
 		}
 	});
 }
-// param - tuple object with paramenters: param.tab - tab object, param.ParentId - Parent tabId, param.InsertAfterId - insert tab after this tabId (on same level),
-// param.Append - if true Appends tab at the end of tree if false or prepends
-function AppendTab(param) {
-	if ($("#"+param.tab.id).length > 0) {
-		GetFaviconAndTitle(param.tab.id, param.addCounter);
+
+function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter) {
+	if (document.getElementById(tab.id) != null) {
+		GetFaviconAndTitle(tab.id, addCounter);
 		return;
 	}	
-	var ClassList = param.tab.pinned ? "pin" : "tab n";
-	if (param.tab.discarded) {
+	var ClassList = tab.pinned ? "pin" : "tab";
+	if (tab.discarded) {
 		ClassList = ClassList + " discarded";
 	}
-	if (param.AdditionalClass) {
-		ClassList = ClassList +" "+ param.AdditionalClass;
+	if (AdditionalClass != false) {
+		ClassList = ClassList +" "+ AdditionalClass;
 	}
-	var tb = document.createElement("div"); tb.className =  ClassList; tb.id = param.tab.id; // TAB
-	var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+param.tab.id; tb.appendChild(dc); // DROP TARGET CENTER
-	var dt = document.createElement("div"); dt.className = "drop_target drag_entered_top"; dt.id = "du"+param.tab.id; tb.appendChild(dt); // DROP TARGET TOP
-	var db = document.createElement("div"); db.className = "drop_target drag_entered_bottom"; db.id = "dd"+param.tab.id; tb.appendChild(db); // DROP TARGET BOTTOM
-	var th = document.createElement("div"); th.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+param.tab.id; th.draggable = true; tb.appendChild(th); // HEADER
-	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+param.tab.id; th.appendChild(ex); // EXPAND ARROW
-	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+param.tab.id; th.appendChild(tt); // TITLE
-	// var tc = document.createElement("div"); tc.className = "tab_counter"; tc.id = "tab_counter"+param.tab.id; th.appendChild(tc); // TABS COUNTER
+	var tb = document.createElement("div"); tb.className =  ClassList; tb.id = tab.id; // TAB
+	var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+tab.id; tb.appendChild(dc); // DROP TARGET CENTER
+	var du = document.createElement("div"); du.className = "drop_target drag_entered_top"; du.id = "du"+tab.id; tb.appendChild(du); // DROP TARGET TOP
+	var dd = document.createElement("div"); dd.className = "drop_target drag_entered_bottom"; dd.id = "dd"+tab.id; tb.appendChild(dd); // DROP TARGET BOTTOM
+	var th = document.createElement("div"); th.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+tab.id; if (SetEvents) {th.draggable = true;} tb.appendChild(th); // HEADER
+	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+tab.id; th.appendChild(ex); // EXPAND ARROW
+	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+tab.id; th.appendChild(tt); // TITLE
 	if (!opt.never_show_close) {
-		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+param.tab.id; th.appendChild(cl); // CLOSE BUTTON
-		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+param.tab.id; cl.appendChild(ci);
+		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+tab.id; th.appendChild(cl); // CLOSE BUTTON
+		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+tab.id; cl.appendChild(ci);
 	}
-	var mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+param.tab.id; th.appendChild(mi);
-	var ch = document.createElement("div"); ch.className = "children"; ch.id = "ch"+param.tab.id; tb.appendChild(ch);
-	if (param.tab.pinned) {
-		param.ParentId = "pin_list";
-	} else {
-		if (param.ParentId == undefined || $("#"+param.ParentId).is(".pin, #pin_list") || $("#"+param.ParentId).length == 0) {
-			param.ParentId = "ch"+active_group;
-		} else {
-			if ($("#ch"+param.ParentId).children().length == 0) {
-				$("#"+param.ParentId).addClass("o").removeClass("n").removeClass("c");
+	var mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+tab.id; th.appendChild(mi);
+	var ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+tab.id; tb.appendChild(ct);
+	
+	if (SetEvents) {
+		ct.onmousedown = function(event) {
+			if (event.target == this) {
+				if (event.which == 1) {
+					DeselectFolders();
+					DeselectTabs();
+				}
+				if (event.which == 3) {
+					ShowFGlobalMenu(event);
+				}
 			}
-			param.ParentId = "ch"+param.ParentId;
+		}
+		ct.ondblclick = function(event) {
+			if (event.target == this) {
+				EventDoubleClickGroup(event, this.parentNode);
+			}
+		}
+		ex.onmousedown = function(event) {
+			if (event.which == 1) {
+				EventTabExpandBox(event);
+			}
+		}
+		ex.onmouseenter = function(event) {
+			this.classList.add("hover");
+		}
+		ex.onmouseleave = function(event) {
+			this.classList.remove("hover");
+		}
+		
+		if (!opt.never_show_close) {
+			cl.onmousedown = function(event) {
+				event.stopImmediatePropagation();
+				if (event.which != 3) {
+					CloseTabs([parseInt(this.parentNode.parentNode.id)]);
+				}
+			}
+			cl.onmouseenter = function(event) {
+				this.classList.add("close_hover");
+			}
+			cl.onmouseleave = function(event) {
+				this.classList.remove("close_hover");
+			}
+		}
+		tb.ondragenter = function(event) {
+			this.childNodes[1].style.zIndex = 99999;
+		}
+
+
+		th.onclick = function(event) {
+			event.stopImmediatePropagation();
+			if (document.getElementById("main_menu").style.top != "-1000px") {
+				HideMenus();
+			} else {
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("expand") == false && event.target.classList.contains("close") == false  && event.target.classList.contains("close_img") == false  && event.target.classList.contains("tab_mediaicon") == false) {
+					DeselectTabs();
+					// SetActiveTab(this.parentNode.id);
+					chrome.tabs.update(parseInt(this.parentNode.id), { active: true });
+				}
+			}
+		}
+		th.ondblclick = function(event) {
+			EventDoubleClickTab(event, this.parentNode);
+		}
+		
+		th.onmousedown = function(event) {
+			event.stopImmediatePropagation();
+			if (event.which == 1) {
+				// SELECT TAB/PIN
+				EventSelectTab(event, this.parentNode);
+			}
+			if (event.which == 2 && opt.close_with_MMB == true) {
+				event.preventDefault();
+				if ((this.parentNode.classList.contains("pin") && opt.allow_pin_close) || this.parentNode.classList.contains("tab")) {
+					CloseTabs([parseInt(this.parentNode.id)]);
+				}
+			}
+			if (event.which == 3) {
+				ShowTabMenu(this.parentNode, event);
+			}
+		}
+
+		th.onmouseover = function(event) {
+			this.classList.add("tab_header_hover");
+			if (opt.never_show_close == false && opt.always_show_close == false) {
+				this.classList.add("close_show");
+			}
+		}
+		th.onmouseleave = function(event) {
+			this.classList.remove("tab_header_hover");
+			if (opt.never_show_close == false && opt.always_show_close == false) {
+				this.classList.remove("close_show");
+			}
+		}
+		th.ondragstart = function(event) { // DRAG START
+			event.stopPropagation();
+			event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+			event.dataTransfer.setData("text/plain", "");
+			event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
+		
+			CleanUpDragClasses();
+			EmptyDragAndDrop();
+			
+			DropTargetsFront(this, true, false);
+
+			if (this.parentNode.classList.contains("selected_tab") == false) {
+				document.querySelectorAll(".selected_tab").forEach(function(s){
+					s.classList.add("selected_frozen");
+					s.classList.remove("selected_tab");
+					s.classList.remove("selected_last");
+				});
+				this.parentNode.classList.add("selected_temporarly");
+				this.parentNode.classList.add("selected_tab");
+			} else {
+				document.querySelectorAll(".group:not(#"+active_group+") .selected_tab").forEach(function(s){
+					s.classList.add("selected_frozen");
+					s.classList.remove("selected_tab");
+					s.classList.remove("selected_last");
+					// if ($(this).parents(".pin, .tab").length > DragAndDrop.Depth) {
+						// DragAndDrop.Depth = $(this).parents(".pin, .tab").length;
+					// }
+				});
+			}
+			let Tabs = GetSelectedTabs();
+			// console.log(Tabs);
+			
+			document.querySelectorAll("[id='"+this.parentNode.id+"'], [id='"+this.parentNode.id+"'] .folder, [id='"+this.parentNode.id+"'] .tab").forEach(function(s){
+				s.classList.add("dragged_tree");
+			});
+			document.querySelectorAll(".selected_tab, .selected_tab .tab, .selected_folder, .selected_folder .folder").forEach(function(s){
+				s.classList.add("dragged_selected");
+				
+				// test_data.push(s.id);
+				
+			});
+
+			// DragAndDrop.Depth = 0;
+			DragAndDrop.TabsIds = Object.assign([], Tabs.TabsIds);
+			DragAndDrop.TabsIdsParents = Object.assign([], Tabs.TabsIdsParents);
+			DragAndDrop.TabsIdsSelected = Object.assign([], Tabs.TabsIdsSelected);
+			DragAndDrop.DragNodeClass = "tab";
+			DragAndDrop.ComesFromWindowId = CurrentWindowId;
+			
+			chrome.runtime.sendMessage({
+				command: "drag_drop",
+				DragNodeClass: DragAndDrop.DragNodeClass,
+				TabsIds: DragAndDrop.TabsIds,
+				TabsIdsParents: DragAndDrop.TabsIdsParents,
+				TabsIdsSelected: DragAndDrop.TabsIdsSelected,
+				ComesFromWindowId: CurrentWindowId,
+				// Depth: DragAndDrop.Depth,
+				Folders: DragAndDrop.Folders,
+				FoldersSelected: DragAndDrop.FoldersSelected
+			});
+		}
+
+		th.ondragenter = function(event) {
+			this.classList.remove("tab_header_hover");
+		}		
+		
+		dc.ondragenter = function(event) {
+			DragAndDrop.timeout = false;
+			setTimeout(function() {
+				DragAndDrop.timeout = true;
+			}, 1000);
+			if (DragAndDrop.DragNodeClass == "tab") {
+				HighlightDragEnterTabToTab(this, 0);
+			}
+		}
+
+		du.ondragenter = function(event) {
+			if (DragAndDrop.DragNodeClass == "tab") {
+				HighlightDragEnterTabToTab(this, 1);
+			}
+		}
+
+		dd.ondragenter = function(event) {
+			if (DragAndDrop.DragNodeClass == "tab") {
+				HighlightDragEnterTabToTab(this, 1);
+			}
+		}
+
+		mi.onmousedown = function(event) {
+			event.stopImmediatePropagation();
+			if (event.which == 1 && (this.parentNode.parentNode.classList.contains("audible") || this.parentNode.parentNode.classList.contains("muted")) ) {
+				chrome.tabs.get(parseInt(this.parentNode.parentNode.id), function(tab) {
+					if (tab) {
+						chrome.tabs.update(tab.id, {muted:!tab.mutedInfo.muted});
+					}
+				});
+			}
 		}
 	}	
-	if (param.Append) {
-		$("#"+param.ParentId).append(tb);
+
+	let parent;
+	if (tab.pinned) {
+		parent = document.getElementById("pin_list");
+	} else {
+		if (ParentId == false || ParentId == undefined || document.getElementById(ParentId) == null || document.querySelector(".pin[id='"+ParentId+"']") != null || ParentId == "pin_list") {
+			parent = document.getElementById("ct"+active_group);
+		} else {
+			parent = document.getElementById("ct"+ParentId);
+			if (parent.children.length == 0) {
+				parent.parentNode.classList.add("o");
+				parent.parentNode.classList.remove("c");
+			}
+		}
+	}	
+	if (Append && parent) {
+		parent.appendChild(tb);
 	}
-	if (!param.Append) {
-		$("#"+param.ParentId).prepend(tb);
+	if (!Append && parent) {
+		parent.prepend(tb);
 	}
-	if (param.InsertBeforeId != undefined && $("#"+param.InsertBeforeId)[0]) {
-		if ((param.tab.pinned && $("#"+param.InsertBeforeId).is(".pin")) || (!param.tab.pinned && $("#"+param.InsertBeforeId).is(".tab"))) {
-			$("#"+param.tab.id).insertBefore($("#"+param.InsertBeforeId));
+	
+	if (InsertBeforeId) {
+		let Before = document.getElementById(InsertBeforeId);
+		if (Before != null) {
+			if ((tab.pinned && Before.classList.contains("pin")) || (tab.pinned == false && Before.classList.contains("tab"))) {
+				Before.parentNode.insertBefore(tb, Before);
+			}
 		}
 	}
-	if (param.InsertAfterId != undefined && $("#"+param.InsertAfterId)[0]) {
-		if ((param.tab.pinned && $("#"+param.InsertAfterId).is(".pin")) || (!param.tab.pinned && $("#"+param.InsertAfterId).is(".tab"))) {
-			$("#"+param.tab.id).insertAfter($("#"+param.InsertAfterId));
+	if (InsertAfterId) {
+		let After = document.getElementById(InsertAfterId);
+		if (After != null) {
+			if ((tab.pinned && After.classList.contains("pin")) || (tab.pinned == false && After.classList.contains("tab"))) {
+				if (After.nextSibling != null) {
+					After.parentNode.insertBefore(tb, After.nextSibling);
+				} else {
+					After.parentNode.appendChild(tb);
+				}
+			}
 		}
 	}
-	GetFaviconAndTitle(param.tab.id, param.addCounter);
-	RefreshMediaIcon(param.tab.id);
-	if (param.tab.active && param.SkipSetActive == undefined) {
-		SetActiveTab(param.tab.id);
+	if (Index) {
+		if (tb.parentNode.childNodes.length >= Index) {
+			tb.parentNode.insertBefore(tb, tb.parentNode.childNodes[Index]);
+		} else {
+			tb.parentNode.appendChild(tb);
+		}
 	}
-	if (param.Scroll) {
-		ScrollToTab(param.tab.id);
+	GetFaviconAndTitle(tab.id, addCounter);
+	RefreshMediaIcon(tab.id);
+	if (tab.active && !SkipSetActive) {
+		SetActiveTab(tab.id);
 	}
-}
-function RemoveTabFromList(tabId) {
-	if ($("#"+tabId)[0]) {
-		$("#"+tabId).remove();
+	if (Scroll) {
+		ScrollToTab(tab.id);
 	}
 }
 
-function SetTabClass(param) { // param - tuple object with paramenters: param.pin - true for pinned, param.id - tabId
-	if (param.pin) {
-		$("#pin_list").append($("#"+param.id));
-		if ($("#ch"+param.id).children().length > 0) { // flatten out children
-			$($("#"+param.id).children().find(".pin, .tab").get().reverse()).each(function() {
-				$(this).removeClass("tab").removeClass("n").removeClass("o").removeClass("c").addClass("pin");
-				$(this).insertAfter($("#"+param.id));
-				chrome.tabs.update(parseInt(this.id), {pinned: true});
-			});
-		}
-		$("#"+param.id).removeClass("tab").removeClass("n").removeClass("o").removeClass("c").addClass("pin");
-	} else {
-		$("#ch"+active_group).prepend($("#"+param.id));
-		$("#"+param.id).removeClass("pin").removeClass("attention").addClass("tab");
-		RefreshExpandStates();
-	}
-	chrome.tabs.update(parseInt(param.id), {pinned: param.pin});
-	RefreshGUI();
-}
-function SetActiveTab(tabId) {
-	if ($("#"+tabId).length > 0) {
-		if ($("#"+tabId).is(".tab")) {
-			SetActiveTabInGroup($("#"+tabId).parents(".group")[0].id, tabId);
-		}
-		$(".selected_folder").removeClass("selected_folder");
-		$(".pin, #"+active_group+" .tab").removeClass("active_tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly").removeClass("tab_header_hover");
-		$(".highlighted_drop_target").removeClass("highlighted_drop_target");
-		$("#"+tabId).removeClass("attention").addClass("active_tab");
-		ScrollToTab(tabId);
+function RemoveTabFromList(tabId) {
+	let tab = document.getElementById(tabId);
+	if (tab != null) {
+		tab.parentNode.removeChild(tab);
 	}
 }
-function ScrollToTab(tabId) {
-	if ($("#"+tabId)[0]) {
-		if ($("#"+tabId).is(".pin")) {
-			if ($("#"+tabId).position().left+$("#"+tabId).outerWidth() > $("#pin_list").innerWidth()) {
-				$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left+$("#"+tabId).outerWidth()-$("#pin_list").innerWidth());
-			} else {
-				if ($("#"+tabId).position().left < 0) {
-					$("#pin_list").scrollLeft($("#pin_list").scrollLeft()+$("#"+tabId).position().left);
-				}
+
+function SetTabClass(tabId, pin) {
+	let PinList = document.getElementById("pin_list");
+	let GroupList = document.getElementById("ct"+active_group);
+	let Tab = document.getElementById(tabId);
+	if (Tab != null) {
+		if (pin) {
+			if (Tab.parentNode.id != "pin_list") {
+				document.getElementById("pin_list").appendChild(Tab);
 			}
-		}
-		if ($("#"+tabId).is(".tab")) {
-			if ($("#"+active_group+" #"+tabId)[0]) {
-				if ($("#"+tabId).is(":not(:visible)")) {
-					$("#"+tabId).parents(".folder, .tab").removeClass("c").addClass("o");
-				}
-				if ($("#"+tabId).offset().top - $("#"+active_group).offset().top < 0) {
-					$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top);
-				} else {
-					if ($("#"+tabId).offset().top - $("#"+active_group).offset().top > $("#"+active_group).innerHeight() - $(".tab_header").outerHeight()) {
-						$("#"+active_group).scrollTop($("#"+active_group).scrollTop() + $("#"+tabId).offset().top - $("#"+active_group).offset().top - $("#"+active_group).innerHeight() + $(".tab_header").outerHeight() + 4);
+			Tab.classList.remove("tab");
+			Tab.classList.remove("o");
+			Tab.classList.remove("c");
+			Tab.classList.add("pin");
+			if (document.getElementById("ct"+tabId).childNodes.length > 0) { // flatten out children
+				let tabs = document.querySelectorAll("#ct"+tabId+" .pin, #ct"+tabId+" .tab");
+				for (let i = tabs.length-1; i >= 0; i--) {
+					tabs[i].remove("tab");
+					tabs[i].remove("o");
+					tabs[i].remove("c");
+					tabs[i].classList.add("pin");
+					if(Tab.nextSibling != null) {
+						PinList.insertBefore(tabs[i], Tab.nextSibling);
+					} else {
+						PinList.appendChild(tabs[i]);
 					}
+					chrome.tabs.update(parseInt(tabs[i].id), {pinned: true});
+				}
+			}
+
+		} else {
+			if (GroupList.childNodes.length > 0) { // flatten out children
+				GroupList.insertBefore(Tab, GroupList.childNodes[0]);
+			} else {
+				GroupList.appendChild(Tab);
+			}
+			Tab.classList.remove("pin");
+			Tab.classList.remove("attention");
+			Tab.classList.add("tab");
+			RefreshExpandStates();
+		}
+		chrome.tabs.update(parseInt(tabId), {pinned: pin});
+		RefreshGUI();
+	}
+}
+
+function SetActiveTab(tabId) {
+	let Tab = document.getElementById(tabId);
+	if (Tab != null) {
+		document.querySelectorAll(".selected_folder").forEach(function(s){
+			s.classList.remove("selected_folder");
+		});
+		document.querySelectorAll(".pin, #"+active_group+" .tab").forEach(function(s){
+			s.classList.remove("active_tab");
+			s.classList.remove("selected_tab");
+			s.classList.remove("selected_last");
+			s.classList.remove("selected_frozen");
+			s.classList.remove("selected_temporarly");
+			s.classList.remove("tab_header_hover");
+		});
+		document.querySelectorAll(".highlighted_drop_target").forEach(function(s){
+			s.classList.remove("highlighted_drop_target");
+		});
+		Tab.classList.remove("attention");
+		Tab.classList.add("active_tab");
+		ScrollToTab(tabId);
+		if (Tab.classList.contains("tab")) {
+			SetActiveTabInGroup(active_group, tabId);
+		}
+	}
+}
+
+function ScrollToTab(tabId) {
+	let Tab = document.getElementById(tabId);
+	if (Tab != null) {
+		if (Tab.classList.contains("pin")) {
+			if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left < 0) {
+				document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - 2;
+			} else {
+				if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left > document.getElementById(active_group).getBoundingClientRect().width - document.querySelector(".tab_header").getBoundingClientRect().width) {
+					document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().width + document.querySelector(".tab_header").getBoundingClientRect().width + 2;
+				}
+			}
+		}
+		if (Tab.classList.contains("tab") && document.querySelector("#"+active_group+" [id='"+tabId+"']") != null) {
+			let Parents = GetParentsByClass(Tab, "c");
+			if (Parents.length > 0) {
+				Parents.forEach(function(s){
+					s.classList.remove("c");
+					s.classList.add("o");
+				});
+			}
+			if (Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top < 0) {
+				document.getElementById(active_group).scrollTop = document.getElementById(active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top - 2;
+			} else {
+				if (Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top > document.getElementById(active_group).getBoundingClientRect().height - document.querySelector(".tab_header").getBoundingClientRect().height) {
+					document.getElementById(active_group).scrollTop = document.getElementById(active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().height + document.querySelector(".tab_header").getBoundingClientRect().height + 10;
 				}
 			}
 		}
 	}
 }
+
 function Detach(tabsIds, Folders) {
 	chrome.windows.get(CurrentWindowId, {populate : true}, function(window) {
 		if (window.tabs.length == 1 || tabsIds.length == 0) {
 			return;
 		}
 		if (tabsIds.length == window.tabs.length) {
-			log("You are trying to detach all tabs! Skipping!");
+			if (opt.debug) console.log("You are trying to detach all tabs! Skipping!");
 			return;
 		}
 		chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
 			let Indexes = [];
 			let Parents = [];
 			let Expands = [];
-/* MOZILLA BUG 1398272 */	let NewIds = [];
+			let NewIds = [];																	// MOZILLA BUG 1398272
 			let NewTabs = [];
 			let Ind = 0;
 			tabsIds.forEach(function(tabId) {
-/* MOZILLA BUG 1398272 */	NewIds.push(tabId);
-				Indexes.push($("#"+tabId).index());
-				Parents.push($("#"+tabId).parent().parent()[0].id);
-				Expands.push($("#"+tabId).is(".n") ? "n" : ($("#"+tabId).is(".c") ? "c" : "o"));
+				let tab = document.getElementById(tabId);
+				NewIds.push(tabId);															// MOZILLA BUG 1398272
+				Indexes.push(Array.from(tab.parentNode.children).indexOf(tab));
+				Parents.push(tab.parentNode.parentNode.id);
+				Expands.push( (tab.classList.contains("c") ? "c" : (tab.classList.contains("o") ? "o" : ""))  );
 			});
 			tabsIds.forEach(function(tabId) {
 				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
-/* MOZILLA BUG 1398272 */	if (browserId == "F") {
-/* MOZILLA BUG 1398272 */	if (Ind == 0) {
-/* MOZILLA BUG 1398272 */		NewIds[Ind] = new_window.tabs[0].id;
-/* MOZILLA BUG 1398272 */	} else {
-/* MOZILLA BUG 1398272 */		NewIds[Ind] = MovedTab[0].id;
-/* MOZILLA BUG 1398272 */	}
-/* MOZILLA BUG 1398272 */	NewTabs.push({id: NewIds[Ind], index: Indexes[Ind], parent: ((tabsIds.indexOf(parseInt(Parents[Ind])) != -1) ? NewIds[tabsIds.indexOf(parseInt(Parents[Ind]))] : Parents[Ind]), expand: Expands[Ind]});
-/* MOZILLA BUG 1398272 */	} else {
-					NewTabs.push({id: tabsIds[Ind], index: Indexes[Ind], parent: Parents[Ind], expand: Expands[Ind]}); // PUSH TAB FROM INDEX
-/* MOZILLA BUG 1398272 */	}
+					if (browserId == "F") {													// MOZILLA BUG 1398272
+						if (Ind == 0) {														// MOZILLA BUG 1398272
+							NewIds[Ind] = new_window.tabs[0].id;						// MOZILLA BUG 1398272
+						} else {																	// MOZILLA BUG 1398272
+							NewIds[Ind] = MovedTab[0].id;									// MOZILLA BUG 1398272
+						}																			// MOZILLA BUG 1398272
+						NewTabs.push({id: NewIds[Ind], index: Indexes[Ind], parent: ((tabsIds.indexOf(parseInt(Parents[Ind])) != -1) ? NewIds[tabsIds.indexOf(parseInt(Parents[Ind]))] : Parents[Ind]), expand: Expands[Ind]});	// MOZILLA BUG 1398272
+					} else {																		// MOZILLA BUG 1398272
+						NewTabs.push({id: tabsIds[Ind], index: Indexes[Ind], parent: Parents[Ind], expand: Expands[Ind]}); // PUSH TAB FROM INDEX
+					}																				// MOZILLA BUG 1398272
 					Ind++;
 					if (Ind >= Parents.length-1) {
 						// chrome.tabs.remove(new_window.tabs[0].id, null);
 						let Confirmations = 0;
 						let GiveUpLimit = 600;
-						log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
+						if (opt.debug) console.log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
 						var Append = setInterval(function() {
 							chrome.windows.get(new_window.id, function(confirm_new_window) {
 								chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
@@ -246,13 +505,13 @@ function Detach(tabsIds, Folders) {
 									}
 								});
 								GiveUpLimit--;
-								log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
+								if (opt.debug) console.log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
 								if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
 									clearInterval(Append);
 								}
 							});
 						}, 1000);
-						if (Object.keys(Folders).length > 0) {
+						if (Folders && Object.keys(Folders).length > 0) {
 							for (var folder in Folders) {
 								RemoveFolder(Folders[folder].id);
 							}
@@ -263,46 +522,29 @@ function Detach(tabsIds, Folders) {
 		});
 	});
 }
-function FindTab(input) { // find and select tabs
-	$(".filtered").removeClass("filtered").removeClass("selected_tab");
-	$(".highlighted_search").removeClass("highlighted_search");
-	if (input.length == 0) {
-		$("#filter_box")[0].value = "";
-		$("#button_filter_clear").css({"opacity": "0"}).attr("title", "");
-		return;
-	} else {
-		$("#button_filter_clear").css({"opacity": "1"});
-		$("#button_filter_clear").attr("title", caption_clear_filter);
-	}
-	SearchIndex = 0;
-	chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
-		tabs.forEach(function(Tab) {
-			if ($("#button_filter_type").is(".url") && Tab.url.toLowerCase().match(input.toLowerCase())) {
-				$("#"+Tab.id).addClass("filtered").addClass("selected_tab");
-			}
-			if ($("#button_filter_type").is(".title") && Tab.title.toLowerCase().match(input.toLowerCase())) {
-				$("#"+Tab.id).addClass("filtered").addClass("selected_tab");
-			}
-		});
-	});
-}
+
 function CloseTabs(tabsIds) {
-	if ($("#"+active_group+" .active_tab")[0] && tabsIds.indexOf(parseInt($("#"+active_group+" .active_tab")[0].id)) != -1) {
-		ActionBeforeTabsClose();
+	let activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
+	if (activeTab != null && tabsIds.indexOf(parseInt(activeTab.id)) != -1) {
+		SwitchActiveTabBeforeClose(active_group);
 	}
 	tabsIds.forEach(function(tabId) {
-		if ($("#"+tabId).is(".pin") && opt.allow_pin_close) {
-			$("#"+tabId).remove();
+		let tab = document.getElementById(tabId);
+		if (tab.classList.contains("pin") && opt.allow_pin_close) {
+			tab.parentNode.removeChild(tab);
 			chrome.tabs.update(tabId, {pinned: false});
 		}
+		if (tabId == tabsIds[tabsIds.length-1]) {
+			setTimeout(function() {
+				chrome.tabs.remove(tabsIds, null);
+			}, 10);
+		}
 	});
-	setTimeout(function() {
-		chrome.tabs.remove(tabsIds, null);
-	}, 50);
 }
+
 function DiscardTabs(tabsIds) {
 	var delay = 100;
-	if ($("#"+tabsIds[0]).is(".discarded")) {
+	if (document.getElementById(tabsIds[0]).classList.contains("discarded")) {
 		delay = 5;
 	} else {
 		chrome.tabs.discard(tabsIds[0]);
@@ -314,35 +556,35 @@ function DiscardTabs(tabsIds) {
 		}, delay);
 	}
 }
-function ActionBeforeTabsClose() {
-	log("function: ActionBeforeTabsClose");
-	if ($("#"+active_group+" .tab").length == 1) {
-		log("there is only one tab");
+
+function SwitchActiveTabBeforeClose(ActiveGroupId) {
+	if (opt.debug) console.log("function: SwitchActiveTabBeforeClose");
+	let activeGroup = document.getElementById(ActiveGroupId);
+	if (document.querySelectorAll("#"+ActiveGroupId+" .tab").length <= 1 && document.querySelector(".pin.active_tab") == null) {
 		if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
-			log("activate group above");
-			if ($("#"+active_group).prev(".group")[0]) {
-				SetActiveGroup(($("#"+active_group).prev(".group")[0].id), true, true);
-			} else {
-				if ($("#"+active_group).next(".group")[0]) {
-					SetActiveGroup(($("#"+active_group).next(".group")[0].id), true, true);
+			if (activeGroup.previousSibling != null) {
+				if (document.querySelectorAll("#"+activeGroup.previousSibling.id+" .tab").length > 0) {
+					SetActiveGroup(activeGroup.previousSibling.id, true, true);
 				} else {
-					SetActiveGroup("tab_list", true, true);
+					SwitchActiveTabBeforeClose(activeGroup.previousSibling.id);
+					return;
 				}
+			} else {
+				SetActiveGroup("tab_list", true, true);
 			}
 		} else {
-			log("activate group below");
-			if ($("#"+active_group).next(".group")[0]) {
-				SetActiveGroup(($("#"+active_group).next(".group")[0].id), true, true);
-			} else {
-				if ($("#"+active_group).prev(".group")[0]) {
-					SetActiveGroup(($("#"+active_group).prev(".group")[0].id), true, true);
+			if (activeGroup.nextSibling != null) {
+				if (document.querySelectorAll("#"+activeGroup.nextSibling.id+" .tab").length > 0) {
+					SetActiveGroup(activeGroup.nextSibling.id, true, true);
 				} else {
-					SetActiveGroup("tab_list", true, true);
+					SwitchActiveTabBeforeClose(activeGroup.nextSibling.id);
+					return;
 				}
+			} else {
+				SetActiveGroup("tab_list", true, true);
 			}
 		}
 	} else {
-		log("there are more tabs");
 		if (opt.after_closing_active_tab == "above") {
 			ActivatePrevTab(true);
 		}
@@ -357,139 +599,134 @@ function ActionBeforeTabsClose() {
 		}
 	}
 }
+
 function ActivateNextTabBeforeClose() {
-	log("function: ActivateNextTabBeforeClose");
-	if ($(".pin.active_tab:visible")[0]) {
-		if ($(".pin.active_tab").next(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
+	let activePin = document.querySelector(".pin.active_tab");
+	if (activePin != null) {
+		if (activePin.nextSibling != null) {
+			chrome.tabs.update(parseInt(activePin.nextSibling.id), { active: true });
 		} else {
-			if ($(".pin.active_tab").prev(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
+			if (activePin.previousSibling != null) {
+				chrome.tabs.update(parseInt(activePin.previousSibling.id), { active: true });
 			}
 		}
 	}
-	if ($("#"+active_group+" .tab.active_tab")[0] && $("#"+active_group+" .tab").length > 1) {
-		if ($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0]) {
-			chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0].id), { active: true });
+	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+		if (opt.promote_children && activeTab.lastChild.firstChild != null) {
+			chrome.tabs.update(parseInt(activeTab.lastChild.firstChild.id), { active: true });
 		} else {
-			if ($("#"+active_group+" .tab.active_tab").next(".tab")[0]) {
-				chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").next(".tab")[0].id), { active: true });
+			if (activeTab.nextSibling != null) {
+				chrome.tabs.update(parseInt(activeTab.nextSibling.id), { active: true });
 			} else {
-				if ($("#"+active_group+" .tab.active_tab").prev(".tab")[0]) {
-					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").prev(".tab")[0].id), { active: true });
+				if (activeTab.previousSibling != null) {
+					chrome.tabs.update(parseInt(activeTab.previousSibling.id), { active: true });
 				} else {
-					if ($("#"+active_group+" .tab.active_tab").parent().is(".children") && $("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0]) {
-						chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0].id), { active: true });
+					if (activeTab.parentNode.parentNode.classList.contains("tab")) {
+						chrome.tabs.update(parseInt(activeTab.parentNode.parentNode.id), { active: true });
 					} else {
-						if ($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0]) {
-							chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0].id), { active: true });
-						} else {
-							ActivatePrevTab();
-						}
+						ActivatePrevTab();
 					}
 				}
 			}
 		}
 	}
 }
+
 function ActivatePrevTabBeforeClose() {
-	log("function: ActivatePrevTabBeforeClose");
-	if ($(".pin.active_tab")[0]) {
-		log("active_tab is pin");
-		if ($(".pin.active_tab").prev(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
+	let activePin = document.querySelector(".pin.active_tab");
+	if (activePin != null) {
+		if (activePin.previousSibling != null) {
+			chrome.tabs.update(parseInt(activePin.previousSibling.id), { active: true });
 		} else {
-			if ($(".pin.active_tab").next(".pin")[0]) {
-				chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
+			if (activePin.nextSibling != null) {
+				chrome.tabs.update(parseInt(activePin.nextSibling.id), { active: true });
 			}
 		}
 	}
-	if ($("#"+active_group+" .tab.active_tab")[0] && $("#"+active_group+" .tab").length > 1) {
-		log("active_group tabs length is > 1");
-		if ($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0]) {
-			log("activating first child, because active tab is root");
-			chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0].id), { active: true });
+	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+		if (opt.promote_children && activeTab.lastChild.firstChild != null) {
+			chrome.tabs.update(parseInt(activeTab.lastChild.firstChild.id), { active: true });
 		} else {
-			if ($("#"+active_group+" .tab.active_tab").prev(".tab")[0]) {
-				log("activating previous tab on same level");
-				chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").prev(".tab")[0].id), { active: true });
+			if (activeTab.previousSibling != null) {
+				chrome.tabs.update(parseInt(activeTab.previousSibling.id), { active: true });
 			} else {
-				if ($("#"+active_group+" .tab.active_tab").next(".tab")[0]) {
-					log("previous tab not found, activating next one on same level");
-					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").next(".tab")[0].id), { active: true });
+				if (activeTab.nextSibling != null) {
+					chrome.tabs.update(parseInt(activeTab.nextSibling.id), { active: true });
 				} else {
-					if ($("#"+active_group+" .tab.active_tab").parent().is(".children") && $(".tab.active_tab").parent().parent(".tab")[0]) {
-						log("previous and next tab not found, which means active tab is last on same level, activating parent");
-						chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0].id), { active: true });
+					if (activeTab.parentNode.parentNode.classList.contains("tab")) {
+						chrome.tabs.update(parseInt(activeTab.parentNode.parentNode.id), { active: true });
 					} else {
-						if ($("#"+active_group+" .tab.active_tab").parents(".tab").last().prev(".tab")[0]) {
-							log("parent tab not found, which means we are on top in hierarchy, activating previous on top level");
-							chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parents(".tab").last().prev(".tab")[0].id), { active: true });
-						} else {
-							log("all attempts to find previous tab failed, lets activate next tab");
-							ActivateNextTab();
-						}
+						ActivateNextTab();
 					}
 				}
 			}
 		}
 	}		
 }
+
 function ActivateNextTab(allow_reverse) {
-	log("function: ActivateNextTab");
-	if ($(".pin.active_tab")[0]) {
-		log("active_tab is pin");
-		if ($(".pin.active_tab").next(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
+	let activePin = document.querySelector(".pin.active_tab");
+	if (activePin != null) {
+		if (activePin.nextSibling != null) {
+			chrome.tabs.update(parseInt(activePin.nextSibling.id), { active: true });
 		} else {
-			if ($(".pin.active_tab").prev(".pin")[0] && allow_reverse) {
-				chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
+			if (activePin.previousSibling != null && allow_reverse) {
+				chrome.tabs.update(parseInt(activePin.previousSibling.id), { active: true });
 			}
 		}
 	}
-	if ($("#"+active_group+" .tab.active_tab")[0] && $("#"+active_group+" .tab").length > 1) {
-		if ($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0]) {
-			chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").children().last().children(".tab")[0].id), { active: true });
+	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+		let FirstChild = activeTab.lastChild.firstChild;
+		if (FirstChild != null) {
+			chrome.tabs.update(parseInt(FirstChild.id), { active: true });
 		} else {
-			if ($("#"+active_group+" .tab.active_tab").next(".tab")[0]) {
-				chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").next(".tab")[0].id), { active: true });
+			if (activeTab.nextSibling != null) {
+				chrome.tabs.update(parseInt(activeTab.nextSibling.id), { active: true });
 			} else {
-				if ($("#"+active_group+" .tab.active_tab").parent().parent().next("#"+active_group+" .tab")[0]) {
-					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent().next(".tab")[0].id), { active: true });
+				let Next = null;
+				while (Next == null && activeTab.parentNode != null && activeTab.parentNode.parentNode != null) {
+					if (activeTab.parentNode.parentNode.classList != undefined && activeTab.parentNode.parentNode.classList.contains("tab") && activeTab.parentNode.parentNode.nextSibling != null && activeTab.parentNode.parentNode.nextSibling.classList.contains("tab")) {
+						Next = activeTab.parentNode.parentNode.nextSibling;
+					}
+					activeTab = activeTab.parentNode.parentNode;
+				}
+				if (Next != null) {
+					chrome.tabs.update(parseInt(Next.id), { active: true });
 				} else {
-					if ($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0]) {
-						chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parents(".tab").last().next(".tab")[0].id), { active: true });
-					} else {
-						if (allow_reverse) {
-							ActivatePrevTab();
-						}
+					if (allow_reverse) {
+						ActivatePrevTab();
 					}
 				}
 			}
 		}
 	}
 }
+
 function ActivatePrevTab(allow_reverse) {
-	log("function: ActivatePrevTab");
-	if ($(".pin.active_tab")[0]) {
-		log("active_tab is pin");
-		if ($(".pin.active_tab").prev(".pin")[0]) {
-			chrome.tabs.update(parseInt($(".pin.active_tab").prev(".pin")[0].id), { active: true });
+	let activePin = document.querySelector(".pin.active_tab");
+	if (activePin != null) {
+		if (activePin.previousSibling != null) {
+			chrome.tabs.update(parseInt(activePin.previousSibling.id), { active: true });
 		} else {
-			if ($(".pin.active_tab").next(".pin")[0] && allow_reverse) {
-				chrome.tabs.update(parseInt($(".pin.active_tab").next(".pin")[0].id), { active: true });
+			if (activePin.nextSibling != null && allow_reverse) {
+				chrome.tabs.update(parseInt(activePin.nextSibling.id), { active: true });
 			}
 		}
 	}
-	if ($("#"+active_group+" .tab.active_tab")[0] && $("#"+active_group+" .tab").length > 1) {
-		if ($("#"+active_group+" .tab.active_tab").prev().find(".tab").length > 0) {
-			chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").prev().find(".tab").last()[0].id), { active: true });
+	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+		let pSchildren = activeTab.previousSibling != null ? document.querySelectorAll("#ct"+activeTab.previousSibling.id+" .tab") : null;
+		if (activeTab.previousSibling != null && pSchildren.length > 0) {
+			chrome.tabs.update(parseInt(pSchildren[pSchildren.length-1].id), { active: true });
 		} else {
-			if ($("#"+active_group+" .tab.active_tab").prev(".tab")[0]) {
-				chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").prev(".tab")[0].id), { active: true });
+			if (activeTab.previousSibling != null) {
+				chrome.tabs.update(parseInt(activeTab.previousSibling.id), { active: true });
 			} else {
-				if ($("#"+active_group+" .tab.tab.active_tab").parent().is(".children") && $("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0]) {
-					chrome.tabs.update(parseInt($("#"+active_group+" .tab.active_tab").parent().parent(".tab")[0].id), { active: true });
+				if (activeTab.parentNode.parentNode.classList.contains("tab")) {
+					chrome.tabs.update(parseInt(activeTab.parentNode.parentNode.id), { active: true });
 				} else {
 					if (allow_reverse) {
 						ActivateNextTab();
@@ -499,159 +736,151 @@ function ActivatePrevTab(allow_reverse) {
 		}
 	}
 }
-// **********		  TABS EVENTS		  ***************
-function SetTabEvents() {
-	$(document).on("dblclick", ".group, #pin_list, .tab", function(event) { // double click to create tab
-		if (event.button == 0 && $(event.target).is(this)) {
-			if (event.target.id == "pin_list") {
-				chrome.tabs.create({ pinned: true });
-			} else {
-				chrome.tabs.create({});
-			}
-		}
+
+function DeselectTabs() {
+	document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+		s.classList.remove("selected_tab");
+		s.classList.remove("selected_last");
 	});
-	$(document).on("mouseenter", ".close", function(event) {
-		$(this).addClass("close_hover");
-	});
-	$(document).on("mouseleave", ".close", function(event) {
-		$(".close_hover").removeClass("close_hover");
-	});
-	$(document).on("mouseenter", ".expand", function(event) {
-		$(this).addClass("hover");
-	});
-	$(document).on("mouseleave", ".expand", function(event) {
-		$(".expand.hover").removeClass("hover");
-	});
-	$(document).on("mouseenter", ".pin", function(event) {
-		// $(".pin").css({ "z-index": "" });
-		$(this).css({ "z-index": "9999" });
-	});
-	$(document).on("mouseleave", ".pin", function(event) {
-		$(".pin").css({ "z-index": "" });
-	});
-	$(document).on("mouseenter", ".tab_header", function(event) {
-		$(this).addClass("tab_header_hover");
-		if (opt.never_show_close == false && opt.always_show_close == false) {
-			$(this).addClass("close_show");
-		}
-	});
-	// $(document).on("mouseenter", ".tab_header", function(event) {
-		// $(".tab_header").css({ "z-index": "" });
-		// $(this).css({ "z-index": "9999" });
-	// });
-	$(document).on("mouseleave", ".tab_header", function(event) {
-		// $(".tab_header").css({ "z-index": "" });
-		$(this).removeClass("tab_header_hover");
-		if (opt.never_show_close == false && opt.always_show_close == false) {
-			$(this).removeClass("close_show");
-		}
-	});
-	$(document).on("mousedown", ".expand", function(event) { // EXPAND BOX - EXPAND / COLLAPSE
-		if (event.button == 0 && !event.shiftKey && !event.ctrlKey) {
-			if ($(this).parent().parent().is(".o")) {
-				$(this).parent().parent().removeClass("o").addClass("c");
-				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "c" } });
-			} else {
-				if ($(this).parent().parent().is(".c")) {
-					$(this).parent().parent().removeClass("c").addClass("o");
-					chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt($(this).parent().parent()[0].id), tab: { expand: "o" } });
-					if (opt.close_other_trees) {
-						$(".o:visible:not(#"+$(this).parent().parent()[0].id+")").removeClass("o").addClass("c");
-						$(this).parents(".tab").each(function() {
-							$(this).removeClass("n").removeClass("c").addClass("o");
-							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "o" } });
-						});
-						$(".c").each(function() {
-							chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(this.id), tab: { expand: "c" } });
-						});
-					}
-				}
-			}
-		}
-	});
-	$(document).on("mousedown", ".tab, .pin", function(event) { // SELECT TAB/PIN
-		if ($(".menu").is(":visible")) {
-			return;
-		}
-		event.stopPropagation();
-		if (event.button == 0) {
-			$("#"+active_group+" .folder").removeClass("selected_folder");
-			let tabId = parseInt(this.id);
-			if (event.shiftKey) { // SET SELECTION WITH SHIFT
-				if ($("#"+active_group+" .active_tab")[0] && $("#"+active_group+" .selected_tab")[0] == undefined && $("#"+active_group+" .active_tab").is(":not(.selected_tab)") && $(this).parent()[0].id == $("#"+active_group+" .active_tab").parent()[0].id) {
-					$(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
-					if ($(this).index() >= $("#"+active_group+" .active_tab").index()) {
-						$("#"+active_group+" .active_tab").nextUntil($(this), ".tab").add($("#"+active_group+" .active_tab")).add($(this)).addClass("selected_tab");
-					}
-					if ($(this).index() <= $("#"+active_group+" .active_tab").index()) {
-						$("#"+active_group+" .active_tab").prevUntil($(this), ".tab").add($("#"+active_group+" .active_tab")).add($(this)).addClass("selected_tab");
-					}
-				} else {
-					if ($(this).parent()[0].id == $("#"+active_group+" .selected_tab").last().parent()[0].id || $(this).parent()[0].id == $("#"+active_group+" .selected_tab").first().parent()[0].id) {
-						if ($(this).index() >= $("#"+active_group+" .selected_tab").last().index()) {
-							if (!event.ctrlKey) {
-								let lastTab = $("#"+active_group+" .selected_tab").last();
-								$(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
-								lastTab.addClass("selected_tab");
-							}
-							
-							
-							$("#"+active_group+" .selected_tab").last().nextUntil($(this), ".tab").add($(this)).addClass("selected_tab");
-						}
-						if ($(this).index() <= $("#"+active_group+" .selected_tab").first().index()) {
-							if (!event.ctrlKey) {
-								let firstTab = $("#"+active_group+" .selected_tab").first();
-								$(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
-								firstTab.addClass("selected_tab");
-							}
-							
-							
-							$("#"+active_group+" .selected_tab").first().prevUntil($(this), ".tab").add($(this)).addClass("selected_tab");
-						}
-					}
-				}
-			}
-			if (event.ctrlKey) { // TOGGLE SELECTION WITH CTRL
-				// if ($(".active_tab:visible").is(":not(.selected_tab)")) {
-					// $(".active_tab:visible").addClass("selected_tab");
-				// }
-				$(this).toggleClass("selected_tab");
-			}
-		}
-	});
-	$(document).on("mousedown", ".tab_header", function(event) { // CLOSE TAB/PIN
-		let tabId = parseInt($(this).parent()[0].id);
-		if ((event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".tab")) || (event.button == 1 && opt.close_with_MMB == true && $(this).parent().is(".pin") && opt.allow_pin_close == true) || (event.button == 0 && $(event.target).is(".close, .close_img"))) {
-			if ($(this).parent().is(".active_tab:visible") && opt.after_closing_active_tab != "browser") {
-				ActionBeforeTabsClose();
-			} // hide pin before it will be closed by listener
-			$(".pin#"+tabId).css({ "width": "0px", "height": "0px", "border": "none", "overflow": "hidden" });
-			chrome.tabs.update(tabId, {pinned: false});
-			setTimeout(function() {
-				if ($("#"+tabId)[0]) {
-					chrome.tabs.remove(tabId);
-				}
-			}, 100);
-		}
-		if (event.button == 2) {
-			event.stopPropagation();
-			ShowTabMenu($(this).parent(), event);
-		}
-	});
-	$(document).on("click", ".tab_header", function(event) { // SINGLE CLICK TO ACTIVATE TAB
-		if ($(".menu").is(":visible")  || ($(this).parent().is(".c, .o") && $(event.target).is(".expand")) || $(event.target).is(".close, .close_img, .tab_mediaicon")) {
-			return;
-		}
-		event.stopPropagation();
-		if (event.button == 0 && !event.shiftKey && !event.ctrlKey) {
-			SetActiveTab($(this).parent()[0].id);
-			chrome.tabs.update(parseInt($(this).parent()[0].id), { active: true });
-		}
-	});
-	// $(document).on("mousedown", ".group, #pin_list", function(event) { // DE-SELECT
-	// console.log($(event.target));
-		// if (event.button == 0 && !event.shiftKey && !event.ctrlKey && $(event.target).is(":not(.pin, .tab, .tab_header, .folder_header, .expand, .close, .close_img, .tab_mediaicon)")) {
-			// $(".pin, #"+active_group+" .tab").removeClass("selected_tab").removeClass("selected_frozen").removeClass("selected_temporarly");
-		// }
-	// });
 }
+
+function HighlightNode(Node) {
+		document.querySelectorAll(".highlighted_drop_target").forEach(function(s){
+			s.classList.remove("highlighted_drop_target");
+		});
+		Node.classList.add("highlighted_drop_target");
+}
+
+function HighlightDragEnterTabToTab(Node, addDepth) {
+	// PIN,TAB==>TAB AND AVOID ENTERING INSIDE OWN CHILDREN
+	if (Node.classList.contains("highlighted_drop_target") == false && Node.parentNode.classList.contains("dragged_tree") == false && Node.parentNode.classList.contains("dragged_selected") == false && DragAndDrop.DragNodeClass == "tab") {
+		if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
+			let Parents = GetParentsByClass(Node, "tab");
+			if (Parents.length <= opt.max_tree_depth + addDepth) {
+				HighlightNode(Node);
+			}
+		} else {
+			HighlightNode(Node);
+		}
+	}
+}
+
+function EventTabExpandBox(event) {
+	if (!event.shiftKey && !event.ctrlKey) {
+		if (event.target.parentNode.parentNode.classList.contains("o")) {
+			event.target.parentNode.parentNode.classList.remove("o");
+			event.target.parentNode.parentNode.classList.add("c");
+			chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(event.target.parentNode.parentNode.id), tab: { expand: "c" } });
+		} else {
+			if (event.target.parentNode.parentNode.classList.contains("c")) {
+				if (opt.close_other_trees) {
+					let thisTree = GetParentsByClass(event.target.parentNode, "tab"); // start from tab's header, instead of tab, important to include clicked tab as well
+					document.querySelectorAll("#"+active_group+" .o.tab").forEach(function(s){
+						s.classList.remove("o");
+						s.classList.add("c");
+						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
+					});
+					thisTree.forEach(function(s){
+						s.classList.remove("c");
+						s.classList.add("o");
+						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "o" } });
+					});
+					ScrollToTab(event.target.parentNode.parentNode.id);
+				} else {
+					event.target.parentNode.parentNode.classList.remove("c");
+					event.target.parentNode.parentNode.classList.add("o");
+					chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(event.target.parentNode.parentNode.id), tab: { expand: "o" } });
+				}
+			}
+		}
+	}
+}
+
+
+function OpenNewTab(pin, parentId) {
+	if (pin) {
+		// chrome.tabs.create((browserId == "V" ? {url: "vivaldi://startpage", pinned: true} : {pinned: true}), function(tab) {
+		chrome.tabs.create({pinned: true}, function(tab) {
+			if (parentId) {
+				// AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter);
+				AppendTab(tab, "pin_list", false, parentId, true, false, true, false, false, true, false);
+				// AppendTab({ tab: tab, InsertAfterId: parentId });
+				schedule_update_data++;
+			}
+		});
+	} else {
+		// chrome.tabs.create((browserId == "V" ? {url: "vivaldi://startpage"} : {}), function(tab) {
+		chrome.tabs.create({}, function(tab) {
+			if (parentId) {
+				AppendTab(tab, parentId, false, false, (opt.append_orphan_tab == "top" ? false : true), false, true, false, false, true, false);
+				// AppendTab({ tab: tab, ParentId: parentId, Append: (opt.append_orphan_tab == "top" ? false : true) });
+				schedule_update_data++;
+			}
+		});
+	}
+}
+function EventSelectTab(event, Node) {
+	DeselectFolders();
+	if (event.shiftKey) { // SET SELECTION WITH SHIFT
+		// let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+		let activeTab = document.querySelector("#"+active_group+" .selected_tab.selected_last");
+
+		if (activeTab == null) {
+			activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
+		}
+		if (activeTab != null && Node.parentNode.id == activeTab.parentNode.id) {
+
+			if (!event.ctrlKey) {
+				document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+					s.classList.remove("selected_frozen");
+					s.classList.remove("selected_temporarly");
+					s.classList.remove("selected_tab");
+					s.classList.remove("selected_last");
+				});
+			}
+			
+			let ChildrenArray = Array.from(Node.parentNode.children);
+			let activeTabIndex = ChildrenArray.indexOf(activeTab);
+			let thisTabIndex = ChildrenArray.indexOf(Node);
+			let fromIndex = thisTabIndex >= activeTabIndex ? activeTabIndex : thisTabIndex;
+			let toIndex = thisTabIndex >= activeTabIndex ? thisTabIndex : activeTabIndex;
+			for (let i = fromIndex; i <= toIndex; i++) {
+				activeTab.parentNode.childNodes[i].classList.add("selected_tab");
+				if (i == toIndex && event.ctrlKey) {
+					activeTab.parentNode.childNodes[i].classList.add("selected_last");
+				}
+			}
+		}
+	}
+	if (event.ctrlKey && !event.shiftKey) { // TOGGLE SELECTION WITH CTRL
+		Node.classList.toggle("selected_tab");
+		if (Node.classList.contains("selected_tab")) {
+			document.querySelectorAll(".selected_last").forEach(function(s){
+				s.classList.remove("selected_last");
+			});
+			Node.classList.add("selected_last");
+		} else {
+			Node.classList.remove("selected_last");
+		}
+	}
+}
+
+function EventDoubleClickTab(event, Node) {
+	if (opt.dbclick_tab == "new_tab") {
+		OpenNewTab(Node.classList.contains("pin"), Node.id);
+	}
+	if (opt.dbclick_tab == "reload_tab") {
+		chrome.tabs.reload(parseInt(Node.id), {})
+	}
+	if (opt.dbclick_tab == "close_tab") {
+		CloseTabs([parseInt(Node.id)]);
+	}
+	if (opt.dbclick_tab == "unload_tab") {
+		SwitchActiveTabBeforeClose(active_group);
+		DiscardTabs([parseInt(Node.id)]);
+	}
+	if (opt.dbclick_tab == "activate_previous_active" && Node.classList.contains("active_tab")) {
+		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
+	}
+}
+

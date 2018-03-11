@@ -4,64 +4,80 @@
 
 // **********          REFRESH GUI          ***************
 
-function SetTRefreshEvents() {
-	$(window).on("resize", function(event) {
-		RefreshGUI();
-	});
-
-	// click on media icon
-	$(document).on("mousedown", ".tab_mediaicon", function(event) {
-		event.stopPropagation();
-		if (event.button == 0 && $(this).parent().parent().is(".audible, .muted")) {
-			chrome.tabs.get(parseInt(this.parentNode.parentNode.id), function(tab) {
-				if (tab) {
-					chrome.tabs.update(tab.id, {muted:!tab.mutedInfo.muted});
-				}
-			});
-		}
-	});
-}
-
 function RefreshGUI() {
-	if ($("#toolbar").children().length > 0) {
-		$("#toolbar").css({ "height": "", "width": "", "display": "", "padding": "", "border": "" });
-		if ($(".button").is(".on")) {
-			$("#toolbar").css({ "height": 53 });
+	let toolbar = document.getElementById("toolbar");
+	if (toolbar.children.length > 0) {
+		toolbar.style.height = "";
+		toolbar.style.width = "";
+		toolbar.style.display = "";
+		toolbar.style.border = "";
+		toolbar.style.padding = "";
+		if (document.querySelector(".on.button") != null) {
+			toolbar.style.height = "53px";
 		} else {
-			$("#toolbar").css({ "height": 26 });
+			toolbar.style.height = "26px";
 		}
 	} else {
-		$("#toolbar").css({ "height": 0, "width": "0px", "display": "none", "padding": "0", "border": "none" });
+		toolbar.style.height = "0px";
+		toolbar.style.width = "0px";
+		toolbar.style.display = "none";
+		toolbar.style.border = "none";
+		toolbar.style.padding = "0";
 	}
-	
-	if ($("#pin_list").children().length > 0) {
-		$("#pin_list").css({ "top": $("#toolbar")[0].getBoundingClientRect().height, "height": "", "width":"", "display": "", "padding": "", "border": "" });
+	let pin_list = document.getElementById("pin_list");
+	if (pin_list.children.length > 0) {
+		pin_list.style.top = toolbar.getBoundingClientRect().height + "px";
+		pin_list.style.height = "";
+		pin_list.style.width = document.body.clientWidth + "px";;
+		pin_list.style.display = "";
+		pin_list.style.border = "";
+		pin_list.style.padding = "";
 	} else {
-		$("#pin_list").css({ "height": "0px", "width": "0px", "display": "none", "padding": "0", "border": "none" });
+		pin_list.style.top = "0px";
+		pin_list.style.height = "0px";
+		pin_list.style.width = "0px";
+		pin_list.style.display = "none";
+		pin_list.style.border = "none";
+		pin_list.style.padding = "0";
 	}
-
-	$("#toolbar_groups").css({ "top": $("#toolbar").outerHeight() + $("#pin_list")[0].getBoundingClientRect().height, "height": $(window).height() - $("#toolbar").outerHeight() - $("#pin_list")[0].getBoundingClientRect().height});
-	
-	$(".group_title").each(function(){
-		$(this)[0].innerText = (bggroups[(this.id).substr(4)] ? bggroups[(this.id).substr(4)].name : caption_noname_group) + (opt.show_counter_groups ? " (" + $("#" + (this.id).substr(4) +" .tab").length + ")" : "");
+	let toolbar_groups = document.getElementById("toolbar_groups");
+	toolbar_groups.style.top = toolbar.getBoundingClientRect().height + pin_list.getBoundingClientRect().height + "px";
+	toolbar_groups.style.height = document.body.clientHeight - toolbar.getBoundingClientRect().height - pin_list.getBoundingClientRect().height + "px";
+	if (opt.show_counter_groups) {
+		document.querySelectorAll(".group").forEach(function(s){
+			let groupLabel = document.getElementById("_gte"+s.id);
+			if (groupLabel) {
+				groupLabel.textContent = (bggroups[s.id] ? bggroups[s.id].name : caption_noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
+			}
+		});
+	} else {
+		document.querySelectorAll(".group").forEach(function(s){
+			let groupLabel = document.getElementById("_gte"+s.id);
+			if (groupLabel) {
+				groupLabel.textContent = bggroups[s.id] ? bggroups[s.id].name : caption_noname_group;
+			}
+		});
+	}
+	document.querySelectorAll(".group_button").forEach(function(s){
+		s.style.height = s.firstChild.getBoundingClientRect().height + "px";
 	});
-	
-	$(".group_button").each(function(){
-		$(this).css({ "height": $(this).children(0).innerWidth() });
-	});
-
-	$("#groups").css({ "top": $("#toolbar")[0].getBoundingClientRect().height + $("#pin_list")[0].getBoundingClientRect().height, "left": $("#toolbar_groups").outerWidth(), "height": $(window).height() - $("#pin_list")[0].getBoundingClientRect().height - $("#toolbar").outerHeight(), "width": $(window).width() - $("#toolbar_groups").outerWidth() });
+	let groups = document.getElementById("groups");
+	groups.style.top = toolbar.getBoundingClientRect().height + pin_list.getBoundingClientRect().height + "px";
+	groups.style.left = toolbar_groups.getBoundingClientRect().width + "px";
+	groups.style.height = document.body.clientHeight - pin_list.getBoundingClientRect().height - toolbar.getBoundingClientRect().height + "px";
+	groups.style.width = document.body.clientWidth - toolbar_groups.getBoundingClientRect().width + 1 + "px";
 }
 
 // set discarded class
 function RefreshDiscarded(tabId) {
-	if ($("#" + tabId).length > 0) {
+	let t = document.getElementById(tabId);
+	if (t != null) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab) {
 				if (tab.discarded) {
-					$("#" + tabId).addClass("discarded");
+					t.classList.add("discarded");
 				} else {
-					$("#" + tabId).removeClass("discarded");
+					t.classList.remove("discarded");
 				}
 			}
 		});
@@ -70,24 +86,29 @@ function RefreshDiscarded(tabId) {
 
 // set discarded class
 function SetAttentionIcon(tabId) {
-	if ($("#" + tabId).length > 0) {
-		$("#" + tabId).addClass("attention");
+	let t = document.getElementById(tabId);
+	if (t != null) {
+		t.classList.add("attention");
 	}
 }
 
 // change media icon
 function RefreshMediaIcon(tabId) {
-	if ($("#" + tabId).length > 0) {
+	let t = document.getElementById(tabId);
+	if (t != null) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab) {
 				if (tab.mutedInfo.muted) {
-					$("#" + tabId).removeClass("audible").addClass("muted");
+					t.classList.remove("audible");
+					t.classList.add("muted");
 				}
 				if (!tab.mutedInfo.muted && tab.audible) {
-					$("#" + tabId).removeClass("muted").addClass("audible");
+					t.classList.remove("muted");
+					t.classList.add("audible");
 				}
 				if (!tab.mutedInfo.muted && !tab.audible) {
-					$("#" + tabId).removeClass("audible").removeClass("muted");
+					t.classList.remove("audible");
+					t.classList.remove("muted");
 				}
 			}
 		});
@@ -99,68 +120,73 @@ function RefreshMediaIcon(tabId) {
 function VivaldiRefreshMediaIcons() {
 	setInterval(function() {
 		chrome.tabs.query({currentWindow: true}, function(tabs) {
-			$(".audible, .muted").removeClass("audible").removeClass("muted");
+			document.querySelectorAll(".audible, .muted").forEach(function(s){
+				s.classList.remove("audible");
+				s.classList.remove("muted");
+			});
 			let tc = tabs.length;
 			for (var ti = 0; ti < tc; ti++) {
 				if (tabs[ti].audible) {
-					$("#" + tabs[ti].id).addClass("audible");
+					document.getElementById(tabs[ti].id).classList.add("audible");
 				}
 				if (tabs[ti].mutedInfo.muted) {
-					$("#" + tabs[ti].id).addClass("muted");
+					document.getElementById(tabs[ti].id).classList.add("muted");
 				}
 			}
 		});
-	}, 1400);
+	// }, 1400);
+	}, 1000);
 }
 
 function GetFaviconAndTitle(tabId, addCounter) {
-	if ($("#" + tabId)[0]) {
+	let t = document.getElementById(tabId);
+	if (t != null) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab){
 				let title = tab.title ? tab.title : tab.url;
+				let tHeader = t.childNodes[3];
+				let tTitle = tHeader.childNodes[1];
 				if (tab.status == "complete") {
-					$("#" + tabId).removeClass("loading");
+					t.classList.remove("loading");
 					// change title
-					$("#tab_title" + tab.id)[0].textContent = title;
-					$("#tab_header" + tab.id).attr("title", title);
-					$("#"+tabId).data("title", title);
-					
+					tTitle.textContent = title;
+					tHeader.title = title;
+					tHeader.setAttribute("tabTitle", title);
 					// compatibility with various Tab suspender extensions
 					if (tab.favIconUrl != undefined && tab.favIconUrl.match("data:image/png;base64") != null) {
-						$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
+						tHeader.style.backgroundImage = "url(" + tab.favIconUrl + ")";
 					} else {
 						// case for internal pages, favicons don't have access, but can be loaded from url
 						if (tab.url.match("opera://|vivaldi://|browser://|chrome://|chrome-extension://") != null) {
-							$("#tab_header" + tab.id).css({ "background-image": "url(chrome://favicon/" + tab.url + ")" });
+							tHeader.style.backgroundImage = "url(chrome://favicon/" + tab.url + ")";
 						} else {
 							// change favicon
-							var img = new Image();
+							let img = new Image();
 							img.src = tab.favIconUrl;
 							img.onload = function() {
-								$("#tab_header" + tab.id).css({ "background-image": "url(" + tab.favIconUrl + ")" });
+								tHeader.style.backgroundImage = "url(" + tab.favIconUrl + ")";
 							};
 							img.onerror = function() {
-								$("#tab_header" + tab.id).css({ "background-image": ((tab.url == "" || browserId == "F") ? "url(./theme/icon_empty.svg)" : ("url(chrome://favicon/" + tab.url + ")")) });
-								// $("#tab_header" + tab.id).css({ "background-image": "url(" + tab.url + ")" });
+								tHeader.style.backgroundImage = ((tab.url == "" || browserId == "F") ? "url(./theme/icon_empty.svg)" : ("url(chrome://favicon/" + tab.url + ")"));
+								// "url(" + tab.url + ")"
 							}
 						}
 					}
 				}
 				if (tab.status == "loading") {
-					$("#tab_header" + tab.id).css({ "background-image": "" });
-					$("#" + tabId).addClass("loading");
 					title = tab.title ? tab.title : caption_loading;
-					$("#tab_title" + tab.id)[0].textContent = title;
-					$("#tab_header" + tab.id).attr("title", title);
-					$("#"+tabId).data("title", title);
+					t.classList.add("loading");
+					tHeader.style.backgroundImage = "";
+					tHeader.title = caption_loading;
+					tHeader.setAttribute("tabTitle", caption_loading);
+					tTitle.textContent = caption_loading;
 					setTimeout(function() {
-						if ($("#" + tabId)[0]) GetFaviconAndTitle(tabId, addCounter);
+						if (document.getElementById(tab.id) != null) GetFaviconAndTitle(tab.id, addCounter);
 					}, 1000);
 				}
 				if (addCounter && (opt.show_counter_tabs || opt.show_counter_tabs_hints)) {
 					RefreshTabCounter(tabId);
 				}
-		
 			}
 		});
 	}
@@ -168,22 +194,23 @@ function GetFaviconAndTitle(tabId, addCounter) {
 
 // refresh open closed trees states
 function RefreshExpandStates() {
-	$(".folder:visible").each(function() {
-		if ($("#ch"+this.id).children().length == 0 && $("#cf"+this.id).children().length == 0) {
-			$(this).removeClass("o").removeClass("c").addClass("n");
+	document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
+		if (s.childNodes[4].children.length == 0 && s.childNodes[5].children.length == 0) {
+			s.classList.remove("o");
+			s.classList.remove("c");
 		} else {
-			if ($(this).is(":not(.o, .c)")) {
-				$(this).addClass("o").removeClass("n");
+			if (s.classList.contains("o") == false && s.classList.contains("c") == false) {
+				s.classList.add("o");
 			}
 		}
 	});
-
-	$(".tab:visible").each(function() {
-		if ($("#ch"+this.id).children().length == 0) {
-			$(this).removeClass("o").removeClass("c").addClass("n");
+	document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
+		if (s.childNodes[4].children.length == 0) {
+			s.classList.remove("o");
+			s.classList.remove("c");
 		} else {
-			if ($(this).is(":not(.o, .c)")) {
-				$(this).addClass("o").removeClass("n");
+			if (s.classList.contains("o") == false && s.classList.contains("c") == false) {
+				s.classList.add("o");
 			}
 		}
 	});
@@ -191,48 +218,50 @@ function RefreshExpandStates() {
 
 function RefreshCounters() {
 	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-		$(".tab.n:visible").each(function() {
-			if ($("#tab_title"+this.id)[0]) {
-				$("#tab_title"+this.id)[0].textContent = $(this).data("title");
-				$("#tab_header"+this.id).attr("title", $(this).data("title"));
+		document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
+			let title = s.childNodes[3].getAttribute("tabTitle");
+			if (title != null) {
+				s.childNodes[3].title = title;
+				s.childNodes[3].childNodes[1].textContent =title;
 			}
 		});
-		$(".tab.c:visible, .tab.o:visible").each(function() {
-			if (opt.show_counter_tabs) {
-				$("#tab_title"+this.id)[0].textContent = ("("+$("#"+this.id+" .tab").length+") ") + $(this).data("title");
+		document.querySelectorAll("#"+active_group+" .o.tab, #"+active_group+" .c.tab").forEach(function(s){
+			let title = s.childNodes[3].getAttribute("tabTitle");
+
+			if (opt.show_counter_tabs && title != null) {
+				s.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
 			}
 			if (opt.show_counter_tabs_hints) {
-				$("#tab_header"+this.id).attr("title", ("("+$("#"+this.id+" .tab").length+") ") + $(this).data("title"));
+				s.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
 			}
 		});
-		$(".folder:visible").each(function() {
-			if (opt.show_counter_tabs) {
-				$("#folder_title"+this.id)[0].textContent = ("("+$("#"+this.id+" .tab").length+") ") + bgfolders[this.id].name;
+		
+		
+		document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
+			if (opt.show_counter_tabs && bgfolders[s.id]) {
+				s.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
 			}
-			if (opt.show_counter_tabs_hints) {
-				$("#folder_header"+this.id).attr("title", ("("+$("#"+this.id+" .tab").length+") ") + bgfolders[this.id].name);
+			if (opt.show_counter_tabs_hints && bgfolders[s.id]) {
+				s.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
 			}
 		});
 	}
 }
 
 function RefreshTabCounter(tabId) {
-	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-		if ($("#"+tabId).data("title")) {
+	let t = document.getElementById(tabId);
+	let title = t.childNodes[3].getAttribute("tabTitle");
+	if (t != null && title != null) {
+		if (t.classList.contains("o") || t.classList.contains("c")) {
 			if (opt.show_counter_tabs) {
-				if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-					$("#tab_title"+tabId)[0].textContent = ("("+$("#ch"+tabId+" .tab").length+") ") + $("#"+tabId).data("title");
-				} else {
-					$("#tab_title"+tabId)[0].textContent = $("#"+tabId).data("title");
-				}
+				t.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
 			}
 			if (opt.show_counter_tabs_hints) {
-				if ($(".c#"+tabId+", .o#"+tabId)[0]) {
-					$("#tab_header"+tabId).attr("title", ("("+$("#ch"+tabId+" .tab").length+") ") + $("#"+tabId).data("title"));
-				} else {
-					$("#tab_header"+tabId).attr("title", $("#"+tabId).data("title"));
-				}
+				t.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
 			}
+		} else {
+				t.childNodes[3].title = title;
+				t.childNodes[3].childNodes[1].textContent = title;
 		}
 	}
 }

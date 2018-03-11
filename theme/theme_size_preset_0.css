@@ -4,10 +4,10 @@ body {
 	--scrollbar_width: 16px;
 	--button_size: 22px;
 	
-	--pin_width: 19px;
-	--pin_height: 21px;
+	--pin_width: 22px;
+	--pin_height: 22px;
 
-	--tab_height: 15px;
+	--tab_height: 16px;
 	--tab_height_line: 17px;
 
 	--title_font_size: 10.5px;
@@ -16,8 +16,8 @@ body {
 	--tab_title_text_padding_exp_left: 25px;
 	--tab_title_text_padding_right_with_close_button: 20px;
 
-	--favicon_width: 13px;
-	--favicon_height: 13px;
+	--favicon_width: 14px;
+	--favicon_height: 14px;
 	--favicon_left: 1px;
 
 	--expand_height: 15px;

@@ -4,36 +4,46 @@
 
 // shrink or expand theme field
 function RefreshFields() {
-	if ($("#theme_list")[0].options.length == 0) {
-		$("#field_theme").css({"height": "45px"});
+	if (document.getElementById("theme_list").options.length == 0) {
+		document.getElementById("field_theme").style.height = "45px";
 	} else {
-		$("#field_theme").css({"height": ""});
+		document.getElementById("field_theme").style.height = "";
 	}
 	if (browserId == "F") {
-		$("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").hide();
+		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s){
+			s.style.display = "none";
+		});
 	}
 	if (browserId == "V") {
-		$("#url_for_web_panel").val(chrome.runtime.getURL("sidebar.html"));
-		$("#url_for_web_panel").prop("readonly", true);
+		let WebPanelUrlBox = document.getElementById("url_for_web_panel");
+		WebPanelUrlBox.value = (chrome.runtime.getURL("sidebar.html"));
+		WebPanelUrlBox.setAttribute("readonly", true);
 	} else{
-		$("#field_vivaldi").hide();
+		document.getElementById("field_vivaldi").style.display = "none";
 	}
-	if ($("#show_toolbar")[0].checked) {
-		$("#field_show_toolbar").css({"height": ""});
-		$("#options_available_buttons, #toolbar, #toolbar_colors").show();
+	if (document.getElementById("show_toolbar").checked) {
+		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
+			s.style.display = "";
+		});
+		document.getElementById("field_show_toolbar").style.height = "";
 	} else{
-		$("#field_show_toolbar").css({"height": "6"});
-		$("#options_available_buttons, #toolbar, #toolbar_colors").hide();
+		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
+			s.style.display = "none";
+		});
+		document.getElementById("field_show_toolbar").style.height = "6";
 	}
-
 }
 
 function RefreshGUI() {
-	$("#button_filter_type").addClass("url").removeClass("title");
-	if ($(".button").is(".on")) {
-		$("#toolbar").css({ "height": 53 });
+	let button_filter_type = document.getElementById("button_filter_type");
+	if (button_filter_type != null) {
+		button_filter_type.classList.add("url");
+		button_filter_type.classList.remove("title");
+	}
+	if (document.querySelector(".on") != null) {
+		document.getElementById("toolbar").style.height = "53px";
 	} else {
-		$("#toolbar").css({ "height": 26 });
+		document.getElementById("toolbar").style.height = "26px";
 	}
 }
 

@@ -2,6 +2,9 @@
    "button_bookmarks": {
       "message": "Закладки"
    },
+   "button_unload": {
+      "message": "Выгрузить все вкладки"
+   },
    "button_discard": {
       "message": "Выгрузить все вкладки"
    },
@@ -18,6 +21,9 @@
       "message": "История"
    },
    "button_move": {
+      "message": "Отсоединить текущую вкладку"
+   },
+   "button_detach": {
       "message": "Отсоединить текущую вкладку"
    },
    "button_new": {
@@ -374,55 +380,55 @@
    "opt_url_for_web_panel": {
       "message": "Вставить этот URL в веб-панель"
    },
-   "tabs_menu_clone": {
+   "menu_duplicate_tab": {
       "message": "Дублировать вкладку"
    },
-   "tabs_menu_close": {
+   "menu_close": {
       "message": "Закрыть вкладку"
    },
-   "tabs_menu_close_other": {
+   "menu_close_other": {
       "message": "Закрыть другие вкладки"
    },
-   "tabs_menu_collapse_all": {
+   "menu_collapse_all": {
       "message": "Свернуть все деревья"
    },
-   "tabs_menu_discard": {
+   "menu_unload": {
       "message": "Выгрузить вкладку"
    },
-   "tabs_menu_expand_all": {
+   "menu_expand_all": {
       "message": "Раскрыть все деревья"
    },
-   "tabs_menu_move": {
+   "menu_detach_tab": {
       "message": "Отсоединить вкладку"
    },
-   "tabs_menu_mute": {
+   "menu_mute_tab": {
       "message": "Выключить звук на вкладке"
    },
-   "tabs_menu_mute_other": {
+   "menu_mute_other": {
       "message": "Выключить звук (на других)"
    },
-   "tabs_menu_new": {
+   "menu_new_tab": {
       "message": "Новая вкладка"
    },
-   "tabs_menu_pin": {
+   "menu_pin_tab": {
       "message": "Закрепить вкладку"
    },
-   "tabs_menu_reload": {
+   "menu_reload_tab": {
       "message": "Обновить вкладку"
    },
-   "tabs_menu_settings": {
+   "menu_treetabs_settings": {
       "message": "Настройки Tree Tabs"
    },
-   "tabs_menu_undo": {
+   "menu_undo_close_tab": {
       "message": "Отменить закрытие"
    },
-   "tabs_menu_unmute": {
+   "menu_unmute_tab": {
       "message": "Включить звук на вкладке"
    },
-   "tabs_menu_unmute_other": {
+   "menu_unmute_other": {
       "message": "Включить звук (на других)"
    },
-   "tabs_menu_unpin": {
+   "menu_unpin_tab": {
       "message": "Открепить вкладку"
    },
    "options_active_tab_font_bold": {
@@ -434,7 +440,7 @@
    "options_never_show_close": {
       "message": "не показывать кнопку закрытия (опция выше будет проигнорирована)"
    },
-   "tabs_menu_close_tree": {
+   "menu_close_tree": {
       "message": "Закрыть дерево"
    }
 }

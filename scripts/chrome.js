@@ -14,24 +14,28 @@ function StartChromeListeners() {
 	}
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "backup_available") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			$("#button_load_bak"+message.bak).removeClass("disabled");
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			document.getElementById("button_load_bak"+message.bak).classList.remove("disabled");
 		}
 		if (message.command == "drag_drop") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			log(message);
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			if (opt.debug) console.log(message);
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
-			DragAndDrop.Depth = message.Depth;
+			// DragAndDrop.Depth = message.Depth;
 			DragAndDrop.Folders = Object.assign({}, message.Folders);
 			DragAndDrop.FoldersSelected = message.FoldersSelected;
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.TabsIdsParents = message.TabsIdsParents;
 			DragAndDrop.TabsIdsSelected = message.TabsIdsSelected;
+			
+			DropTargetsFront(undefined, true, true);
+			
+			
 		}
 		if (message.command == "dropped") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			log(message);
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			if (opt.debug) console.log(message);
 			DragAndDrop.DroppedToWindowId = message.DroppedToWindowId;
 			if (Object.keys(DragAndDrop.Folders).length > 0 && message.DroppedToWindowId != CurrentWindowId) {
 				for (var folder in DragAndDrop.Folders)
@@ -41,21 +45,21 @@ function StartChromeListeners() {
 			}
 		}
 		if (message.command == "reload_sidebar") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			log(message);
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			if (opt.debug) console.log(message);
 			window.location.reload();
 		}
 		if (message.command == "reload_options") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
 				opt = Object.assign({}, response);
 				setTimeout(function() {
 					RestorePinListRowSettings();
-				}, 200);
+			}, 200);
 			});
 		}
 		if (message.command == "reload_theme") {
-			log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			setTimeout(function() {
 				chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
 					RestorePinListRowSettings();
@@ -65,114 +69,150 @@ function StartChromeListeners() {
 			}, 300);
 		}
 		if (message.windowId == CurrentWindowId) {
-			switch(message.command) {
-				case "tab_created": // if set to treat unparented tabs as active tab's child
-					log("tab_created");
-					log("openerTabId is: "+message.tab.openerTabId);
-					
-					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && $("#"+active_group+" .active_tab")[0]) {
-						message.tab.openerTabId = $("#"+active_group+" .active_tab")[0].id;
+			
+			// I WANT TO MOVE THIS LOGIC TO THE BACKGROUND SCRIPT!
+			
+			if (message.command == "tab_created") { // if set to treat unparented tabs as active tab's child
+			
+				if (opt.debug) console.log("tab_created: "+message.tabId);
+				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
+
+				if (message.parentTabId != undefined) {
+					AppendTab(message.tab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
+				} else {
+					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && document.querySelector("#"+active_group+" .active_tab")) {
+						if (opt.debug) console.log("ignore orphan case, append tab as child");
+						message.tab.openerTabId = document.querySelector("#"+active_group+" .active_tab").id;
 					}
 					if (message.tab.openerTabId) { // child case
 						if (opt.append_child_tab == "after_active") {
-							AppendTab({ tab: message.tab, InsertAfterId: $("#"+active_group+" .active_tab")[0] ? $("#"+active_group+" .active_tab")[0].id : undefined, Append: false, Scroll: true  });
+							if (opt.debug) console.log("child case, tab will append after active");
+							AppendTab(message.tab, false, false, document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : false, false, false, true, false, false, true, false);
 						} else {
-							if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length < opt.max_tree_depth)) { // append to tree
+							let Parents = GetParentsByClass(document.getElementById(message.tab.openerTabId), "tab");
+							if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree
 								if (opt.append_child_tab == "top") {
-									AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: false, Scroll: true });
+									if (opt.debug) console.log("child case, in tree limit, tab will append on top");
+									AppendTab(message.tab, message.tab.openerTabId, false, false, (message.tab.pinned ? true : false), false, true, false, false, true, false);
 								}
 								if (opt.append_child_tab == "bottom") {
-									AppendTab({ tab: message.tab, ParentId: message.tab.openerTabId, Append: true, Scroll: true });
+									if (opt.debug) console.log("child case, in tree limit, tab will append on bottom");
+									AppendTab(message.tab, message.tab.openerTabId, false, false, true, false, true, false, false, true, false);
 								}
 							}
-							if (opt.max_tree_depth > 0 && $("#"+message.tab.openerTabId).parents(".tab").length >= opt.max_tree_depth) { // if reached depth limit of the tree
+							if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
+								if (opt.debug) console.log("child case, surpassed tree limit");
 								if (opt.append_child_tab_after_limit == "after") {
-									AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: true, Scroll: true });
+									if (opt.debug) console.log("tab will append after active");
+									AppendTab(message.tab, false, false, message.tab.openerTabId, true, false, true, false, false, true, false);
 								}
 								if (opt.append_child_tab_after_limit == "top") {
-									AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: false, Scroll: true });
+									if (opt.debug) console.log("tab will append on top");
+									AppendTab(message.tab, document.getElementById(message.tab.openerTabId).parentNode.parentNode.id, false, false, (message.tab.pinned ? true : false), false, true, false, false, true, false);
 								}
 								if (opt.append_child_tab_after_limit == "bottom") {
-									AppendTab({ tab: message.tab, ParentId: $("#"+message.tab.openerTabId).parent().parent()[0].id, Append: true, Scroll: true });
+									if (opt.debug) console.log("tab will append on bottom");
+									AppendTab(message.tab, document.getElementById(message.tab.openerTabId).parentNode.parentNode.id, false, false, true, false, true, false, false, true, false);
 								}
 							}
 						}
-						if (opt.max_tree_depth == 0) { // place tabs flat, (should I merge it with orphans case?)
+						if (opt.max_tree_depth == 0) { // place tabs flat
+							if (opt.debug) console.log("max_tree_depth is 0, tabs are placed on the same level");
 							if (opt.append_child_tab_after_limit == "after") {
-								AppendTab({ tab: message.tab, InsertAfterId: message.tab.openerTabId, Append: false, Scroll: true });
+								if (opt.debug) console.log("tab will append after active");
+								AppendTab(message.tab, false, false, message.tab.openerTabId, false, false, true, false, false, true, false);
 							}
 							if (opt.append_child_tab_after_limit == "top") {
-								AppendTab({ tab: message.tab, Append: false, Scroll: true });
+								if (opt.debug) console.log("tab will append on top");
+								AppendTab(message.tab, false, false, false, false, false, true, false, false, true, false);
 							}
 							if (opt.append_child_tab_after_limit == "bottom") {
-								AppendTab({ tab: message.tab, Append: true, Scroll: true });
+								if (opt.debug) console.log("tab will append on bottom");
+								AppendTab(message.tab, false, false, false, true, false, true, false, false, true, false);
 							}
 						}
 					} else { // orphan case
 						if (opt.append_orphan_tab == "after_active") {
-							AppendTab({ tab: message.tab, InsertAfterId: $("#"+active_group+" .active_tab")[0] ? $("#"+active_group+" .active_tab")[0].id : undefined, Append: false });
+							AppendTab(message.tab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (message.tab.pinned ? true : false), false, true, false, false, true, false);
 						}
 						if (opt.append_orphan_tab == "top") {
-							AppendTab({ tab: message.tab, Append: false });
+							AppendTab(message.tab, false, false, false, false, false, true, false, false, true, false);
 						}
 						if (opt.append_orphan_tab == "bottom" || opt.append_orphan_tab == "as_child") {
-							AppendTab({ tab: message.tab, Append: true });
+							AppendTab(message.tab, false, false, false, true, false, true, false, false, true, false);
 						}
 					}
-					if ($("#"+message.tab.openerTabId).is(".c")) {
-						$("#"+message.tab.openerTabId).removeClass("c").addClass("o");
+				}
+				
+				if (message.tab.openerTabId) { // check if openerTabId is defined, if it's in DOM and if it's closed, then change it to open
+					let openerTab = document.querySelector(".c[id='"+message.tab.openerTabId+"']");
+					if (openerTab != null) {
+						openerTab.classList.remove("c");
+						openerTab.classList.add("o");
 					}
-					if (opt.syncro_tabbar_tabs_order) {
-						let TTtabsIndexes = $(".pin, .tab").map(function(){return parseInt(this.id);}).toArray();
-						chrome.tabs.move(message.tab.id, {index: TTtabsIndexes.indexOf(message.tab.id)});
+				}
+				if (opt.syncro_tabbar_tabs_order) {
+					let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
+						return parseInt(s.id);
+					});
+					chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
+				}
+				RefreshExpandStates();
+				schedule_update_data++;
+				RefreshGUI();
+				RefreshCounters();
+				return;
+			}
+			if (message.command == "tab_attached") {
+				if (opt.debug) console.log(message);
+				AppendTab(message.tab, message.ParentId, false, false, true, false, true, false, false, true, false);
+				RefreshGUI();
+				return;
+			}
+			if (message.command == "tab_detached") {
+				let ctDetachedParent = document.getElementById(message.tabId).childNodes[4];
+				if (ctDetachedParent != null) {
+					if (opt.promote_children_in_first_child == true && ctDetachedParent.childNodes.length > 1) {
+						let ctNewParent = document.getElementById(ctDetachedParent.firstChild.id).childNodes[4];
+						ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
+						while (ctDetachedParent.firstChild) {
+							ctNewParent.appendChild(ctDetachedParent.firstChild);
+						}
+					} else {
+						while (ctDetachedParent.firstChild) {
+							ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
+						}
 					}
-					RefreshExpandStates();
+				}
+				RemoveTabFromList(message.tabId);
+				setTimeout(function() {
 					schedule_update_data++;
-					RefreshGUI();
-					RefreshCounters();
-				break;
-				case "tab_attached":
-					log(message);
-					AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true});
-					RefreshGUI();
-				break;
-				case "tab_detached":
-					if ($(".tab#"+message.tabId)[0]) {
-						if (opt.promote_children == true) {
-							if (opt.promote_children_in_first_child == true && $("#ch"+message.tabId).children().length > 1) {
-								let FirstChild = $("#ch"+message.tabId).children()[0];
-								$(FirstChild).insertAfter($("#"+message.tabId));
-								$("#ch"+FirstChild.id).append($("#ch"+message.tabId).children());
-							} else {
-								$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+				}, 300);
+				RefreshGUI();
+				return;
+			}
+			if (message.command == "tab_removed") {
+				if (opt.debug) console.log("tab_removed: "+message.tabId);
+				let mTab = document.getElementById(message.tabId);
+				if (mTab != null) {
+					let ctParent = mTab.childNodes[4];
+					if (opt.debug) console.log("tab_removed, promote children: " +opt.promote_children);
+					if (opt.promote_children == true) {
+						if (opt.promote_children_in_first_child == true && ctParent.childNodes.length > 1) {
+							let ctNewParent = document.getElementById(ctParent.firstChild.id).childNodes[4];
+							ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
+							while (ctParent.firstChild) {
+								ctNewParent.appendChild(ctParent.firstChild);
 							}
 						} else {
-							$("#ch"+message.tabId).find(".tab").each(function() {
-								RemoveTabFromList(this.id);
-							});
-						}
-					}
-					RemoveTabFromList(message.tabId);
-					setTimeout(function() {
-						schedule_update_data++;
-					}, 300);
-					RefreshGUI();
-				break;
-				case "tab_removed":
-					if ($(".tab#"+message.tabId)[0]) {
-						if (opt.promote_children == true) {
-							if (opt.promote_children_in_first_child == true && $("#ch"+message.tabId).children().length > 1) {
-								let FirstChild = $("#ch"+message.tabId).children()[0];
-								$(FirstChild).insertAfter($("#"+message.tabId));
-								$("#ch"+FirstChild.id).append($("#ch"+message.tabId).children());
-							} else {
-								$("#ch"+message.tabId).children().insertAfter($("#"+message.tabId));
+							while (ctParent.firstChild) {
+								ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
 							}
-						} else {
-							$("#ch"+message.tabId).find(".tab").each(function() {
-								chrome.tabs.remove(parseInt(this.id));
-							});
 						}
+					} else {
+						document.querySelectorAll("[id='"+message.tabId+"'] .tab").forEach(function(s) {
+							chrome.tabs.remove(parseInt(s.id));
+						});
 					}
 					RemoveTabFromList(message.tabId);
 					RefreshExpandStates();
@@ -181,44 +221,48 @@ function StartChromeListeners() {
 					}, 300);
 					RefreshGUI();
 					RefreshCounters();
-				break;
-				case "tab_activated":
+				}
+				return;
+			}
+			if (message.command == "tab_activated") {
+				SetActiveTab(message.tabId);
+				return;
+			}
+			if (message.command == "tab_attention") {
+				SetAttentionIcon(message.tabId);
+				return;
+			}
+			if (message.command == "tab_updated") {
+				if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
 					setTimeout(function() {
-						SetActiveTab(message.tabId);
-					}, 200);
-				break;
-				case "tab_attention":
-					SetAttentionIcon(message.tabId);
-				break;
-				case "tab_updated":
-					if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
-						setTimeout(function() {
-							GetFaviconAndTitle(message.tabId, true);
-						}, 100);
+						GetFaviconAndTitle(message.tabId, true);
+					}, 100);
+				}
+				if (message.changeInfo.title != undefined) {
+					setTimeout(function() {
+						GetFaviconAndTitle(message.tabId, true);
+					}, 1000);
+				}
+				if (message.changeInfo.audible != undefined || message.changeInfo.mutedInfo != undefined) {
+					RefreshMediaIcon(message.tabId);
+				}
+				if (message.changeInfo.discarded != undefined) {
+					RefreshDiscarded(message.tabId);
+				}
+				if (message.changeInfo.pinned != undefined) {
+					let updateTab = document.getElementById(message.tabId);
+					if (updateTab != null && ( (message.tab.pinned && updateTab.classList.contains("tab")) || (!message.tab.pinned && updateTab.classList.contains("pin")) )  ) {
+						SetTabClass(message.tabId, message.tab.pinned);
+						schedule_update_data++;
 					}
-					if (message.changeInfo.title != undefined) {
-						setTimeout(function() {
-							GetFaviconAndTitle(message.tabId, true);
-						}, 1000);
-					}
-					if (message.changeInfo.audible != undefined || message.changeInfo.mutedInfo != undefined) {
-						RefreshMediaIcon(message.tabId);
-					}
-					if (message.changeInfo.discarded != undefined) {
-						RefreshDiscarded(message.tabId);
-					}
-					if (message.changeInfo.pinned != undefined) {
-						if ((message.tab.pinned && $("#"+message.tabId).is(".tab")) || (!message.tab.pinned && $("#"+message.tabId).is(".pin"))) {
-							SetTabClass({ id: message.tabId, pin: message.tab.pinned });
-							schedule_update_data++;
-						}
-						RefreshExpandStates();
-					}
-				break;
-				case "remote_update":
-					RearrangeTreeStructure(message.groups, message.folders, message.tabs);
-					sendResponse(true);
-				break;
+					RefreshExpandStates();
+				}
+				return;
+			}
+			if (message.command == "remote_update") {
+				RearrangeTreeStructure(message.groups, message.folders, message.tabs);
+				sendResponse(true);
+				return;
 			}
 		}
 		

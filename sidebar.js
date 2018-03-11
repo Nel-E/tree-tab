@@ -5,23 +5,22 @@
 document.addEventListener("DOMContentLoaded", Run(), false);
 function Loadi18n() {
 	// toolbar labels
-	$(".button").each(function() {
-		$(this).attr("title", chrome.i18n.getMessage(this.id));
+	document.querySelectorAll(".button").forEach(function(s){
+		s.title = chrome.i18n.getMessage(s.id);
 	});
-	// menu labels
-	$(".menu_item").each(function() {
-		$(this).text(chrome.i18n.getMessage(this.id));
-	});
-	// edit group dialog labels
-	$(".edit_dialog_button").each(function() {
-		$(this)[0].textContent = chrome.i18n.getMessage(this.id);
+	// menu labels and edit group dialog labels
+	document.querySelectorAll(".menu_item, .edit_dialog_button").forEach(function(s){
+		s.textContent = chrome.i18n.getMessage(s.id);
 	});
 }
 function RestorePinListRowSettings() {
+	plist = document.getElementById("pin_list");
 	if (opt.pin_list_multi_row) {
-		$("#pin_list").css({"white-space": "normal", "overflow-x": "hidden"});
+		plist.style.whiteSpace = "normal";
+		plist.style.overflowX = "hidden";
 	} else {
-		$("#pin_list").css({"white-space": "", "overflow-x": ""});
+		plist.style.whiteSpace = "";
+		plist.style.overflowX = "";
 	}
 	RefreshGUI();
 }
@@ -66,41 +65,76 @@ function Initialize() {
 		// APPEND TABS
 		let tc = tabs.length;
 		for (var ti = 0; ti < tc; ti++) {
-			AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
+			// AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
+			AppendTab(tabs[ti], false, false, false, true, false, true, false, true, false, false);
 		}
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				if ($("#"+bgtabs[tabs[ti].id].parent).length > 0 && $("#"+tabs[ti].id).find($("#ch"+bgtabs[tabs[ti].id].parent)).length == 0) {
-					$("#ch"+bgtabs[tabs[ti].id].parent).append($("#"+tabs[ti].id));
+				let TabParent = document.getElementById("ct"+bgtabs[tabs[ti].id].parent) ;
+
+				if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #ct"+bgtabs[tabs[ti].id].parent) == null) {
+					TabParent.appendChild(document.getElementById(tabs[ti].id));
 				}
 			}
 		}
+
+
+
+		
+		// THIS TAKES 6 SECONDS, THE ORIGINAL WAY ONLY 4
+		// for (var ti = 0; ti < tc; ti++) {			
+			// if (document.getElementById("ct"+bgtabs[tabs[ti].id].parent) != null) {
+				// AppendTab({tab: tabs[ti], ParentId: bgtabs[tabs[ti].id].parent, index: bgtabs[tabs[ti].id].index, Append: true, SkipSetActive: true});
+			// }
+		// }
+		// for (var ti = 0; ti < tc; ti++) {
+			// if (document.getElementById(tabs[ti].id) != null) {
+				// AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
+			// }
+		// }
+	
+	
+
+
+	
 		for (var ti = 0; ti < tc; ti++) {
-			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-				$("#"+tabs[ti].id).addClass(bgtabs[tabs[ti].id].expand);
+			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && bgtabs[tabs[ti].id].expand != "") {
+				document.getElementById(tabs[ti].id).classList.add(bgtabs[tabs[ti].id].expand);
 			}
 		}
 		// SET ACTIVE TAB FOR EACH GROUP
-		for (var group in bggroups) {
-			if ($("#"+group+" #"+bggroups[group].active_tab)[0]) {
-				$("#"+bggroups[group].active_tab).addClass("active_tab");
-			}
-		}				
-		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-			SetActiveGroup(response, false, true);
+		chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
+			chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+				for (var group in bggroups) {
+					if (response && tabs[0].pinned && response == group) {
+						SetActiveTab(tabs[0].id);
+						continue;
+					}
+					let activeInGroup = document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']");
+					if (activeInGroup != null) {
+						// document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']").classList.add("active_tab");
+						activeInGroup.classList.add("active_tab");
+					}
+				}
+				if (response) {
+					SetActiveGroup(response, true, true);
+				} else {
+					SetActiveGroup("tab_list", true, true);
+				}
+			});
 		});
 		RearrangeTreeTabs(tabs, bgtabs, true);
 		RearrangeFolders(true);
-		SetToolbarShelfToggle("mousedown");
+		// SetToolbarShelfToggle("mousedown");
 		StartChromeListeners();
-		SetIOEvents();
-		SetToolbarEvents();
-		SetTRefreshEvents();
-		SetGroupEvents();
-		SetTabEvents();
-		SetFolderEvents();
+		// SetToolbarEvents();
+		// SetTRefreshEvents();
 		SetMenu();
-		SetDragAndDropEvents();
+		SetEvents();
+		HideMenus();
+		if (opt.switch_with_scroll) {
+			BindTabsSwitchingToMouseWheel("pin_list");
+		}
 		if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
 			RearrangeBrowserTabs();
 		}
@@ -108,22 +142,10 @@ function Initialize() {
 		if (browserId == "V") {
 			VivaldiRefreshMediaIcons();
 		}
-		
-		var SetActiveLoop = setInterval(function() {
-			log("SetActiveTab");
-			chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
-				if (tabs[0].pinned && $("#"+active_group+" .active_tab")[0]) {
-					SetActiveTab(tabs[0].id);
-				} else {
-					clearInterval(SetActiveLoop);
-				}
-			});
-		}, 1000);
-
 		setTimeout(function() {
 			RefreshExpandStates();
 			RefreshCounters();
-		}, 1000);
+		}, 3000);
 		setTimeout(function() {
 			UpdateData();
 			delete bgtabs;
@@ -131,9 +153,9 @@ function Initialize() {
 		}, 5000);
 		if (browserId != "F") {
 			chrome.storage.local.get(null, function(items) {
-				if (Object.keys(items["windows_BAK1"]).length > 0) { $("#button_load_bak1").removeClass("disabled"); }
-				if (Object.keys(items["windows_BAK2"]).length > 0) { $("#button_load_bak2").removeClass("disabled"); }
-				if (Object.keys(items["windows_BAK3"]).length > 0) { $("#button_load_bak3").removeClass("disabled"); }
+				if (Object.keys(items["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
+				if (Object.keys(items["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
+				if (Object.keys(items["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
 			});
 		}
 	});			

@@ -3,7 +3,6 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title></title>
-		
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_0.css" id="sizes_preset_0" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_1.css" id="sizes_preset_1" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_2.css" id="sizes_preset_2" />
@@ -20,8 +19,6 @@
 		<link type="text/css" rel="stylesheet" media="all" href="../options/options.css" id="main_body_css" />
 
 		<style rel="stylesheet">	#red_higlights_go_here { background-color: transparent; } </style>
-		
-		<script type="text/javascript" src="../lib_jquery/jquery-3.2.1.min.js"></script>
 	</head>
 	<body id="body">
 	
@@ -74,6 +71,19 @@
 					<td class="label" id="options_syncro_tabbar_groups_tabs_order"></td>
 				</tr>
 			</table>
+			
+			<ul>
+				<li>
+					<label class="label" id="options_dbclick_group"></label>
+					<select id="dbclick_group">
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_group_none" value="nothing"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_group_new" value="new_tab"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_group_activate_previous_active" value="activate_previous_active"></option>
+					</select>
+				</li>
+			</ul>
+			
+			
 		</fieldset>
 
 		<fieldset class="field" id="field_tabs">
@@ -153,6 +163,17 @@
 			
 			<ul>
 				<li>
+					<label class="label" id="options_dbclick_tab"></label>
+					<select id="dbclick_tab">
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_none" value="nothing"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_new" value="new_tab"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_close" value="close_tab"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_reload" value="reload_tab"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_unload" value="unload_tab"></option>
+						<option class="bg_opt_drop_down_menu" id="options_dbclick_tab_activate_previous_active" value="activate_previous_active"></option>
+					</select>
+				</li>
+				<li>
 					<label class="label" id="options_append_child_tab"></label>
 					<select id="append_child_tab">
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_top" value="top"></option>
@@ -206,12 +227,12 @@
 		
 			<select id="theme_list" style="padding-right:6px;"></select>
 			<input type="text" id="new_theme_name" name="untitled" value="untitled"></input>
-			<button class="set_button" type="button" id="options_rename_theme_button" style="margin:6px;">Rename</button>
-			<button class="set_button" type="button" id="options_add_theme_button" style="margin:6px;">Add new</button>
-			<button class="set_button" type="button" id="options_remove_theme_button" style="margin:6px;">Remove</button>
-			<button class="set_button" type="button" id="options_import_theme_button" style="margin:6px;">Import</button>
-			<button class="set_button" type="button" id="options_export_theme_button" style="margin:6px;">Export</button>
-			<button class="set_button" type="button" id="options_share_theme_link" style="margin:6px;">Export</button>
+			<button class="set_button theme_buttons" type="button" id="options_rename_theme_button" style="margin:6px;">Rename</button>
+			<button class="set_button theme_buttons" type="button" id="options_add_theme_button" style="margin:6px;">Add new</button>
+			<button class="set_button theme_buttons" type="button" id="options_remove_theme_button" style="margin:6px;">Remove</button>
+			<button class="set_button theme_buttons" type="button" id="options_import_theme_button" style="margin:6px;">Import</button>
+			<button class="set_button theme_buttons" type="button" id="options_export_theme_button" style="margin:6px;">Export</button>
+			<button class="set_button theme_buttons" type="button" id="options_share_theme_link" style="margin:6px;">Export</button>
 			<br>
 			<br>
 			<fieldset class="field" id="field_show_toolbar" style="position: relative; width:816px;">
@@ -241,7 +262,7 @@
 					<div class="toolbar" id="toolbar" style="position: relative; top: 5px;  height: 26px; width: 350px; overflow:hidden;"></div>	
 				</div>
 
-				<button class="set_button" type="button" id="options_reset_toolbar_button" style="margin:10px;">Reset</button>
+				<button class="set_button" type="button" id="options_reset_toolbar_button" style="margin:10px; margin-top:20px;">Reset</button>
 
 			</fieldset>
 
@@ -298,9 +319,11 @@
 				<div class="pick_col color_bucket" id="scrollbar_track"></div>
 
 				<div class="pin_list" id="pin_list"></div>
-				<div class="group" id="tab_list">
-					<div class="children_folders" id="cftab_list"></div>
-					<div class="children_tabs" id="chtab_list"></div>
+				<div id="groups">
+					<div class="group" id="tab_list">
+						<div class="children_folders" id="cftab_list"></div>
+						<div class="children_tabs" id="cttab_list"></div>
+					</div>
 				</div>
 				<div id="pin_list_scrollbar"><div id="pin_list_scrollbar_thumb"></div></div>
 				<div id="group_scrollbar"><div id="group_scrollbar_thumb"></div></div>
@@ -394,7 +417,7 @@
 		
 		<button class="set_button" type="button" id="options_clear_data" style="margin:10px;"></button>
 		
-		<input type="color" id="color_picker" style="position:absolute; left:-500px; top:-500px; overflow:hidden; user-select: none; -moz-user-select: none;">
+		<input type="color" id="color_picker" style="position:absolute; left:-1000px; top:-1000px; width:1px; height:1px; overflow:hidden;">
 		<div id="DragImage" style="display: none; width:0px; height:0px;"></div>
 
 		<script type="text/javascript" src="../scripts/global.js"></script>
@@ -409,6 +432,7 @@
 
 		<div id="donate"></div>
 		<div id="donate_paypal" class="donation_button"></div>
+		<div id="donate_litecoin" class="donation_button"></div>
 		<div id="donate_bitcoin" class="donation_button"></div>
 		<div id="donate_ethereum" class="donation_button"></div>
 

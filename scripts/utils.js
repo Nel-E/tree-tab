@@ -3,6 +3,126 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 
+function HideRenameDialogs() {
+	document.querySelectorAll(".edit_dialog").forEach(function(s){
+		s.style.display = "none";
+		s.style.top = "-500px";
+		s.style.left = "-500px";
+	});
+}
+function GetParentsByClass(Node, Class) {
+	let Parents = [];
+	let ParentNode = Node;
+	while (ParentNode.parentNode != null) {
+		if (ParentNode.parentNode.classList != undefined && ParentNode.parentNode.classList.contains(Class)) {
+			Parents.push(ParentNode.parentNode);
+		}
+		ParentNode = ParentNode.parentNode;
+	}
+	return Parents;
+}
+function GetParentsBy2Classes(Node, ClassA, ClassB) {
+	let Parents = [];
+	let ParentNode = Node;
+	while (ParentNode.parentNode != null) {
+		if (ParentNode.parentNode.classList != undefined && ParentNode.parentNode.classList.contains(ClassA) && ParentNode.parentNode.classList.contains(ClassB)) {
+			Parents.push(ParentNode.parentNode);
+		}
+		ParentNode = ParentNode.parentNode;
+	}
+	return Parents;
+}
+
+
+function GetSelectedFolders() {
+	if (opt.debug) console.log("function: GetSelectedFolders");
+	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
+	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
+		res.FoldersSelected.push(s.id);
+		res.Folders[s.id] = Object.assign({}, bgfolders[s.id]);
+		let Fchildren = document.querySelectorAll("#cf"+s.id+" .folder");
+		Fchildren.forEach(function(fc){
+			res.Folders[fc.id] = Object.assign({}, bgfolders[fc.id]);
+		});
+		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
+		Tchildren.forEach(function(tc){
+			res.TabsIds.push(parseInt(tc.id));
+			res.TabsIdsParents.push(tc.parentNode.id);
+		});
+	});
+	if (opt.debug) console.log(res);
+	return res;
+}
+
+function GetSelectedTabs() {
+	if (opt.debug) console.log("function: GetSelectedTabs");
+	// let res = {urls: [], TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
+	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
+	document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+		// chrome.tabs.get(parseInt(s.id), function(tab) {
+			// res.urls.push(tab.url);
+		// });
+		
+		res.TabsIds.push(parseInt(s.id));
+		res.TabsIdsParents.push(s.parentNode.id);
+		res.TabsIdsSelected.push(parseInt(s.id));
+		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
+		Tchildren.forEach(function(tc){
+			
+			// chrome.tabs.get(parseInt(tc.id), function(tab) {
+				// res.urls.push(tab.url);
+			// });
+			
+			res.TabsIds.push(parseInt(tc.id));
+			res.TabsIdsParents.push(tc.parentNode.id);
+		});
+	});
+	if (opt.debug) console.log(res);
+	return res;
+}
+
+
+
+
+
+function FindTab(input) { // find and select tabs
+	let ButtonFilterClear = document.getElementById("button_filter_clear");
+	document.querySelectorAll(".filtered, .highlighted_search").forEach(function(s){
+		s.classList.remove("filtered");
+		s.classList.remove("selected_tab");
+		s.classList.remove("selected_last");
+		s.classList.remove("highlighted_search");
+	})
+	if (input.length == 0) {
+		document.getElementById("filter_box").value = "";
+		ButtonFilterClear.style.opacity = "0";
+		ButtonFilterClear.title = "";
+		return;
+	} else {
+		ButtonFilterClear.style.opacity = "1";
+		ButtonFilterClear.title = caption_clear_filter;
+	}
+	SearchIndex = 0;
+	let FilterType = document.getElementById("button_filter_type");
+	let searchUrl = FilterType.classList.contains("url");
+	let searchTitle = FilterType.classList.contains("title");
+	chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
+		tabs.forEach(function(Tab) {
+			if (searchUrl) {
+				if (Tab.url.toLowerCase().match(input.toLowerCase())) {
+					document.getElementById(Tab.id).classList.add("filtered");
+					document.getElementById(Tab.id).classList.add("selected_tab");
+				}
+			}
+			if (searchTitle) {
+				if (Tab.title.toLowerCase().match(input.toLowerCase())) {
+					document.getElementById(Tab.id).classList.add("filtered");
+					document.getElementById(Tab.id).classList.add("selected_tab");
+				}
+			}
+		});
+	});
+}
 // sort tabs main function
 // function SortTabs() {
 	// if ($(".tab").find(":visible:first")[0]){
@@ -58,9 +178,7 @@
 	// return url_parts.join(" ! ");
 // }
 
-
-
-function BookmarkGroup(GroupId) {
+function Bookmark(rootNode) {
 	let ToolbarId = browserId == "F" ? "toolbar_____" : "1";
 	chrome.bookmarks.get(ToolbarId, function(list) {
 		chrome.bookmarks.search("TreeTabs", function(list) {
@@ -75,199 +193,92 @@ function BookmarkGroup(GroupId) {
 				chrome.bookmarks.create({parentId: ToolbarId, title: "TreeTabs"}, function(TreeTabsNew) {
 					TreeTabsId = TreeTabsNew.id;
 				});
-				BookmarkGroup(GroupId);
+				Bookmark(rootNode);
 				return;
 			} else {
-				chrome.bookmarks.create({parentId: TreeTabsId, title: bggroups[GroupId].name}, function(GroupFolder) {
-					let GroupFolderId = GroupFolder.id;
-					let folders = {};
-					$($("#ch"+GroupId+" .tab").get().reverse()).each(function() {
-						chrome.tabs.get(parseInt(this.id), function(tab){
-							if (tab) {
-								chrome.bookmarks.create({parentId: GroupFolderId, title: tab.title, url: tab.url, index: 0 });
-							}
-						});
-					});					
-					$($("#"+GroupId+" .folder").get().reverse()).each(function() {
-						if (bgfolders[this.id]) {
-							let ttId = this.id;
-							chrome.bookmarks.create({parentId: GroupFolderId, title: bgfolders[ttId].name, index: 0}, function(folderId) {
-								folders[ttId] = {ttid: ttId, id: folderId.id, ttparent: bgfolders[ttId].parent, parent: GroupFolderId};
-								if (ttId == $("#"+GroupId+" .folder")[0].id) {
-									for (var elem in folders) {
-										let FolderTTId = folders[elem].ttid;
-										let BookmarkFolderId = folders[elem].id;
-										let TTParentId = folders[elem].ttparent;
-										if (folders[TTParentId]) {
-											folders[FolderTTId].parent = folders[TTParentId].id;
+				if (rootNode.classList.contains("tab")) {
+					chrome.tabs.get(parseInt(rootNode.id), function(tab) {
+						if (tab) {
+							chrome.bookmarks.create({parentId: TreeTabsId, title: tab.title}, function(root) {
+								document.querySelectorAll("[id='"+rootNode.id+"'], [id='"+rootNode.id+"'] .tab").forEach(function(s){
+									chrome.tabs.get(parseInt(s.id), function(tab){
+										if (tab) {
+											chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
 										}
-									}
-									setTimeout(function() {
-										for (var elem in folders) {
-											let BookmarkFolderId = folders[elem].id;
-											let BookmarkFolderParentId = folders[elem].parent;
-											chrome.bookmarks.move(BookmarkFolderId, {parentId: BookmarkFolderParentId, index: 0}, function(folderId) {		});
-										}
-									}, 2000);
-									setTimeout(function() {
-										for (var elem in folders) {
-											let FolderTTId = folders[elem].ttid;
-											let BookmarkFolderId = folders[elem].id;
-											$("#ch"+FolderTTId+" .tab").each(function() {
-												chrome.tabs.get(parseInt(this.id), function(tab){
-													if (tab) {
-														chrome.bookmarks.create({parentId: BookmarkFolderId, title: tab.title, url: tab.url, });
-													}
-												});
-											});
-										}
-									}, 8000);
-								}
+									});
+								});
 							});
 						}
 					});
-				});
-			}
-		});
-	});
-}
-
-function BookmarkTree(rootNodeId, rootName, rootIsFolder) {
-	let ToolbarId = browserId == "F" ? "toolbar_____" : "1";
-	chrome.bookmarks.get(ToolbarId, function(list) {
-		chrome.bookmarks.search("TreeTabs", function(list) {
-			let TreeTabsId;
-			for (var elem in list) {
-				if (list[elem].parentId == ToolbarId) {
-					TreeTabsId = list[elem].id;
-					break;
 				}
-			}
-			if (TreeTabsId == undefined) {
-				chrome.bookmarks.create({parentId: ToolbarId, title: "TreeTabs"}, function(TreeTabsNew) {
-					TreeTabsId = TreeTabsNew.id;
-				});
-				// BookmarkTree(root);
-				return;
-			} else {
-				// chrome.bookmarks.create({parentId: TreeTabsId, title: bggroups[GroupId].name}, function(GroupFolder) {
-				chrome.bookmarks.create({parentId: TreeTabsId, title: rootName}, function(rootFolder) {
-					let rootFolderId = rootFolder.id;
-					let folders = {};
-					// if (!rootIsFolder) {
-						
-						
-						
-						
-						$($("#ch"+rootNodeId+" .tab").get().reverse()).each(function() {
-							chrome.tabs.get(parseInt(this.id), function(tab){
-								if (tab) {
-									chrome.bookmarks.create({parentId: rootFolderId, title: tab.title, url: tab.url, index: 0 });
-								}
-							});
-						});
-						
+				
+				if (rootNode.classList.contains("folder") || rootNode.classList.contains("group")) {
+					let rootName = caption_noname_group;
+					if (rootNode.classList.contains("folder") && bgfolders[rootNode.id]) {
+						rootName = bgfolders[rootNode.id].name;
+					}
+					if (rootNode.classList.contains("group") && bggroups[rootNode.id]) {
+						rootName = bggroups[rootNode.id].name;
+					}
 
-
-						// } esle {
-						$($("#cf"+rootNodeId+" .folder").get().reverse()).each(function() {
-							if (bgfolders[this.id]) {
-								let ttId = this.id;
-								chrome.bookmarks.create({parentId: GroupFolderId, title: bgfolders[ttId].name, index: 0}, function(folderId) {
-									folders[ttId] = {ttid: ttId, id: folderId.id, ttparent: bgfolders[ttId].parent, parent: GroupFolderId};
-									if (ttId == $("#"+rootNodeId+" .folder")[0].id) {
-										for (var elem in folders) {
-											let FolderTTId = folders[elem].ttid;
-											let BookmarkFolderId = folders[elem].id;
-											let TTParentId = folders[elem].ttparent;
-											if (folders[TTParentId]) {
-												folders[FolderTTId].parent = folders[TTParentId].id;
+					chrome.bookmarks.create({parentId: TreeTabsId, title: rootName}, function(root) {
+						let foldersRefs = {};
+						
+						let folders = document.querySelectorAll("#cf"+rootNode.id+" .folder");
+						folders.forEach(function(s){
+							if (bgfolders[s.id]) {
+								let ttId = s.id;
+								chrome.bookmarks.create({parentId: root.id, title: bgfolders[ttId].name}, function(Bkfolder) {
+									foldersRefs[ttId] = {ttid: ttId, id: Bkfolder.id, ttparent: bgfolders[ttId].parent, parent: root.id};
+									
+									let elemInd = 0;
+									if (ttId == folders[folders.length-1].id) {
+										for (var elem in foldersRefs) {
+											let FolderTTId = foldersRefs[elem].ttid;
+											let BookmarkFolderId = foldersRefs[elem].id;
+											let TTParentId = foldersRefs[elem].ttparent;
+											if (foldersRefs[TTParentId]) {
+												foldersRefs[FolderTTId].parent = foldersRefs[TTParentId].id;
 											}
-										}
-										setTimeout(function() {
-											for (var elem in folders) {
-												let BookmarkFolderId = folders[elem].id;
-												let BookmarkFolderParentId = folders[elem].parent;
-												chrome.bookmarks.move(BookmarkFolderId, {parentId: BookmarkFolderParentId, index: 0}, function(folderId) {		});
-											}
-										}, 2000);
-										setTimeout(function() {
-											for (var elem in folders) {
-												let FolderTTId = folders[elem].ttid;
-												let BookmarkFolderId = folders[elem].id;
-												$("#ch"+FolderTTId+" .tab").each(function() {
-													chrome.tabs.get(parseInt(this.id), function(tab){
-														if (tab) {
-															chrome.bookmarks.create({parentId: BookmarkFolderId, title: tab.title, url: tab.url, });
+											
+											elemInd++;
+											
+											if (elemInd == Object.keys(foldersRefs).length) {
+												elemInd = 0;
+												for (var elem in foldersRefs) {
+													let BookmarkFolderId = foldersRefs[elem].id;
+													let BookmarkFolderParentId = foldersRefs[elem].parent;
+													chrome.bookmarks.move(BookmarkFolderId, {parentId: BookmarkFolderParentId}, function(BkFinalfolder) {
+														document.querySelectorAll("#ct"+foldersRefs[elem].ttid+" .tab").forEach(function(s){
+															chrome.tabs.get(parseInt(s.id), function(tab){
+																if (tab) {
+																	chrome.bookmarks.create({parentId: BkFinalfolder.id, title: tab.title, url: tab.url });
+																}
+															});
+														});
+														
+														elemInd++;
+														
+														if (elemInd == Object.keys(foldersRefs).length) {
+															document.querySelectorAll("#ct"+rootNode.id+" .tab").forEach(function(s){
+																chrome.tabs.get(parseInt(s.id), function(tab){
+																	if (tab) {
+																		chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
+																	}
+																});
+															});															
 														}
 													});
-												});
+												}
 											}
-										}, 6000);
+										}
 									}
 								});
 							}
 						});
-					// }
-
-				});
+					});
+				}
 			}
 		});
 	});
 }
-
-
-
-// bookmark main function
-// function BookmarkTabs(tabs_array, FolderName) {
-	// var rootId;
-	// var vertical_tabs_folderId;
-	// chrome.bookmarks.getRootByName("bookmarks_bar", function(tree){
-		// rootId = tree.id;
-		// chrome.bookmarks.search("VerticalTabs", function(list){
-			// for (var elem in list) {
-				// if (list[elem].parentId == rootId){
-					// vertical_tabs_folderId = list[elem].id;
-					// break;
-				// }
-			// }
-			// if (vertical_tabs_folderId == undefined){
-				// chrome.bookmarks.create({parentId: rootId, title: "VerticalTabs"}, function(vertical_tabs_new){
-					// vertical_tabs_folderId = vertical_tabs_new.id;
-				// });
-			// }
-			// chrome.bookmarks.search(FolderName, function(list){
-				// for (var elem in list) {
-					// if (list[elem].parentId == vertical_tabs_folderId){
-						// SlowlyBookmarkTabs(tabs_array, list[elem].id);
-						// return;
-					// }
-				// }
-				// chrome.bookmarks.create({parentId: vertical_tabs_folderId, title: FolderName}, function(active_group_folderId_new){
-					// SlowlyBookmarkTabs(tabs_array, active_group_folderId_new.id);
-				// });
-			// });
-		// });
-	// });
-// }
-
-// bookmark sub function
-// function SlowlyBookmarkTabs(tabs_array, group_folderId) {
-	// if (tabs_array.length > 0){
-		// chrome.tabs.get(tabs_array[0], function(tab){
-			// chrome.bookmarks.search({url: tab.url}, function(list){
-				// tabs_array.splice(0, 1);
-				// setTimeout(function(){
-					// SlowlyBookmarkTabs(tabs_array, group_folderId);
-				// },10);
-				// for (var elem in list){
-					// if (list[elem].parentId == group_folderId){
-						// bookmarkId = list[elem].id;
-						// return;
-					// }
-				// }
-				// chrome.bookmarks.create({parentId: group_folderId, title: tab.title, url: tab.url});
-			// });
-		// });
-	// }
-// }

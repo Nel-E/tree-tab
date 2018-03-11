@@ -49,7 +49,7 @@ function ChromeLoadTabs(retry) {
 					let winId = w[wIndex].id;
 					let url1 = w[wIndex].tabs[0].url;
 					let url2 = w[wIndex].tabs[w[wIndex].tabs.length-1].url;
-					windows[winId] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+					windows[winId] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 					for (var LwIndex = 0; LwIndex < LoadedWinCount; LwIndex++) {
 						if (LoadedWindows[LwIndex].url1 == url1 || LoadedWindows[LwIndex].url2 == url2) {
 							if (LoadedWindows[LwIndex].group_bar) { windows[winId].group_bar = LoadedWindows[LwIndex].group_bar; }
@@ -101,6 +101,9 @@ function ChromeLoadTabs(retry) {
 				for (var group in windows[windowId].groups) {
 					if (refTabs[windows[windowId].groups[group].active_tab]) {
 						windows[windowId].groups[group].active_tab = refTabs[windows[windowId].groups[group].active_tab];
+					}
+					if (refTabs[windows[windowId].groups[group].prev_active_tab]) {
+						windows[windowId].groups[group].prev_active_tab = refTabs[windows[windowId].groups[group].prev_active_tab];
 					}
 				}
 			}
@@ -183,7 +186,7 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 }
 function ChromeHashURL(tab) {
 	if (tabs[tab.id] == undefined) {
-		tabs[tab.id] = {hash: 0, parent: tab.pinned ? "pin_list" : "tab_list", index: tab.index, expand: "n"};
+		tabs[tab.id] = {hash: 0, parent: tab.pinned ? "pin_list" : (windows[tab.windowId] ? windows[tab.windowId].active_group : "tab_list"), index: tab.index, expand: "n"};
 	}
 	var hash = 0;
 	for (var charIndex = 0; charIndex < tab.url.length; charIndex++) {
@@ -259,7 +262,7 @@ function ChromeListeners() { // start all listeners
 		chrome.runtime.sendMessage({command: "tab_activated", windowId: activeInfo.windowId, tabId: activeInfo.tabId});
 	});
 	chrome.windows.onCreated.addListener(function(window) {
-		windows[window.id] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
+		windows[window.id] = {group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: caption_ungrouped_group, font: ""}}, folders: {}};
 		schedule_save++;
 	});
 	chrome.windows.onRemoved.addListener(function(windowId) {
@@ -272,106 +275,151 @@ function ChromeListeners() { // start all listeners
 }	
 function ChromeMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		switch(message.command) {
-			case "reload":
-				window.location.reload();
-			break;
-			case "get_preferences":
-				sendResponse(opt);
-			break;
-			case "save_preferences":
-				opt = Object.assign({}, message.opt);
-				chrome.storage.local.set({preferences: message.opt});
-			break;
-			case "get_windows":
-				sendResponse(windows);
-			break;
-			case "get_folders":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].folders);
+		if (opt.debug) console.log("message to background:");
+		if (opt.debug) console.log(message);
+		if (message.command == "reload") {
+			window.location.reload();
+			return;
+		}
+		if (message.command == "get_preferences") {
+			sendResponse(opt);
+			return;
+		}
+		if (message.command == "save_preferences") {
+			opt = Object.assign({}, message.opt);
+			chrome.storage.local.set({preferences: message.opt});
+			return;
+		}
+		if (message.command == "get_windows") {
+			sendResponse(windows);
+			return;
+		}
+		if (message.command == "get_folders") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].folders);
+			}
+			return;
+		}
+		if (message.command == "save_folders") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].folders = Object.assign({}, message.folders);
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "get_groups") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].groups);
+			}
+			return;
+		}
+		if (message.command == "save_groups") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].groups = Object.assign({}, message.groups);
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "set_active_group") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].active_group = message.active_group;
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "get_active_group") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].active_group);
+			}
+			return;
+		}
+		if (message.command == "set_search_filter") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].search_filter = message.search_filter;
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "get_search_filter") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].search_filter);
+			}
+			return;
+		}			
+		if (message.command == "set_active_shelf") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].active_shelf = message.active_shelf;
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "get_active_shelf") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].active_shelf);
+			}
+			return;
+		}
+		if (message.command == "set_group_bar") {
+			if (windows[message.windowId]) {
+				windows[message.windowId].group_bar = message.group_bar;
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "get_group_bar") {
+			if (windows[message.windowId]) {
+				sendResponse(windows[message.windowId].group_bar);
+			}
+			return;
+		}
+		if (message.command == "get_browser_tabs") {
+			sendResponse(tabs);
+			return;
+		}
+		if (message.command == "is_bg_ready") {
+			sendResponse(running);
+			return;
+		}
+		if (message.command == "update_tab") {
+			if (tabs[message.tabId]) {
+				if (message.tab.index) {
+					tabs[message.tabId].index = message.tab.index;
 				}
-			break;
-			case "save_folders":
-				if (windows[message.windowId]) {
-					windows[message.windowId].folders = Object.assign({}, message.folders);
-					schedule_save++;
+				if (message.tab.expand) {
+					tabs[message.tabId].expand = message.tab.expand;
 				}
-			break;
-			case "get_groups":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].groups);
+				if (message.tab.parent) {
+					tabs[message.tabId].parent = message.tab.parent;
 				}
-			break;
-			case "save_groups":
-				if (windows[message.windowId]) {
-					windows[message.windowId].groups = Object.assign({}, message.groups);
-					schedule_save++;
+				schedule_save++;
+			}
+			return;
+		}
+		if (message.command == "update_all_tabs") {
+			for (let i = 0; i < message.pins.length; i++) {
+				if (tabs[message.pins[i].id]) {
+					tabs[message.pins[i].id].parent = "pin_list";
+					tabs[message.pins[i].id].expand = "";
+					tabs[message.pins[i].id].index = message.pins[i].index;
 				}
-			break;
-			case "set_active_group":
-				if (windows[message.windowId]) {
-					windows[message.windowId].active_group = message.active_group;
-					schedule_save++;
+			}
+			for (let j = 0; j < message.tabs.length; j++) {
+				if (tabs[message.tabs[j].id]) {
+					tabs[message.tabs[j].id].parent = message.tabs[j].parent;
+					tabs[message.tabs[j].id].expand = message.tabs[j].expand;
+					tabs[message.tabs[j].id].index = message.tabs[j].index;
 				}
-			break;
-			case "get_active_group":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].active_group);
-				}
-			break;
-			case "set_search_filter":
-				if (windows[message.windowId]) {
-					windows[message.windowId].search_filter = message.search_filter;
-					schedule_save++;
-				}
-			break;
-			case "get_search_filter":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].search_filter);
-				}
-			break;			
-			case "set_active_shelf":
-				if (windows[message.windowId]) {
-					windows[message.windowId].active_shelf = message.active_shelf;
-					schedule_save++;
-				}
-			break;
-			case "get_active_shelf":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].active_shelf);
-				}
-			break;
-			case "set_group_bar":
-				if (windows[message.windowId]) {
-					windows[message.windowId].group_bar = message.group_bar;
-					schedule_save++;
-				}
-			break;
-			case "get_group_bar":
-				if (windows[message.windowId]) {
-					sendResponse(windows[message.windowId].group_bar);
-				}
-			break;
-			case "get_browser_tabs":
-				sendResponse(tabs);
-			break;
-			case "is_bg_ready":
-				sendResponse(running);
-			break;
-			case "update_tab":
-				if (tabs[message.tabId]) {
-					for (var parameter in message.tab) {
-						tabs[message.tabId][parameter] = message.tab[parameter];
-					}
-					schedule_save++;
-				}
-			break;
-			case "get_theme":
-				sendResponse(theme);
-			break;
-			case "reload_theme":
-				GetCurrentTheme();
-			break;
+			}
+			schedule_save++;
+			return;
+		}
+		if (message.command == "get_theme") {
+			sendResponse(theme);
+			return;
+		}
+		if (message.command == "reload_theme") {
+			GetCurrentTheme();
+			return;
 		}
 	});
 }

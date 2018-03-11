@@ -8,22 +8,37 @@
 #donate {
 	position:absolute;
 	top:17px;
-	left:700px;
+	left:640px;
 	width: 100px;
 	height: 20px;
 	background-image: url(../options/donate_title.svg);
 }
 
+/* buttons are 35px apart */
 #donate_paypal {
 	position:absolute;
 	top:14px;
-	left:790px;
+	left:755px;
 	width: 32px;
 	height: 32px;
 	background-image: url(../options/donate_paypal.png);
 	background-size: 30px 30px;
 }
 #donate_paypal:hover {
+	top: 13px;
+	left:754px;
+	background-size: 32px 32px;
+}
+#donate_litecoin {
+	position:absolute;
+	top:14px;
+	left:790px;
+	width: 32px;
+	height: 32px;
+	background-image: url(../options/donate_ltc.png);
+	background-size: 30px 30px;
+}
+#donate_litecoin:hover {
 	top: 13px;
 	left:789px;
 	background-size: 32px 32px;
@@ -136,7 +151,7 @@ ul:not(.menu) li {
 .color_x,
 .options_button_minus,
 .options_button_plus {
-	z-index: 1000;
+	z-index: 9000;
 	position: absolute;
 	display: float;
 	height: 20px;
@@ -369,17 +384,18 @@ ul:not(.menu) li {
 /* PIN LIST AND SCROLLBAR */
 #pin_list {
 	position: absolute;
-	height: calc(var(--scrollbar_height) + var(--pin_height));
+	height: calc(var(--scrollbar_height) + var(--pin_height) + 2px - var(--pin_list_padding_top) - var(--pin_list_padding_bottom));
 	width: 788px;
 	top: 30px;
 	left: 20px;
+	padding: none;
 }
 
 #pin_list_scrollbar {
 	position: absolute;
 	height: var(--scrollbar_height);
 	width: 790px;
-	top: calc(var(--pin_height) + 31px);
+	top: calc(var(--pin_height) + 32px );
 	left: 20px; z-index: 1000;
 	background-color: var(--scrollbar_track);
 }
@@ -432,11 +448,11 @@ ul:not(.menu) li {
 
 
 /* TAB LIST AND SCROLLBAR */
-#tab_list {
+#groups {
 	position: absolute;
 	height: 800px;
-	width: calc(770px - var(--scrollbar_width));
-	top: calc(var(--scrollbar_height) + var(--pin_height) + 32px);
+	width: calc(771px - var(--scrollbar_width));
+	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	left: 40px;
 	z-index: 1000
 }
@@ -445,7 +461,7 @@ ul:not(.menu) li {
 	position: absolute;
 	height: 800px;
 	width: var(--scrollbar_width);
-	top: calc(var(--scrollbar_height) + var(--pin_height) + 32px);
+	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	left: calc(810px - var(--scrollbar_width));
 	z-index: 1000;
 	background-color: var(--scrollbar_track);
@@ -484,7 +500,7 @@ ul:not(.menu) li {
 	position:absolute;
 	width: 740px;
 	height: auto;
-	top: calc(var(--scrollbar_height) + var(--pin_height) + 34px);
+	top: calc(var(--scrollbar_height) + var(--pin_height) + 35px);
 	left: 50px;
 	margin: 0;
 	/* background:rgba(0,255,0,0.5); */
@@ -590,7 +606,7 @@ ul:not(.menu) li {
 #toolbar_groups_block {
 	position: absolute;
 	left: 20px;
-	top: calc(var(--scrollbar_height) + var(--pin_height) + 32px);
+	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	width: 19px;
 	height: 800px;
 	background-color: var(--group_list_background);

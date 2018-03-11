@@ -19,6 +19,9 @@
 	"button_undo": {
 		"message": "Reopen last closed"
 	},
+	"button_detach": {
+		"message": "Detach tab"
+	},
 	"button_move": {
 		"message": "Detach tab"
 	},
@@ -54,6 +57,9 @@
 	},
 	"button_extensions": {
 		"message": "Extensions"
+	},
+	"button_unload": {
+		"message": "Unload tabs"
 	},
 	"button_discard": {
 		"message": "Unload tabs"
@@ -128,89 +134,102 @@
 
 
 
-	"tabs_menu_expand_all": {
+	"menu_expand_all": {
 		"message": "Expand all trees"
 	},
-	"tabs_menu_collapse_all": {
+	"menu_collapse_all": {
 		"message": "Collapse all trees"
 	},
-	"tabs_menu_expand_this": {
-		"message": "Expand this tree"
+	"menu_expand_tree": {
+		"message": "Expand tree"
 	},
-	"tabs_menu_collapse_this": {
-		"message": "Collapse this tree"
+	"menu_collapse_tree": {
+		"message": "Collapse tree"
 	},
-	"tabs_menu_new": {
+	"menu_new_tab": {
 		"message": "New tab"
 	},
-	"tabs_menu_clone": {
+	"menu_new_pin": {
+		"message": "New pinned tab"
+	},
+	"menu_duplicate_tab": {
 		"message": "Duplicate"
 	},
-	"tabs_menu_move": {
+	"menu_detach_tab": {
 		"message": "Detach"
 	},
-	"tabs_menu_reload": {
+	"menu_reload_tab": {
 		"message": "Reload"
 	},
-	"tabs_menu_pin": {
+	"menu_pin_tab": {
 		"message": "Pin"
 	},
-	"tabs_menu_mute": {
+	"menu_mute_tab": {
 		"message": "Mute"
 	},
-	"tabs_menu_unmute": {
+	"menu_mute_tree": {
+		"message": "Mute tree"
+	},
+	"menu_unmute_tree": {
+		"message": "Unmute tree"
+	},
+	"menu_unmute_tab": {
 		"message": "Unmute"
 	},
-	"tabs_menu_mute_other": {
+	"menu_mute_other": {
 		"message": "Mute other"
 	},
-	"tabs_menu_unmute_other": {
+	"menu_unmute_other": {
 		"message": "Unmute other"
 	},
-	"tabs_menu_unpin": {
+	"menu_unpin_tab": {
 		"message": "Unpin"
 	},
-	"tabs_menu_close_tree": {
+	"menu_close_tree": {
 		"message": "Close tree"
 	},
-	"tabs_menu_close": {
+	"menu_close": {
 		"message": "Close"
 	},
-	"tabs_menu_close_other": {
+	"menu_close_other": {
 		"message": "Close other"
 	},
-	"tabs_menu_undo": {
+	"menu_undo_close_tab": {
 		"message": "Undo close"
 	},
-	"tabs_menu_settings": {
+	"menu_treetabs_settings": {
 		"message": "Settings"
 	},
-	"tabs_menu_discard": {
+	"menu_unload": {
 		"message": "Unload"
 	},
 
+	"menu_bookmark_tree": {
+		"message": "Bookmark tree"
+	},
 
 
-	"folders_menu_new_folder": {
+
+	"menu_new_folder": {
 		"message": "New folder"
 	},
-	"folders_menu_rename_folder": {
+	"menu_rename_folder": {
 		"message": "Rename folder"
 	},
-	"folders_menu_delete": {
+	"menu_delete_folder": {
 		"message": "Delete"
 	},
 
-	"groups_menu_new_group": {
+	"menu_new_group": {
 		"message": "New group"
 	},
-	"groups_menu_rename": {
+	"menu_rename_group": {
 		"message": "Rename group"
 	},
-	"groups_menu_delete": {
+	"menu_delete_group": {
 		"message": "Delete group"
 	},
-	"groups_menu_delete_tabs_close": {
+	"menu_delete_group_tabs_close": {
 		"message": "Delete group with tabs"
 	},
 
@@ -218,7 +237,7 @@
 		"message": "Unload group"
 	},
 
-	"groups_menu_bookmark": {
+	"menu_bookmark_group": {
 		"message": "Bookmark group"
 	},
 
@@ -280,6 +299,48 @@
 		"message": "Discard tree structure after browser's restart, this option is for those who don't use browser's session. Basically it disables loading database at startup."
 	},
 
+
+	"options_dbclick_tab": {
+		"message": "Action for double click on tab"
+	},
+	"options_dbclick_tab_none": {
+		"message": "nothing"
+	},
+	"options_dbclick_tab_new": {
+		"message": "open new tab"
+	},
+	"options_dbclick_tab_close": {
+		"message": "close tab"
+	},
+	"options_dbclick_tab_reload": {
+		"message": "reload tab"
+	},
+	"options_dbclick_tab_unload": {
+		"message": "unload tab"
+	},
+	"options_dbclick_tab_activate_previous_active": {
+		"message": "go back to previous active tab (works only on unpinned tabs)"
+	},
+
+
+
+
+	"options_dbclick_group": {
+		"message": "Action for double click on empty space on the left side or below the tabs"
+	},
+	"options_dbclick_group_none": {
+		"message": "nothing"
+	},
+	"options_dbclick_group_new": {
+		"message": "open new tab"
+	},
+	"options_dbclick_group_activate_previous_active": {
+		"message": "go back to previous active tab (works only on unpinned tabs)"
+	},
+
+	
+	
+	
 	"options_append_child_tab": {
 		"message": "Append children tabs at the"
 	},
@@ -552,19 +613,82 @@
 
 
 
-	"options_color_pick_filter_clear_icon": {
-	 "message": "Clear search result x button color"
-	},
 
 	"close_x": {
 	 "message": "x inside the close button"
 	},
 	"close_hover_x": {
-	 "message": "x inside the close button on hover"
+	 "message": "x inside the close button, on mouse hover"
 	},
+
+
+	"button_background": {
+	 "message": "Toolbar buttons background"
+	},
+	"button_hover_background": {
+	 "message": "Toolbar buttons background, on mouse hover"
+	},
+	
+	
+	"button_icons": {
+	 "message": "Toolbar buttons icon color"
+	},
+	"button_icons_hover": {
+	 "message": "Toolbar buttons icon color, on mouse hover"
+	},
+	"button_border": {
+	 "message": "Toolbar buttons border color"
+	},
+	"button_hover_border": {
+	 "message": "Toolbar buttons border color, on mouse hover"
+	},
+	
+
+	"filter_box_font": {
+	 "message": "Search box, font color"
+	},
+	"filter_box_background": {
+	 "message": "Search box, font background color"
+	},
+	"filter_box_border": {
+	 "message": "Search box, border color"
+	},
+	"filter_clear_icon": {
+	 "message": "Clear search result x button color"
+	},
+	
+
+	"toolbar_background": {
+	 "message": "Toolbar background color"
+	},
+	"toolbar_border_bottom": {
+	 "message": "Toolbar borders color"
+	},
+	
+
+
+	"attention_background": {
+	 "message": "Tabs blinking for attention, background color"
+	},
+	"attention_border": {
+	 "message": "Tabs blinking for attention, border color"
+	},
+	
+
+	"pin_list_border_bottom": {
+	 "message": "Pinned tabs list, border at the bottom color"
+	},
+	"pin_list_background": {
+	 "message": "Pinned tabs list, background color"
+	},
+	
+
 	"options_color_pick_hover": {
 	 "message": "On hover"
 	},
+	
+	
+	
 	"options_color_pick_border": {
 	 "message": "Border color"
 	},

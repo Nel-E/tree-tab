@@ -123,10 +123,19 @@ div {
 	mask-image: url(../theme/toolbar_settings.svg);
 }
 
-#button_move .button_img {
-	-webkit-mask-image: url(../theme/toolbar_move.svg);
-	mask-image: url(../theme/toolbar_move.svg);
+#button_detach .button_img {
+	-webkit-mask-image: url(../theme/toolbar_detach.svg);
+	mask-image: url(../theme/toolbar_detach.svg);
 }
+
+
+/* FOR LEGACY (CHANGED NAME TO DETACH) */
+#button_move .button_img {
+	-webkit-mask-image: url(../theme/toolbar_detach.svg);
+	mask-image: url(../theme/toolbar_detach.svg);
+}
+
+
 
 #button_pin>.button_img {
 	-webkit-mask-image: url(../theme/toolbar_pin.svg);
@@ -153,9 +162,14 @@ div {
 	mask-image: url(../theme/toolbar_extensions.svg);
 }
 
+/* FOR LEGACY (CHANGED NAME TO UNLOAD) */
 #button_discard>.button_img {
-	-webkit-mask-image: url(../theme/toolbar_discard.svg);
-	mask-image: url(../theme/toolbar_discard.svg);
+	-webkit-mask-image: url(../theme/toolbar_unload.svg);
+	mask-image: url(../theme/toolbar_unload.svg);
+}
+#button_unload>.button_img {
+	-webkit-mask-image: url(../theme/toolbar_unload.svg);
+	mask-image: url(../theme/toolbar_unload.svg);
 }
 
 #button_new>.button_img {
@@ -345,7 +359,7 @@ div {
 #pin_list {
 	position: absolute;
 	display: block;
-	width: calc(100% - var(--pin_list_padding_right));
+	width: calc(100% - 1px);
 	height: auto;
 	left: 0px;
 	overflow-x: auto;
@@ -358,9 +372,12 @@ div {
 }
 
 #groups {
+	z-index: 10;
 	position: absolute;
 	display: inline-block;
 	width: 100%;
+	height: 100%;
+	background-color: var(--tab_list_background);
 }
 
 
@@ -421,14 +438,43 @@ div {
 .group_button {
 	position: relative;
 	margin-left: 1px;
-	width: 16px;
+	width: 18px;
 	height: 300px;
 	border: 1px solid transparent;
 	background-color: transparent;
 }
 
+.drop_target.group_button_drag_entered_top {
+	z-index: 3;
+	position: absolute;
+	width: 110%;
+	height: 50%;
+	left: -1px;
+	top: -1px;
+	border-top: 1px solid transparent;
+	background-color: transparent;
+}
+.drop_target.group_button_drag_entered_top.highlighted_drop_target {
+	border-top: 1px solid var(--drag_indicator);
+}
 
-.group_drag_box {
+.drop_target.group_button_drag_entered_bottom {
+	z-index: 4;
+	position: absolute;
+	width: 110%;
+	height: 50%;
+	left: -1px;
+	bottom: -2px;
+	border-bottom: 1px solid transparent;
+	background-color: transparent;
+}
+.drop_target.group_button_drag_entered_bottom.highlighted_drop_target {
+	border-bottom: 1px solid var(--drag_indicator);
+}
+
+
+.drop_target.group_drag_box {
+	z-index: 5;
 	position: absolute;
 	width: 100%;
 	height: 100%;
@@ -436,16 +482,16 @@ div {
 	top: -1px;
 	background-color: transparent;
 }
-.group_drag_box.highlighted_drop_target {
+.drop_target.group_drag_box.highlighted_drop_target {
 	border: 1px solid var(--drag_indicator);
 }
 
 .group_button:hover:not(.active_group) {
+	width: 16px;
 	background-color: var(--group_list_button_hover_background);
 }
 
 .group_button.active_group {
-	width: 20px;
 	border: 1px solid var(--group_list_borders);
 	background-color: var(--tab_list_background);
 }
@@ -869,12 +915,12 @@ div {
 
 .drop_target {
 	position: absolute;
-	pointer-events: none;
+	/* pointer-events: none; */
 }
 
-.tab>.drag_enter_center {
+.tab>.drop_target.drag_enter_center {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9911;
+	z-index: -1;
 	top: 0px;
 	left: var(--tab_drag_enter_center_left);
 	height: var(--tab_height);
@@ -882,47 +928,47 @@ div {
 	border: 1px solid transparent;
 }
 
-.tab>.drag_enter_center.highlighted_drop_target {
+.tab>.drop_target.drag_enter_center.highlighted_drop_target {
 	border: 1px solid var(--drag_indicator);
 }
 
-.tab>.drag_entered_top {
+.tab>.drop_target.drag_entered_top {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9915;
+	z-index: -1;
 	top: var(--tab_drag_entered_top);
 	left: var(--tab_drag_entered_left);
 	width: var(--tab_drag_entered_tb_width);
 	height: var(--drag_area_top);
 	border-top: 1px solid transparent;
 }
-.tab>.drag_entered_top.highlighted_drop_target {
+.tab>.drop_target.drag_entered_top.highlighted_drop_target {
 	border-top: 1px solid var(--drag_indicator);
 }
 
-.tab>.drag_entered_bottom {
+.tab>.drop_target.drag_entered_bottom {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9920;
+	z-index: -1;
 	bottom: var(--tab_drag_entered_bottom);
 	left: var(--tab_drag_entered_left);
 	width: var(--tab_drag_entered_tb_width);
 	height: var(--drag_area_bottom);
 	border-bottom: 1px solid transparent;
 }
-.tab>.drag_entered_bottom.highlighted_drop_target {
+.tab>.drop_target.drag_entered_bottom.highlighted_drop_target {
 	border-bottom: 1px solid var(--drag_indicator);
 }
 .group>:first-child {
 	margin-top: var(--margin_top_first_tab);
 }
 
-.children_tabs>:last-child {
+.group>.children_tabs>:last-child {
 	margin-bottom: 12px;
 }
 
 
 /* TABS WITH CHILDREN, OPEN AND CLOSED */
 .expand {
-	z-index: 200;
+	z-index: -1;
 	position: absolute;
 	top: 0px;
 	left: 0px;
@@ -935,16 +981,16 @@ div {
 }
 
 /* CHILDREN TABS */
-.tab>.children {
+.tab>.children_tabs {
 	position: relative;
 	padding-left: var(--children_padding_left);
 }
 
-.tab.o>.children {
+.tab.o>.children_tabs {
 	height: auto;
 }
 
-.tab.c>.children {
+.tab.c>.children_tabs {
 	display: none;
 	height: 0px;
 }
@@ -955,12 +1001,14 @@ div {
 }
 
 .tab.c>.tab_header>.expand {
+	z-index: 200;
 	background-color: var(--expand_closed_background);
 	mask-image: url(../theme/expand_closed.svg);
 	-webkit-mask-image: url(../theme/expand_c.svg);
 }
 
 .tab.o>.tab_header>.expand {
+	z-index: 200;
 	background-color: var(--expand_open_background);
 	mask-image: url(../theme/expand_open.svg);
 	-webkit-mask-image: url(../theme/expand_o.svg);
@@ -1008,9 +1056,9 @@ div {
 	border:1px solid var(--tab_border);
 	background-color:var(--tab_background);
 }
-.folder>.drag_enter_center {
+.folder>.drop_target.drag_enter_center {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9911;
+	z-index: -1;
 	top: 0px;
 	left: var(--tab_drag_enter_center_left);
 	height: var(--tab_height);
@@ -1018,45 +1066,48 @@ div {
 	border: 1px solid transparent;
 }
 
-.folder>.drag_enter_center.highlighted_drop_target {
+.folder>.drop_target.drag_enter_center.highlighted_drop_target {
 	border: 1px solid var(--drag_indicator);
 }
 
-.folder>.drag_entered_top {
+.folder>.drop_target.drag_entered_top {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9915;
+	z-index: -1;
 	top: var(--tab_drag_entered_top);
 	left: var(--tab_drag_entered_left);
 	width: var(--tab_drag_entered_tb_width);
 	height: var(--drag_area_top);
 	border-top: 1px solid transparent;
 }
-.folder>.drag_entered_top.highlighted_drop_target {
+.folder>.drop_target.drag_entered_top.highlighted_drop_target {
 	border-top: 1px solid var(--drag_indicator);
 }
 
-.folder>.drag_entered_bottom {
+.folder>.drop_target.drag_entered_bottom {
 	border-radius: var(--tab_header_border_radius);
-	z-index: 9920;
+	z-index: -1;
 	bottom: var(--tab_drag_entered_bottom);
 	left: var(--tab_drag_entered_left);
 	width: var(--tab_drag_entered_tb_width);
 	height: var(--drag_area_bottom);
 	border-bottom: 1px solid transparent;
 }
-.folder>.drag_entered_bottom.highlighted_drop_target {
+.folder>.drop_target.drag_entered_bottom.highlighted_drop_target {
 	border-bottom: 1px solid var(--drag_indicator);
 }
 
-.folder>.children {
+.folder>.children_folders,
+.folder>.children_tabs {
 	position: relative;
 	padding-left: var(--children_padding_left);
 }
-.folder.o>.children {
+.folder.o>.children_folders,
+.folder.o>.children_tabs {
 	height: auto;
 }
 
-.folder.c>.children {
+.folder.c>.children_folders,
+.folder.c>.children_tabs {
 	display: none;
 	height: 0px;
 }
@@ -1084,7 +1135,6 @@ div {
 }
 
 .folder>.folder_header>.folder_icon,
-.folder.n>.folder_header>.folder_icon,
 .folder.c>.folder_header>.folder_icon {
 	background-color: var(--expand_closed_background);
 	-webkit-mask-image: url(../theme/icon_folder_closed.svg);
@@ -1162,6 +1212,7 @@ div {
 	width: var(--pin_width);
 	/* border: 1px solid red; */
 }
+
 /* #pin_list>:first-child {
 	background-color: red;
 
@@ -1171,7 +1222,10 @@ div {
 } */
 
 .pin>.tab_header>.tab_title,
-.pin>.tab_header>.expand {
+.pin>.tab_header>.expand,
+.pin>.tab_header>.close,
+.pin>.tab_header>.close.close_hover,
+.pin>.tab_header>.close>.close_img {
 	display: none;
 	top: 0px;
 	height: 0px;
@@ -1189,8 +1243,8 @@ div {
 	background-position: center, center;
 }
 
-.pin>.drag_entered_top {
-	z-index: 20;
+.pin>.drop_target.drag_entered_top {
+	z-index: -1;
 	position: absolute;
 	top: 0px;
 	left: var(--pin_drag_entered_top_left);
@@ -1199,12 +1253,12 @@ div {
 	border-left: 1px solid transparent;
 }
 
-.pin>.drag_entered_top.highlighted_drop_target {
+.pin>.drop_target.drag_entered_top.highlighted_drop_target {
 	border-left: 1px solid var(--drag_indicator);
 }
 
-.pin>.drag_entered_bottom {
-	z-index: 21;
+.pin>.drop_target.drag_entered_bottom {
+	z-index: -1;
 	position: absolute;
 	top: 0px;
 	left: var(--pin_drag_entered_bottom_right);
@@ -1213,18 +1267,19 @@ div {
 	border-left: 1px solid transparent;
 }
 
-.pin>.drag_entered_bottom.highlighted_drop_target {
+.pin>.drop_target.drag_entered_bottom.highlighted_drop_target {
 	border-right: 1px solid var(--drag_indicator);
 }
 
-.pin>.drag_enter_center {
+.pin>.drop_target.drag_enter_center {
+	z-index: -1;
 	display: none;
 	position: absolute;
 	top: 0px;
 	height: 0px;
 	width: 0px;
 }
-.pin>.children {
+.pin>.children_tabs {
 	display: none;
 	position: absolute;
 	top: 0px;
@@ -1235,6 +1290,9 @@ div {
 .pin.selected_tab,
 .pin.active_tab {
 	z-index: 800;
+}
+#pin_list>:last-child {
+	margin-right: var(--pin_last_margin_right);
 }
 
 
@@ -1350,6 +1408,34 @@ div {
 	z-index: 9999;
 }
 
+
+
+
+
+
+
+/* 
+
+@keyframes blinking {
+	0% {background-color:  var(--tab_background); border:1px solid var(--tab_border);}
+	50% {background-color: var(--attention_background); border:1px solid var(--attention_border);}
+	80% {background-color: var(--tab_background); border:1px solid var(--tab_border);}
+	100% {background-color: var(--tab_background); border:1px solid var(--tab_border);}
+}
+
+ */
+.dragged_selected>.folder_header,
+.dragged_selected>.tab_header,
+.dragged_tree>.folder_header,
+.dragged_tree>.tab_header {
+	/* animation: blinking 2.5s infinite; */
+	
+	border:1px solid var(--tab_selected_border);
+	background-color:var(--tab_selected_background);
+	
+}
+
+
 /* MENU */
 
 .menu {
@@ -1384,7 +1470,6 @@ div {
 	background-color: var(--tabs_menu_separator);
 	margin: 0px auto;
 }
-
 
 /* HIDE */
 

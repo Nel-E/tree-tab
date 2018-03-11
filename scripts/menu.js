@@ -4,322 +4,654 @@
 
 // **********			 MENU		 ***************
 
+function HideMenus() {
+	document.querySelectorAll(".separator, .menu_item").forEach(function(s){s.style.display = "none";});
+	document.querySelectorAll(".menu").forEach(function(s){
+		s.style.top = "-1000px";
+		s.style.left = "-1000px";
+	});
+}
+
+function ShowMenu(MenuNode, event) {
+	MenuNode.style.display = "block";
+	let x = event.pageX >= (document.body.clientWidth - MenuNode.getBoundingClientRect().width - 5) ? (document.body.clientWidth - MenuNode.getBoundingClientRect().width - 5) : (event.pageX - 5);
+	let y = event.pageY >= (document.body.clientHeight - MenuNode.getBoundingClientRect().height - 16) ? (document.body.clientHeight - MenuNode.getBoundingClientRect().height - 16) : (event.pageY - 16);
+	MenuNode.style.top = y + "px";
+	MenuNode.style.left = x + "px";
+}
+
 function ShowTabMenu(TabNode, event) {
-	$(".menu").hide(0);
-	menuItemId = parseInt(TabNode[0].id);
+	HideMenus();
+	menuItemNode = TabNode;
+ 	// $(".menu").hide(0);
+
 	// MUTE TABS
-	if (TabNode.is(".muted")) {
-		$("#tabs_menu_mute").css({ "display": "none" });
-		$("#tabs_menu_unmute").css({ "display": "" });
+	// if (TabNode.classList.contains("audible") && !TabNode.classList.contains("muted")) {
+		// document.querySelector("#menu_mute_tab").style.display = "";
+	// }
+	if (TabNode.classList.contains("muted")) {
+		document.querySelector("#menu_unmute_tab").style.display = "";
 	} else {
-		$("#tabs_menu_mute").css({ "display": "" });
-		$("#tabs_menu_unmute").css({ "display": "none" });
+		document.querySelector("#menu_mute_tab").style.display = "";
 	}
-	if (TabNode.is(".pin")) {
-		if (!opt.allow_pin_close) {
-			$("#tabs_menu_close").css({ "display": "none" });
-		}
-		// show contextmenu with correct size position
-		if ($("#pins_menu").outerWidth() > $(window).width() - 10) {
-			$("#pins_menu").css({ "width": $(window).width() - 10 });
-		} else {
-			$("#pins_menu").css({ "width": "" });
-		}
-		var x = event.pageX >= $(window).width() - $("#pins_menu").outerWidth() ? $(window).width() - $("#pins_menu").outerWidth() : event.pageX;
-		var y = event.pageY >= $(window).height() - $("#pins_menu").outerHeight() - 10 ? $(window).height() - $("#pins_menu").outerHeight() - 10 : event.pageY;
-		$("#pins_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+	if (!TabNode.classList.contains("discarded")) {
+		document.querySelector("#menu_unload").style.display = "";
 	}
-	if (TabNode.is(".tab")) {
-		if (TabNode.is(".o")) {
-			$("#tabs_menu #tabs_menu_expand_this").css({ "display": "none" });
-			$("#tabs_menu #tabs_menu_collapse_this").css({ "display": "" });
+	
+	if (TabNode.classList.contains("pin")) {
+		if (opt.allow_pin_close) {
+			document.getElementById("menu_close").style.display = "";
 		}
-		if (TabNode.is(".c")) {
-			$("#tabs_menu #tabs_menu_expand_this").css({ "display": "" });
-			$("#tabs_menu #tabs_menu_collapse_this").css({ "display": "none" });
-		}
-		if (TabNode.is(".o, .c")) {
-			$("#tabs_menu #tabs_menu_close_tree").css({ "display": "" });
-			$("#tabs_menu #tabs_menu_collapse_this").next().css({ "display": "" });
-		} else {
-			$("#tabs_menu_close_tree, #tabs_menu #tabs_menu_expand_this, #tabs_menu #tabs_menu_collapse_this").css({ "display": "none" });
-			$("#tabs_menu_collapse_this").next().css({ "display": "none" });
-		}
-		if ($("#tabs_menu").outerWidth() > $(window).width() - 10) {
-			$("#tabs_menu").css({ "width": $(window).width() - 10 });
-		} else {
-			$("#tabs_menu").css({ "width": "" });
-		}
-		var x = event.pageX >= $(window).width() - $("#tabs_menu").outerWidth() ? $(window).width() - $("#tabs_menu").outerWidth() : event.pageX;
-		var y = event.pageY >= $(window).height() - $("#tabs_menu").outerHeight() - 10 ? $(window).height() - $("#tabs_menu").outerHeight() - 10 : event.pageY;
-		$("#tabs_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+
+		document.querySelectorAll("#menu_new_pin, #separator_unpt, #menu_unpin_tab, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close_other, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+			s.style.display = "";
+		});
 	}
+	
+	if (TabNode.classList.contains("tab")) {
+
+		document.querySelectorAll("#menu_new_tab, #separator_pit, #menu_pin_tab, #separator_newf, #menu_new_folder, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close, #menu_close_other, #separator_mut, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+			s.style.display = "";
+		});
+
+		if (TabNode.classList.contains("o")) {
+			document.querySelector("#separator_collt").style.display = "";
+			document.querySelector("#menu_collapse_tree").style.display = "";
+		}
+		if (TabNode.classList.contains("c")) {
+			document.querySelector("#separator_expat").style.display = "";
+			document.querySelector("#menu_expand_tree").style.display = "";
+		}
+		if (TabNode.classList.contains("c") || TabNode.classList.contains("o")) {
+			document.querySelector("#menu_close_tree").style.display = "";
+			document.querySelector("#separator_bkt").style.display = "";
+			document.querySelector("#menu_bookmark_tree").style.display = "";
+			document.querySelector("#separator_mutt").style.display = "";
+			document.querySelector("#menu_mute_tree").style.display = "";
+			document.querySelector("#menu_unmute_tree").style.display = "";
+		}
+	}
+	ShowMenu(document.getElementById("main_menu"), event);
 }
 
 function ShowFolderMenu(FolderNode, event) {
-	$(".menu").hide(0);
-	menuItemId = FolderNode[0].id;
-	if (FolderNode.is(".c")) {
-		$("#folders_menu #tabs_menu_expand_this").css({ "display": "" });
-		$("#folders_menu #tabs_menu_collapse_this").css({ "display": "none" });
-	} else {
-		$("#folders_menu #tabs_menu_expand_this").css({ "display": "none" });
-		$("#folders_menu #tabs_menu_collapse_this").css({ "display": "" });
+	HideMenus();
+	menuItemNode = FolderNode;
+	
+	document.querySelectorAll("#menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #separator_colla, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+		s.style.display = "";
+	});
+
+	if (FolderNode.classList.contains("o")) {
+		document.querySelector("#folders_menu, #menu_collapse_tree").style.display = "";
 	}
-	$("#folders_menu #tabs_menu_collapse_this").next().css({ "display": "" });
-	if ($("#folders_menu").outerWidth() > $(window).width() - 10) {
-		$("#folders_menu").css({ "width": $(window).width() - 10 });
-	} else {
-		$("#folders_menu").css({ "width": "" });
+	if (FolderNode.classList.contains("c")) {
+		document.querySelector("#folders_menu, #menu_expand_tree").style.display = "";
 	}
-	var x = event.pageX >= $(window).width() - $("#folders_menu").outerWidth() ? $(window).width() - $("#folders_menu").outerWidth() : event.pageX;
-	var y = event.pageY >= $(window).height() - $("#folders_menu").outerHeight() - 10 ? $(window).height() - $("#folders_menu").outerHeight() - 10 : event.pageY;
-	$("#folders_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
+	
+	ShowMenu(document.getElementById("main_menu"), event);
+}
+
+function ShowFGlobalMenu(event) {
+	menuItemNode = event.target;
+	HideMenus();
+
+
+	document.querySelectorAll("#menu_new_pin, #menu_new_tab, #menu_new_folder, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_newg, #menu_new_group, #separator_gbk, #menu_bookmark_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+		s.style.display = "";
+	});
+	ShowMenu(document.getElementById("main_menu"), event);
+}
+
+function ShowFGroupMenu(GroupNode, event) {
+	HideMenus();
+	menuItemNode = GroupNode;
+console.log(menuItemNode);
+	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close, #separator_gunlo, #groups_menu_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+		s.style.display = "";
+	});
+	
+	ShowMenu(document.getElementById("main_menu"), event);
 }
 
 function SetMenu() {
-	// trigger action when the contexmenu is about to be shown
-	$(document).bind("contextmenu", function(event) {
-		if (!event.ctrlKey) {
-			event.preventDefault();
-		}
-	});
-
-	// show global menu
-	$(document).on("mousedown", "#pin_list, .group", function(event) {
-		event.stopPropagation();
-		if (event.button == 2) {
-			$(".menu").hide(0);
-			menuItemId = active_group;
-
-			var x = event.pageX >= $(window).width() - $("#global_menu").outerWidth() ? $(window).width() - $("#global_menu").outerWidth() : event.pageX;
-			var y = event.pageY >= $(window).height() - $("#global_menu").outerHeight() - 10 ? $(window).height() - $("#global_menu").outerHeight() - 10 : event.pageY;
-			$("#global_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
-		}
-	});
-
-	// show global menu
-	$(document).on("mousedown", ".group_drag_box", function(event) {
-		// event.stopPropagation();
-		if (event.button == 2) {
-			$(".menu").hide(0);
-			if (this.id == "-tab_list") {
-				menuItemId = "tab_list";
-				$("#groups_menu_rename, #groups_menu_delete, #groups_menu_delete_tabs_close").hide();
-			} else {
-				menuItemId = (this.id).substr(1);
-				$("#groups_menu_rename, #groups_menu_delete, #groups_menu_delete_tabs_close").show();
-			}
-			var x = event.pageX >= $(window).width() - $("#groups_menu").outerWidth() ? $(window).width() - $("#groups_menu").outerWidth() : event.pageX;
-			var y = event.pageY >= $(window).height() - $("#groups_menu").outerHeight() - 10 ? $(window).height() - $("#groups_menu").outerHeight() - 10 : event.pageY;
-			$("#groups_menu").css({ "display": "block", "top": y - 15, "left": x - 5 });
-		}
-	});
-
-
-
-	// if the menu element is clicked
-	$(document).on("mousedown", ".menu li", function(event) {
-		event.stopPropagation();
-		if (event.button != 0) {
-			return;
-		}
-		switch ($(this).attr("data-action")) {
-			case "tab_new":
-				chrome.tabs.create({});
-			break;
-			case "tab_clone":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".selected_tab:visible").each(function() {
-						chrome.tabs.duplicate(parseInt(this.id));
-					});
-				} else {
-					chrome.tabs.duplicate(menuItemId);
+	document.querySelectorAll(".menu_item").forEach(function(m){
+		if (m.id == "menu_new_pin") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("pin")) {
+						OpenNewTab(true, menuItemNode.id);
+					} else {
+						OpenNewTab(true, undefined);
+					}
+					HideMenus();
 				}
-			break;
-			case "tab_move":
-				if ($("#" + menuItemId).is(".selected_tab, .active_tab")) {
+			}				
+		}
+		if (m.id == "menu_new_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("folder")) {
+						OpenNewTab(false, menuItemNode.id);
+					} else {
+						if (menuItemNode.classList.contains("pin")) {
+							OpenNewTab(true, menuItemNode.id);
+						} else {
+							if (menuItemNode.classList.contains("tab")) {
+								OpenNewTab(false, menuItemNode.id);
+							} else {
+								OpenNewTab();
+							}
+						}
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_unpin_tab" || m.id == "menu_pin_tab") {
+			m.onmousedown = function(event) {
+				event.stopPropagation();
+				if (event.which == 1) {
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { pinned: (menuItemNode.classList.contains("tab")) });
+						});
+					} else {
+						chrome.tabs.update(parseInt(menuItemNode.id), { pinned: (menuItemNode.classList.contains("tab")) });
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_duplicate_tab") {
+			m.onmousedown = function(event) {
+				event.stopPropagation();
+				if (event.which == 1) {
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							chrome.tabs.duplicate(parseInt(s.id), function(tab) {
+								setTimeout(function() {
+									let tb = document.getElementById(tab.id);
+									if (s != null && tb != null) {
+										s.parentNode.insertBefore(tb, s);
+									}
+								}, 10);
+							});
+						});
+					} else {
+						chrome.tabs.duplicate(parseInt(menuItemNode.id), function(tab) {
+							setTimeout(function() {
+								let tb = document.getElementById(tab.id);
+								if (menuItemNode != null && tb != null) {
+									menuItemNode.parentNode.insertBefore(tb, menuItemNode);
+								}
+							}, 10);
+						});
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_detach_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+
+					if (menuItemNode.classList.contains("selected_tab")) {
+						let tabsArr = [];
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							tabsArr.push(parseInt(s.id));
+							if (s.childNodes[4].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
+									tabsArr.push(parseInt(t.id));
+								});
+							}
+						});
+						Detach(tabsArr);
+					} else {
+						Detach([parseInt(menuItemNode.id)]);
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_reload_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							chrome.tabs.reload(parseInt(s.id));
+						});
+					} else {
+						chrome.tabs.reload(parseInt(menuItemNode.id));
+					}
+					HideMenus();
+				}
+			}				
+		}
+		
+		if (m.id == "menu_unload") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						let tabsArr = [];
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							tabsArr.push(parseInt(s.id));
+							if (s.childNodes[4].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
+									tabsArr.push(parseInt(t.id));
+								});
+							}
+						});
+						DiscardTabs(tabsArr);
+					} else {
+						DiscardTabs([parseInt(menuItemNode.id)]);
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_close") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						let tabsArr = [];
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							tabsArr.push(parseInt(s.id));
+							if (s.childNodes[4].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
+									tabsArr.push(parseInt(t.id));
+								});
+							}
+						});
+						CloseTabs(tabsArr);
+					} else {
+						CloseTabs([parseInt(menuItemNode.id)]);
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_mute_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: true });
+						});
+					} else {
+						chrome.tabs.update(parseInt(menuItemNode.id), { muted: true });
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_mute_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("[id='"+menuItemNode.id+"'], [id='"+menuItemNode.id+"'] .tab").forEach(function(s){
+						chrome.tabs.update(parseInt(s.id), { muted: true });
+					});
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_unmute_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: false });
+						});
+					} else {
+						chrome.tabs.update(parseInt(menuItemNode.id), { muted: false });
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_unmute_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("[id='"+menuItemNode.id+"'], [id='"+menuItemNode.id+"'] .tab").forEach(function(s){
+						chrome.tabs.update(parseInt(s.id), { muted: false });
+					});
+					HideMenus();
+				}
+			}				
+		}
+
+		
+		if (m.id == "menu_mute_other") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin:not(.selected_tab), #"+active_group+" .tab:not(.selected_tab)").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: true });
+						});
+					} else {
+						document.querySelectorAll(".pin:not([id='"+menuItemNode.id+"']), #"+active_group+" .tab:not([id='"+menuItemNode.id+"'])").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: true });
+						});
+					}
+
+					HideMenus();
+				}
+			}				
+		}
+
+		
+		if (m.id == "menu_unmute_other") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin:not(.selected_tab), #"+active_group+" .tab:not(.selected_tab)").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: false });
+						});
+					} else {
+						document.querySelectorAll(".pin:not([id='"+menuItemNode.id+"']), #"+active_group+" .tab:not([id='"+menuItemNode.id+"'])").forEach(function(s){
+							chrome.tabs.update(parseInt(s.id), { muted: false });
+						});
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+
+
+		
+		if (m.id == "menu_undo_close_tab") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					chrome.sessions.getRecentlyClosed(null, function(sessions) {
+						if (sessions.length > 0) {
+							chrome.sessions.restore(null, function() {});
+						}
+					});
+					HideMenus();
+				}
+			}				
+		}
+
+		
+		if (m.id == "menu_new_folder") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("folder")) {
+						AddNewFolder(menuItemNode.id, undefined, undefined, undefined);
+					} else {
+						if (menuItemNode.classList.contains("tab")) {
+							let folders = GetParentsByClass(menuItemNode, "folder");
+							if (folders.length > 0) {
+								AddNewFolder(folders[0].id, undefined, undefined, undefined);
+							} else {
+								AddNewFolder();
+							}
+						} else {
+							AddNewFolder();
+						}
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_expand_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("[id='"+menuItemNode.id+"'], [id='"+menuItemNode.id+"'] .folder.c, [id='"+menuItemNode.id+"'] .tab.c").forEach(function(s){
+						s.classList.add("o");
+						s.classList.remove("c");
+					});
+						
+					schedule_update_data++;
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_collapse_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("[id='"+menuItemNode.id+"'], [id='"+menuItemNode.id+"'] .folder.c, [id='"+menuItemNode.id+"'] .tab.c").forEach(function(s){
+						s.classList.add("c");
+						s.classList.remove("o");
+					});
+					schedule_update_data++;
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_expand_all") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("#"+active_group+" .folder.c, #"+active_group+" .tab.c").forEach(function(s){
+						s.classList.add("o");
+						s.classList.remove("c");
+					});
+					schedule_update_data++;
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_collapse_all") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					document.querySelectorAll("#"+active_group+" .folder.o, #"+active_group+" .tab.o").forEach(function(s){
+						s.classList.add("c");
+						s.classList.remove("o");
+					});
+					schedule_update_data++;
+					HideMenus();
+				}
+			}				
+		}
+
+
+
+		if (m.id == "menu_close_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+
 					let tabsArr = [];
-					$(".active_tab:visible, .selected_tab:visible").each(function() {
-						tabsArr.push(parseInt(this.id));
-						if ($("#ch"+this.id).children().length > 0) {
-							$($("#ch"+this.id).find(".tab")).each(function() {
-								tabsArr.push(parseInt(this.id));
+					document.querySelectorAll("[id='"+menuItemNode.id+"'] .tab, [id='"+menuItemNode.id+"']").forEach(function(s){
+						tabsArr.push(parseInt(s.id));
+						if (s.childNodes[4].childNodes.length > 0) {
+							document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
+								tabsArr.push(parseInt(t.id));
 							});
 						}
 					});
-					Detach(tabsArr);
-				} else {
-					Detach([menuItemId]);
+					CloseTabs(tabsArr);
+					HideMenus();
 				}
-			break;
-			case "tab_reload":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".selected_tab:visible").each(function() {
-						chrome.tabs.reload(parseInt(this.id));
-					});
-				} else {
-					chrome.tabs.reload(menuItemId);
-				}
-			break;
-			case "tab_pin":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".selected_tab:visible").each(function() {
-						chrome.tabs.update(parseInt(this.id), { pinned: ($("#" + menuItemId).is(".pin") ? false : true) });
-					});
-				} else {
-					chrome.tabs.update(menuItemId, { pinned: ($("#" + menuItemId).is(".pin") ? false : true) });
-				}
-			break;
-			case "tab_mute":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".selected_tab:visible").each(function() {
-						chrome.tabs.get(parseInt(this.id), function(tab) {
-							if (tab) {
-								chrome.tabs.update(tab.id, { muted: true });
-							}
-						});
-					});
-				} else {
-					chrome.tabs.get(menuItemId, function(tab) {
-						if (tab) {
-							chrome.tabs.update(tab.id, { muted: true });
-						}
-					});
-				}
-			break;
-			case "tab_unmute":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".selected_tab:visible").each(function() {
-						chrome.tabs.get(parseInt(this.id), function(tab) {
-							if (tab) {
-								chrome.tabs.update(tab.id, { muted: false });
-							}
-						});
-					});
-				} else {
-					chrome.tabs.get(menuItemId, function(tab) {
-						chrome.tabs.update(tab.id, { muted: false });
-					});
-				}
-			break;
-			case "tab_mute_other":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".tab:visible:not(.selected_tab)").each(function() {
-						chrome.tabs.update(parseInt(this.id), { muted: true });
-					});
-				} else {
-					$(".tab:visible:not(#" + menuItemId + ")").each(function() {
-						chrome.tabs.update(parseInt(this.id), { muted: true });
-					});
-				}
-			break;
-			case "tab_unmute_other":
-				if ($("#" + menuItemId).is(".selected_tab")) {
-					$(".tab:visible:not(.selected_tab)").each(function() {
-						chrome.tabs.update(parseInt(this.id), { muted: false });
-					});
-				} else {
-					$(".tab:visible:not(#" + menuItemId + ")").each(function() {
-						chrome.tabs.update(parseInt(this.id), { muted: false });
-					});
-				}
-			break;
-			case "tab_close":
-				CloseTabs($("#" + menuItemId).is(".selected_tab") ? $(".selected_tab:visible").map(function() { return parseInt(this.id); }).toArray() : [menuItemId]);
-			break;
-			case "tab_close_tree":
-				CloseTabs($("#" + menuItemId).find(".tab").map(function() { return parseInt(this.id); }).toArray());
-				CloseTabs([menuItemId]);
-			break;
-			case "tab_close_other":
-				CloseTabs($(".tab:visible:not(#" + menuItemId + ")").map(function() { return parseInt(this.id); }).toArray());
-			break;
-			case "tab_undo_close":
-				chrome.sessions.getRecentlyClosed(null, function(sessions) {
-					if (sessions.length > 0) {
-						chrome.sessions.restore(null, function() {});
-					}
-				});
-			break;
-			case "tab_discard":
-				DiscardTabs($("#" + menuItemId).is(".selected_tab") ? $(".tab.selected_tab:visible").map(function() { return parseInt(this.id); }).toArray() : [menuItemId]);
-			break;
-			case "tab_settings":
-				chrome.tabs.create({ "url": "options.html" });
-			break;
-			case "expand_all":
-				$("#"+active_group+" .folder.c, #"+active_group+" .tab.c").addClass("o").removeClass("c");
-				schedule_update_data++;
-			break;
-			case "collapse_all":
-				$("#"+active_group+" .folder.o, #"+active_group+" .tab.o").addClass("c").removeClass("o");
-				schedule_update_data++;
-			break;
-			case "expand_this":
-				$("#"+menuItemId+".folder").addClass("o").removeClass("c");
-				$("#"+menuItemId+".tab.c").addClass("o").removeClass("c");
-				$("#"+menuItemId+" .folder.c, #"+menuItemId+" .tab.c").addClass("o").removeClass("c");
-				schedule_update_data++;
-			break;
-			case "collapse_this":
-				$("#"+menuItemId+".o").addClass("c").removeClass("o");
-				$("#"+menuItemId+" .folder.o, #"+menuItemId+" .tab.o").addClass("c").removeClass("o");
-				schedule_update_data++;
-			break;
-			case "folder_new":
-				AddNewFolder({});
-			break;
-			case "folder_rename":
-				if ($("#" + menuItemId).is(".selected_folder")) {
-					$(".selected_folder:visible").each(function() {
-						ShowRenameFolderDialog(this.id);
-					});
-				} else {
-					ShowRenameFolderDialog(menuItemId);
-				}
-			break;
-			case "folder_delete":
-				if ($("#" + menuItemId).is(".selected_folder")) {
-					$(".selected_folder:visible").each(function() {
-						RemoveFolder(this.id);
-					});
-				} else {
-					RemoveFolder(menuItemId);
-				}
-			break;
-			case "group_new":
-				AddNewGroup({});
-			break;
-			case "group_rename":
-				ShowGroupEditWindow();
-			break;
-			case "group_delete":
-				GroupRemove(menuItemId, false);
-			break;
-			case "group_delete_tabs_close":
-				GroupRemove(menuItemId, true);
-			break;
-			case "group_unload":
-				DiscardTabs($("#"+menuItemId+" .tab").map(function() { return parseInt(this.id); }).toArray());
-			break;
-			case "group_bookmark":
-				BookmarkGroup(menuItemId);
-			break;
-			case "tree_bookmark":
-				BookmarkTree(menuItemId);
-			break;
+			}				
 		}
-		$(".menu").hide(0);
+
+		if (m.id == "menu_rename_folder") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					ShowRenameFolderDialog(menuItemNode.id);
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_delete_folder") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					if (menuItemNode.classList.contains("selected_folder")) {
+						document.querySelectorAll("#"+menuItemNode.id+"  .selected_folder, #"+menuItemNode.id).forEach(function(s){
+							RemoveFolder(s.id);
+						});
+					} else {
+						RemoveFolder(menuItemNode.id);
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_close_other") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					let tabsArr = [];
+					if (menuItemNode.classList.contains("selected_tab")) {
+						document.querySelectorAll(".pin:not(.selected_tab), #"+active_group+" .tab:not(.selected_tab)").forEach(function(s){
+							let children = document.querySelectorAll("[id='"+s.id+"'] .selected_tab");
+							if (children.length == 0 || opt.promote_children) {
+								tabsArr.push(parseInt(s.id));
+							}
+						});
+						CloseTabs(tabsArr);
+					} else {
+						if (menuItemNode.classList.contains("tab")) {
+							document.getElementById(active_group).appendChild(menuItemNode);
+						}
+						document.querySelectorAll(".pin:not([id='"+menuItemNode.id+"']), #"+active_group+" .tab:not([id='"+menuItemNode.id+"'])").forEach(function(s){
+							tabsArr.push(parseInt(s.id));
+						});
+			
+						CloseTabs(tabsArr);
+					}
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_bookmark_tree") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					Bookmark(menuItemNode);
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_rename_group") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					ShowGroupEditWindow(menuItemNode.id);
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_delete_group") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					GroupRemove(menuItemNode.id, false);
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_delete_group_tabs_close") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					GroupRemove(menuItemNode.id, true);
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "groups_menu_unload") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					let tabsArr = [];
+					document.querySelectorAll("[id='"+menuItemNode.id+"'] .tab").forEach(function(s){
+						tabsArr.push(parseInt(s.id));
+					});
+					DiscardTabs(tabsArr);					
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_bookmark_group") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					Bookmark(menuItemNode);
+					HideMenus();
+				}
+			}				
+		}
+
+		if (m.id == "menu_new_group") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					AddNewGroup();
+					HideMenus();
+				}
+			}				
+		}
+
+
+		if (m.id == "menu_treetabs_settings") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					chrome.tabs.create({ "url": "options.html" });
+					HideMenus();
+				}
+			}				
+		}
+
+
 	});
 	
 	
 
-
 	// move tabs to group
-	// $(document).on("mousedown", "#tabs_menu_move_to_new_group, .move_to_group_menu_entry", function(event) {
+	// $(document).on("mousedown", "#menu_detach_tab_to_new_group, .move_to_group_menu_entry", function(event) {
 		// var tabsIds
-		// if ($(this).is("#tabs_menu_move_to_new_group")) {
+		// if ($(this).is("#menu_detach_tab_to_new_group")) {
 			// bg.dt.DropToGroup = AddNewGroup(575757);
 			// GetColorFromMiddlePixel(vt.menuItemId, bg.dt.DropToGroup);
 		// } else {

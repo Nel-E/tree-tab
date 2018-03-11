@@ -15,6 +15,7 @@
 		"16": "icons/16.png"
 	},
 	"permissions": [ "tabs", "sessions", "<all_urls>", "storage", "bookmarks" ],
+
 	"sidebar_action": {
 		"default_icon": {
 			"16": "icons/16.png",
@@ -28,12 +29,6 @@
 	"browser_action": {
 		"default_icon": "icons/24.png"
 	},
-	"commands": {
-		"_execute_browser_action": {
-			"suggested_key": { "default": "F2" },
-			"description": "toggle Tree Tabs"
-		}
-	},
 	"applications": {
 		"gecko": {
 			"id": "TreeTabs@jagiello.it",
@@ -44,5 +39,5 @@
 		"page": "options.html",
 		"open_in_tab": true
 	},
-	"version": "1.5"
+	"version": "100"
 }

@@ -24,9 +24,9 @@ body {
 	--pin_list_padding_top: 1px;
 	--pin_list_padding_bottom: 2px;
 	--pin_list_padding_left: 2px;
-	--pin_list_padding_right: 4px;
 	
 	--pin_margin_left: -1px;
+	--pin_last_margin_right: 3px;
 	--pin_margin_bottom: -1px;
 	
 	

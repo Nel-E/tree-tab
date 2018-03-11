@@ -1,10 +1,10 @@
-TOP PRIORITY:
+
 
 undo close to restore trees (will work ONLY in firefox)
 Close tab on Middle mouse click and not On Middle mouse down
 Split Pin size in theme
 
-LOW PRIORITY:
+
 add groups scrolling arrows
 add textbox for ungrouped name in options
 option for scrollbar on the left
@@ -16,6 +16,9 @@ menu: select all
 menu: invert selection
 menu: close above/close below
 menu: Customising the context menu
+menu: move to group
+menu: Unload other
+
 
 click on active to return to previous tab
 sort tabs/tree
@@ -23,3 +26,46 @@ maybe filter tabs on search
 
 make tabs border width configurable, including size 0
 make tab spacing configurable, including 0 size
+
+font size
+hibernate group
+
+double click on tab actions selection like double click to be able to expand child tab.
+ I want you to be able to display the tab number count on the right end
+customizable menu
+
+import session to unload tabs immediately
+bind groups to FF containers
+
+Unread Tabs Color/Style
+Give back group color (like it was before)
+
+
+- When a pinned tab refreshes, it constantly blinks red. Suggest changing that to match Firefox's solid little blue indicator. It's less eye-catching (annoying) and more consistent.
+
+folders collapsed by default or make this optional
+
+
+when actived tab located in folder, all tabs operation related with creating new tab (such as clone of tab in folder, new tab) must work only in current folder.
+
+New tab in selected folder!
+
+
+separate option for close folder (close or promote children)
+menu: unload tabs in folders
+
+menu: unload tabs must close real FF tabs, but your tabs must markeds like unloads and stay in list.
+
+Also all your tabs you can save in special folder of FF bookmarks and working from this place, where subdirs first level = groups for tab in left... Option for set base bookmark dir for addon can add to addon config.
+
+Whilst themes are apparently available, i couldn't just grab one via a drop-down which would make it easier.
+Accept BCH (BitcoinCash) donations as the FEES make it FAR more palatable to donate (a few cents vs a few dollars). I bet you're missing out on plenty of micro donations because Bitcoin fees are so high it's no longer micro, and ETH is too high too (though not as bad).
+
+- I also support the suggestion of integrating Tree Tabs with Firefox sync. I definitely would have a great use for this possibility.
+- Like many other commenters suggested, it would be wonderful to see some indication of the container a tab was opened in, if any. Getting an option to directly be able to chose to open a new tab in a container would also be very useful. 
+
+
+I don't understand those from comments
+- add possibility open all tabs in folder in new left tab group with deleting this folder;
+- for economy memory your tabs must to makings (html code) during activating left tab group or during unfold folders/trees;
+- real FF tabs must creating and linking only after activate your tabs;
