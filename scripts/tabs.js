@@ -103,6 +103,10 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 					DeselectFolders();
 					DeselectTabs();
 				}
+				if (event.which == 2 && event.target == this) {
+					event.stopImmediatePropagation();
+					ActionClickGroup(this.parentNode, opt.midclick_group);
+				}
 				if (event.which == 3) {
 					ShowFGlobalMenu(event);
 				}
@@ -110,12 +114,15 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 		}
 		ct.ondblclick = function(event) {
 			if (event.target == this) {
-				EventDoubleClickGroup(event, this.parentNode);
+				ActionClickGroup(this.parentNode, opt.dbclick_group);
 			}
 		}
 		ex.onmousedown = function(event) {
+			if (document.getElementById("main_menu").style.top != "-1000px") {
+				HideMenus();
+			}
 			if (event.which == 1) {
-				EventTabExpandBox(event);
+				EventExpandBox(this.parentNode.parentNode);
 			}
 		}
 		ex.onmouseenter = function(event) {
@@ -149,7 +156,7 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 			if (document.getElementById("main_menu").style.top != "-1000px") {
 				HideMenus();
 			} else {
-				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("expand") == false && event.target.classList.contains("close") == false  && event.target.classList.contains("close_img") == false  && event.target.classList.contains("tab_mediaicon") == false) {
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("tab_title") || event.target.classList.contains("tab_header"))) {
 					DeselectTabs();
 					// SetActiveTab(this.parentNode.id);
 					chrome.tabs.update(parseInt(this.parentNode.id), { active: true });
@@ -157,7 +164,9 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 			}
 		}
 		th.ondblclick = function(event) {
-			EventDoubleClickTab(event, this.parentNode);
+			if (event.target.classList && (event.target.classList.contains("tab_title") || event.target.classList.contains("tab_header"))) {
+				ActionClickTab(this.parentNode, opt.dbclick_tab);
+			}
 		}
 		
 		th.onmousedown = function(event) {
@@ -166,11 +175,9 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 				// SELECT TAB/PIN
 				EventSelectTab(event, this.parentNode);
 			}
-			if (event.which == 2 && opt.close_with_MMB == true) {
+			if (event.which == 2) {
 				event.preventDefault();
-				if ((this.parentNode.classList.contains("pin") && opt.allow_pin_close) || this.parentNode.classList.contains("tab")) {
-					CloseTabs([parseInt(this.parentNode.id)]);
-				}
+				ActionClickTab(this.parentNode, opt.midclick_tab);
 			}
 			if (event.which == 3) {
 				ShowTabMenu(this.parentNode, event);
@@ -339,7 +346,7 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 	}
 	GetFaviconAndTitle(tab.id, addCounter);
 	RefreshMediaIcon(tab.id);
-	if (tab.active && !SkipSetActive) {
+	if (tab.active && SkipSetActive == false) {
 		SetActiveTab(tab.id);
 	}
 	if (Scroll) {
@@ -544,7 +551,8 @@ function CloseTabs(tabsIds) {
 
 function DiscardTabs(tabsIds) {
 	var delay = 100;
-	if (document.getElementById(tabsIds[0]).classList.contains("discarded")) {
+	let tabNode = document.getElementById(tabsIds[0]);
+	if (tabNode == null || tabNode.classList.contains("discarded") || tabNode.classList.contains("active_tab")) {
 		delay = 5;
 	} else {
 		chrome.tabs.discard(tabsIds[0]);
@@ -765,31 +773,70 @@ function HighlightDragEnterTabToTab(Node, addDepth) {
 	}
 }
 
-function EventTabExpandBox(event) {
+function EventExpandBox(Node) {
 	if (!event.shiftKey && !event.ctrlKey) {
-		if (event.target.parentNode.parentNode.classList.contains("o")) {
-			event.target.parentNode.parentNode.classList.remove("o");
-			event.target.parentNode.parentNode.classList.add("c");
-			chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(event.target.parentNode.parentNode.id), tab: { expand: "c" } });
+		if (Node.classList.contains("o")) {
+			Node.classList.remove("o");
+			Node.classList.add("c");
+			
+			if (Node.classList.contains("tab")) {
+				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "c" } });
+			}
+			
+			if (Node.classList.contains("folder")) {
+				SaveFolders();
+			}
+			
 		} else {
-			if (event.target.parentNode.parentNode.classList.contains("c")) {
-				if (opt.close_other_trees) {
-					let thisTree = GetParentsByClass(event.target.parentNode, "tab"); // start from tab's header, instead of tab, important to include clicked tab as well
+			if (Node.classList.contains("c")) {
+				if (opt.collapse_other_trees) {
+					let thisTreeTabs = GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
+					let thisTreeFolders = GetParentsByClass(Node.childNodes[0], "folder"); 
+					
+					
 					document.querySelectorAll("#"+active_group+" .o.tab").forEach(function(s){
 						s.classList.remove("o");
 						s.classList.add("c");
 						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
 					});
-					thisTree.forEach(function(s){
+					
+					document.querySelectorAll("#"+active_group+" .o.folder").forEach(function(s){
+						s.classList.remove("o");
+						s.classList.add("c");
+					});
+					
+					
+					thisTreeTabs.forEach(function(s){
 						s.classList.remove("c");
 						s.classList.add("o");
 						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "o" } });
 					});
-					ScrollToTab(event.target.parentNode.parentNode.id);
+					thisTreeFolders.forEach(function(s){
+						s.classList.remove("c");
+						s.classList.add("o");
+					});
+					
+					
+					
+					// if (Node.classList.contains("folder")) {
+						SaveFolders();
+					// }
+					if (Node.classList.contains("tab")) {
+						ScrollToTab(Node.id);
+					}
+					
 				} else {
-					event.target.parentNode.parentNode.classList.remove("c");
-					event.target.parentNode.parentNode.classList.add("o");
-					chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(event.target.parentNode.parentNode.id), tab: { expand: "o" } });
+					Node.classList.remove("c");
+					Node.classList.add("o");
+					
+					if (Node.classList.contains("tab")) {
+						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "o" } });
+					}
+					
+					if (Node.classList.contains("folder")) {
+						SaveFolders();
+					}
+					
 				}
 			}
 		}
@@ -799,36 +846,31 @@ function EventTabExpandBox(event) {
 
 function OpenNewTab(pin, parentId) {
 	if (pin) {
-		// chrome.tabs.create((browserId == "V" ? {url: "vivaldi://startpage", pinned: true} : {pinned: true}), function(tab) {
 		chrome.tabs.create({pinned: true}, function(tab) {
 			if (parentId) {
-				// AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter);
 				AppendTab(tab, "pin_list", false, parentId, true, false, true, false, false, true, false);
-				// AppendTab({ tab: tab, InsertAfterId: parentId });
 				schedule_update_data++;
 			}
 		});
 	} else {
-		// chrome.tabs.create((browserId == "V" ? {url: "vivaldi://startpage"} : {}), function(tab) {
 		chrome.tabs.create({}, function(tab) {
 			if (parentId) {
 				AppendTab(tab, parentId, false, false, (opt.append_orphan_tab == "top" ? false : true), false, true, false, false, true, false);
-				// AppendTab({ tab: tab, ParentId: parentId, Append: (opt.append_orphan_tab == "top" ? false : true) });
 				schedule_update_data++;
 			}
 		});
 	}
 }
-function EventSelectTab(event, Node) {
+
+
+function EventSelectTab(event, TabNode) {
 	DeselectFolders();
 	if (event.shiftKey) { // SET SELECTION WITH SHIFT
-		// let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
 		let activeTab = document.querySelector("#"+active_group+" .selected_tab.selected_last");
-
 		if (activeTab == null) {
 			activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
 		}
-		if (activeTab != null && Node.parentNode.id == activeTab.parentNode.id) {
+		if (activeTab != null && TabNode.parentNode.id == activeTab.parentNode.id) {
 
 			if (!event.ctrlKey) {
 				document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
@@ -838,10 +880,9 @@ function EventSelectTab(event, Node) {
 					s.classList.remove("selected_last");
 				});
 			}
-			
-			let ChildrenArray = Array.from(Node.parentNode.children);
+			let ChildrenArray = Array.from(TabNode.parentNode.children);
 			let activeTabIndex = ChildrenArray.indexOf(activeTab);
-			let thisTabIndex = ChildrenArray.indexOf(Node);
+			let thisTabIndex = ChildrenArray.indexOf(TabNode);
 			let fromIndex = thisTabIndex >= activeTabIndex ? activeTabIndex : thisTabIndex;
 			let toIndex = thisTabIndex >= activeTabIndex ? thisTabIndex : activeTabIndex;
 			for (let i = fromIndex; i <= toIndex; i++) {
@@ -853,34 +894,38 @@ function EventSelectTab(event, Node) {
 		}
 	}
 	if (event.ctrlKey && !event.shiftKey) { // TOGGLE SELECTION WITH CTRL
-		Node.classList.toggle("selected_tab");
-		if (Node.classList.contains("selected_tab")) {
+		TabNode.classList.toggle("selected_tab");
+		if (TabNode.classList.contains("selected_tab")) {
 			document.querySelectorAll(".selected_last").forEach(function(s){
 				s.classList.remove("selected_last");
 			});
-			Node.classList.add("selected_last");
+			TabNode.classList.add("selected_last");
 		} else {
-			Node.classList.remove("selected_last");
+			TabNode.classList.remove("selected_last");
 		}
 	}
 }
 
-function EventDoubleClickTab(event, Node) {
-	if (opt.dbclick_tab == "new_tab") {
-		OpenNewTab(Node.classList.contains("pin"), Node.id);
+function ActionClickTab(TabNode, bgOption) {
+	if (bgOption == "new_tab") {
+		OpenNewTab(TabNode.classList.contains("pin"), TabNode.id);
 	}
-	if (opt.dbclick_tab == "reload_tab") {
-		chrome.tabs.reload(parseInt(Node.id), {})
+	if (bgOption == "expand_collapse") {
+		EventExpandBox(TabNode);
 	}
-	if (opt.dbclick_tab == "close_tab") {
-		CloseTabs([parseInt(Node.id)]);
+	if (bgOption == "close_tab") {
+		if ((TabNode.classList.contains("pin") && opt.allow_pin_close) || TabNode.classList.contains("tab")) {
+			CloseTabs([parseInt(TabNode.id)]);
+		}
 	}
-	if (opt.dbclick_tab == "unload_tab") {
+	if (bgOption == "reload_tab") {
+		chrome.tabs.reload(parseInt(TabNode.id));
+	}
+	if (bgOption == "unload_tab") {
 		SwitchActiveTabBeforeClose(active_group);
-		DiscardTabs([parseInt(Node.id)]);
+		DiscardTabs([parseInt(TabNode.id)]);
 	}
-	if (opt.dbclick_tab == "activate_previous_active" && Node.classList.contains("active_tab")) {
+	if (bgOption == "activate_previous_active" && TabNode.classList.contains("active_tab")) {
 		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
 	}
 }
-

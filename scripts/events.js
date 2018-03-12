@@ -32,20 +32,37 @@ function SetEvents() {
 	}
 	
 	// MOUSE DOWN EVENTS
-	document.onmousedown = function(event) {
-		// if (event.which == 2 && opt.close_with_MMB == true) {
-			// event.preventDefault();
-		// }
+	document.body.onmousedown = function(event) {
+		if (event.which == 2) {
+			event.preventDefault();
+		}	
+
 		if (event.which == 1 && event.target.classList.contains("menu_item") == false) {
 			HideMenus();
 		}
 		event.stopImmediatePropagation();
 
 		if (event.which == 1) {
-			// DISABLE HOVER STYLE ON ALL TABS BEFORE DRAG
 			RemoveHeadersHoverClass();
 		}
-		
+	
+	}
+	// MOUSE DOWN EVENTS
+	document.body.onmousedown = function(event) {
+
+		if (event.which == 2) {
+			event.preventDefault();
+		}	
+
+		if (event.which == 1 && event.target.classList.contains("menu_item") == false) {
+			HideMenus();
+		}
+		event.stopImmediatePropagation();
+
+		if (event.which == 1) {
+			RemoveHeadersHoverClass();
+		}
+	
 	}
 
 	// CONFIRM EDIT FOLDER
@@ -97,11 +114,10 @@ function SetEvents() {
 			DeselectTabs();
 			HideMenus();
 		}
-		if (event.which == 2 && opt.close_with_MMB == true) {
-			event.preventDefault();
+		if (event.which == 2 && event.target == this) {
+			ActionClickGroup(this, opt.midclick_group);
 		}
 		if (event.which == 3 && event.target == this) {
-			// SHOW MENU
 			ShowFGlobalMenu(event);
 		}
 	}
@@ -115,7 +131,7 @@ function SetEvents() {
 	// DOUBLE CLICK ACTION
 	PinList.ondblclick = function(event) {
 		if (event.target == this) {
-			EventDoubleClickGroup(event, this);
+			ActionClickGroup(this, opt.dbclick_group);
 		}
 	}
 	

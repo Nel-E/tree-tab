@@ -78,7 +78,7 @@ function ShowFolderMenu(FolderNode, event) {
 	HideMenus();
 	menuItemNode = FolderNode;
 	
-	document.querySelectorAll("#menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #separator_colla, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_mute_tab, #menu_unmute_tab, #menu_unload, #menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #separator_colla, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
 
@@ -106,11 +106,15 @@ function ShowFGlobalMenu(event) {
 function ShowFGroupMenu(GroupNode, event) {
 	HideMenus();
 	menuItemNode = GroupNode;
-console.log(menuItemNode);
+	
 	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close, #separator_gunlo, #groups_menu_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
-	
+	if (menuItemNode.id == "tab_list") {
+		document.querySelectorAll("#menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close").forEach(function(s){
+			s.style.display = "none";
+		});
+	}
 	ShowMenu(document.getElementById("main_menu"), event);
 }
 
@@ -241,19 +245,28 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (menuItemNode.classList.contains("selected_tab")) {
+					if (menuItemNode.classList.contains("pin") || menuItemNode.classList.contains("tab")) {
+						if (menuItemNode.classList.contains("selected_tab")) {
+							let tabsArr = [];
+							document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+								tabsArr.push(parseInt(s.id));
+								if (s.childNodes[4].childNodes.length > 0) {
+									document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
+										tabsArr.push(parseInt(t.id));
+									});
+								}
+							});
+							DiscardTabs(tabsArr);
+						} else {
+							DiscardTabs([parseInt(menuItemNode.id)]);
+						}
+					}
+					if (menuItemNode.classList.contains("folder")) {
 						let tabsArr = [];
-						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+						document.querySelectorAll("#"+menuItemNode.id+" .tab").forEach(function(s){
 							tabsArr.push(parseInt(s.id));
-							if (s.childNodes[4].childNodes.length > 0) {
-								document.querySelectorAll("#"+s.childNodes[4].id+" .tab").forEach(function(t){
-									tabsArr.push(parseInt(t.id));
-								});
-							}
 						});
 						DiscardTabs(tabsArr);
-					} else {
-						DiscardTabs([parseInt(menuItemNode.id)]);
 					}
 					HideMenus();
 				}
@@ -287,12 +300,19 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+					if (menuItemNode.classList.contains("pin") || menuItemNode.classList.contains("tab")) {
+						if (menuItemNode.classList.contains("selected_tab")) {
+							document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+								chrome.tabs.update(parseInt(s.id), { muted: true });
+							});
+						} else {
+							chrome.tabs.update(parseInt(menuItemNode.id), { muted: true });
+						}
+					}
+					if (menuItemNode.classList.contains("folder")) {
+						document.querySelectorAll("#"+menuItemNode.id+" .tab").forEach(function(s){
 							chrome.tabs.update(parseInt(s.id), { muted: true });
 						});
-					} else {
-						chrome.tabs.update(parseInt(menuItemNode.id), { muted: true });
 					}
 					HideMenus();
 				}
@@ -315,12 +335,19 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+					if (menuItemNode.classList.contains("pin") || menuItemNode.classList.contains("tab")) {
+						if (menuItemNode.classList.contains("selected_tab")) {
+							document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+								chrome.tabs.update(parseInt(s.id), { muted: false });
+							});
+						} else {
+							chrome.tabs.update(parseInt(menuItemNode.id), { muted: false });
+						}
+					}
+					if (menuItemNode.classList.contains("folder")) {
+						document.querySelectorAll("#"+menuItemNode.id+" .tab").forEach(function(s){
 							chrome.tabs.update(parseInt(s.id), { muted: false });
 						});
-					} else {
-						chrome.tabs.update(parseInt(menuItemNode.id), { muted: false });
 					}
 					HideMenus();
 				}

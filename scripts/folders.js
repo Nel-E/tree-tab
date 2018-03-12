@@ -8,6 +8,7 @@ function AddNewFolder(ParentId, Name, Index, ExpandState) {
 	AppendFolder(newId, caption_noname_group, (ParentId ? ParentId : ""), undefined, true);
 	SaveFolders();
 	RefreshCounters();
+	RefreshExpandStates();
 	return newId;
 }
 
@@ -30,12 +31,12 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 		if (SetEvents) {
 			ct.ondblclick = function(event) {
 				if (event.target == this) {
-					EventDoubleClickGroup(event, this.parentNode);
+					ActionClickGroup(this.parentNode, opt.dbclick_group);
 				}
 			}
 			cf.ondblclick = function(event) {
 				if (event.target == this) {
-					EventDoubleClickGroup(event, this.parentNode);
+					ActionClickGroup(this.parentNode, opt.dbclick_group);
 				}
 			}
 
@@ -44,6 +45,10 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					if (event.which == 1) {
 						DeselectFolders();
 						DeselectTabs();
+					}
+					if (event.which == 2 && event.target == this) {
+						event.stopImmediatePropagation();
+						ActionClickGroup(this.parentNode, opt.midclick_group);
 					}
 					if (event.which == 3) {
 						ShowFGlobalMenu(event);
@@ -55,6 +60,10 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					if (event.which == 1) {
 						DeselectFolders();
 						DeselectTabs();
+					}
+					if (event.which == 2 && event.target == this) {
+						event.stopImmediatePropagation();
+						ActionClickGroup(this.parentNode, opt.midclick_group);
 					}
 					if (event.which == 3) {
 						ShowFGlobalMenu(event);
@@ -77,6 +86,9 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 				}
 			}
 			fh.onmousedown = function(event) {
+				if (document.getElementById("main_menu").style.top != "-1000px") {
+					HideMenus();
+				}
 				// SELECT FOLDER
 				if (event.which == 1 && !event.shiftKey) {
 					DeselectTabs();
@@ -85,9 +97,9 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					}
 					event.target.parentNode.parentNode.classList.toggle("selected_folder");
 				}
-				if (event.which == 2 && opt.close_with_MMB == true) {
+				if (event.which == 2) {
 					event.preventDefault();
-					RemoveFolder(this.parentNode.id);
+					ActionClickFolder(this.parentNode, opt.midclick_folder);
 				}
 				// SHOW FOLDER MENU
 				if (event.which == 3) {
@@ -96,8 +108,10 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 			}
 			// edit folder
 			fh.ondblclick = function(event) {
-				if (event.which == 1) {
-					ShowRenameFolderDialog(this.parentNode.id);
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("folder_title") || event.target.classList.contains("folder_header"))) {
+				// if (event.which == 1) {
+					// ShowRenameFolderDialog(this.parentNode.id);
+					ActionClickFolder(this.parentNode, opt.dbclick_folder);
 				}
 			}
 			fh.ondragstart = function(event) { // DRAG START
@@ -189,21 +203,17 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 				}
 			}
 			ex.onmousedown = function(event) {
+				if (document.getElementById("main_menu").style.top != "-1000px") {
+					HideMenus();
+				}
 				// EXPAND/COLLAPSE FOLDER
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (this.parentNode.parentNode.classList.contains("o")) {
-						this.parentNode.parentNode.classList.remove("o");
-						this.parentNode.parentNode.classList.add("c");
-					} else {
-						if (this.parentNode.parentNode.classList.contains("c")) {
-							this.parentNode.parentNode.classList.remove("c");
-							this.parentNode.parentNode.classList.add("o");
-						}
-					}
+					
+					EventExpandBox(this.parentNode.parentNode);
+
 					RefreshExpandStates();
 					RefreshCounters();
-					SaveFolders();
 				}
 			}
 		}	
@@ -353,5 +363,30 @@ function DeselectFolders() {
 	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
 		s.classList.remove("selected_folder");
 	});
+}
+
+function ActionClickFolder(FolderNode, bgOption) {
+	if (bgOption == "rename_folder") {
+		ShowRenameFolderDialog(FolderNode.id);
+	}
+	if (bgOption == "new_folder") {
+		AddNewFolder(FolderNode.id, undefined, undefined, undefined);
+	}
+	if (bgOption == "new_tab") {
+		OpenNewTab(false, FolderNode.id);
+	}
+	if (bgOption == "expand_collapse") {
+		EventExpandBox(FolderNode);
+	}
+	if (bgOption == "close_folder") {
+		RemoveFolder(FolderNode.id);
+	}
+	if (bgOption == "unload_folder") {
+		let tabsArr = [];
+		document.querySelectorAll("#"+FolderNode.id+" .tab").forEach(function(s){
+			tabsArr.push(parseInt(s.id));
+		});
+		DiscardTabs(tabsArr);
+	}
 }
 

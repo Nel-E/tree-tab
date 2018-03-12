@@ -11,7 +11,7 @@ var dragged_button;
 active_group = "tab_list";
 
 // options for all drop down menus
-let DropDownList = ["dbclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab"];
+let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab"];
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
@@ -328,7 +328,7 @@ function SetEvents() {
 	// options that need reload
 	document.onclick = function(event) {if (event.which == 1) {
 		if (event.target.id == "show_toolbar" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "allow_pin_close" || event.target.id == "switch_with_scroll" || event.target.id == "always_show_close" || event.target.id == "never_show_close" || 
-			event.target.id == "close_other_trees" || event.target.id == "show_counter_tabs" || event.target.id == "show_counter_tabs_hints" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "syncro_tabbar_groups_tabs_order" || event.target.id == "groups_toolbar_default") {
+			event.target.id == "collapse_other_trees" || event.target.id == "show_counter_tabs" || event.target.id == "show_counter_tabs_hints" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "syncro_tabbar_groups_tabs_order" || event.target.id == "groups_toolbar_default") {
 			chrome.runtime.sendMessage({command: "reload_sidebar"});
 		}
 		if (event.target.id == "groups_toolbar_default") {

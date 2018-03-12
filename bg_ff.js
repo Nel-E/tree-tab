@@ -220,16 +220,18 @@ function FirefoxListeners() {
 		browser.sidebarAction.open();
 	});
 	chrome.tabs.onCreated.addListener(function(tab) {
-		let t = Promise.resolve(browser.sessions.getTabValue(tab.id, "TTdata")).then(function(TabData) {
-			if (TabData != undefined) {
-				tabs[tab.id] = Object.assign({}, TabData);
-				let originalParent = TabData.parent_ttid == "" ? undefined : (tt_ids[TabData.parent_ttid] ? tt_ids[TabData.parent_ttid] : TabData.parent_ttid);
-				chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id, parentTabId: originalParent, index: TabData.index});
-			} else {
-				AppendTabTTId(tab.id);
-				chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tab: tab, tabId: tab.id});
-			}
-			schedule_save++;
+		chrome.tabs.get(tab.id, function(NewTab) { // for some reason firefox sends tab with "active == false" even if tab is active (THIS IS POSSIBLY A NEW BUG IN FF 60.01!)
+			let t = Promise.resolve(browser.sessions.getTabValue(NewTab.id, "TTdata")).then(function(TabData) {
+				if (TabData != undefined) {
+					tabs[NewTab.id] = Object.assign({}, TabData);
+					let originalParent = TabData.parent_ttid == "" ? undefined : (tt_ids[TabData.parent_ttid] ? tt_ids[TabData.parent_ttid] : TabData.parent_ttid);
+					chrome.runtime.sendMessage({command: "tab_created", windowId: NewTab.windowId, tab: NewTab, tabId: NewTab.id, parentTabId: originalParent, index: TabData.index});
+				} else {
+					AppendTabTTId(NewTab.id);
+					chrome.runtime.sendMessage({command: "tab_created", windowId: NewTab.windowId, tab: NewTab, tabId: NewTab.id});
+				}
+				schedule_save++;
+			});
 		});
 	});
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {

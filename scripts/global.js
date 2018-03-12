@@ -109,7 +109,6 @@ var DefaultTheme = {
 var DefaultPreferences = {
 	"skip_load": false,
 	"pin_list_multi_row": true,
-	"close_with_MMB": true,
 	"always_show_close": false,
 	"never_show_close": false,
 	"allow_pin_close": false,
@@ -117,10 +116,10 @@ var DefaultPreferences = {
 	"append_child_tab_after_limit": "after",
 	"append_orphan_tab": "bottom",
 	"after_closing_active_tab": "below_seek_in_parent",
-	"close_other_trees": false,
+	"collapse_other_trees": false,
+	"open_tree_on_hover": true,
 	"promote_children": true,
 	"promote_children_in_first_child": true,
-	"open_tree_on_hover": true,
 	"max_tree_depth": -1,
 	"max_tree_drag_drop": true,
 	"switch_with_scroll": false,
@@ -130,8 +129,12 @@ var DefaultPreferences = {
 	"show_counter_tabs_hints": true,
 	"groups_toolbar_default": true,
 	"syncro_tabbar_groups_tabs_order": true,
+	"midclick_tab": "close_tab",
 	"dbclick_tab": "new_tab",
 	"dbclick_group": "new_tab",
+	"midclick_group": "nothing",
+	"midclick_folder": "nothing",
+	"dbclick_folder": "rename_folder",
 	"debug": false
 };
 var theme = {
@@ -257,7 +260,9 @@ function ShowOpenFileDialog(id, extension) {
 	let inp = document.createElement("input");
 	inp.id = id;
 	inp.type = "file";
-	inp.accept = extension;
+	if (browserId == "F") {
+		inp.accept = extension;
+	}
 	inp.style.display = "none";
 	body.appendChild(inp);
 	inp.click();
@@ -273,9 +278,10 @@ function SaveFile(filename, data) {
 	savelink.download = filename;
 	savelink.href = URL.createObjectURL(file);
 	body.appendChild(savelink);
-	savelink.click();
 	if (browserId != "F") {
 		window.open(savelink.href);
+	} else {
+		savelink.click();
 	}
 	savelink.parentNode.removeChild(savelink);
 }

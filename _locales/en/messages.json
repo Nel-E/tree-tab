@@ -267,32 +267,30 @@
 		"message": " Tabs "
 	},
 	"options_syncro_tabbar_tabs_order": {
-		"message": "Synchronize browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop. This option is needed for correct ctrl+tab switching"
+		"message": "Synchronize browser tabs order with Tree Tabs, tabs can be unresponsive for a second after drag&drop. This option is needed for correct ctrl+tab switching. You can disable this option if you don't use keyboard shortcuts."
 	},
 	"options_switch_with_scroll": {
 		"message": "Switch tabs with mouse wheel"
 	},
-	"options_close_with_MMB": {
-		"message": "Close tabs with middle mouse button"
-	},
+
 	"options_always_show_close": {
-		"message": "Show close button on all tabs"
+		"message": "Show close button on all tabs and folders"
 	},
 	"options_never_show_close": {
-	 "message": "Never show close button, even on hover (option above will be ignored)"
+	 "message": "Never show close button (option above will be ignored)"
 	},
-	"options_close_other_trees": {
+	"options_collapse_other_trees": {
 		"message": "Automatically collapse other trees on expand"
 	},
 	"options_open_tree_on_hover": {
 		"message": "Auto expand collapsed trees when dragging and holding for a second over them"
 	},
 	"options_promote_children": {
-		"message": "Promote children tabs on close, if disabled, when closing the parent of a tree structure, all tabs will be closed (be careful, because undo close tab will not recover the trees structure)"
+		"message": "Promote children on close, if disabled, when closing the parent of a tree structure, all tabs and folders will be closed (be careful, because undo close tab will not recover the trees structure)"
 	},
 
 	"options_promote_children_in_first_child": {
-		"message": "Promote first child tab as a parent"
+		"message": "Promote first child as a parent"
 	},
 
 	"options_skip_load": {
@@ -300,41 +298,51 @@
 	},
 
 
+	"options_midclick_tab": {
+		"message": "Action for middle mouse click on tab"
+	},
 	"options_dbclick_tab": {
 		"message": "Action for double click on tab"
 	},
-	"options_dbclick_tab_none": {
+
+	"options_action_tab_none": {
 		"message": "nothing"
 	},
-	"options_dbclick_tab_new": {
+	"options_action_tab_new": {
 		"message": "open new tab"
 	},
-	"options_dbclick_tab_close": {
+	"options_action_tab_expand_collapse": {
+		"message": "expand/collapse tree"
+	},
+	"options_action_tab_close": {
 		"message": "close tab"
 	},
-	"options_dbclick_tab_reload": {
+	"options_action_tab_reload": {
 		"message": "reload tab"
 	},
-	"options_dbclick_tab_unload": {
+	"options_action_tab_unload": {
 		"message": "unload tab"
 	},
-	"options_dbclick_tab_activate_previous_active": {
+	"options_action_tab_activate_previous_active": {
 		"message": "go back to previous active tab (works only on unpinned tabs)"
 	},
 
 
 
 
+	"options_midclick_group": {
+		"message": "Action for middle click on empty space on the left side or below the tabs"
+	},
 	"options_dbclick_group": {
 		"message": "Action for double click on empty space on the left side or below the tabs"
 	},
-	"options_dbclick_group_none": {
+	"options_action__group_none": {
 		"message": "nothing"
 	},
-	"options_dbclick_group_new": {
+	"options_action__group_new": {
 		"message": "open new tab"
 	},
-	"options_dbclick_group_activate_previous_active": {
+	"options_action__group_activate_previous_active": {
 		"message": "go back to previous active tab (works only on unpinned tabs)"
 	},
 
@@ -405,10 +413,10 @@
 		"message": "Limit Drag&Drop to tree's maximum depth as well"
 	},
 	"options_show_counter_tabs": {
-		"message": "Show children tabs count on tab's title"
+		"message": "Show children tabs count on tabs and folders titles"
 	},
 	"options_show_counter_tabs_hints": {
-		"message": "Show children tabs count in tab's hint"
+		"message": "Show children tabs count in tabs and folders hints"
 	},
 
 	"options_max_tree_depth": {
@@ -429,16 +437,58 @@
 		"message": "Show groups toolbar in new windows"
 	},
 	"options_syncro_tabbar_groups_tabs_order": {
-		"message": "Synchronize browser tabs order after drag&drop of the group tabs. Tabs will sort for a long time, if browser has a lot of tabs open. This option is needed for correct ctrl+tab switching"
+		"message": "Synchronize browser tabs order after drag&drop of the group tabs. Tabs will sort for a long time, if browser has a lot of tabs open. This option is needed for correct ctrl+tab switching. You can disable this option if you don't use keyboard shortcuts."
 	},
 
 
 
 
+	"options_folders": {
+		"message": "Folders"
+	},
+
+
+	"options_midclick_folder": {
+		"message": "Action for middle mouse click on folder"
+	},
+	"options_dbclick_folder": {
+		"message": "Action for double click on folder"
+	},
+
+	"options_action_folder_none": {
+		"message": "nothing"
+	},
+	"options_action_folder_rename": {
+		"message": "rename folder"
+	},
+	"options_action_folder_new_folder": {
+		"message": "open new folder"
+	},
+	"options_action_folder_new_tab": {
+		"message": "open new tab"
+	},
+	"options_action_folder_expand_collapse": {
+		"message": "expand/collapse tree"
+	},
+	"options_action_folder_close": {
+		"message": "close folder"
+	},
+	"options_action_folder_unload": {
+		"message": "unload tabs in folder"
+	},
+
+	
 
 
 
 
+
+
+
+
+	"options_global": {
+		"message": "Global"
+	},
 
 
 

@@ -75,8 +75,9 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 					DeselectTabs();
 					HideMenus();
 				}
-				if (event.which == 2 && opt.close_with_MMB == true) {
+				if (event.which == 2) {
 					event.preventDefault();
+					ActionClickGroup(this, opt.midclick_group);
 				}
 				if (event.which == 3 && event.target.id == this.id) {
 					// SHOW MENU
@@ -92,7 +93,7 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 			// DOUBLE CLICK ACTION
 			grp.ondblclick = function(event) {
 				if (event.target.id == this.id) {
-					EventDoubleClickGroup(event, this);
+					ActionClickGroup(this, opt.dbclick_group);
 				}
 			}
 
@@ -384,16 +385,17 @@ function GroupsToolbarToggle() {
 	RefreshGUI();
 }
 
-function EventDoubleClickGroup(event, Node) {
-	if (opt.dbclick_group == "new_tab") {
-		if (Node.classList.contains("pin_list")) {
+function ActionClickGroup(Node, bgOption) {
+	console.log(Node.id)
+	if (bgOption == "new_tab") {
+		if (Node.id == "pin_list") {
 			OpenNewTab(true, undefined);
 		}
 		if (Node.classList.contains("tab") || Node.classList.contains("folder") || Node.classList.contains("group")) {
 			OpenNewTab(false, Node.id);
 		}
 	}
-	if (opt.dbclick_group == "activate_previous_active") {
+	if (bgOption == "activate_previous_active") {
 		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
 	}
 }

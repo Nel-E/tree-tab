@@ -259,15 +259,6 @@ function Bookmark(rootNode) {
 														
 														elemInd++;
 														
-														if (elemInd == Object.keys(foldersRefs).length) {
-															document.querySelectorAll("#ct"+rootNode.id+" .tab").forEach(function(s){
-																chrome.tabs.get(parseInt(s.id), function(tab){
-																	if (tab) {
-																		chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
-																	}
-																});
-															});															
-														}
 													});
 												}
 											}
@@ -276,6 +267,15 @@ function Bookmark(rootNode) {
 								});
 							}
 						});
+						
+						document.querySelectorAll("#ct"+rootNode.id+" .tab").forEach(function(s){
+							chrome.tabs.get(parseInt(s.id), function(tab){
+								if (tab) {
+									chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
+								}
+							});
+						});															
+						
 					});
 				}
 			}

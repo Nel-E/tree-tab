@@ -125,12 +125,10 @@
    "options_append_orphan_tab_top": {
       "message": "в начале списка"
    },
-   "options_close_other_trees": {
+   "options_collapse_other_trees": {
       "message": "автоматически сворачивать другие деревья при раскрывании дерева"
    },
-   "options_close_with_MMB": {
-      "message": "закрывать вкладки средней кнопкой мыши"
-   },
+
    "options_color_button_background": {
       "message": " фон кнопки"
    },
