@@ -4,7 +4,7 @@
 
 function OldHashTab(tab){
 	if (tabs[tab.id] == undefined){
-		tabs[tab.id] = {ttid: "", hash: 0, h: 0, parent: tab.pinned ? "pin_list" : "tab_list", index: tab.index, expand: "n"};
+		tabs[tab.id] = {ttid: "", hash: 0, h: 0, parent: tab.pinned ? "pin_list" : "tab_list", index: tab.index, expand: ""};
 	}
 	var hash = 0;
 	if (tab.url.length === 0){
@@ -153,9 +153,9 @@ function FirefoxLoadV100(retry) {
 					
 					let tab = Promise.resolve(browser.sessions.getTabValue(tabId, "TTId")).then(function(TTId) { // LOAD TTID FROM FIREFOX GET TAB VALUE
 						if (TTId != undefined) {
-							tabs[tabId] = {ttid: TTId, parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: "n"};
+							tabs[tabId] = {ttid: TTId, parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: ""};
 						} else {
-							tabs[tabId] = {ttid: "", parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: "n"};
+							tabs[tabId] = {ttid: "", parent_ttid: "", parent: tabPinned ? "pin_list" : "tab_list", index: tabIndex, expand: ""};
 						}
 						// IF ON LAST TAB AND LAST WINDOW, START MATCHING LOADED DATA
 						if (tabId == lastTabId && winId == lastWinId) {

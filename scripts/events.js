@@ -109,11 +109,20 @@ function SetEvents() {
 	}
 
 	PinList.onmousedown = function(event) {
-		if (event.which == 1 && event.target == this) {
-			DeselectFolders();
-			DeselectTabs();
-			HideMenus();
+		if (opt.pin_list_multi_row) {
+			if (event.which == 1 && event.target == this) {
+				DeselectFolders();
+				DeselectTabs();
+				HideMenus();
+			}
+		} else {
+			if (event.which == 1 && event.target == this && event.clientY < (this.childNodes[0].getBoundingClientRect().height + this.getBoundingClientRect().top)) {
+				DeselectFolders();
+				DeselectTabs();
+				HideMenus();
+			}
 		}
+		
 		if (event.which == 2 && event.target == this) {
 			ActionClickGroup(this, opt.midclick_group);
 		}

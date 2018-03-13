@@ -20,7 +20,6 @@ menu: move to group
 menu: Unload other
 
 
-click on active to return to previous tab
 sort tabs/tree
 maybe filter tabs on search
 

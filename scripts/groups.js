@@ -70,7 +70,7 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 		if (SetEvents) {
 			grp.onmousedown = function(event) {
 				event.stopImmediatePropagation();
-				if (event.which == 1 && event.target == this) {
+				if (event.which == 1 && event.target == this && event.clientX < (this.childNodes[0].getBoundingClientRect().width + this.getBoundingClientRect().left)) {
 					DeselectFolders();
 					DeselectTabs();
 					HideMenus();
