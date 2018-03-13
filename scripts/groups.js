@@ -144,7 +144,8 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 			gtd.ondragstart = function(event) { // DRAG START
 				event.stopPropagation();
 				event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-				event.dataTransfer.setData("text/plain", "");
+				event.dataTransfer.setData("text", "");
+				// event.dataTransfer.setData("text/plain", "");
 				// event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
 				CleanUpDragClasses();
 				EmptyDragAndDrop();

@@ -3,6 +3,9 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 function ExportGroup(filename) {
+	if (opt.debug) {
+		console.log("function: ExportGroup, filename "+filename);
+	}
 	let GroupToSave = { group: bggroups[active_group], folders: {}, tabs: [] };
 	document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
 		if (bgfolders[s.id]) {
@@ -25,7 +28,11 @@ function ExportGroup(filename) {
 						}
 					);
 				}
+				
 				if (tab.id == lastId) {
+					// if (opt.debug) {
+						// console.log(GroupToSave);
+					// }
 					SaveFile(filename, GroupToSave);
 				}
 			});
@@ -99,10 +106,10 @@ function ExportSession(filename) {
 				let ExportWindows = [];
 				w.forEach(function(CWin) {
 					if (CWin.tabs.length > 0) {
-						if (CWin.tabs.length > 100 && warn) {
-							alert(chrome.i18n.getMessage("warning_exporting_big_amount_of_tabs"));
-							warn = false;
-						}
+						// if (CWin.tabs.length > 100 && warn) {
+							// alert(chrome.i18n.getMessage("warning_exporting_big_amount_of_tabs"));
+							// warn = false;
+						// }
 						windows[CWin.id]["id"] = CWin.id;
 						windows[CWin.id]["tabs"] = [];
 						CWin.tabs.forEach(function(CTab) {

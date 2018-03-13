@@ -117,6 +117,7 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 			fh.ondragstart = function(event) { // DRAG START
 				event.stopPropagation();
 				event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+				event.dataTransfer.setData("text", "");
 				// event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
 				CleanUpDragClasses();
 				EmptyDragAndDrop();
@@ -150,12 +151,43 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					// test_data.push(s.id);
 				});
 				let Folders = GetSelectedFolders();
+				
+				document.querySelectorAll("[id='"+this.parentNode.id+"'], [id='"+this.parentNode.id+"'] .folder, [id='"+this.parentNode.id+"'] .tab").forEach(function(s){
+					s.classList.add("dragged_tree");
+				});
+				document.querySelectorAll(".selected_tab, .selected_tab .tab, .selected_folder, .selected_folder .folder").forEach(function(s){
+					s.classList.add("dragged_selected");
+				});
+
+				if (opt.max_tree_drag_drop_folders) {
+					document.querySelectorAll(".dragged_tree .folder").forEach(function(s){
+						let parents = GetParentsByClass(s.parentNode, "dragged_tree");
+						if (parents.length > DragAndDrop.Depth) {
+							DragAndDrop.Depth = parents.length;
+						}
+					});
+				} else {
+					DragAndDrop.Depth = -1;
+				}
+					
 				DragAndDrop.DragNodeClass = "folder";
 				DragAndDrop.TabsIds = Object.assign([], Folders.TabsIds);
 				DragAndDrop.TabsIdsParents = Object.assign([], Folders.TabsIdsParents);
 				DragAndDrop.Folders = Object.assign({}, Folders.Folders);
 				DragAndDrop.FoldersSelected = Object.assign([], Folders.FoldersSelected);
 				DragAndDrop.ComesFromWindowId = CurrentWindowId;
+				
+				chrome.runtime.sendMessage({
+					command: "drag_drop",
+					DragNodeClass: DragAndDrop.DragNodeClass,
+					TabsIds: DragAndDrop.TabsIds,
+					TabsIdsParents: DragAndDrop.TabsIdsParents,
+					TabsIdsSelected: DragAndDrop.TabsIdsSelected,
+					ComesFromWindowId: CurrentWindowId,
+					Depth: DragAndDrop.Depth,
+					Folders: DragAndDrop.Folders,
+					FoldersSelected: DragAndDrop.FoldersSelected
+				});
 			}
 			fh.ondragenter = function(event) {
 				this.classList.remove("folder_header_hover");
@@ -178,28 +210,20 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 				setTimeout(function() {
 					DragAndDrop.timeout = true;
 				}, 1000);
-				// PIN,TAB,FOLDER==>FOLDER
-				if (this.classList.contains("highlighted_drop_target") == false && this.parentNode.classList.contains("dragged_tree") == false && this.parentNode.classList.contains("dragged_selected") == false
-					&& document.querySelector(".dragged_tree, .dragged_selected") != null) {
-					if (document.querySelector(".dragged_tree").classList.contains("pin") || document.querySelector(".dragged_tree").classList.contains("tab") || document.querySelector(".dragged_tree").classList.contains("folder")) {
-						HighlightNode(this);
-					}
+				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
+					HighlightDragEnter(this, 0, "folder");
 				}
 			}
 			du.ondragenter = function(event) {
 				// FOLDER==>FOLDER
-				if (document.querySelector(".dragged_tree, .dragged_selected") != null) {
-					if (document.querySelector(".dragged_tree").classList.contains("folder")) {
-						HighlightNode(this);
-					}
+				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
+					HighlightDragEnter(this, 1, "folder");
 				}
 			}
 			dd.ondragenter = function(event) {
 				// FOLDER==>FOLDER
-				if (document.querySelector(".dragged_tree, .dragged_selected") != null) {
-					if (document.querySelector(".dragged_tree").classList.contains("folder")) {
-						HighlightNode(this);
-					}
+				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
+					HighlightDragEnter(this, 1, "folder");
 				}
 			}
 			ex.onmousedown = function(event) {
@@ -207,11 +231,9 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					HideMenus();
 				}
 				// EXPAND/COLLAPSE FOLDER
-				if (event.which == 1) {
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey) {
 					event.stopPropagation();
-					
 					EventExpandBox(this.parentNode.parentNode);
-
 					RefreshExpandStates();
 					RefreshCounters();
 				}

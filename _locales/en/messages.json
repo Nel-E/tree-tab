@@ -409,9 +409,6 @@
 	"options_append_child_tab_after_limit_bottom": {
 		"message": "at the bottom"
 	},
-	"options_max_tree_drag_drop": {
-		"message": "Limit Drag&Drop to tree's maximum depth as well"
-	},
 	"options_show_counter_tabs": {
 		"message": "Show children tabs count on tabs and folders titles"
 	},
@@ -421,6 +418,12 @@
 
 	"options_max_tree_depth": {
 		"message": "Maximum tree depth: set it to -1 for unlimited branches, 0 for flat tabs placement (no trees), any number above 0 will be its maximum"
+	},
+	"options_max_tree_drag_drop": {
+		"message": "Limit Drag&Drop to tree's maximum depth, so you can't drop tabs beyond maximum depth"
+	},
+	"options_max_tree_drag_drop_folders": {
+		"message": "Limit Drag&Drop to tree's maximum depth, so you can't drop folders beyond maximum depth"
 	},
 
 

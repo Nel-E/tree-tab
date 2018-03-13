@@ -65,7 +65,6 @@ function Initialize() {
 		// APPEND TABS
 		let tc = tabs.length;
 		for (var ti = 0; ti < tc; ti++) {
-			// AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
 			AppendTab(tabs[ti], false, false, false, true, false, true, false, true, false, false);
 		}
 		for (var ti = 0; ti < tc; ti++) {
@@ -77,26 +76,6 @@ function Initialize() {
 				}
 			}
 		}
-
-
-
-		
-		// THIS TAKES 6 SECONDS, THE ORIGINAL WAY ONLY 4
-		// for (var ti = 0; ti < tc; ti++) {			
-			// if (document.getElementById("ct"+bgtabs[tabs[ti].id].parent) != null) {
-				// AppendTab({tab: tabs[ti], ParentId: bgtabs[tabs[ti].id].parent, index: bgtabs[tabs[ti].id].index, Append: true, SkipSetActive: true});
-			// }
-		// }
-		// for (var ti = 0; ti < tc; ti++) {
-			// if (document.getElementById(tabs[ti].id) != null) {
-				// AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
-			// }
-		// }
-	
-	
-
-
-	
 		for (var ti = 0; ti < tc; ti++) {
 			if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && bgtabs[tabs[ti].id].expand != "") {
 				document.getElementById(tabs[ti].id).classList.add(bgtabs[tabs[ti].id].expand);
@@ -112,7 +91,6 @@ function Initialize() {
 					}
 					let activeInGroup = document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']");
 					if (activeInGroup != null) {
-						// document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']").classList.add("active_tab");
 						activeInGroup.classList.add("active_tab");
 					}
 				}
@@ -125,10 +103,7 @@ function Initialize() {
 		});
 		RearrangeTreeTabs(tabs, bgtabs, true);
 		RearrangeFolders(true);
-		// SetToolbarShelfToggle("mousedown");
 		StartChromeListeners();
-		// SetToolbarEvents();
-		// SetTRefreshEvents();
 		SetMenu();
 		SetEvents();
 		HideMenus();

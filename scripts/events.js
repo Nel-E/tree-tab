@@ -298,21 +298,26 @@ function SetEvents() {
 			console.log("document dragend");
 			console.log(event);
 		}
-		if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
-			if ((browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight)))||	(browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight))) {
-				if (opt.debug) console.log("dragged outside sidebar");
-				if (DragAndDrop.DragNodeClass == "tab") {
-					Detach(DragAndDrop.TabsIds, {});
-				}
-				if (DragAndDrop.DragNodeClass == "folder") {
-					Detach(DragAndDrop.TabsIds, DragAndDrop.Folders);
-					setTimeout(function() {
-						SaveFolders();
-					}, 500);
-				}
-			}
-		}
+		
+		
+		// DETACHING TEMPORARILY DISABLED PLEASE USE MENU OR TOOLBAR!
+		
+		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
+			// if ((browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight)))||	(browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight))) {
+				// if (opt.debug) console.log("dragged outside sidebar");
+				// if (DragAndDrop.DragNodeClass == "tab") {
+					// Detach(DragAndDrop.TabsIds, {});
+				// }
+				// if (DragAndDrop.DragNodeClass == "folder") {
+					// Detach(DragAndDrop.TabsIds, DragAndDrop.Folders);
+					// setTimeout(function() {
+						// SaveFolders();
+					// }, 500);
+				// }
+			// }
+		// }
 		CleanUpDragClasses();
+		chrome.runtime.sendMessage({command: "dragend"});
 	}
 }
 

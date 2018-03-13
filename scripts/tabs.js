@@ -121,7 +121,7 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 			if (document.getElementById("main_menu").style.top != "-1000px") {
 				HideMenus();
 			}
-			if (event.which == 1) {
+			if (event.which == 1 && !event.shiftKey && !event.ctrlKey) {
 				EventExpandBox(this.parentNode.parentNode);
 			}
 		}
@@ -199,8 +199,9 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 		th.ondragstart = function(event) { // DRAG START
 			event.stopPropagation();
 			event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-			event.dataTransfer.setData("text/plain", "");
-			event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
+			event.dataTransfer.setData("text", "");
+			// event.dataTransfer.setData("text/plain", "");
+			// event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
 		
 			CleanUpDragClasses();
 			EmptyDragAndDrop();
@@ -220,25 +221,28 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 					s.classList.add("selected_frozen");
 					s.classList.remove("selected_tab");
 					s.classList.remove("selected_last");
-					// if ($(this).parents(".pin, .tab").length > DragAndDrop.Depth) {
-						// DragAndDrop.Depth = $(this).parents(".pin, .tab").length;
-					// }
 				});
 			}
 			let Tabs = GetSelectedTabs();
-			// console.log(Tabs);
 			
 			document.querySelectorAll("[id='"+this.parentNode.id+"'], [id='"+this.parentNode.id+"'] .folder, [id='"+this.parentNode.id+"'] .tab").forEach(function(s){
 				s.classList.add("dragged_tree");
 			});
 			document.querySelectorAll(".selected_tab, .selected_tab .tab, .selected_folder, .selected_folder .folder").forEach(function(s){
 				s.classList.add("dragged_selected");
-				
-				// test_data.push(s.id);
-				
 			});
 
-			// DragAndDrop.Depth = 0;
+			if (opt.max_tree_drag_drop) {
+				document.querySelectorAll(".dragged_tree .tab").forEach(function(s){
+					let parents = GetParentsByClass(s.parentNode, "dragged_tree");
+					if (parents.length > DragAndDrop.Depth) {
+						DragAndDrop.Depth = parents.length;
+					}
+				});
+			} else {
+				DragAndDrop.Depth = -1;
+			}
+			
 			DragAndDrop.TabsIds = Object.assign([], Tabs.TabsIds);
 			DragAndDrop.TabsIdsParents = Object.assign([], Tabs.TabsIdsParents);
 			DragAndDrop.TabsIdsSelected = Object.assign([], Tabs.TabsIdsSelected);
@@ -252,7 +256,7 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 				TabsIdsParents: DragAndDrop.TabsIdsParents,
 				TabsIdsSelected: DragAndDrop.TabsIdsSelected,
 				ComesFromWindowId: CurrentWindowId,
-				// Depth: DragAndDrop.Depth,
+				Depth: DragAndDrop.Depth,
 				Folders: DragAndDrop.Folders,
 				FoldersSelected: DragAndDrop.FoldersSelected
 			});
@@ -268,19 +272,19 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 				DragAndDrop.timeout = true;
 			}, 1000);
 			if (DragAndDrop.DragNodeClass == "tab") {
-				HighlightDragEnterTabToTab(this, 0);
+				HighlightDragEnter(this, 0, "tab");
 			}
 		}
 
 		du.ondragenter = function(event) {
 			if (DragAndDrop.DragNodeClass == "tab") {
-				HighlightDragEnterTabToTab(this, 1);
+				HighlightDragEnter(this, 1, "tab");
 			}
 		}
 
 		dd.ondragenter = function(event) {
 			if (DragAndDrop.DragNodeClass == "tab") {
-				HighlightDragEnterTabToTab(this, 1);
+				HighlightDragEnter(this, 1, "tab");
 			}
 		}
 
@@ -759,12 +763,13 @@ function HighlightNode(Node) {
 		Node.classList.add("highlighted_drop_target");
 }
 
-function HighlightDragEnterTabToTab(Node, addDepth) {
-	// PIN,TAB==>TAB AND AVOID ENTERING INSIDE OWN CHILDREN
-	if (Node.classList.contains("highlighted_drop_target") == false && Node.parentNode.classList.contains("dragged_tree") == false && Node.parentNode.classList.contains("dragged_selected") == false && DragAndDrop.DragNodeClass == "tab") {
-		if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
-			let Parents = GetParentsByClass(Node, "tab");
-			if (Parents.length <= opt.max_tree_depth + addDepth) {
+function HighlightDragEnter(Node, addDepth, Class) { // Class == "tab" or "folder"
+	// PIN,TAB==>TAB OR PIN,TAB==>FOLDER
+	// AND AVOID ENTERING INSIDE OWN CHILDREN
+	if (Node.classList.contains("highlighted_drop_target") == false && Node.parentNode.classList.contains("dragged_tree") == false && Node.parentNode.classList.contains("dragged_selected") == false) {
+		if (opt.max_tree_depth >= 0 && DragAndDrop.Depth >= 0 && DragAndDrop.DragNodeClass == Class) {
+			let Parents = GetParentsByClass(Node, Class);
+			if ((Parents.length + DragAndDrop.Depth <= opt.max_tree_depth + addDepth) || (Node.parentNode.parentNode.parentNode.classList.contains("group") && Node.classList.contains("drag_enter_center") == false)) {
 				HighlightNode(Node);
 			}
 		} else {
@@ -774,70 +779,58 @@ function HighlightDragEnterTabToTab(Node, addDepth) {
 }
 
 function EventExpandBox(Node) {
-	if (!event.shiftKey && !event.ctrlKey) {
-		if (Node.classList.contains("o")) {
-			Node.classList.remove("o");
-			Node.classList.add("c");
-			
-			if (Node.classList.contains("tab")) {
-				chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "c" } });
-			}
-			
-			if (Node.classList.contains("folder")) {
+	if (Node.classList.contains("o")) {
+		Node.classList.remove("o");
+		Node.classList.add("c");
+		
+		if (Node.classList.contains("tab")) {
+			chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "c" } });
+		}
+		
+		if (Node.classList.contains("folder")) {
+			SaveFolders();
+		}
+		
+	} else {
+		if (Node.classList.contains("c")) {
+			if (opt.collapse_other_trees) {
+				let thisTreeTabs = GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
+				let thisTreeFolders = GetParentsByClass(Node.childNodes[0], "folder"); 
+				document.querySelectorAll("#"+active_group+" .o.tab").forEach(function(s){
+					s.classList.remove("o");
+					s.classList.add("c");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
+				});
+				
+				document.querySelectorAll("#"+active_group+" .o.folder").forEach(function(s){
+					s.classList.remove("o");
+					s.classList.add("c");
+				});
+				thisTreeTabs.forEach(function(s){
+					s.classList.remove("c");
+					s.classList.add("o");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "o" } });
+				});
+				thisTreeFolders.forEach(function(s){
+					s.classList.remove("c");
+					s.classList.add("o");
+				});
 				SaveFolders();
-			}
-			
-		} else {
-			if (Node.classList.contains("c")) {
-				if (opt.collapse_other_trees) {
-					let thisTreeTabs = GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
-					let thisTreeFolders = GetParentsByClass(Node.childNodes[0], "folder"); 
-					
-					
-					document.querySelectorAll("#"+active_group+" .o.tab").forEach(function(s){
-						s.classList.remove("o");
-						s.classList.add("c");
-						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
-					});
-					
-					document.querySelectorAll("#"+active_group+" .o.folder").forEach(function(s){
-						s.classList.remove("o");
-						s.classList.add("c");
-					});
-					
-					
-					thisTreeTabs.forEach(function(s){
-						s.classList.remove("c");
-						s.classList.add("o");
-						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "o" } });
-					});
-					thisTreeFolders.forEach(function(s){
-						s.classList.remove("c");
-						s.classList.add("o");
-					});
-					
-					
-					
-					// if (Node.classList.contains("folder")) {
-						SaveFolders();
-					// }
-					if (Node.classList.contains("tab")) {
-						ScrollToTab(Node.id);
-					}
-					
-				} else {
-					Node.classList.remove("c");
-					Node.classList.add("o");
-					
-					if (Node.classList.contains("tab")) {
-						chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "o" } });
-					}
-					
-					if (Node.classList.contains("folder")) {
-						SaveFolders();
-					}
-					
+				if (Node.classList.contains("tab")) {
+					ScrollToTab(Node.id);
 				}
+			} else {
+				Node.classList.remove("c");
+				Node.classList.add("o");
+				
+				if (Node.classList.contains("tab")) {
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "o" } });
+				}
+				
+				if (Node.classList.contains("folder")) {
+					SaveFolders();
+				}
+				
 			}
 		}
 	}

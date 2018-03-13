@@ -22,16 +22,13 @@ function StartChromeListeners() {
 			if (opt.debug) console.log(message);
 			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
 			DragAndDrop.DragNodeClass = message.DragNodeClass;
-			// DragAndDrop.Depth = message.Depth;
+			DragAndDrop.Depth = message.Depth;
 			DragAndDrop.Folders = Object.assign({}, message.Folders);
 			DragAndDrop.FoldersSelected = message.FoldersSelected;
 			DragAndDrop.TabsIds = message.TabsIds;
 			DragAndDrop.TabsIdsParents = message.TabsIdsParents;
 			DragAndDrop.TabsIdsSelected = message.TabsIdsSelected;
-			
-			DropTargetsFront(undefined, true, true);
-			
-			
+			DropTargetsFront(undefined, true, false);
 		}
 		if (message.command == "dropped") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
@@ -43,6 +40,9 @@ function StartChromeListeners() {
 					RemoveFolder(DragAndDrop.Folders[folder].id);
 				}
 			}
+		}
+		if (message.command == "dragend") {
+			CleanUpDragClasses();
 		}
 		if (message.command == "reload_sidebar") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);

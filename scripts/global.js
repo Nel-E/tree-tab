@@ -14,7 +14,7 @@ var tabs = {};
 var tt_ids = {};
 var DragAndDrop = {
 	timeout: false,
-	// Depth: 0,
+	Depth: 0,
 	// DragNode: undefined,
 	DragNodeClass: "",
 	TabsIds: [],
@@ -121,7 +121,9 @@ var DefaultPreferences = {
 	"promote_children": true,
 	"promote_children_in_first_child": true,
 	"max_tree_depth": -1,
+	// "max_tree_depth_folders": 0,
 	"max_tree_drag_drop": true,
+	"max_tree_drag_drop_folders": false,
 	"switch_with_scroll": false,
 	"syncro_tabbar_tabs_order": true,
 	"show_counter_groups": true,
@@ -143,16 +145,20 @@ var theme = {
 	"ToolbarShow": true,
 	"toolbar": DefaultToolbar
 };
+
 // *******************             GLOBAL FUNCTIONS                 ************************
+
 // generate random id
 function GenerateRandomID(){
 	var letters = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","R","S","T","Q","U","V","W","Y","Z","a","b","c","d","e","f","g","h","i","k","l","m","n","o","p","r","s","t","q","u","v","w","y","z"];
 	var random = ""; for (var letter = 0; letter < 6; letter++ ) {random += letters[Math.floor(Math.random() * letters.length)];} return random;
 }
+
 // color in format "rgb(r,g,b)" or simply "r,g,b" (can have spaces, but must contain "," between values)
 function RGBtoHex(color){
 	color = color.replace(/[rgb(]|\)|\s/g, ""); color = color.split(","); return color.map(function(v){ return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
 }
+
 function HexToRGB(hex, alpha){
 	hex = hex.replace('#', '');
 	let r = parseInt(hex.length == 3 ? hex.slice(0, 1).repeat(2) : hex.slice(0, 2), 16);
@@ -160,16 +166,36 @@ function HexToRGB(hex, alpha){
 	let b = parseInt(hex.length == 3 ? hex.slice(2, 3).repeat(2) : hex.slice(4, 6), 16);
 	if (alpha) { return 'rgba('+r+', '+g+', '+b+', '+alpha+')'; } else { return 'rgb('+r+', '+g+', '+b+')'; }
 }
+
 function GetCurrentTheme() {
 	chrome.storage.local.get(null, function(items) {
 		if (items["current_theme"] && items["themes"] && items["themes"][items["current_theme"]]) {
 			theme = items["themes"][items["current_theme"]];
+			if (theme.theme_version == 1) {
+				theme["ColorsSet"]["scrollbar_height"] = theme.ScrollbarPinList + "px";
+				theme["ColorsSet"]["scrollbar_width"] = theme.ScrollbarTabList + "px";
+				theme["toolbar"] = DefaultToolbar;
+				theme["unused_buttons"] = "";
+			}
+			if (theme.theme_version == 2) {
+				SelectedTheme["TabsMargins"] = "2";
+			}
 		} else {
 			theme = Object.assign({}, DefaultTheme);
 		}
 	});
 }
+
 function ApplyTheme(theme) {
+	if (theme.theme_version == 1) {
+		theme["ColorsSet"]["scrollbar_height"] = theme.ScrollbarPinList + "px";
+		theme["ColorsSet"]["scrollbar_width"] = theme.ScrollbarTabList + "px";
+		theme["toolbar"] = DefaultToolbar;
+		theme["unused_buttons"] = "";
+	}
+	if (theme.theme_version == 2) {
+		theme["TabsMargins"] = "2";
+	}
 	RestoreStateOfGroupsToolbar();
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
@@ -202,6 +228,7 @@ function ApplyTheme(theme) {
 	}
 	Loadi18n();
 }
+
 // theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"}
 function ApplyColorsSet(ThemeColors){
 	let css_variables = "";
@@ -215,6 +242,7 @@ function ApplyColorsSet(ThemeColors){
 		}
 	}
 }
+
 function ApplySizeSet(size){
 	for (let si = 0; si < document.styleSheets.length; si++) {
 		if ((document.styleSheets[si].ownerNode.id).match("sizes_preset") != null) {
@@ -234,6 +262,7 @@ function ApplySizeSet(size){
 		}
 	}
 }
+
 function ApplyTabsMargins(size){
 	for (let si = 0; si < document.styleSheets.length; si++) {
 		if ((document.styleSheets[si].ownerNode.id).match("tabs_margin") != null) {
@@ -245,9 +274,11 @@ function ApplyTabsMargins(size){
 		}
 	}
 }
+
 function LoadDefaultPreferences() {
 	opt = Object.assign({}, DefaultPreferences);
 }
+
 function SavePreferences() {
 	chrome.runtime.sendMessage({command: "save_preferences", opt: opt}, function(response) {
 		setTimeout(function() {
@@ -255,42 +286,49 @@ function SavePreferences() {
 		}, 300);
 	});
 }
+
 function ShowOpenFileDialog(id, extension) {
 	let body = document.getElementById("body");
 	let inp = document.createElement("input");
 	inp.id = id;
 	inp.type = "file";
-	if (browserId == "F") {
-		inp.accept = extension;
-	}
+	inp.accept = extension;
 	inp.style.display = "none";
 	body.appendChild(inp);
 	inp.click();
 	return inp;
 }
+
 function SaveFile(filename, data) {
-	let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
-	let body = document.getElementById("body");
-	let savelink = document.createElement("a");
-	savelink.target = "_blank";
-	savelink.style.display = "none";
-	savelink.type = "file";
-	savelink.download = filename;
-	savelink.href = URL.createObjectURL(file);
-	body.appendChild(savelink);
-	if (browserId != "F") {
-		window.open(savelink.href);
-	} else {
-		savelink.click();
-	}
-	savelink.parentNode.removeChild(savelink);
+	chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
+		chrome.tabs.create({url: "download.html"}, function(tab) {
+			setTimeout(function() {
+				chrome.runtime.sendMessage({command: "show_save_file_dialog", currentTabId: activeTab[0].id, selfTabId: tab.id, data: data, filename: filename});
+			}, 100);
+		});
+	});
 }
+
+// function SaveFile(filename, data) {
+	// let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
+	// let body = document.getElementById("body");
+	// let savelink = document.createElement("a");
+	// savelink.target = "_blank";
+	// savelink.style.display = "none";
+	// savelink.type = "file";
+	// savelink.download = filename;
+	// savelink.href = URL.createObjectURL(file);
+	// body.appendChild(savelink);
+	// savelink.click();
+	// savelink.parentNode.removeChild(savelink);
+// }
+
 function EmptyDragAndDrop() {
 	DragAndDrop.timeout = false;
 	DragAndDrop.DragNodeClass = "";
 	DragAndDrop.DroppedToWindowId = 0;
 	DragAndDrop.ComesFromWindowId = undefined;
-	// DragAndDrop.Depth = 0;
+	DragAndDrop.Depth = 0;
 	DragAndDrop.TabsIds = [];
 	DragAndDrop.TabsIdsParents = [];
 	DragAndDrop.TabsIdsSelected = [];
