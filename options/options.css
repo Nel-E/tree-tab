@@ -115,6 +115,11 @@ ul:not(.menu) li {
 	padding-right: 6px;
 }
 
+.regexLabel {
+  width:200px;
+  display:inline-block;
+  font-weight:bold
+}
 
 
 

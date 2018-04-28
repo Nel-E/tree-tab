@@ -89,6 +89,26 @@ function StartChromeListeners() {
 				if (opt.debug) console.log("tab_created: "+message.tabId);
 				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
 
+				if(message.tab.url !== undefined)
+				{
+					for(let i = 0; i < opt.tab_group_regexes.length; i++) {
+						var regexPair = opt.tab_group_regexes[i];
+						if(message.tab.url.match(regexPair[0])) {
+							var groupId = FindGroupIdByName(regexPair[1]);
+							if(groupId === null) {
+								groupId = AddNewGroup(regexPair[1]);
+							}
+							if(active_group !== groupId) {
+								SetActiveGroup(groupId, true, true);
+								// It becomes an orphan if it's being opened in a different group.
+								message.parentTabId = undefined;
+								message.tab.openerTabId = undefined;
+							}
+						}
+					}
+				}
+				tabUrls[message.tab.id] = message.tab.url;
+
 				if (message.parentTabId != undefined) {
 					AppendTab(message.tab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
 				} else {
@@ -144,6 +164,11 @@ function StartChromeListeners() {
 							}
 						}
 					} else { // orphan case
+						if(!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
+							if(active_group != "tab_list") {
+								SetActiveGroup("tab_list", false, false);
+							}
+						}
 						if (opt.append_orphan_tab == "after_active") {
 							AppendTab(message.tab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (message.tab.pinned ? true : false), false, true, false, false, true, false);
 						}
@@ -208,6 +233,7 @@ function StartChromeListeners() {
 				return;
 			}
 			if (message.command == "tab_removed") {
+				delete tabUrls[message.tabId];
 				if (opt.debug) console.log("tab_removed: "+message.tabId);
 				let mTab = document.getElementById(message.tabId);
 				if (mTab != null) {
@@ -278,6 +304,35 @@ function StartChromeListeners() {
 						}
 					}
 					RefreshExpandStates();
+				}
+				if(message.changeInfo.url != undefined)
+				{
+					if((opt.move_tabs_on_url_change === "from_empty" && tabUrls[message.tabId] === newTabUrl) || opt.move_tabs_on_url_change === "always") {
+						for(let i = 0; i < opt.tab_group_regexes.length; i++) {
+							var regexPair = opt.tab_group_regexes[i];
+							if(message.changeInfo.url.match(regexPair[0])) {
+								var groupId = FindGroupIdByName(regexPair[1]);
+								if(groupId === null) {
+									groupId = AddNewGroup(regexPair[1]);
+								}
+								if(active_group !== groupId) {
+									let updateTab = document.getElementById(message.tabId);
+									let newParent = document.getElementById("ct" + groupId);
+									if (updateTab != null && updateTab.classList.contains("tab") && !message.tab.pinned) {
+										SetTabClass(updateTab.id, false);
+										newParent.appendChild(updateTab);
+										schedule_update_data++;
+									}
+
+									SetActiveGroup(groupId, false, true);
+									SetActiveTabInGroup(groupId, updateTab.id);
+									SetActiveTab(updateTab.id);
+								}
+								break;
+							}
+						}
+					}
+					tabUrls[message.tabId] = message.changeInfo.url;
 				}
 				return;
 			}

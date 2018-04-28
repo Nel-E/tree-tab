@@ -275,6 +275,31 @@
 		"message": "Switch tabs with mouse wheel"
 	},
 
+	"options_tab_group_regex": {
+		"message": "Tab group assignments (Items matching the given pattern will be moved to the designated group. Pattern accepts regular expressions.)"
+	},
+	"option_tab_match": {
+		"message": "Pattern"
+	},
+	"option_tab_group": {
+		"message": "Group"
+	},
+	"options_orphaned_tabs_to_ungrouped": {
+		"message": "Always place orphan tabs in the 'ungrouped' group"
+	},
+	"options_move_on_url_change": {
+		"message": "Move tabs that match regexes when URL changes"
+	},
+	"options_move_on_url_change_always": {
+		"message": "Always"
+	},
+	"options_move_on_url_change_never": {
+		"message": "Never"
+	},
+	"options_move_on_url_change_from_empty": {
+		"message": "New Tabs Only"
+	},
+
 	"options_always_show_close": {
 		"message": "Show close button on all tabs and folders"
 	},

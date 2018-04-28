@@ -180,6 +180,11 @@
 					<td style="position:relative;left:2px;width:3px;">-</td>
 					<td class="label" id="options_switch_with_scroll"></td>
 				</tr>
+				<tr>
+					<td><input type="checkbox" class="opt_checkbox bg_opt" id="orphaned_tabs_to_ungrouped"></input></td>
+					<td style="position:relative;left:2px;width:3px;">-</td>
+					<td class="label" id="options_orphaned_tabs_to_ungrouped"></td>
+				</tr>
 			</table>
 			<ul>
 				<li>
@@ -215,6 +220,25 @@
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_top" value="top"></option>
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_after" value="after"></option>
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_bottom" value="bottom"></option>
+					</select>
+				</li>
+				<li>
+					<label class="label" id="options_tab_group_regex"></label><br>
+					<span class="regexLabel">
+						<label class="label" id="option_tab_match"></label>
+					</span>
+					<span class="regexLabel">
+						<label class="label" id="option_tab_group" style="width:200px"></label>
+					</span>
+					<div id="tab_group_regexes"></div>
+					<input class="set_button theme_buttons" type="button" id="add_tab_group_regex" style="margin:6px;" value="Add">
+				</li>
+				<li>
+					<label class="label" id="options_move_on_url_change"></label>	
+					<select id="move_tabs_on_url_change">
+						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_never" value="never"></option>
+						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_from_empty" value="from_empty"></option>
+						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_always" value="always"></option>
 					</select>
 				</li>
 			</ul>
