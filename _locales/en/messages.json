@@ -118,20 +118,19 @@
 	"button_folders": {
 		"message": "Folders"
 	},
-
 	"button_new_folder": {
 		"message": "New folder"
 	},
-
 	"button_remove_folder": {
 		"message": "Remove selected folder/s"
 	},
-
 	"button_edit_folder": {
 		"message": "Rename folder"
 	},
 
 
+	
+	
 
 
 	"menu_expand_all": {
@@ -205,7 +204,7 @@
 	},
 
 	"menu_bookmark_tree": {
-		"message": "Bookmark tree"
+		"message": "Bookmark"
 	},
 
 
@@ -224,21 +223,24 @@
 		"message": "New group"
 	},
 	"menu_rename_group": {
-		"message": "Rename group"
+		"message": "Rename"
 	},
 	"menu_delete_group": {
-		"message": "Delete group"
+		"message": "Delete"
 	},
 	"menu_delete_group_tabs_close": {
-		"message": "Delete group with tabs"
+		"message": "Delete with tabs"
 	},
 
-	"groups_menu_unload": {
-		"message": "Unload group"
+	"menu_groups_unload": {
+		"message": "Unload"
 	},
 
 	"menu_bookmark_group": {
-		"message": "Bookmark group"
+		"message": "Bookmark"
+	},
+	"menu_groups_hibernate": {
+		"message": "Hibernate"
 	},
 
 
@@ -542,11 +544,98 @@
 
 
 
+	"options_toolbar_look": {
+		"message": " Toolbar's look "
+	},
+
+	
+	
+	"button_background": {
+	 "message": "Toolbar buttons background"
+	},
+	"button_hover_background": {
+	 "message": "Toolbar buttons background, on mouse hover"
+	},
+	"button_on_background": {
+	 "message": "Toolbar active buttons background"
+	},
+	
+	
+	"button_icons": {
+	 "message": "Toolbar buttons icon color"
+	},
+	"button_icons_hover": {
+	 "message": "Toolbar buttons icon color, on mouse hover"
+	},
+	"button_on_icons": {
+	 "message": "Toolbar active buttons icon color"
+	},
+	"button_border": {
+	 "message": "Toolbar buttons border color"
+	},
+	"button_hover_border": {
+	 "message": "Toolbar buttons border color, on mouse hover"
+	},
+	
+
+	"filter_box_font": {
+	 "message": "Search box, font color"
+	},
+	"filter_box_background": {
+	 "message": "Search box, font background color"
+	},
+	"filter_box_border": {
+	 "message": "Search box, border color"
+	},
+	"filter_clear_icon": {
+	 "message": "Clear search result x button color"
+	},
+	
+
+	"toolbar_background": {
+	 "message": "Toolbar background color"
+	},
+	"toolbar_shelf_background": {
+	 "message": "Toolbar's shelf background color"
+	},
+	"toolbar_border_bottom": {
+	 "message": "Toolbar borders color"
+	},
+	
+	
+	
+	"button_shelf_background": {
+	 "message": "Toolbar's shelf buttons background color"
+	},
+	"button_shelf_hover_background": {
+	 "message": "Toolbar's shelf buttons background color, on mouse hover"
+	},
+	"button_shelf_icons": {
+	 "message": "Toolbar's shelf buttons icon color"
+	},
+	"button_shelf_icons_hover": {
+	 "message": "Toolbar's shelf buttons icon color, on mouse hover"
+	},
+	"button_shelf_border": {
+	 "message": "Toolbar's shelf buttons border color"
+	},
+	"button_shelf_hover_border": {
+	 "message": "Toolbar's shelf buttons border color, on mouse hover"
+	},
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	"options_theme_tabs": {
 		"message": " Tabs look "
 	},
 
-
+	
 
 	"options_tabs_margin_overlap": {
 		"message": "Tabs spacing:\nOverlap 1px, best for themes with borders"
@@ -558,8 +647,48 @@
 		"message": "Tabs spacing:\nDefault, 1px between tabs"
 	},
 
+	
+	
 
+	"options_tab_list_scrollbar_width_down": {
+	 "message": "Decrease scrollbars width"
+	},
+	"options_tab_list_scrollbar_width_up": {
+	 "message": "Increase scrollbars width"
+	},
+	"options_tab_list_scrollbar_height_down": {
+	 "message": "Decrease scrollbars height"
+	},
+	"options_tab_list_scrollbar_height_up": {
+	 "message": "Increase scrollbars height"
+	},
 
+	
+	
+	"options_tabs_indentation_down": {
+	 "message": "Decrease tabs indentation"
+	},
+	"options_tabs_indentation_up": {
+	 "message": "Increase tabs indentation"
+	},
+	
+
+	"options_tabs_roundness_down": {
+	 "message": "Make tabs corners more square"
+	},
+	"options_tabs_roundness_up": {
+	 "message": "Make tabs rounder"
+	},
+	
+
+	"options_tabs_size_down": {
+	 "message": "Decrease tabs size"
+	},
+	"options_tabs_size_up": {
+	 "message": "Increase tabs size"
+	},
+
+	
 
 	"options_theme_tabs_sample_text_normal": {
 		"message": "Normal"
@@ -639,11 +768,8 @@
 	"options_theme_tabs_sample_text_search_result_highlighted_active_hover": {
 		"message": "Search result highlighted, active, mouse hover over"
 	},
-
-
-
-
 	
+
 	"options_theme_tabs_sample_text_search_result_highlighted_selected": {
 		"message": "Search result highlighted, selected"
 	},
@@ -660,64 +786,6 @@
 
 
 
-	
-	
-	
-
-
-
-
-	"close_x": {
-	 "message": "x inside the close button"
-	},
-	"close_hover_x": {
-	 "message": "x inside the close button, on mouse hover"
-	},
-
-
-	"button_background": {
-	 "message": "Toolbar buttons background"
-	},
-	"button_hover_background": {
-	 "message": "Toolbar buttons background, on mouse hover"
-	},
-	
-	
-	"button_icons": {
-	 "message": "Toolbar buttons icon color"
-	},
-	"button_icons_hover": {
-	 "message": "Toolbar buttons icon color, on mouse hover"
-	},
-	"button_border": {
-	 "message": "Toolbar buttons border color"
-	},
-	"button_hover_border": {
-	 "message": "Toolbar buttons border color, on mouse hover"
-	},
-	
-
-	"filter_box_font": {
-	 "message": "Search box, font color"
-	},
-	"filter_box_background": {
-	 "message": "Search box, font background color"
-	},
-	"filter_box_border": {
-	 "message": "Search box, border color"
-	},
-	"filter_clear_icon": {
-	 "message": "Clear search result x button color"
-	},
-	
-
-	"toolbar_background": {
-	 "message": "Toolbar background color"
-	},
-	"toolbar_border_bottom": {
-	 "message": "Toolbar borders color"
-	},
-	
 
 
 	"attention_background": {
@@ -726,8 +794,6 @@
 	"attention_border": {
 	 "message": "Tabs blinking for attention, border color"
 	},
-	
-
 	"pin_list_border_bottom": {
 	 "message": "Pinned tabs list, border at the bottom color"
 	},
@@ -735,67 +801,116 @@
 	 "message": "Pinned tabs list, background color"
 	},
 	
-
-	"options_color_pick_hover": {
-	 "message": "On hover"
+	
+	"folder_icon_open": {
+	 "message": "Open folder icon"
+	},
+	"folder_icon_closed": {
+	 "message": "Empty or closed folder icon"
+	},
+	"folder_icon_hover": {
+	 "message": "Folder icon on mouse hover"
+	},
+	
+	
+	"expand_open_background": {
+	 "message": "Open tree indicator"
+	},
+	"expand_closed_background": {
+	 "message": "Closed tree indicator"
+	},
+	"expand_hover_background": {
+	 "message": "Tree indicator on mouse hover"
+	},
+	
+	
+	"group_list_button_hover_background": {
+	 "message": "Group on mouse hover"
+	},
+	"group_list_borders": {
+	 "message": "Group list border"
+	},
+	"group_list_default_font_color": {
+	 "message": "Group list default font color"
+	},
+	
+	"group_list_background": {
+	 "message": "Group list background color"
+	},
+	"tab_list_background": {
+	 "message": "Tabs background color"
+	},
+	
+	
+	"drag_indicator": {
+	 "message": "Drag&Drop indicator"
 	},
 	
 	
 	
-	"options_color_pick_border": {
-	 "message": "Border color"
-	},
-	"options_color_pick_background": {
-	 "message": "Fill color"
-	},
-	"options_color_pick_font": {
-	 "message": "Font color"
-	},
-	
-	"options_tabs_indentation_down": {
-	 "message": "Decrease tabs indentation"
-	},
-	"options_tabs_indentation_up": {
-	 "message": "Increase tabs indentation"
-	},
-	
-	"options_tabs_roundness_down": {
-	 "message": "Make tabs corners more square"
-	},
-	"options_tabs_roundness_up": {
-	 "message": "Make tabs rounder"
-	},
-	
-	"options_tabs_size_down": {
-	 "message": "Decrease tabs size"
-	},
-	"options_tabs_size_up": {
-	 "message": "Increase tabs size"
-	},
-	
-
-
-
-
-
-
-
-
-	"options_tab_list_scrollbar_width_down": {
-	 "message": "Decrease scrollbars width"
-	},
-	"options_tab_list_scrollbar_width_up": {
-	 "message": "Increase scrollbars width"
-	},
-	"options_tab_list_scrollbar_height_down": {
-	 "message": "Decrease scrollbars height"
-	},
-	"options_tab_list_scrollbar_height_up": {
-	 "message": "Increase scrollbars height"
-	},
-
 	
 	
+
+	"close_x": {
+	 "message": "x inside the close button"
+	},
+	"close_hover_x": {
+	 "message": "x inside the close button, on mouse hover"
+	},
+	"close_hover_border": {
+	 "message": "close button border, on mouse hover"
+	},
+	"close_hover_background": {
+	 "message": "close button box color, on mouse hover"
+	},
+
+
+
+	"scrollbar_thumb": {
+	 "message": "Scrollbar thumb"
+	},
+	"scrollbar_thumb_hover": {
+	 "message": "Scrollbar thumb, on mouse hover"
+	},
+	"scrollbar_track": {
+	 "message": "Scrollbar track"
+	},
+
+
+
+
+
+	"options_example_menu_item": {
+		"message": "menu item"
+	},
+	"options_menu": {
+		"message": " Menu "
+	},
+
+
+	"tabs_menu_hover_border": {
+		"message": "menu item border, on mouse hover"
+	},
+	"tabs_menu_hover_background": {
+		"message": "menu item background, on mouse hover"
+	},
+	"tabs_menu_separator": {
+		"message": "menu separator"
+	},
+	"tabs_menu_font": {
+		"message": "menu text color"
+	},
+	"tabs_menu_border": {
+		"message": "menu border"
+	},
+	"tabs_menu_background": {
+		"message": "menu background"
+	},
+
+	
+
+
+
 
 
 
@@ -826,14 +941,6 @@
 	
 
 
-	"options_example_menu_item": {
-		"message": "menu item"
-	},
-	"options_menu": {
-		"message": " Menu "
-	},
-
-	
 
 
 	
@@ -887,6 +994,15 @@
 	},
 	
 
+	"manager_window_button_label_import_group": {
+		"message": "Import Group"
+	},
+	
+	"manager_window_button_label_import_session": {
+		"message": "Import Session"
+	},
+	
+
 
 
 
@@ -910,6 +1026,18 @@
 	},
 	"caption_searchbox": {
 		"message": " Search tabs..."
+	},
+	
+	"manager_window_header_title": {
+		"message": "Manager"
+	},
+	
+	"menu_manager_window": {
+		"message": "Open manager"
+	},
+	
+	"button_manager_window": {
+		"message": "Open manager window"
 	}
 	
 

@@ -4,27 +4,15 @@
 
 if (browserId != "F") {
 	// ConvertLegacyStorage();
-	ChromeLoadTabs(0);
+	document.addEventListener("DOMContentLoaded", ChromeLoadTabs(0), false);
 	ChromeMessageListeners();
 }
 function ChromeLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.storage.local.get(null, function(storage) {
 			// LOAD PREFERENCES
-			opt = Object.assign({}, DefaultPreferences);
-			if (storage["preferences"]) {
-				for (var parameter in storage["preferences"]) {
-					if (opt[parameter] != undefined) {
-						opt[parameter] = storage["preferences"][parameter];
-					}
-				}
-			}
-			// LOAD THEME
-			if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
-				theme = storage["themes"][storage["current_theme"]];
-			} else {
-				theme = Object.assign({}, DefaultTheme);
-			}
+			GetCurrentPreferences(storage);
+			
 			// load tabs and windows from storage
 			var refTabs = {};
 			var tabs_matched = 0;
@@ -116,6 +104,29 @@ function ChromeLoadTabs(retry) {
 				ChromeAutoSaveData(2, 600000);
 				ChromeAutoSaveData(3, 1800000);
 				ChromeListeners();
+
+				delete running;
+				delete schedule_update_data;
+				delete schedule_rearrange_tabs;
+				delete DragNodeClass;
+				delete DragOverTimer;
+				delete DragTreeDepth;
+				delete menuItemNode;
+				delete CurrentWindowId;
+				delete SearchIndex;
+				delete active_group;
+				delete browserId;
+				delete bggroups;
+				delete bgfolders;
+				delete caption_clear_filter;
+				delete caption_loading;
+				delete caption_searchbox;
+				delete DefaultToolbar;
+				delete DefaultTheme;
+				delete DefaultPreferences;
+
+				delete tt_ids;
+
 			} else {
 				setTimeout(function() {
 					ChromeLoadTabs(retry+1);
@@ -281,15 +292,6 @@ function ChromeMessageListeners() {
 			window.location.reload();
 			return;
 		}
-		if (message.command == "get_preferences") {
-			sendResponse(opt);
-			return;
-		}
-		if (message.command == "save_preferences") {
-			opt = Object.assign({}, message.opt);
-			chrome.storage.local.set({preferences: message.opt});
-			return;
-		}
 		if (message.command == "get_windows") {
 			sendResponse(windows);
 			return;
@@ -411,14 +413,6 @@ function ChromeMessageListeners() {
 				}
 			}
 			schedule_save++;
-			return;
-		}
-		if (message.command == "get_theme") {
-			sendResponse(theme);
-			return;
-		}
-		if (message.command == "reload_theme") {
-			GetCurrentTheme();
 			return;
 		}
 	});

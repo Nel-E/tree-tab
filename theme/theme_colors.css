@@ -9,11 +9,27 @@ body {
 	--toolbar_background: #f2f2f2;
 	--toolbar_border_bottom: #cccccc;
 
+	/* MAIN TOOLBAR "ON" BUTTONS COLORS */
+	--button_on_background: #f2f2f2;
+	--button_on_icons: #808080;
+
+	/* SHELF TOOLBAR */
+	--toolbar_shelf_background: #f2f2f2;
+
+	/* SHELF TOOLBAR BUTTONS COLORS */
+	--button_shelf_background: #f2f2f2;
+	--button_shelf_border: #f2f2f2;
+	--button_shelf_hover_background: #dcdcdc;
+	--button_shelf_hover_border: #dcdcdc;
+	--button_shelf_icons: #808080;
+	--button_shelf_icons_hover: #808080;
+
+
 	/* MAIN TOOLBAR BUTTONS COLORS */
 	--button_background: #f2f2f2;
 	--button_border: #f2f2f2;
 	--button_hover_background: #dcdcdc;
-	--button_hover_border: #bebebe;
+	--button_hover_border: #dcdcdc;
 	--button_icons: #808080;
 	--button_icons_hover: #808080;
 
@@ -29,7 +45,7 @@ body {
 	--group_list_default_font_color: #808080;
 	--group_list_button_hover_background: #dcdcdc;
 
-	/* TOTO GROUP EDIT DIALOG */
+	/* TODO GROUP EDIT DIALOG */
 
 
 	/* LISTS */
@@ -248,9 +264,12 @@ body {
 	--tab_filtered_selected_active_highlighted_search_hover_title_font_weight: bold;
 
 	/* folders */
-	/* --folder_list_background: #fafafa; */
-	
-	
+	--folder_icon_closed: #969696;
+	--folder_icon_open: #339bf3;
+	--folder_icon_hover: #ffa500;
+
+
+	/* TABS EXPAND INDICATOR */
 	--expand_hover_background: #ffa500;
 	--expand_closed_background: #969696;
 	--expand_open_background: #339bf3;

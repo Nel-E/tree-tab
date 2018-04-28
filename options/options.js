@@ -7,6 +7,8 @@
 var current_theme = "";
 var themes = [];
 var SelectedTheme = Object.assign({}, DefaultTheme);
+
+
 var dragged_button;
 active_group = "tab_list";
 
@@ -15,30 +17,49 @@ let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclic
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
-	chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
-		opt = Object.assign({}, response);
-		chrome.storage.local.get(null, function(items) {
-			if (items["themes"]) {
-				for (var themeName in items["themes"]) {
-					themes.push(themeName);
-				}
+	chrome.storage.local.get(null, function(storage) {
+		
+		GetCurrentPreferences(storage);
+
+		if (storage["themes"]) {
+			for (var themeName in storage["themes"]) {
+				themes.push(themeName);
 			}
-			if (items["current_theme"]) {
-				current_theme = items["current_theme"];
-				LoadTheme(items["current_theme"]);
-			}
-			GetOptions();
-			RefreshFields();
-			SetEvents();
-			AppendGroupToList("tab_list", caption_ungrouped_group, "", false);
-			AppendGroupToList("tab_list2", caption_noname_group, "", false);
-			AppendSampleTabs();
-		});
+		}
+		if (storage["current_theme"]) {
+			current_theme = storage["current_theme"];
+			LoadTheme(storage["current_theme"]);
+		}
+		
+
+		if (storage["unused_buttons"]) {
+			RecreateToolbarUnusedButtons(storage["unused_buttons"]);
+		}
+
+		RecreateToolbar(GetCurrentToolbar(storage));
+		SetToolbarEvents(false, false, true, "click");
+		AddEditToolbarEditEvents();
+
+		
+		GetOptions(storage);
+		RefreshFields();
+		SetEvents();
+
+		AppendGroupToList("tab_list", caption_ungrouped_group, "", false);
+		AppendGroupToList("tab_list2", caption_noname_group, "", false);
+		AppendSampleTabs();
+	
+		setTimeout(function() {
+			document.querySelectorAll(".on").forEach(function(s){
+				s.classList.remove("on");
+			});
+			RefreshGUI();
+		}, 100);
 	});
 });
 
 // document events
-function GetOptions() {
+function GetOptions(storage) {
 	// get language labels
 	document.querySelectorAll(".label, .set_button, .bg_opt_drop_down_menu").forEach(function(s){
 		s.textContent = chrome.i18n.getMessage(s.id);
@@ -69,9 +90,6 @@ function GetOptions() {
 	});
 	
 
-
-
-
 	// get options for all drop down menus (loop through all drop down items that are in DropDownList array)
 	for (let i = 0; i < DropDownList.length; i++) {
 		let DropDownOption = document.getElementById(DropDownList[i]);
@@ -92,7 +110,7 @@ function GetOptions() {
 	for (var i = 0; i < themes.length; i++) {
 		let theme_name = document.createElement("option");
 		theme_name.value = themes[i];
-		theme_name.text = themes[i];
+		theme_name.text = storage.themes[themes[i]].theme_name;
 		ThemeList.add(theme_name);
 	}
 	// select current theme in dropdown list
@@ -105,11 +123,38 @@ function GetOptions() {
 }
 
 function RemovePreview() {
-	if (document.styleSheets[document.styleSheets.length-1].cssRules.length) {
-		document.styleSheets[document.styleSheets.length-1].deleteRule(document.styleSheets[document.styleSheets.length-1].cssRules.length-1);
-	}
 	document.querySelectorAll(".hover_blinking").forEach(function(s){s.classList.remove("hover_blinking");});
 	document.querySelectorAll(".hover_border_blinking").forEach(function(s){s.classList.remove("hover_border_blinking");});
+	document.querySelectorAll(".red_preview").forEach(function(s){
+		s.style.backgroundColor = "";
+		s.style.border = "";
+		s.style.borderBottom = "";
+		s.style.borderRight = "";
+		s.style.color = "";
+		s.style.animation = "";
+		s.style.fontWeight = "";
+		s.style.fontStyle = "";
+		// s.style.zIndex = "";
+		s.classList.remove("red_preview");
+	});
+}
+
+
+
+function AddRedStylePreview(Id, style, value, removePreview) {
+	if (removePreview) RemovePreview();
+	let d = document.getElementById(Id);
+	d.classList.add("red_preview");
+	d.style[style] = value;
+}
+
+function AddBlueBackgroundPreview(Id, removePreview) {
+	if (removePreview) RemovePreview();
+	document.getElementById(Id).classList.add("hover_blinking");
+}
+function AddBlueBorderPreview(Id, removePreview) {
+	if (removePreview) RemovePreview();
+	document.getElementById(Id).classList.add("hover_border_blinking");
 }
 
 
@@ -141,123 +186,316 @@ function SetEvents() {
 	}}
 
 // --------------------------------ADD RED AND BLUE PREVIEWS---------------------------------------------------------------
-	// document.body.onmousedown = function(event) {
-		// if (event.which == 1 && (event.target.id || event.target.classList)) {
-			// console.log(event.target);
-		// }
-	// }
-	document.querySelectorAll(".pick_col, #filter_box_font").forEach(function(s){s.onmouseenter = function(event) {
-		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": red; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-	}});
-	document.querySelectorAll(".font_weight_normal").forEach(function(s){s.onmouseenter = function(event) {
-		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": normal; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-	}});
-	document.querySelectorAll(".font_weight_bold").forEach(function(s){s.onmouseenter = function(event) {
-		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": bold; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-	}});
-	document.querySelectorAll(".font_style_normal").forEach(function(s){s.onmouseenter = function(event) {
-		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": normal; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-	}});
-	document.querySelectorAll(".font_style_italic").forEach(function(s){s.onmouseenter = function(event) {
-		document.styleSheets[document.styleSheets.length-1].insertRule("body { --"+this.id+": italic; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-	}});
-	document.querySelectorAll(".pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font").forEach(function(s){s.onmouseleave = function(event) {
-		RemovePreview();
-	}});
-	
-
-	document.getElementById("group_list_default_font_color").onmouseenter = function(event) {
-		document.getElementById("_gtetab_list").style.color = "red";
-		document.getElementById("_gtetab_list2").style.color = "red";
-		
-	}
-	document.getElementById("group_list_default_font_color").onmouseleave = function(event) {
-		document.getElementById("_gtetab_list").style.color = "";
-		document.getElementById("_gtetab_list2").style.color = "";
-	}
-
-	
-	document.getElementById("scrollbar_thumb_hover").onmouseenter = function(event) {
-		RemovePreview();
-		document.getElementById("group_scrollbar_thumb").classList.add("hover_blinking");
-		document.getElementById("pin_list_scrollbar_thumb").classList.add("hover_blinking");
-	}
-	document.getElementById("scrollbar_thumb_hover").onmouseleave = function(event) {
-		RemovePreview();
+	document.body.onmousedown = function(event) {
+		if (event.which == 1 && (event.target.id || event.target.classList)) {
+			console.log(event.target);
+		}
 	}
 	
-
-	document.getElementById("group_list_button_hover_background").onmouseenter = function(event) {
+	
+	document.querySelectorAll("#scrollbar_thumb_hover, #options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down, #options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down, .pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font").forEach(function(s){s.onmouseleave = function(event) {
 		RemovePreview();
-		document.getElementById("_tab_list2").classList.add("hover_blinking");
-	}
-	document.getElementById("group_list_button_hover_background").onmouseleave = function(event) {
-		RemovePreview();
-	}
+	}});
 
+	// toolbar buttons
+	document.getElementById("button_background").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_plus", "backgroundColor", "red", true);
+	}
 	document.getElementById("button_hover_background").onmouseenter = function(event) {
-		RemovePreview();
-		document.querySelectorAll(".button").forEach(function(s){s.classList.add("hover_blinking");});
+		AddBlueBackgroundPreview("button_theme_plus", true);
 	}
-	document.getElementById("button_hover_background").onmouseleave = function(event) {
-		RemovePreview();
+
+	document.getElementById("button_on_background").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_search", "backgroundColor", "red", true);
 	}
 	
-
-
+	document.getElementById("button_icons").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_plus_img", "backgroundColor", "red", true);
+	}
 	document.getElementById("button_icons_hover").onmouseenter = function(event) {
-		RemovePreview();
-		document.querySelectorAll(".button_img").forEach(function(s){s.classList.remove("hover_blinking");});
+		AddBlueBackgroundPreview("button_theme_plus_img", true);
 	}
-	document.getElementById("button_icons_hover").onmouseleave = function(event) {
-		RemovePreview();
+	document.getElementById("button_on_icons").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_search_img", "backgroundColor", "red", true);
 	}
 
+	document.getElementById("button_border").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_plus", "border", "1px solid red", true);
+	}
 	document.getElementById("button_hover_border").onmouseenter = function(event) {
-		RemovePreview();
-		document.querySelectorAll(".button").forEach(function(s){s.classList.add("hover_border_blinking");});
+		AddBlueBorderPreview("button_theme_plus", true);
 	}
-	document.getElementById("button_hover_border").onmouseleave = function(event) {
-		RemovePreview();
+
+
+	// search box
+	document.getElementById("filter_box_font").onmouseenter = function(event) {
+		AddRedStylePreview("filter_box_theme", "color", "red", true);
+	}
+	document.getElementById("filter_box_background").onmouseenter = function(event) {
+		AddRedStylePreview("filter_box_theme", "backgroundColor", "red", true);
+	}
+	document.getElementById("filter_box_border").onmouseenter = function(event) {
+		AddRedStylePreview("filter_box_theme", "border", "1px solid red", true);
+	}
+	document.getElementById("filter_clear_icon").onmouseenter = function(event) {
+		AddRedStylePreview("button_filter_clear_theme", "backgroundColor", "red", true);
 	}
 	
-	document.getElementById("options_tab_list_scrollbar_width_up").onmouseenter = function(event) {
-		document.getElementById("group_scrollbar").style.backgroundColor = "red";
-		document.getElementById("group_scrollbar_thumb").style.backgroundColor = "red";
+	// toolbar background
+	document.getElementById("toolbar_background").onmouseenter = function(event) {
+		AddRedStylePreview("toolbar_main_theme", "backgroundColor", "red", true);
 	}
-	document.getElementById("options_tab_list_scrollbar_width_down").onmouseenter = function(event) {
-		document.getElementById("group_scrollbar").style.backgroundColor = "red";
-		document.getElementById("group_scrollbar_thumb").style.backgroundColor = "red";
+
+	// shelf toolbar background
+	document.getElementById("toolbar_shelf_background").onmouseenter = function(event) {
+		AddRedStylePreview("toolbar_search_input_box_theme", "backgroundColor", "red", true);
+	}
+
+	// toolbar's border
+	document.getElementById("toolbar_border_bottom").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_search", "border", "1px solid red", true);
+		AddRedStylePreview("toolbar_main_theme", "borderBottom", "1px solid red");
+		AddRedStylePreview("toolbar_theme", "borderBottom", "1px solid red");
 	}
 	
-	document.getElementById("options_tab_list_scrollbar_width_up").onmouseleave = function(event) {
-		document.getElementById("group_scrollbar").style.backgroundColor = "";
-		document.getElementById("group_scrollbar_thumb").style.backgroundColor = "";
+	// shelf toolbar buttons
+	document.getElementById("button_shelf_background").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_pen", "backgroundColor", "red", true);
 	}
-	document.getElementById("options_tab_list_scrollbar_width_down").onmouseleave = function(event) {
-		document.getElementById("group_scrollbar").style.backgroundColor = "";
-		document.getElementById("group_scrollbar_thumb").style.backgroundColor = "";
+	document.getElementById("button_shelf_hover_background").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("button_theme_pen", true);
+	}
+	document.getElementById("button_shelf_icons").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_pen_img", "backgroundColor", "red", true);
+	}
+	document.getElementById("button_shelf_icons_hover").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("button_theme_pen_img", true);
+	}
+	document.getElementById("button_shelf_border").onmouseenter = function(event) {
+		AddRedStylePreview("button_theme_pen", "border", "1px solid red", true);
+	}
+	document.getElementById("button_shelf_hover_border").onmouseenter = function(event) {
+		AddBlueBorderPreview("button_theme_pen", true);
+	}
+
+	// pinned tab attention_background
+	document.getElementById("attention_background").onmouseenter = function(event) {
+		AddRedStylePreview("tab_header10", "backgroundColor", "red", true);
+		document.getElementById("tab_header10").style.animation = "none";
+	}
+
+	// pinned tab attention_border
+	document.getElementById("attention_border").onmouseenter = function(event) {
+		AddRedStylePreview("tab_header10", "border", "1px solid red", true);
+		document.getElementById("tab_header10").style.animation = "none";
+	}
+
+	// pin_list border bottom
+	document.getElementById("pin_list_border_bottom").onmouseenter = function(event) {
+		AddRedStylePreview("pin_list", "borderBottom", "1px solid red", true);
+	}
+
+	// pin_list background
+	document.getElementById("pin_list_background").onmouseenter = function(event) {
+		AddRedStylePreview("pin_list", "backgroundColor", "red", true);
+	}
+	
+	
+	// tab row font_color
+	document.querySelectorAll(".tab_col.font_color").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
+	}});
+
+	// tab row font not bold
+	document.querySelectorAll(".tab_col.font_weight_normal").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontWeight", "normal", false);
+	}});
+
+	// tab row font bold
+	document.querySelectorAll(".tab_col.font_weight_bold").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontWeight", "bold", false);
+	}});
+
+	// tab row font style normal
+	document.querySelectorAll(".tab_col.font_style_normal").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontStyle", "normal", false);
+	}});
+	// tab row font style italic
+	document.querySelectorAll(".tab_col.font_style_italic").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
+		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontStyle", "italic", false);
+	}});
+	
+	
+	// tab border
+	document.querySelectorAll(".tab_col.color_border").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_header" + this.parentNode.id.substr(1), "border", "1px solid red", true);
+	}});
+	
+	// tab background
+	document.querySelectorAll(".tab_col.color_bucket").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("tab_header" + this.parentNode.id.substr(1), "backgroundColor", "red", true);
+	}});
+	
+	
+	
+	
+	// scrollbars hover
+	document.getElementById("scrollbar_thumb_hover").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("group_scrollbar_thumb", true);
+		AddBlueBackgroundPreview("pin_list_scrollbar_thumb");
+	}
+	
+	// scrollbars thumb
+	document.getElementById("scrollbar_thumb").onmouseenter = function(event) {
+		AddRedStylePreview("group_scrollbar_thumb", "backgroundColor", "red", true);
+		AddRedStylePreview("pin_list_scrollbar_thumb", "backgroundColor", "red");
+	}
+	
+	
+	// scrollbars track
+	document.getElementById("scrollbar_track").onmouseenter = function(event) {
+		AddRedStylePreview("group_scrollbar", "backgroundColor", "red", true);
+		AddRedStylePreview("pin_list_scrollbar", "backgroundColor", "red");
 	}
 	
 
+	// tab_list scrollbars
+	document.querySelectorAll("#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("group_scrollbar", "backgroundColor", "red", true);
+		AddRedStylePreview("group_scrollbar_thumb", "backgroundColor", "red");
+	}});
 	
-	document.getElementById("options_tab_list_scrollbar_height_up").onmouseenter = function(event) {
-		document.getElementById("pin_list_scrollbar").style.backgroundColor = "red";
-		document.getElementById("pin_list_scrollbar_thumb").style.backgroundColor = "red";
+	// pin_list scrollbars
+	document.querySelectorAll("#options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down").forEach(function(s){s.onmouseenter = function(event) {
+		AddRedStylePreview("pin_list_scrollbar", "backgroundColor", "red", true);
+		AddRedStylePreview("pin_list_scrollbar_thumb", "backgroundColor", "red");
+	}});
+
+
+
+	// folder icon open
+	document.getElementById("folder_icon_open").onmouseenter = function(event) {
+		AddRedStylePreview("fopf_folder1", "backgroundColor", "red", true);
 	}
-	document.getElementById("options_tab_list_scrollbar_height_down").onmouseenter = function(event) {
-		document.getElementById("pin_list_scrollbar").style.backgroundColor = "red";
-		document.getElementById("pin_list_scrollbar_thumb").style.backgroundColor = "red";
+	// folder icon closed
+	document.getElementById("folder_icon_closed").onmouseenter = function(event) {
+		AddRedStylePreview("fopf_folder2", "backgroundColor", "red", true);
 	}
+	// folder icon hover
+	document.getElementById("folder_icon_hover").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("fopf_folder3", true);
+	}
+
+
+	// tab expand closed
+	document.getElementById("expand_closed_background").onmouseenter = function(event) {
+		AddRedStylePreview("exp14", "backgroundColor", "red", true);
+	}
+	// tab expand hover
+	document.getElementById("expand_hover_background").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("exp16", true);
+	}
+	// tab expand open
+	document.getElementById("expand_open_background").onmouseenter = function(event) {
+		AddRedStylePreview("exp5", "backgroundColor", "red", true);
+	}
+
+
 	
-	document.getElementById("options_tab_list_scrollbar_height_up").onmouseleave = function(event) {
-		document.getElementById("pin_list_scrollbar").style.backgroundColor = "";
-		document.getElementById("pin_list_scrollbar_thumb").style.backgroundColor = "";
+	
+	
+	// drag indicator
+	document.getElementById("drag_indicator").onmouseenter = function(event) {
+		AddRedStylePreview("di19", "borderBottom", "1px solid red", true);
 	}
-	document.getElementById("options_tab_list_scrollbar_height_down").onmouseleave = function(event) {
-		document.getElementById("pin_list_scrollbar").style.backgroundColor = "";
-		document.getElementById("pin_list_scrollbar_thumb").style.backgroundColor = "";
+
+
+	// close x
+	document.getElementById("close_x").onmouseenter = function(event) {
+		AddRedStylePreview("close_img11", "backgroundColor", "red", true);
+		// console.log(this.style);
 	}
+	// close x hover
+	document.getElementById("close_hover_x").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("close_img13", true);
+	}
+	// close border hover
+	document.getElementById("close_hover_border").onmouseenter = function(event) {
+		AddBlueBorderPreview("close13", true);
+	}
+	// close border hover
+	document.getElementById("close_hover_background").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("close13", true);
+	}
+
+
+	
+	
+	// group button hover
+	document.getElementById("group_list_button_hover_background").onmouseenter = function(event) {
+		AddBlueBackgroundPreview("_tab_list2", true);
+	}
+	// group buttons borders
+	document.getElementById("group_list_borders").onmouseenter = function(event) {
+		AddRedStylePreview("toolbar_groups_block", "borderRight", "1px solid red", true);
+		AddRedStylePreview("_tab_list", "border", "1px solid red");
+	}
+	// group buttons font
+	document.getElementById("group_list_default_font_color").onmouseenter = function(event) {
+		AddRedStylePreview("_gtetab_list", "color", "red", true);
+		AddRedStylePreview("_gtetab_list2", "color", "red");
+	}
+	// group list background
+	document.getElementById("group_list_background").onmouseenter = function(event) {
+		AddRedStylePreview("toolbar_groups_block", "backgroundColor", "red", true);
+	}
+	// tab_list background
+	document.getElementById("tab_list_background").onmouseenter = function(event) {
+		AddRedStylePreview("tab_list", "backgroundColor", "red", true);
+		AddRedStylePreview("_tab_list", "backgroundColor", "red");
+	}
+
+	
+	
+	
+	
+	// menu hover border
+	document.getElementById("tabs_menu_hover_border").onmouseenter = function(event) {
+		AddRedStylePreview("menu_hover_sample", "border", "1px solid red", true);
+	}
+	// menu hover background
+	document.getElementById("tabs_menu_hover_background").onmouseenter = function(event) {
+		AddRedStylePreview("menu_hover_sample", "backgroundColor", "red", true);
+	}
+
+	// menu separator
+	document.getElementById("tabs_menu_separator").onmouseenter = function(event) {
+		AddRedStylePreview("menu_separator1", "backgroundColor", "red", true);
+		AddRedStylePreview("menu_separator2", "backgroundColor", "red");
+	}
+
+	// menu font
+	document.getElementById("tabs_menu_font").onmouseenter = function(event) {
+		AddRedStylePreview("menu_hover_sample", "color", "red", true);
+		AddRedStylePreview("menu_sample1", "color", "red");
+		AddRedStylePreview("menu_sample2", "color", "red");
+	}
+
+
+	// menu border
+	document.getElementById("tabs_menu_border").onmouseenter = function(event) {
+		AddRedStylePreview("tabs_menu", "border", "1px solid red", true);
+	}
+
+	// menu background
+	document.getElementById("tabs_menu_background").onmouseenter = function(event) {
+		AddRedStylePreview("tabs_menu", "backgroundColor", "red", true);
+	}
+
 
 
 // --------------------------------------COLOR PICKER---------------------------------------------------------------------	
@@ -322,14 +560,25 @@ function SetEvents() {
 			}
 		}
 		SavePreferences();
+		if (this.id == "show_toolbar") {
+			SaveToolbar();
+			RefreshFields();
+
+			
+			// setTimeout(function() {
+				// chrome.runtime.sendMessage({command: "reload_toolbar", toolbar: toolbar, opt: opt});
+			// }, 300);
+		}
 	}}});
 
 
 	// options that need reload
 	document.onclick = function(event) {if (event.which == 1) {
-		if (event.target.id == "show_toolbar" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "allow_pin_close" || event.target.id == "switch_with_scroll" || event.target.id == "always_show_close" || event.target.id == "never_show_close" || 
+		if (event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "allow_pin_close" || event.target.id == "switch_with_scroll" || event.target.id == "always_show_close" || event.target.id == "never_show_close" || 
 			event.target.id == "collapse_other_trees" || event.target.id == "show_counter_tabs" || event.target.id == "show_counter_tabs_hints" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "syncro_tabbar_groups_tabs_order" || event.target.id == "groups_toolbar_default") {
-			chrome.runtime.sendMessage({command: "reload_sidebar"});
+			setTimeout(function() {
+				chrome.runtime.sendMessage({command: "reload_sidebar"});
+			}, 50);
 		}
 		if (event.target.id == "groups_toolbar_default") {
 			chrome.runtime.sendMessage({command: "reload"});
@@ -342,11 +591,13 @@ function SetEvents() {
 	// set dropdown menu options
 	for (let i = 0; i < DropDownList.length; i++) {
 		document.getElementById(DropDownList[i]).onchange = function(event) {
-console.log(opt[this.id]);
-console.log(this.value);
+// console.log(opt[this.id]);
+// console.log(this.value);
 			opt[this.id] = this.value;
 			SavePreferences();
-			chrome.runtime.sendMessage({command: "reload_sidebar"});
+			setTimeout(function() {
+				chrome.runtime.sendMessage({command: "reload_sidebar"});
+			}, 50);
 		}
 	}
 
@@ -354,15 +605,17 @@ console.log(this.value);
 	document.getElementById("max_tree_depth").oninput = function(event) {
 		opt.max_tree_depth = parseInt(this.value);
 		SavePreferences();
-		chrome.runtime.sendMessage({command: "reload_sidebar"});
+		setTimeout(function() {
+			chrome.runtime.sendMessage({command: "reload_sidebar"});
+		}, 50);
 	}
 	
 	// set toolbar on/off and show/hide all toolbar options
-	document.getElementById("show_toolbar").onclick = function(event) {if (event.which == 1) {
-		SelectedTheme.ToolbarShow = this.checked ? true : false;
-		RefreshFields();
-		SaveTheme(document.getElementById("theme_list").value);
-	}}
+	// document.getElementById("show_toolbar").onclick = function(event) {if (event.which == 1) {
+		// SelectedTheme.ToolbarShow = this.checked ? true : false;
+		// RefreshFields();
+		// SaveTheme(document.getElementById("theme_list").value);
+	// }}
 
 	
 // ------------------------------OTHER------------------------------------------------------------------------------------	
@@ -378,17 +631,24 @@ console.log(this.value);
 // ----------------------------RESET TOOLBAR BUTTON-----------------------------------------------------------------------	
 	
 	document.getElementById("options_reset_toolbar_button").onclick = function(event) {if (event.which == 1) {
+
 		SetToolbarEvents(true, false, false, "");
 		RemoveToolbarEditEvents();
-		SelectedTheme["toolbar"] = DefaultToolbar;
-		SelectedTheme["unused_buttons"] = "";
-		document.getElementById("toolbar").innerHTML = DefaultToolbar;
-		document.getElementById("toolbar_unused_buttons").innerHTML = "";
-		SaveTheme(document.getElementById("theme_list").value);
-		document.querySelectorAll(".on").forEach(function(s){s.classList.remove("on");});
-		RefreshGUI();
+		
+
+		let unused_buttons = document.getElementById("toolbar_unused_buttons");
+		while(unused_buttons.hasChildNodes()) {
+			unused_buttons.removeChild(unused_buttons.firstChild);
+		}
+		
+		RemoveToolbar();
+		RecreateToolbar(DefaultToolbar);
 		SetToolbarEvents(false, false, true, "click");
 		AddEditToolbarEditEvents();
+		
+		SaveToolbar();
+		
+		
 	}}
 
 
@@ -421,10 +681,11 @@ console.log(this.value);
 
 	// export theme preset button
 	document.getElementById("options_export_theme_button").onclick = function(event) {if (event.which == 1) {
-		if (document.getElementById("theme_list").options.length == 0) {
+		let ThemeList = document.getElementById("theme_list");
+		if (ThemeList.options.length == 0) {
 			alert(chrome.i18n.getMessage("options_no_theme_to_export"));
 		} else {
-			SaveFile(document.getElementById("theme_list").value + ".tt_theme", SelectedTheme);
+			SaveFile(ThemeList.options[ThemeList.selectedIndex].text + ".tt_theme", SelectedTheme);
 		}
 	}}
 
@@ -585,11 +846,11 @@ console.log(this.value);
 	// clear data
 	document.getElementById("options_clear_data").onclick = function(event) {if (event.which == 1) {
 		chrome.storage.local.clear();
-		chrome.runtime.sendMessage({command: "reload"});
-		chrome.runtime.sendMessage({command: "reload_sidebar"});
 		setTimeout(function() {
+			chrome.runtime.sendMessage({command: "reload"});
+			chrome.runtime.sendMessage({command: "reload_sidebar"});
 			location.reload();
-		}, 300);
+		}, 100);
 	}}
 }
 
@@ -602,50 +863,42 @@ function RemoveToolbarEditEvents() {
 	});
 }
 
+// ----------------------EDIT TOOLBAR-------------------------------------------------------------------------------------	
 function AddEditToolbarEditEvents() {
 	document.querySelectorAll("#button_filter_clear").forEach(function(s){
 		s.style.opacity = "1";
 	});
-	document.querySelectorAll(".button_img").forEach(function(s){
-		if (s.parentNode.id != "button_filter_type" || s.parentNode.id != "filter_search_go_prev" || s.parentNode.id != "filter_search_go_next") {
-			s.setAttribute("draggable", true);
-			s.onmousedown = function(event) {
-				if (event.which == 1) {
-					dragged_button = document.getElementById(this.parentNode.id);
-				}
-			}
-			s.ondragstart = function(event) {
-				event.dataTransfer.setData(" "," ");
-				event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-			}
-			// move (flip) buttons
-			s.ondragenter = function(event) {
-				if ((dragged_button.id == "button_tools" || dragged_button.id == "button_search" || dragged_button.id == "button_groups" || dragged_button.id == "button_backup" || dragged_button.id == "button_folders") && this.parentNode.parentNode.classList.contains("toolbar_shelf")) {
-					return;
-				}
-				let dragged_buttonIndex = Array.from(dragged_button.parentNode.children).indexOf(dragged_button);
-				let Index = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
-				
-				if (Index <= dragged_buttonIndex) {
-					this.parentNode.parentNode.insertBefore(dragged_button, this.parentNode);
-				} else {
-					if (this.parentNode.nextSibling != null) {
-						this.parentNode.parentNode.insertBefore(dragged_button, this.parentNode.nextSibling);
-					} else {
-						this.parentNode.parentNode.appendChild(dragged_button);
-					}				
-				}
-			}
-			// save toolbar
-			s.ondragend = function(event) {
-				RemoveToolbarEditEvents();
 
-				SelectedTheme.toolbar = document.getElementById("toolbar").innerHTML;
-				SelectedTheme.unused_buttons = document.getElementById("toolbar_unused_buttons").innerHTML;
-				SaveTheme(document.getElementById("theme_list").value);
-				
-				AddEditToolbarEditEvents();
+	document.querySelectorAll("#toolbar_main .button_img, #toolbar_shelf_tools .button_img, #toolbar_shelf_groups .button_img, #toolbar_shelf_backup .button_img, #toolbar_shelf_folders .button_img").forEach(function(s){
+		s.setAttribute("draggable", true);
+		s.onmousedown = function(event) {
+			if (event.which == 1) {
+				dragged_button = document.getElementById(this.parentNode.id);
 			}
+		}
+		s.ondragstart = function(event) {
+			event.dataTransfer.setData(" "," ");
+			event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+		}
+		// move (flip) buttons
+		s.ondragenter = function(event) {
+			if ((dragged_button.id == "button_tools" || dragged_button.id == "button_search" || dragged_button.id == "button_groups" || dragged_button.id == "button_backup" || dragged_button.id == "button_folders") && this.parentNode.parentNode.classList.contains("toolbar_shelf")) {
+				return;
+			}
+			let dragged_buttonIndex = Array.from(dragged_button.parentNode.children).indexOf(dragged_button);
+			let Index = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
+			
+			if (Index <= dragged_buttonIndex) {
+				InsterBeforeNode(dragged_button, this.parentNode);
+			} else {
+				InsterAfterNode(dragged_button, this.parentNode);
+			}
+		}
+		// save toolbar
+		s.ondragend = function(event) {
+			RemoveToolbarEditEvents();
+			SaveToolbar();
+			AddEditToolbarEditEvents();
 		}
 	});
 	
@@ -676,3 +929,7 @@ function copyStringToClipboard(string) {
 function BindTabsSwitchingToMouseWheel() {}
 function GetFaviconAndTitle() {}
 function RefreshMediaIcon() {}
+function SetActiveTab() {}
+function RefreshCounters() {}
+function RefreshExpandStates() {}
+function Loadi18n() {}

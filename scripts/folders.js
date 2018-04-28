@@ -2,27 +2,29 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-function AddNewFolder(ParentId, Name, Index, ExpandState) {
-	var newId = GenerateNewFolderID();
+function AddNewFolder(folderId, ParentId, Name, Index, ExpandState, AdditionalClass, SetEvents) {
+	var newId = folderId ? folderId : GenerateNewFolderID();
 	bgfolders[newId] = { id: newId, parent: (ParentId ? ParentId : ""), index: (Index ? Index : 0), name: (Name ? Name : caption_noname_group), expand: (ExpandState ? ExpandState : "") };
-	AppendFolder(newId, caption_noname_group, (ParentId ? ParentId : ""), undefined, true);
+	AppendFolder(newId, caption_noname_group, (ParentId ? ParentId : ""), undefined, SetEvents, AdditionalClass);
 	SaveFolders();
 	RefreshCounters();
 	RefreshExpandStates();
 	return newId;
 }
 
-function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
+function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalClass) {
+	let ClassList = "folder ";
+	if (AdditionalClass != undefined) {
+		ClassList = ClassList + AdditionalClass;
+	}
 	if (document.getElementById(folderId) == null) {
-		var fd = document.createElement("div"); fd.className = "folder ";  if (Expand) { fd.className += Expand }  fd.id = folderId;// FOLDER
-		var dc = document.createElement("div"); dc.className = "drop_target drag_enter_center"; dc.id = "dc"+folderId; fd.appendChild(dc); // DROP TARGET CENTER
-		var du = document.createElement("div"); du.className = "drop_target drag_entered_top"; du.id = "du"+folderId; fd.appendChild(du); // DROP TARGET TOP
-		var dd = document.createElement("div"); dd.className = "drop_target drag_entered_bottom"; dd.id = "dd"+folderId; fd.appendChild(dd); // DROP TARGET BOTTOM
+		var fd = document.createElement("div"); fd.className = ClassList;  if (Expand) { fd.className += Expand }  fd.id = folderId; // FOLDER
 		var fh = document.createElement("div"); fh.className = (opt.always_show_close && !opt.never_show_close) ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+folderId; if (SetEvents) {fh.draggable = true;} fd.appendChild(fh); // HEADER
 		var ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+folderId; fh.appendChild(ex);
 		var ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+folderId; ft.textContent = Name; fh.appendChild(ft); // TITLE
 		var cf = document.createElement("div"); cf.className = "children_folders"; cf.id = "cf"+folderId; fd.appendChild(cf);
 		var ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+folderId; fd.appendChild(ct);
+		var di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+folderId; fd.appendChild(di); // DROP TARGET INDICATOR
 		if (!opt.never_show_close) {
 			var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+folderId; fh.appendChild(cl); // CLOSE BUTTON
 			var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+folderId; cl.appendChild(ci);
@@ -40,12 +42,20 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 				}
 			}
 
+			cf.onclick = function(event) {
+				if (event.target == this && event.which == 1) {
+					DeselectFolders();
+					DeselectTabs();
+				}
+			}
+			ct.onclick = function(event) {
+				if (event.target == this && event.which == 1) {
+					DeselectFolders();
+					DeselectTabs();
+				}
+			}
 			cf.onmousedown = function(event) {
 				if (event.target == this) {
-					if (event.which == 1) {
-						DeselectFolders();
-						DeselectTabs();
-					}
 					if (event.which == 2 && event.target == this) {
 						event.stopImmediatePropagation();
 						ActionClickGroup(this.parentNode, opt.midclick_group);
@@ -57,10 +67,6 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 			}
 			ct.onmousedown = function(event) {
 				if (event.target == this) {
-					if (event.which == 1) {
-						DeselectFolders();
-						DeselectTabs();
-					}
 					if (event.which == 2 && event.target == this) {
 						event.stopImmediatePropagation();
 						ActionClickGroup(this.parentNode, opt.midclick_group);
@@ -85,17 +91,21 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					this.classList.remove("close_hover");
 				}
 			}
-			fh.onmousedown = function(event) {
-				if (document.getElementById("main_menu").style.top != "-1000px") {
-					HideMenus();
-				}
+			fh.onclick = function(event) {
 				// SELECT FOLDER
 				if (event.which == 1 && !event.shiftKey) {
 					DeselectTabs();
-					if (!event.ctrlKey) {
+					if (!event.ctrlKey && this.parentNode.classList.contains("selected_folder") == false) {
 						DeselectFolders();
 					}
-					event.target.parentNode.parentNode.classList.toggle("selected_folder");
+					if (event.ctrlKey) {
+						this.parentNode.classList.toggle("selected_folder");
+					}
+				}
+			}
+			fh.onmousedown = function(event) {
+				if (document.getElementById("main_menu").style.top != "-1000px") {
+					HideMenus();
 				}
 				if (event.which == 2) {
 					event.preventDefault();
@@ -108,86 +118,15 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 			}
 			// edit folder
 			fh.ondblclick = function(event) {
-				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("folder_title") || event.target.classList.contains("folder_header"))) {
+				// if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("folder_title") || event.target.classList.contains("folder_header"))) {
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("folder_header")) {
 				// if (event.which == 1) {
 					// ShowRenameFolderDialog(this.parentNode.id);
 					ActionClickFolder(this.parentNode, opt.dbclick_folder);
 				}
 			}
 			fh.ondragstart = function(event) { // DRAG START
-				event.stopPropagation();
-				event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-				event.dataTransfer.setData("text", "");
-				// event.dataTransfer.setData("TTSourceWindowId", CurrentWindowId);
-				CleanUpDragClasses();
-				EmptyDragAndDrop();
-			
-				if (opt.debug) console.log("started dragging folder");
-				if (opt.debug) console.log(DragAndDrop.DragNodeClass);
-				
-				DropTargetsFront(this, true, false);
-
-				if (this.parentNode.classList.contains("selected_folder") == false) {
-					if (opt.debug) console.log(this.parentNode.classList);
-					document.querySelectorAll(".selected_folder").forEach(function(s){
-						s.classList.add("selected_folder_frozen");
-						s.classList.remove("selected_folder");
-					});
-					this.parentNode.classList.add("selected_folder_temporarly");
-					this.parentNode.classList.add("selected_folder");
-				} else {
-					document.querySelectorAll(".group:not(#"+active_group+") .selected_folder").forEach(function(s){
-						s.classList.add("selected_folder_frozen");
-						s.classList.remove("selected_folder");
-					});
-				}
-				RemoveHeadersHoverClass();
-				// let test_data = [];
-				document.querySelectorAll("[id='"+this.parentNode.id+"'], [id='"+this.parentNode.id+"'] .folder, [id='"+this.parentNode.id+"'] .tab").forEach(function(s){
-					s.classList.add("dragged_tree");
-				});
-				document.querySelectorAll(".selected_tab, .selected_tab .tab, .selected_folder, .selected_folder .folder").forEach(function(s){
-					s.classList.add("dragged_selected");
-					// test_data.push(s.id);
-				});
-				let Folders = GetSelectedFolders();
-				
-				document.querySelectorAll("[id='"+this.parentNode.id+"'], [id='"+this.parentNode.id+"'] .folder, [id='"+this.parentNode.id+"'] .tab").forEach(function(s){
-					s.classList.add("dragged_tree");
-				});
-				document.querySelectorAll(".selected_tab, .selected_tab .tab, .selected_folder, .selected_folder .folder").forEach(function(s){
-					s.classList.add("dragged_selected");
-				});
-
-				if (opt.max_tree_drag_drop_folders) {
-					document.querySelectorAll(".dragged_tree .folder").forEach(function(s){
-						let parents = GetParentsByClass(s.parentNode, "dragged_tree");
-						if (parents.length > DragAndDrop.Depth) {
-							DragAndDrop.Depth = parents.length;
-						}
-					});
-				} else {
-					DragAndDrop.Depth = -1;
-				}
-					
-				DragAndDrop.DragNodeClass = "folder";
-				DragAndDrop.TabsIds = Object.assign([], Folders.TabsIds);
-				DragAndDrop.TabsIdsParents = Object.assign([], Folders.TabsIdsParents);
-				DragAndDrop.Folders = Object.assign({}, Folders.Folders);
-				DragAndDrop.FoldersSelected = Object.assign([], Folders.FoldersSelected);
-				DragAndDrop.ComesFromWindowId = CurrentWindowId;
-				
-				chrome.runtime.sendMessage({
-					command: "drag_drop",
-					DragNodeClass: DragAndDrop.DragNodeClass,
-					TabsIds: DragAndDrop.TabsIds,
-					TabsIdsParents: DragAndDrop.TabsIdsParents,
-					TabsIdsSelected: DragAndDrop.TabsIdsSelected,
-					ComesFromWindowId: CurrentWindowId,
-					Depth: DragAndDrop.Depth,
-					Folders: DragAndDrop.Folders,
-					FoldersSelected: DragAndDrop.FoldersSelected
-				});
+				FolderStartDrag(this, event);
 			}
 			fh.ondragenter = function(event) {
 				this.classList.remove("folder_header_hover");
@@ -204,34 +143,27 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents) {
 					this.classList.remove("close_show");
 				}
 			}
-			dc.ondragenter = function(event) {
-				// DRAGENTER PIN,TAB,FOLDER==>DROP ZONES
-				DragAndDrop.timeout = false;
+			fh.ondragleave = function(event) {
+				RemoveHighlight();
+			}
+			fh.ondragover = function(event) {
+				FolderDragOver(this, event);
+			}
+			
+			fh.ondragenter = function(event) {
+				DragOverTimer = false;
 				setTimeout(function() {
-					DragAndDrop.timeout = true;
+					DragOverTimer = true;
 				}, 1000);
-				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
-					HighlightDragEnter(this, 0, "folder");
-				}
 			}
-			du.ondragenter = function(event) {
-				// FOLDER==>FOLDER
-				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
-					HighlightDragEnter(this, 1, "folder");
-				}
-			}
-			dd.ondragenter = function(event) {
-				// FOLDER==>FOLDER
-				if (DragAndDrop.DragNodeClass == "tab" || DragAndDrop.DragNodeClass == "folder") {
-					HighlightDragEnter(this, 1, "folder");
-				}
-			}
+			
 			ex.onmousedown = function(event) {
+				event.stopPropagation();
 				if (document.getElementById("main_menu").style.top != "-1000px") {
 					HideMenus();
 				}
 				// EXPAND/COLLAPSE FOLDER
-				if (event.which == 1 && !event.shiftKey && !event.ctrlKey) {
+				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target == this) {
 					event.stopPropagation();
 					EventExpandBox(this.parentNode.parentNode);
 					RefreshExpandStates();
@@ -258,7 +190,7 @@ function GenerateNewFolderID() {
 
 function AppendFolders(Folders) {
 	for (var folderId in Folders) {
-		AppendFolder(folderId, Folders[folderId].name, Folders[folderId].parent, Folders[folderId].expand, true);
+		AppendFolder(folderId, Folders[folderId].name, Folders[folderId].parent, Folders[folderId].expand, true, undefined);
 	}
 	for (var folderId in Folders) {
 		let f = document.getElementById(folderId);
@@ -283,13 +215,9 @@ function RearrangeFolders(first_loop) {
 		if (bgfolders[s.id] && s.parentNode.childNodes[bgfolders[s.id].index]) {
 			let Ind = Array.from(s.parentNode.children).indexOf(s);
 			if (Ind > bgfolders[s.id].index) {
-				s.parentNode.childNodes[bgfolders[s.id].index].parentNode.insertBefore(s, s.parentNode.childNodes[bgfolders[s.id].index]);
+				InsterBeforeNode(s, s.parentNode.childNodes[bgfolders[s.id].index]);
 			} else {
-				if (s.parentNode.childNodes[bgfolders[s.id].index].nextSibling != null) {
-					s.parentNode.childNodes[bgfolders[s.id].index].parentNode.insertBefore(s, s.parentNode.childNodes[bgfolders[s.id].index].nextSibling);
-				} else {
-					s.parentNode.childNodes[bgfolders[s.id].index].parentNode.appendChild(s);
-				}				
+				InsterAfterNode(s, s.parentNode.childNodes[bgfolders[s.id].index]);
 			}
 		}
 		let newInd = Array.from(s.parentNode.children).indexOf(s);
@@ -302,25 +230,25 @@ function RearrangeFolders(first_loop) {
 function RemoveFolder(FolderId) {
 	let folder = document.getElementById(FolderId);
 	if (folder != null) {
-		let CF = folder.childNodes[4]; // CF stands for DIV with children folders
-		let CT = folder.childNodes[5]; // CT stands for DIV with children tabs
+		let CF = folder.childNodes[1]; // CF stands for DIV with children folders
+		let CT = folder.childNodes[2]; // CT stands for DIV with children tabs
 		if (opt.promote_children == true) {
 			if (opt.promote_children_in_first_child == true && CF.children.length > 0) {
 				let FirstFolderChild = CF.firstChild;
 				folder.parentNode.insertBefore(FirstFolderChild, folder);
-				let NewCF = FirstFolderChild.childNodes[4];
+				let NewCF = FirstFolderChild.childNodes[1];
 				while (CF.firstChild) {
 					NewCF.appendChild(CF.firstChild);
 				}
 				if (CT.childNodes.length > 0) {
-					let NewCT = FirstFolderChild.childNodes[5];
+					let NewCT = FirstFolderChild.childNodes[2];
 					while (CT.firstChild) {
 						NewCT.appendChild(CT.firstChild);
 					}
 				}
 			} else {
 				let NewCT = document.getElementById("ct"+folder.parentNode.parentNode.id);
-				// let NewCT = folder.parentNode.parentNode.childNodes[5];
+				// let NewCT = folder.parentNode.parentNode.childNodes[2];
 				while (CT.firstChild) {
 					NewCT.appendChild(CT.firstChild);
 				}
@@ -344,15 +272,15 @@ function RemoveFolder(FolderId) {
 	}
 }
 
-function SetActiveFolder(FolderId) {
-	let folder = document.getElementById(FolderId);
-	if (folder != null) {
-		document.querySelectorAll(".selected_folder").forEach(function(s){
-			s.classList.remove("selected_folder");
-		});
-		folder.classList.add("selected_folder");
-	}
-}
+// function SetActiveFolder(FolderId) {
+	// let folder = document.getElementById(FolderId);
+	// if (folder != null) {
+		// document.querySelectorAll(".selected_folder").forEach(function(s){
+			// s.classList.remove("selected_folder");
+		// });
+		// folder.classList.add("selected_folder");
+	// }
+// }
 
 function ShowRenameFolderDialog(FolderId) { // Rename folder popup
 	HideRenameDialogs();
@@ -363,7 +291,8 @@ function ShowRenameFolderDialog(FolderId) { // Rename folder popup
 		folderEditDialog.setAttribute("FolderId", FolderId);
 		folderEditDialog.style.display = "block";
 		folderEditDialog.style.top = document.getElementById("toolbar").getBoundingClientRect().height + document.getElementById("pin_list").getBoundingClientRect().height + 8 + "px";
-		folderEditDialog.style.left = "22px";
+		// folderEditDialog.style.left = "22px";
+		folderEditDialog.style.left = "";
 		setTimeout(function(){
 			document.getElementById("folder_edit_name").select();
 		},5);
@@ -392,7 +321,7 @@ function ActionClickFolder(FolderNode, bgOption) {
 		ShowRenameFolderDialog(FolderNode.id);
 	}
 	if (bgOption == "new_folder") {
-		AddNewFolder(FolderNode.id, undefined, undefined, undefined);
+		AddNewFolder(undefined, FolderNode.id, undefined, undefined, undefined, undefined, true);
 	}
 	if (bgOption == "new_tab") {
 		OpenNewTab(false, FolderNode.id);
@@ -412,3 +341,122 @@ function ActionClickFolder(FolderNode, bgOption) {
 	}
 }
 
+function FolderStartDrag(Node, event) {
+	event.stopPropagation();
+	event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+	event.dataTransfer.setData("text", "");
+	event.dataTransfer.setData("SourceWindowId", CurrentWindowId);
+	CleanUpDragClasses();
+	EmptyDragAndDrop();
+
+	if (opt.debug) console.log("started dragging folder");
+	
+	DragNodeClass = "folder";
+	
+	let TabsIds = [];
+	let TabsIdsParents = [];
+	
+	let Folders = {};
+	let FoldersSelected = [];
+
+
+	if (Node.parentNode.classList.contains("selected_folder")) {
+		document.querySelectorAll(".group:not(#"+active_group+") .selected_folder").forEach(function(s){
+			s.classList.add("selected_folder_frozen");
+			s.classList.remove("selected_folder");
+		});
+	} else {
+		if (opt.debug) console.log(Node.parentNode.classList);
+		FreezeSelected();
+		Node.parentNode.classList.add("selected_folder_temporarly");
+		Node.parentNode.classList.add("selected_folder");
+	}
+	
+	RemoveHeadersHoverClass();
+	
+	document.querySelectorAll("[id='"+Node.parentNode.id+"'], [id='"+Node.parentNode.id+"'] .folder, [id='"+Node.parentNode.id+"'] .tab").forEach(function(s){
+		s.classList.add("dragged_tree");
+	});
+
+	if (opt.max_tree_drag_drop_folders) {
+		document.querySelectorAll(".dragged_tree .folder").forEach(function(s){
+			let parents = GetParentsByClass(s.parentNode, "dragged_tree");
+			if (parents.length > DragTreeDepth) {
+				DragTreeDepth = parents.length;
+			}
+		});
+	} else {
+		DragTreeDepth = -1;
+	}
+
+	// REST OF SELECTED FOLDERS+TABS THAT WILL BE DRAGGED
+	document.querySelectorAll(".selected_folder, .selected_folder .tab, .selected_folder .folder").forEach(function(s){
+		s.classList.add("dragged_tree");
+	});
+
+	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
+		FoldersSelected.push(s.id);
+		Folders[s.id] = Object.assign({}, bgfolders[s.id]);
+		let Fchildren = document.querySelectorAll("#cf"+s.id+" .folder");
+		Fchildren.forEach(function(fc){
+			Folders[fc.id] = Folders[fc.id] = Object.assign({}, bgfolders[fc.id]);
+		});
+		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
+		Tchildren.forEach(function(tc){
+			TabsIds.push(parseInt(tc.id));
+			TabsIdsParents.push(tc.parentNode.id);
+		});
+	});
+
+	event.dataTransfer.setData("TabsIds", JSON.stringify(TabsIds));
+	event.dataTransfer.setData("TabsIdsParents", JSON.stringify(TabsIdsParents));
+
+	event.dataTransfer.setData("Folders", JSON.stringify(TabsIds));
+	event.dataTransfer.setData("FoldersSelected", JSON.stringify(FoldersSelected));
+	
+	chrome.runtime.sendMessage({
+		command: "drag_drop",
+		DragNodeClass: "folder",
+		DragTreeDepth: DragTreeDepth
+	});	
+}
+
+function FolderDragOver(Node, event) {
+	if (Node.parentNode.classList.contains("dragged_tree") == false) {
+
+		let P = (GetParentsByClass(Node, "folder")).length + DragTreeDepth;
+		let PGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
+	
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop_folders == false)) {
+			RemoveHighlight();
+			Node.parentNode.classList.remove("inside");
+			Node.parentNode.classList.remove("after");
+			Node.parentNode.classList.add("before");
+			Node.parentNode.classList.add("highlighted_drop_target");
+		}
+		
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth || opt.max_tree_depth<0 || opt.max_tree_drag_drop_folders == false)) {
+			RemoveHighlight();
+			Node.parentNode.classList.remove("before");
+			Node.parentNode.classList.remove("after");
+			Node.parentNode.classList.add("inside");
+			Node.parentNode.classList.add("highlighted_drop_target");
+		}
+		
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop_folders == false)) {
+			RemoveHighlight();
+			Node.parentNode.classList.remove("inside");
+			Node.parentNode.classList.remove("before");
+			Node.parentNode.classList.add("after");
+			Node.parentNode.classList.add("highlighted_drop_target");
+		}
+		
+		if (DragNodeClass == "tab" && Node.parentNode.classList.contains("inside") == false && (P <= opt.max_tree_depth || opt.max_tree_depth<0 || opt.max_tree_drag_drop_folders == false)) {
+			RemoveHighlight();
+			Node.parentNode.classList.remove("before");
+			Node.parentNode.classList.remove("after");
+			Node.parentNode.classList.add("inside");
+			Node.parentNode.classList.add("highlighted_drop_target");
+		}
+	}
+}

@@ -3,6 +3,28 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 
+function AppendToNode(Node, AppendNode) {
+	if (Node != null && AppendNode != null) {
+		AppendNode.appendChild(Node);
+	}
+}
+
+function InsterBeforeNode(Node, BeforeNode) {
+	if (Node != null && BeforeNode != null) {
+		BeforeNode.parentNode.insertBefore(Node, BeforeNode);
+	}
+}
+
+function InsterAfterNode(Node, AfterNode) {
+	if (Node != null && AfterNode != null) {
+		if (AfterNode.nextSibling != null) {
+			AfterNode.parentNode.insertBefore(Node, AfterNode.nextSibling);
+		} else {
+			AfterNode.parentNode.appendChild(Node);
+		}
+	}
+}
+
 function HideRenameDialogs() {
 	document.querySelectorAll(".edit_dialog").forEach(function(s){
 		s.style.display = "none";
@@ -33,6 +55,18 @@ function GetParentsBy2Classes(Node, ClassA, ClassB) {
 	return Parents;
 }
 
+// color in format "rgb(r,g,b)" or simply "r,g,b" (can have spaces, but must contain "," between values)
+function RGBtoHex(color){
+	color = color.replace(/[rgb(]|\)|\s/g, ""); color = color.split(","); return color.map(function(v){ return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
+}
+
+function HexToRGB(hex, alpha){
+	hex = hex.replace('#', '');
+	let r = parseInt(hex.length == 3 ? hex.slice(0, 1).repeat(2) : hex.slice(0, 2), 16);
+	let g = parseInt(hex.length == 3 ? hex.slice(1, 2).repeat(2) : hex.slice(2, 4), 16);
+	let b = parseInt(hex.length == 3 ? hex.slice(2, 3).repeat(2) : hex.slice(4, 6), 16);
+	if (alpha) { return 'rgba('+r+', '+g+', '+b+', '+alpha+')'; } else { return 'rgb('+r+', '+g+', '+b+')'; }
+}
 
 function GetSelectedFolders() {
 	if (opt.debug) console.log("function: GetSelectedFolders");

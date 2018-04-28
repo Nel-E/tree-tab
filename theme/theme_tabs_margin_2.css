@@ -1,35 +1,28 @@
 body {
-	/* vertical */
-	--margin_top_first_tab: 1px;
-	--margin_top_tab: 1px;
+	/* TABS */
+	--margin_tab_top: 1px;
+	--margin_tab_bottom: 0px;
+	--margin_tab_left: 1px;
+	--margin_tab_right: 1px;
 	
-	/* drag_bottom bottom vertical */
+	/* drag_enter top, bottom */
+	--tab_drag_entered_top: -1px;
 	--tab_drag_entered_bottom: -1px;
 	
-	/* drag_top vertical */
-	--tab_drag_entered_top: -1px;
+	/* PINS */
+	--pin_margin_left: 1px;
+	--pin_last_margin_right: 1px;
+	--pin_margin_bottom: 1px;
 
-	/* horizontal */
-	--tab_header_left: 1px;
-	--tab_header_width: calc(100% - 4px);
+	/* drag_enter left, right */
+	--pin_drag_entered_top_left: -1px;
+	--pin_drag_entered_bottom_right: -1px;
 
-	/* drag_enter horizontal */
-	--tab_drag_enter_center_left: 1px;
-	--tab_drag_enter_center_width: calc(100% - 4px);
-
-	/* drag_top_bottom left */
-	--tab_drag_entered_left: 1px;
-	--tab_drag_entered_tb_width: calc(100% - 2px);
-
+	/* PIN LIST */
 	--pin_list_padding_top: 1px;
 	--pin_list_padding_bottom: 0px;
 	--pin_list_padding_left: 0px;
 	
-	--pin_margin_left: 1px;
-	--pin_last_margin_right: 1px;
-	--pin_margin_bottom: 1px;
-	
-	
-	--pin_drag_entered_top_left: -1px;
-	--pin_drag_entered_bottom_right: calc(50% - 1px);
+	--group_folders_top: -1px;
+	--group_tabs_top: -1px;
 }

@@ -4,8 +4,9 @@
 
 // **********          REFRESH GUI          ***************
 
-function RefreshGUI() {
+async function RefreshGUI() {
 	let toolbar = document.getElementById("toolbar");
+	let toolbarHeight = 27;
 	if (toolbar.children.length > 0) {
 		toolbar.style.height = "";
 		toolbar.style.width = "";
@@ -14,21 +15,27 @@ function RefreshGUI() {
 		toolbar.style.padding = "";
 		if (document.querySelector(".on.button") != null) {
 			toolbar.style.height = "53px";
+			toolbarHeight = 54;
 		} else {
 			toolbar.style.height = "26px";
 		}
 	} else {
 		toolbar.style.height = "0px";
+		toolbarHeight = 0;
 		toolbar.style.width = "0px";
 		toolbar.style.display = "none";
 		toolbar.style.border = "none";
 		toolbar.style.padding = "0";
 	}
+	
+	let group_list = document.getElementById("group_list");
+	group_list.style.width = document.body.clientWidth + 50 + "px";
+	
 	let pin_list = document.getElementById("pin_list");
 	if (pin_list.children.length > 0) {
-		pin_list.style.top = toolbar.getBoundingClientRect().height + "px";
+		pin_list.style.top = toolbarHeight + "px";
 		pin_list.style.height = "";
-		pin_list.style.width = document.body.clientWidth + "px";;
+		pin_list.style.width = "";
 		pin_list.style.display = "";
 		pin_list.style.border = "";
 		pin_list.style.padding = "";
@@ -40,9 +47,13 @@ function RefreshGUI() {
 		pin_list.style.border = "none";
 		pin_list.style.padding = "0";
 	}
+	let pin_listHeight = pin_list.getBoundingClientRect().height;
+
 	let toolbar_groups = document.getElementById("toolbar_groups");
-	toolbar_groups.style.top = toolbar.getBoundingClientRect().height + pin_list.getBoundingClientRect().height + "px";
-	toolbar_groups.style.height = document.body.clientHeight - toolbar.getBoundingClientRect().height - pin_list.getBoundingClientRect().height + "px";
+	toolbar_groups.style.top = toolbarHeight + pin_listHeight + "px";
+	toolbar_groups.style.height = document.body.clientHeight - toolbarHeight - pin_listHeight + "px";
+	let toolbar_groupsWidth = toolbar_groups.getBoundingClientRect().width;
+
 	if (opt.show_counter_groups) {
 		document.querySelectorAll(".group").forEach(function(s){
 			let groupLabel = document.getElementById("_gte"+s.id);
@@ -62,10 +73,62 @@ function RefreshGUI() {
 		s.style.height = s.firstChild.getBoundingClientRect().height + "px";
 	});
 	let groups = document.getElementById("groups");
-	groups.style.top = toolbar.getBoundingClientRect().height + pin_list.getBoundingClientRect().height + "px";
-	groups.style.left = toolbar_groups.getBoundingClientRect().width + "px";
-	groups.style.height = document.body.clientHeight - pin_list.getBoundingClientRect().height - toolbar.getBoundingClientRect().height + "px";
-	groups.style.width = document.body.clientWidth - toolbar_groups.getBoundingClientRect().width + 1 + "px";
+	let groupsHeight = document.body.clientHeight - toolbarHeight - pin_listHeight;
+
+	groups.style.top = toolbarHeight + pin_listHeight + "px";
+	groups.style.left = toolbar_groupsWidth + "px";
+	groups.style.height = groupsHeight + "px";
+	groups.style.width = (document.body.clientWidth - toolbar_groupsWidth - 1) + "px";
+
+
+
+	let ManagerWindow = document.getElementById("manager_window");
+	
+	let ManagerWindowGroupsList = document.getElementById("manager_window_groups_list");
+	let ManagerWindowGroupsListHeight = 8 + ManagerWindowGroupsList.children.length * 18;
+	
+
+	let ManagerWindowSessionsList = document.getElementById("manager_window_sessions_list");
+	let ManagerWindowSessionsListHeight = 8 + ManagerWindowSessionsList.children.length * 18;
+	
+	// let total = ManagerWindowGroupsListHeight + ManagerWindowSessionsListHeight;
+	// if (total > document.body.clientHeight - 200) {
+		// let cut = (total - (document.body.clientHeight - 200))/2;
+		// ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight - cut + "px";
+		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight - cut + "px";
+	// } else {
+		// ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight + "px";
+		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
+		
+	// }
+	// ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
+
+
+	if (ManagerWindowGroupsListHeight > document.body.clientHeight - 300) {
+		ManagerWindowGroupsList.style.height = document.body.clientHeight - 300 + "px";
+	} else {
+		ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight + "px";
+	}
+	
+	if (ManagerWindowSessionsListHeight > document.body.clientHeight - 300) {
+		ManagerWindowSessionsList.style.height = document.body.clientHeight - 300 + "px";
+	} else {
+		ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
+	}
+	
+	
+	
+	ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
+
+
+
+
+
+
+
+
+	
+	
 }
 
 // set discarded class
@@ -119,7 +182,7 @@ function RefreshMediaIcon(tabId) {
 // Vivaldi does not have changeInfo.audible listener, this is my own implementation, hopefully this will not affect performance too much
 function VivaldiRefreshMediaIcons() {
 	setInterval(function() {
-		chrome.tabs.query({currentWindow: true}, function(tabs) {
+		chrome.tabs.query({currentWindow: true, audible: true}, function(tabs) {
 			document.querySelectorAll(".audible, .muted").forEach(function(s){
 				s.classList.remove("audible");
 				s.classList.remove("muted");
@@ -134,17 +197,16 @@ function VivaldiRefreshMediaIcons() {
 				}
 			}
 		});
-	// }, 1400);
-	}, 1000);
+	}, 2000);
 }
 
-function GetFaviconAndTitle(tabId, addCounter) {
+async function GetFaviconAndTitle(tabId, addCounter) {
 	let t = document.getElementById(tabId);
 	if (t != null) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab){
 				let title = tab.title ? tab.title : tab.url;
-				let tHeader = t.childNodes[3];
+				let tHeader = t.childNodes[0];
 				let tTitle = tHeader.childNodes[1];
 				if (tab.status == "complete") {
 					t.classList.remove("loading");
@@ -193,9 +255,9 @@ function GetFaviconAndTitle(tabId, addCounter) {
 }
 
 // refresh open closed trees states
-function RefreshExpandStates() {
+async function RefreshExpandStates() {
 	document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
-		if (s.childNodes[4].children.length == 0 && s.childNodes[5].children.length == 0) {
+		if (s.childNodes[1].children.length == 0 && s.childNodes[2].children.length == 0) {
 			s.classList.remove("o");
 			s.classList.remove("c");
 		} else {
@@ -205,7 +267,7 @@ function RefreshExpandStates() {
 		}
 	});
 	document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
-		if (s.childNodes[4].children.length == 0) {
+		if (s.childNodes[1].children.length == 0) {
 			s.classList.remove("o");
 			s.classList.remove("c");
 		} else {
@@ -216,52 +278,53 @@ function RefreshExpandStates() {
 	});
 }
 
-function RefreshCounters() {
+async function RefreshCounters() {
 	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
 		document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
-			let title = s.childNodes[3].getAttribute("tabTitle");
+			let title = s.childNodes[0].getAttribute("tabTitle");
 			if (title != null) {
-				s.childNodes[3].title = title;
-				s.childNodes[3].childNodes[1].textContent =title;
+				s.childNodes[0].title = title;
+				s.childNodes[0].childNodes[1].textContent =title;
 			}
 		});
 		document.querySelectorAll("#"+active_group+" .o.tab, #"+active_group+" .c.tab").forEach(function(s){
-			let title = s.childNodes[3].getAttribute("tabTitle");
-
+			let title = s.childNodes[0].getAttribute("tabTitle");
 			if (opt.show_counter_tabs && title != null) {
-				s.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
+				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
 			}
 			if (opt.show_counter_tabs_hints) {
-				s.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
+				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
 			}
 		});
 		
 		
 		document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
 			if (opt.show_counter_tabs && bgfolders[s.id]) {
-				s.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
+				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
 			}
 			if (opt.show_counter_tabs_hints && bgfolders[s.id]) {
-				s.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
+				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
 			}
 		});
 	}
 }
 
-function RefreshTabCounter(tabId) {
+async function RefreshTabCounter(tabId) {
 	let t = document.getElementById(tabId);
-	let title = t.childNodes[3].getAttribute("tabTitle");
-	if (t != null && title != null) {
-		if (t.classList.contains("o") || t.classList.contains("c")) {
-			if (opt.show_counter_tabs) {
-				t.childNodes[3].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
+	if (t.childNodes[0]) {
+		let title = t.childNodes[0].getAttribute("tabTitle");
+		if (t != null && title != null) {
+			if (t.classList.contains("o") || t.classList.contains("c")) {
+				if (opt.show_counter_tabs) {
+					t.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
+				}
+				if (opt.show_counter_tabs_hints) {
+					t.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
+				}
+			} else {
+					t.childNodes[0].title = title;
+					t.childNodes[0].childNodes[1].textContent = title;
 			}
-			if (opt.show_counter_tabs_hints) {
-				t.childNodes[3].title = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
-			}
-		} else {
-				t.childNodes[3].title = title;
-				t.childNodes[3].childNodes[1].textContent = title;
 		}
 	}
 }

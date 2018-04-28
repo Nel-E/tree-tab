@@ -2,7 +2,6 @@ body {
 	
 	--scrollbar_height: 4px;
 	--scrollbar_width: 16px;
-	--button_size: 22px;
 	
 	--pin_width: 22px;
 	--pin_height: 22px;
@@ -28,14 +27,11 @@ body {
 	--expand_mask_height: 4px;
 	--expand_mask_width: 4px;
 
-	--drag_area_top: 6px;
-	--drag_area_bottom: 4px;
-
 	--children_padding_left: 5px;
 	--close_top: 1px;
-	--close_right: 1px;
-	--close_height: 11px;
-	--close_width: 11px;
+	--close_right: 0px;
+	--close_height: 12px;
+	--close_width: 12px;
 	
 	--tab_mediaicon_height: 8px;
 	--tab_mediaicon_width: 8px;

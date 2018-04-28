@@ -52,7 +52,7 @@ function AppendSampleTabs() {
 	document.getElementById("tab_title17").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_hover");
 	document.getElementById("tab_header17").classList.add("tab_header_hover");
 
-	AppendTab({id: 19, pinned: false, discarded: true}, "5", false, false, true, false, false, "selected_tab", false, false, false);
+	AppendTab({id: 19, pinned: false, discarded: true}, "5", false, false, true, false, false, "selected_tab highlighted_drop_target after", false, false, false);
 	document.getElementById("tab_title19").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected");
 	
 	AppendTab({id: 20, pinned: false, discarded: true}, "5", false, false, true, false, false, "selected_tab", false, false, false);
@@ -121,6 +121,11 @@ function AppendSampleTabs() {
 	document.getElementById("tab_title37").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_active_hover");
 	document.getElementById("tab_header37").classList.add("tab_header_hover");
 
+	AddNewFolder("f_folder1", "cftab_list", caption_noname_group, 0, "o", "o", false);
+	AddNewFolder("f_folder2", "f_folder1", caption_noname_group, 0, "c", "c", false);
+	AddNewFolder("f_folder3", "f_folder1", caption_noname_group, 0, "c", "c", false);
+	
+	
 	document.getElementById("_tab_list").classList.add("active_group");
 	
 }

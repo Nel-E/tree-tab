@@ -5,6 +5,7 @@
 // **********         CHROME EVENTS         ***************
 
 function StartChromeListeners() {
+
 	if (browserId == "F") {
 		browser.browserAction.onClicked.addListener(function(tab) {
 			if (tab.windowId == CurrentWindowId) {
@@ -12,62 +13,73 @@ function StartChromeListeners() {
 			}
 		});
 	}
+
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+
 		if (message.command == "backup_available") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			document.getElementById("button_load_bak"+message.bak).classList.remove("disabled");
+			let BAKbutton = document.getElementById("button_load_bak"+message.bak);
+			if (BAKbutton != null) {
+				BAKbutton.classList.remove("disabled");
+			}
 		}
+
 		if (message.command == "drag_drop") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			if (opt.debug) console.log(message);
-			DragAndDrop.ComesFromWindowId = message.ComesFromWindowId;
-			DragAndDrop.DragNodeClass = message.DragNodeClass;
-			DragAndDrop.Depth = message.Depth;
-			DragAndDrop.Folders = Object.assign({}, message.Folders);
-			DragAndDrop.FoldersSelected = message.FoldersSelected;
-			DragAndDrop.TabsIds = message.TabsIds;
-			DragAndDrop.TabsIdsParents = message.TabsIdsParents;
-			DragAndDrop.TabsIdsSelected = message.TabsIdsSelected;
-			DropTargetsFront(undefined, true, false);
+
+			CleanUpDragClasses();
+			DragNodeClass = message.DragNodeClass;
+			DragTreeDepth = Object.assign(0, message.DragTreeDepth);
+			
+			if (opt.debug) console.log(DragAndDrop);
 		}
-		if (message.command == "dropped") {
-			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			if (opt.debug) console.log(message);
-			DragAndDrop.DroppedToWindowId = message.DroppedToWindowId;
-			if (Object.keys(DragAndDrop.Folders).length > 0 && message.DroppedToWindowId != CurrentWindowId) {
-				for (var folder in DragAndDrop.Folders)
-				{
-					RemoveFolder(DragAndDrop.Folders[folder].id);
-				}
-			}
-		}
+
 		if (message.command == "dragend") {
 			CleanUpDragClasses();
+			EmptyDragAndDrop();
 		}
+
+		if (message.command == "remove_folder") {
+			RemoveFolder(message.folderId);
+		}
+
 		if (message.command == "reload_sidebar") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
 			if (opt.debug) console.log(message);
 			window.location.reload();
 		}
+
 		if (message.command == "reload_options") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			chrome.runtime.sendMessage({command: "get_preferences"}, function(response) {
-				opt = Object.assign({}, response);
-				setTimeout(function() {
-					RestorePinListRowSettings();
-			}, 200);
-			});
+			opt = Object.assign({}, message.opt);
+			setTimeout(function() {
+				RestorePinListRowSettings();
+			}, 100);
 		}
+
+		if (message.command == "reload_toolbar") {
+			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+			opt = Object.assign({}, message.opt);
+
+			if (opt.show_toolbar) {
+				RemoveToolbar();
+				RecreateToolbar(message.toolbar);
+				SetToolbarEvents(false, true, true, "mousedown");
+				RestoreToolbarShelf();
+				RestoreToolbarSearchFilter();
+			} else {
+				RemoveToolbar();
+			}
+			RefreshGUI();
+		}
+
 		if (message.command == "reload_theme") {
 			if (opt.debug) console.log("message to sidebar "+CurrentWindowId+": message: "+message.command);
-			setTimeout(function() {
-				chrome.runtime.sendMessage({command: "get_theme", windowId: CurrentWindowId}, function(response) {
-					RestorePinListRowSettings();
-					let theme = response;
-					ApplyTheme(theme);
-				});
-			}, 300);
+			RestorePinListRowSettings();
+			ApplyTheme(message.theme);
 		}
+
 		if (message.windowId == CurrentWindowId) {
 			
 			// I WANT TO MOVE THIS LOGIC TO THE BACKGROUND SCRIPT!
@@ -158,22 +170,26 @@ function StartChromeListeners() {
 					chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
 				}
 				RefreshExpandStates();
-				schedule_update_data++;
-				RefreshGUI();
-				RefreshCounters();
+				setTimeout(function() {
+					schedule_update_data++;
+				}, 500);
+				setTimeout(function() {
+					RefreshCounters();
+					RefreshGUI();
+				},50);
 				return;
 			}
 			if (message.command == "tab_attached") {
-				if (opt.debug) console.log(message);
+				if (opt.debug) console.log("tab_attached " + message.tabId + ", tab is pinned: " + message.tab.pinned + ", ParentId: "+ message.ParentId);
 				AppendTab(message.tab, message.ParentId, false, false, true, false, true, false, false, true, false);
 				RefreshGUI();
 				return;
 			}
 			if (message.command == "tab_detached") {
-				let ctDetachedParent = document.getElementById(message.tabId).childNodes[4];
+				let ctDetachedParent = document.getElementById(message.tabId).childNodes[1];
 				if (ctDetachedParent != null) {
 					if (opt.promote_children_in_first_child == true && ctDetachedParent.childNodes.length > 1) {
-						let ctNewParent = document.getElementById(ctDetachedParent.firstChild.id).childNodes[4];
+						let ctNewParent = document.getElementById(ctDetachedParent.firstChild.id).childNodes[1];
 						ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
 						while (ctDetachedParent.firstChild) {
 							ctNewParent.appendChild(ctDetachedParent.firstChild);
@@ -195,11 +211,11 @@ function StartChromeListeners() {
 				if (opt.debug) console.log("tab_removed: "+message.tabId);
 				let mTab = document.getElementById(message.tabId);
 				if (mTab != null) {
-					let ctParent = mTab.childNodes[4];
+					let ctParent = mTab.childNodes[1];
 					if (opt.debug) console.log("tab_removed, promote children: " +opt.promote_children);
 					if (opt.promote_children == true) {
 						if (opt.promote_children_in_first_child == true && ctParent.childNodes.length > 1) {
-							let ctNewParent = document.getElementById(ctParent.firstChild.id).childNodes[4];
+							let ctNewParent = document.getElementById(ctParent.firstChild.id).childNodes[1];
 							ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
 							while (ctParent.firstChild) {
 								ctNewParent.appendChild(ctParent.firstChild);
@@ -251,9 +267,15 @@ function StartChromeListeners() {
 				}
 				if (message.changeInfo.pinned != undefined) {
 					let updateTab = document.getElementById(message.tabId);
-					if (updateTab != null && ( (message.tab.pinned && updateTab.classList.contains("tab")) || (!message.tab.pinned && updateTab.classList.contains("pin")) )  ) {
-						SetTabClass(message.tabId, message.tab.pinned);
-						schedule_update_data++;
+					if (updateTab != null) {
+						if (message.tab.pinned && updateTab.classList.contains("pin") == false) {
+							SetTabClass(message.tabId, true);
+							schedule_update_data++;
+						}
+						if (!message.tab.pinned && updateTab.classList.contains("tab") == false) {
+							SetTabClass(message.tabId, false);
+							schedule_update_data++;
+						}
 					}
 					RefreshExpandStates();
 				}

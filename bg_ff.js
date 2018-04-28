@@ -2,18 +2,19 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
+
 if (browserId == "F") {
-	FirefoxStart(0);
-	FirefoxMessageListeners();
+	document.addEventListener("DOMContentLoaded", FirefoxStart(0), false);
 }
 function FirefoxStart(retry) {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
-		FirefoxLoadTabs(0);
 		if (w[0].tabs.length == 1 && (w[0].tabs[0].url == "about:blank" || w[0].tabs[0].url == "about:sessionrestore")) {
 			setTimeout(function() {
 				FirefoxStart(retry+1);
 			}, 2000);
 		} else {
+			FirefoxLoadTabs(0);
+			FirefoxMessageListeners();
 			if (retry > 0) {
 				chrome.runtime.sendMessage({command: "reload_sidebar"});
 			}
@@ -27,20 +28,10 @@ function FirefoxLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ["normal"], populate: true}, function(w) {
 		chrome.storage.local.get(null, function(storage) {
 			// LOAD PREFERENCES
-			opt = Object.assign({}, DefaultPreferences);
-			if (storage["preferences"]) {
-				for (var parameter in storage["preferences"]) {
-					if (opt[parameter] != undefined) {
-						opt[parameter] = storage["preferences"][parameter];
-					}
-				}
-			}
-			// LOAD THEME
-			if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
-				theme = storage["themes"][storage["current_theme"]];
-			} else {
-				theme = Object.assign({}, DefaultTheme);
-			}
+			GetCurrentPreferences(storage);
+
+			if (opt.debug) console.log("FirefoxLoadTabs, retry: ");
+			if (opt.debug) console.log(retry);
 			// CACHED COUNTS AND STUFF
 			// var tt_ids = {};
 			var tabs_matched = 0;
@@ -109,10 +100,27 @@ function FirefoxLoadTabs(retry) {
 								// will try to find tabs for 3 times
 								if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
 									running = true;
-									// setInterval(function() {
 									FirefoxAutoSaveData();
-									// }, 10000);
 									FirefoxListeners();
+									delete running;
+									delete schedule_update_data;
+									delete schedule_rearrange_tabs;
+									delete DragNodeClass;
+									delete DragOverTimer;
+									delete DragTreeDepth;
+									delete menuItemNode;
+									delete CurrentWindowId;
+									delete SearchIndex;
+									delete active_group;
+									delete browserId;
+									delete bggroups;
+									delete bgfolders;
+									delete caption_clear_filter;
+									delete caption_loading;
+									delete caption_searchbox;
+									delete DefaultToolbar;
+									delete DefaultTheme;
+									delete DefaultPreferences;
 								} else {
 									setTimeout(function() {
 										FirefoxLoadTabs(retry+1);
@@ -320,6 +328,24 @@ function FirefoxListeners() {
 		// delete windows[windowId];
 		schedule_save++;
 	});
+	chrome.sessions.onChanged.addListener(function(session) {
+		chrome.windows.getAll({windowTypes: ['normal'], populate: false}, function(w) {
+			chrome.tabs.query({}, function(t) {
+				for (var wiInd = 0; wiInd < w.length; wiInd++) {
+					if (windows[w[wiInd].id] == undefined) {
+						chrome.runtime.sendMessage({command: "reload_sidebar"});
+						window.location.reload();
+					}
+				}
+				for (var tbInd = 0; tbInd < t.length; tbInd++) {
+					if (tabs[t[tbInd].id] == undefined) {
+						chrome.runtime.sendMessage({command: "reload_sidebar"});
+						window.location.reload();
+					}
+				}
+			});
+		});
+	});
 }
 function FirefoxMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
@@ -327,15 +353,6 @@ function FirefoxMessageListeners() {
 		if (opt.debug) console.log(message);
 		if (message.command == "reload") {
 			window.location.reload();
-			return;
-		}
-		if (message.command == "get_preferences") {
-			sendResponse(opt);
-			return;
-		}
-		if (message.command == "save_preferences") {
-			opt = Object.assign({}, message.opt);
-			chrome.storage.local.set({preferences: message.opt});
 			return;
 		}
 		if (message.command == "get_windows") {
@@ -478,14 +495,6 @@ function FirefoxMessageListeners() {
 				}
 			}
 			schedule_save++;
-			return;
-		}
-		if (message.command == "get_theme") {
-			sendResponse(theme);
-			return;
-		}
-		if (message.command == "reload_theme") {
-			GetCurrentTheme();
 			return;
 		}
 	});

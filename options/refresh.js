@@ -25,11 +25,13 @@ function RefreshFields() {
 		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
 			s.style.display = "";
 		});
+		document.getElementById("options_toolbar_look").style.display = "";
 		document.getElementById("field_show_toolbar").style.height = "";
 	} else{
 		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
 			s.style.display = "none";
 		});
+		document.getElementById("options_toolbar_look").style.display = "none";
 		document.getElementById("field_show_toolbar").style.height = "6";
 	}
 }

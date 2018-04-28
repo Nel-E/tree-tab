@@ -2,17 +2,17 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-function ExportGroup(filename) {
+function ExportGroup(groupId, filename, save_to_manager) {
 	if (opt.debug) {
 		console.log("function: ExportGroup, filename "+filename);
 	}
-	let GroupToSave = { group: bggroups[active_group], folders: {}, tabs: [] };
-	document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
+	let GroupToSave = { group: bggroups[groupId], folders: {}, tabs: [] };
+	document.querySelectorAll("#"+groupId+" .folder").forEach(function(s){
 		if (bgfolders[s.id]) {
 			GroupToSave.folders[s.id] = bgfolders[s.id];
 		}
 	});
-	let Tabs = document.querySelectorAll("#"+active_group+" .tab");
+	let Tabs = document.querySelectorAll("#"+groupId+" .tab");
 	if (Tabs.length > 0) {
 		let lastId = parseInt(Tabs[Tabs.length-1].id);
 		Tabs.forEach(function(s){
@@ -28,75 +28,110 @@ function ExportGroup(filename) {
 						}
 					);
 				}
-				
 				if (tab.id == lastId) {
-					// if (opt.debug) {
-						// console.log(GroupToSave);
-					// }
-					SaveFile(filename, GroupToSave);
+					if (filename) {
+						SaveFile(filename, GroupToSave);
+					}
+					if (save_to_manager) {
+						AddGroupToStorage(GroupToSave, true);
+					}
 				}
 			});
 		});
 	}
 }
-function ImportGroup() {
+
+function ImportGroup(recreate_group, save_to_manager) {
 	let file = document.getElementById("file_import_group");
 	let fr = new FileReader();
 	if (file.files[0] == undefined) return;
 	fr.readAsText(file.files[0]);
 	fr.onload = function() {
 		let data = fr.result;
+		let group = JSON.parse(data);
+		// console.log(group);
 		file.parentNode.removeChild(file);
-		let LoadedGroup = JSON.parse(data);
-		let NewFolders = {};
-		let RefsTabs = {};
-		let NewTabs = [];
-		let NewGroupId = AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
-		SetActiveGroup(NewGroupId, false, false);
-		for (var folder in LoadedGroup.folders) {
-			let newId = GenerateNewFolderID();
-			NewFolders[folder] =  { id: newId, parent: NewGroupId, index: (LoadedGroup.folders[folder].index), name: (LoadedGroup.folders[folder].name), expand: (LoadedGroup.folders[folder].expand) };
+		if (recreate_group) {
+			RecreateGroup(group);
 		}
-		for (var folder in NewFolders) {
-			if (NewFolders[LoadedGroup.folders[folder].parent]) {
-				NewFolders[folder].parent = NewFolders[LoadedGroup.folders[folder].parent].id;
+		if (save_to_manager) {
+			AddGroupToStorage(group, true);
+		}
+	}
+}
+
+function AddGroupToStorage(group, add_to_manager) {
+	chrome.storage.local.get(null, function(storage) {
+		if (storage["hibernated_groups"] == undefined) {
+			let hibernated_groups = [];
+			hibernated_groups.push(group);
+			chrome.storage.local.set({hibernated_groups: hibernated_groups});
+			if (add_to_manager) {
+				AddGroupToManagerList(group);
+			}
+		} else {
+			let hibernated_groups = storage["hibernated_groups"];
+			hibernated_groups.push(group);
+			chrome.storage.local.set({hibernated_groups: hibernated_groups});
+			if (add_to_manager) {
+				AddGroupToManagerList(group);
 			}
 		}
-		(LoadedGroup.tabs).forEach(function(Tab){
-			chrome.tabs.create({url: Tab.url, active: false}, function(new_tab) {
-				if (new_tab) {
-					RefsTabs[Tab.id] = new_tab.id;
-					Tab.id = new_tab.id;
-					NewTabs.push(Tab);
-					setTimeout(function() {
-						let nt = document.getElementById(new_tab.id);
-						let NewGroupTabs = document.getElementById("ct"+NewGroupId);
-						if (nt != null && NewGroupTabs != null) {
-							NewGroupTabs.appendChild(nt);
-						}
-					}, 1000);
-				}
-				if (NewTabs.length == LoadedGroup.tabs.length-1) {
-					setTimeout(function() {
-						NewTabs.forEach(function(LTab) {
-							if (LTab.parent == LoadedGroup.group.id) {
-								LTab.parent = NewGroupId;
-							}
-							if (NewFolders[LTab.parent]) {
-								LTab.parent = NewFolders[LTab.parent].id;
-							}
-							if (RefsTabs[LTab.parent]) {
-								LTab.parent = RefsTabs[LTab.parent];
-							}
-						});
-						RearrangeTreeStructure({}, NewFolders, NewTabs);
-					}, 2000);
-				}
-			});
-		});
-	}	 
+	});
 }
-function ExportSession(filename) {
+
+
+function RecreateGroup(LoadedGroup) {
+	let NewFolders = {};
+	let RefsTabs = {};
+	let NewTabs = [];
+	let NewGroupId = AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
+	SetActiveGroup(NewGroupId, false, false);
+	for (var folder in LoadedGroup.folders) {
+		let newId = GenerateNewFolderID();
+		NewFolders[folder] =  { id: newId, parent: NewGroupId, index: (LoadedGroup.folders[folder].index), name: (LoadedGroup.folders[folder].name), expand: (LoadedGroup.folders[folder].expand) };
+	}
+	for (var folder in NewFolders) {
+		if (NewFolders[LoadedGroup.folders[folder].parent]) {
+			NewFolders[folder].parent = NewFolders[LoadedGroup.folders[folder].parent].id;
+		}
+	}
+	(LoadedGroup.tabs).forEach(function(Tab){
+		chrome.tabs.create({url: Tab.url, active: false}, function(new_tab) {
+			if (new_tab) {
+				RefsTabs[Tab.id] = new_tab.id;
+				Tab.id = new_tab.id;
+				NewTabs.push(Tab);
+				setTimeout(function() {
+					let nt = document.getElementById(new_tab.id);
+					let NewGroupTabs = document.getElementById("ct"+NewGroupId);
+					if (nt != null && NewGroupTabs != null) {
+						NewGroupTabs.appendChild(nt);
+					}
+				}, 1000);
+			}
+			if (NewTabs.length == LoadedGroup.tabs.length-1) {
+				setTimeout(function() {
+					NewTabs.forEach(function(LTab) {
+						if (LTab.parent == LoadedGroup.group.id) {
+							LTab.parent = NewGroupId;
+						}
+						if (NewFolders[LTab.parent]) {
+							LTab.parent = NewFolders[LTab.parent].id;
+						}
+						if (RefsTabs[LTab.parent]) {
+							LTab.parent = RefsTabs[LTab.parent];
+						}
+					});
+					RearrangeTreeStructure({}, NewFolders, NewTabs);
+				}, 2000);
+			}
+		});
+	});
+}
+
+
+function ExportSession(filename, save_to_manager) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 			let tabs = Object.assign({}, response);
@@ -120,54 +155,111 @@ function ExportSession(filename) {
 						ExportWindows.push(windows[CWin.id]);
 					}
 				});
-				SaveFile(filename, ExportWindows);
+				if (filename) {
+					SaveFile(filename, ExportWindows);
+				}
+				if (save_to_manager) {
+					// AddGroupToStorage(GroupToSave, true);
+				}
 			});
 		});
 	});
 }
-function ImportSession() {
+
+function ImportSession(recreate_session, save_to_manager) {
 	let file = document.getElementById("file_import_backup");
 	let fr = new FileReader();
 	if (file.files[0] == undefined) return;
 	fr.readAsText(file.files[file.files.length-1]);
+	
+	// console.log(  (file.files[file.files.length-1].name).replace(".tt_session", "")   );
+	
 	fr.onload = function() {
 		let data = fr.result;
 		file.parentNode.removeChild(file);
-		let LoadedWindows = JSON.parse(data);
-		let RefsTabs = {};
-		if (opt.debug) console.log(LoadedWindows);
-		LoadedWindows.forEach(function(LWin) {
-			let NewTabs = [];
-			let urls = [];
-			(LWin.tabs).forEach(function(Tab) {
-				urls.push(Tab.url);
-				NewTabs.push(Tab);
-			});
-			chrome.windows.create({url: urls}, function(new_window) {
-				for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
-					RefsTabs[NewTabs[tInd].id] = new_window.tabs[tInd].id;
-					NewTabs[tInd].id = new_window.tabs[tInd].id;
-				}
-				for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
-					if (RefsTabs[NewTabs[tInd].parent] != undefined) {
-						NewTabs[tInd].parent = RefsTabs[NewTabs[tInd].parent];
-					}					
-				}
-				let HaveResponse;
-				let GiveUp = 0;
-				var Append = setInterval(function() {
-					chrome.runtime.sendMessage({command: "remote_update", groups: LWin.groups, folders: LWin.folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
-						HaveResponse = response;
-					});
-					if (HaveResponse || GiveUp > 900) {
-						clearInterval(Append);
-					}
-					GiveUp++;
-				}, 2000);
-			});
-		});
+		
+		let LoadedSession = JSON.parse(data);
+		
+		if (recreate_session) {
+			RecreateSession(LoadedSession);
+		}
+		if (save_to_manager) {
+			AddSessionToStorage(LoadedSession, (file.files[file.files.length-1].name).replace(".tt_session", ""), true);
+		}
+		
+		
+		
 	}	 
 }
+
+function AddSessionToStorage(session, name, add_to_manager) {
+	chrome.storage.local.get(null, function(storage) {
+			if (opt.debug) {
+				console.log(storage);
+			}
+			
+			// let d = new Date();
+			// d.toLocaleString()
+			
+		if (storage.saved_sessions == undefined) {
+			let saved_sessions = [];
+			saved_sessions.push({name: name, session: session});
+			chrome.storage.local.set({saved_sessions: saved_sessions});
+			if (add_to_manager) {
+				AddSessionToManagerList(saved_sessions[saved_sessions.length-1]);
+			}
+		} else {
+			let saved_sessions = storage.saved_sessions;
+			saved_sessions.push({name: name, session: session});
+			
+			
+			chrome.storage.local.set({saved_sessions: saved_sessions});
+			if (add_to_manager) {
+				AddSessionToManagerList(saved_sessions[saved_sessions.length-1]);
+			}
+		}
+	});
+
+}
+
+
+
+function RecreateSession(LoadedSession) {
+	let RefsTabs = {};
+	if (opt.debug) console.log(LoadedSession);
+	LoadedSession.forEach(function(LWin) {
+		let NewTabs = [];
+		let urls = [];
+		(LWin.tabs).forEach(function(Tab) {
+			urls.push(Tab.url);
+			NewTabs.push(Tab);
+		});
+		chrome.windows.create({url: urls}, function(new_window) {
+			for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
+				RefsTabs[NewTabs[tInd].id] = new_window.tabs[tInd].id;
+				NewTabs[tInd].id = new_window.tabs[tInd].id;
+			}
+			for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
+				if (RefsTabs[NewTabs[tInd].parent] != undefined) {
+					NewTabs[tInd].parent = RefsTabs[NewTabs[tInd].parent];
+				}					
+			}
+			let HaveResponse;
+			let GiveUp = 0;
+			var Append = setInterval(function() {
+				chrome.runtime.sendMessage({command: "remote_update", groups: LWin.groups, folders: LWin.folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
+					HaveResponse = response;
+				});
+				if (HaveResponse || GiveUp > 900) {
+					clearInterval(Append);
+				}
+				GiveUp++;
+			}, 2000);
+		});
+	});
+}
+
+
 function RearrangeTreeStructure(groups, folders, tabs) { // groups and folders are in object, just like bggroups and bgfolders, but tabs are in array of bgtreetabs objects
 	if (opt.debug) console.log("function: RearrangeTreeStructure");
 	chrome.tabs.query({currentWindow: true}, function(ChromeTabs) {
@@ -209,6 +301,7 @@ function RearrangeTreeStructure(groups, folders, tabs) { // groups and folders a
 		}, 1000);
 	});
 }
+
 function ImportMergeTabs() {
 	if (opt.debug) console.log("function: ImportMergeTabs");
 	let file = document.getElementById("file_import_merge_backup");

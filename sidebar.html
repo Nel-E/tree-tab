@@ -64,6 +64,24 @@
 			<div class="edit_dialog_confirm" id="folder_edit_confirm"><span class="edit_dialog_button" id="folder_edit_button_confirm"></span></div>
 		</ul>
 	
+		<ul class="edit_dialog" id="manager_window">
+			<div id="manager_window_header"><div id="manager_window_header_title"></div><div id="manager_window_close"><div class="close_img"></div></div></div>
+			
+			<div id="manager_window_toolbar">   <div class="manager_window_toolbar_button mw_on" id="manager_window_toolbar_groups_button">Hibernated Groups</div>  <div class="manager_window_toolbar_button" id="manager_window_toolbar_sessions_button">Saved Sessions</div>   </div>
+			<div id="manager_window_groups_list_title">Hibernated Groups</div>
+			<div id="manager_window_groups_list"></div>
+			<div id="manager_window_sessions_list_title">Saved Sessions</div>
+			<div id="manager_window_sessions_list"></div>
+			
+		
+			<div id="groups_manager_lower_buttons">
+				<div class="edit_dialog_confirm" id="manager_window_button_import_group"><span class="edit_dialog_button" id="manager_window_button_label_import_group"></span></div>
+				<br>
+				<div class="edit_dialog_confirm" id="manager_window_button_import_session"><span class="edit_dialog_button" id="manager_window_button_label_import_session"></span></div>
+			</div>
+				
+		</ul>
+	
 		<ul class="menu" id="main_menu">
 			<li class="menu_item" id="menu_new_pin"></li>
 			<div class="separator" id="separator_newt"></div>
@@ -125,7 +143,11 @@
 			<div class="separator" id="separator_delgclo"></div>
 			<li class="menu_item" id="menu_delete_group_tabs_close"></li>
 			<div class="separator" id="separator_gunlo"></div>
-			<li class="menu_item" id="groups_menu_unload"></li>
+			<li class="menu_item" id="menu_groups_unload"></li>
+			<div class="separator" id="separator_ghmanagr"></div>
+			<li class="menu_item" id="menu_manager_window"></li>
+			<div class="separator" id="separator_ghiber"></div>
+			<li class="menu_item" id="menu_groups_hibernate"></li>
 			<div class="separator" id="separator_gbk"></div>
 			<li class="menu_item" id="menu_bookmark_group"></li>
 			<div class="separator" id="separator_tts"></div>
@@ -158,6 +180,7 @@
 		
 		<script type="text/javascript" src="../scripts/global.js"></script>
 		
+		<script type="text/javascript" src="../scripts/theme.js"></script>
 		<script type="text/javascript" src="../scripts/toolbar.js"></script>
 		<script type="text/javascript" src="../scripts/chrome.js"></script>
 		<script type="text/javascript" src="../scripts/refresh.js"></script>
@@ -168,6 +191,7 @@
 		<script type="text/javascript" src="../scripts/folders.js"></script>
 		<script type="text/javascript" src="../scripts/groups.js"></script>
 		<script type="text/javascript" src="../scripts/menu.js"></script>
+		<script type="text/javascript" src="../scripts/manager.js"></script>
 
 		<script type="text/javascript" src="sidebar.js"></script>
 		<script type="text/javascript" src="../scripts/events.js"></script>

@@ -2,13 +2,12 @@ body {
 	
 	--scrollbar_height: 4px;
 	--scrollbar_width: 16px;
-	--button_size: 22px;
 	
 	--pin_width: 24px;
 	--pin_height: 24px;
 
 	--tab_height: 20px;
-	--tab_height_line: 22px;
+	--tab_height_line: 23px;
 	
 	--title_font_size: 12px;
 
@@ -28,14 +27,11 @@ body {
 	--expand_mask_height: 6px;
 	--expand_mask_width: 6px;
 
-	--drag_area_top: 7px;
-	--drag_area_bottom: 5px;
-
 	--children_padding_left: 5px;
 	--close_top: 2px;
-	--close_right: 2px;
-	--close_height: 13px;
-	--close_width: 13px;
+	--close_right: 1px;
+	--close_height: 14px;
+	--close_width: 14px;
 	
 	--tab_mediaicon_height: 10px;
 	--tab_mediaicon_width: 10px;

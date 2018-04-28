@@ -1,4 +1,23 @@
+FIXES:
+deny Drag&drop tab to root of folders
+"Never show close button" option was breaking theme preview/editor
+closing pinned tabs did not resize area of pinned tabs, leaving empty space below
+added "bookmark" menu for single tab
+clone pinned tab was added as not pinned (only in Firefox)
+Shortcut changed to Ctrl+F2
+export session file has now date as a name
 
+
+
+
+
+
+instruction to add popup
+line for children hierarchy (like at the beggining)
+"undo close" as a possible action with middle click on empty space
+
+
+DRAG&DROP TO ANOTHER WINDOW OF THE ENTIRE GROUP
 
 undo close to restore trees (will work ONLY in firefox)
 Close tab on Middle mouse click and not On Middle mouse down
@@ -23,8 +42,6 @@ menu: Unload other
 sort tabs/tree
 maybe filter tabs on search
 
-make tabs border width configurable, including size 0
-make tab spacing configurable, including 0 size
 
 font size
 hibernate group

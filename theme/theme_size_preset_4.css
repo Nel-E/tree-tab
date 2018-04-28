@@ -2,13 +2,12 @@ body {
 	
 	--scrollbar_height: 4px;
 	--scrollbar_width: 16px;
-	--button_size: 22px;
 	
 	--pin_width: 28px;
 	--pin_height: 28px;
 
 	--tab_height: 24px;
-	--tab_height_line: 25px;
+	--tab_height_line: 26px;
 
 	--title_font_size: 14px;
 
@@ -27,9 +26,6 @@ body {
 	--expand_mask_left: 27px;
 	--expand_mask_height: 7px;
 	--expand_mask_width: 7px;
-
-	--drag_area_top: 9px;
-	--drag_area_bottom: 6px;
 
 	--children_padding_left: 5px;
 	--close_top: 4px;
