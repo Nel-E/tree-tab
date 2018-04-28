@@ -307,7 +307,9 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new") {
 				s.onclick = function(event) {
 					if (event.which == 1) {
+                        newTabButtonClicked = true;
 						OpenNewTab();
+                        newTabButtonClicked = false;
 					}
 				}
 				s.onmousedown = function(event) {

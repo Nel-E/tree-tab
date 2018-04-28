@@ -13,7 +13,7 @@ var dragged_button;
 active_group = "tab_list";
 
 // options for all drop down menus
-let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab"];
+let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab", "move_tabs_on_url_change"];
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
@@ -58,6 +58,53 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
+function SetRegexes()
+{
+	let regexes = document.getElementById('tab_group_regexes');
+	opt.tab_group_regexes = [];
+	for(let child of regexes.children)
+	{
+		var regex = child.children[0].value.trim();
+		var groupName = child.children[1].value.trim();
+		if(regex !== "" && groupName !== "")
+		{
+			opt.tab_group_regexes.push([regex, groupName]);
+		}
+	}
+	SavePreferences();
+}
+
+function AddRegexPair()
+{
+	let regexes = document.getElementById('tab_group_regexes');
+	let outer = document.createElement("div");
+
+	let input = document.createElement("input");
+	input.type = "text";
+	input.style.width = '200px';
+	input.onchange = SetRegexes;
+	input.onkeyup = SetRegexes;
+	outer.appendChild(input);
+
+	input = document.createElement("input");
+	input.type = "text";
+	input.style.width = '200px';
+	input.onchange = SetRegexes;
+	input.onkeyup = SetRegexes;
+	outer.appendChild(input);
+	
+	let deleteButton = document.createElement("input");
+	deleteButton.type = "button";
+	deleteButton.style.width = '75px';
+	deleteButton.className = "set_button theme_buttons";
+	deleteButton.value = "Remove";
+	deleteButton.onclick = function() { regexes.removeChild(outer); }
+	outer.appendChild(deleteButton);
+	
+	regexes.appendChild(outer);
+	return outer;
+}
+
 // document events
 function GetOptions(storage) {
 	// get language labels
@@ -99,6 +146,14 @@ function GetOptions(storage) {
 				break;
 			}
 		}
+	}
+	
+	for(let i = 0; i < opt.tab_group_regexes.length; i++)
+	{
+		let regexPair = opt.tab_group_regexes[i];
+		let outer = AddRegexPair();
+		outer.children[0].value = regexPair[0];
+		outer.children[1].value = regexPair[1]
 	}
 
 	// get options for tabs tree depth option
@@ -341,6 +396,15 @@ function SetEvents() {
 	}});
 	
 	
+	document.getElementById("group_list_default_font_color").onmouseenter = function(event) {
+		document.getElementById("_gtetab_list").style.color = "red";
+		document.getElementById("_gtetab_list2").style.color = "red";
+		
+	}
+	document.getElementById("group_list_default_font_color").onmouseleave = function(event) {
+		document.getElementById("_gtetab_list").style.color = "";
+		document.getElementById("_gtetab_list2").style.color = "";
+	}
 	
 	
 	// scrollbars hover

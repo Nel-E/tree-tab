@@ -189,6 +189,19 @@ function AddNewGroup(Name, FontColor) {
 	return newId;
 }
 
+function FindGroupIdByName(name) {
+	for(let key in bggroups) {
+		if(!bggroups.hasOwnProperty(key)) {
+			continue;
+		}
+
+		if(bggroups[key].name === name) {
+			return key;
+		}
+	}
+	return null;
+}
+
 // remove group, delete tabs if close_tabs is true
 function GroupRemove(groupId, close_tabs) {
 	if (close_tabs) {

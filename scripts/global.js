@@ -24,6 +24,14 @@ var SearchIndex = 0;
 var active_group = "tab_list";
 var opt = {};
 var browserId = navigator.userAgent.match("Opera") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
+
+var newTabUrl = "";
+if(browserId == 'F') {
+	newTabUrl = "about:newtab";
+} else {
+	newTabUrl = "https://www.google.com/_/chrome/newtab?ie=UTF-8";
+}
+
 var bggroups = {};
 var bgfolders = {};
 var caption_clear_filter = chrome.i18n.getMessage("caption_clear_filter");
@@ -31,7 +39,7 @@ var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
-
+var newTabButtonClicked = false;
 
 const DefaultToolbar = {
 	"toolbar_main": ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
@@ -83,8 +91,13 @@ const DefaultPreferences = {
 	"midclick_group": "nothing",
 	"midclick_folder": "nothing",
 	"dbclick_folder": "rename_folder",
-	"debug": false
+	"debug": false,
+	"orphaned_tabs_to_ungrouped": false,
+	"tab_group_regexes": [],
+	"move_tabs_on_url_change": "from_empty"
 };
+
+var tabUrls = {};
 
 // *******************             GLOBAL FUNCTIONS                 ************************
 
