@@ -47,23 +47,6 @@ function SetEvents() {
 		}
 	
 	}
-	// MOUSE DOWN EVENTS
-	document.body.onmousedown = function(event) {
-
-		if (event.which == 2) {
-			event.preventDefault();
-		}	
-
-		if (event.which == 1 && event.target.classList.contains("menu_item") == false) {
-			HideMenus();
-		}
-		event.stopImmediatePropagation();
-
-		if (event.which == 1) {
-			RemoveHeadersHoverClass();
-		}
-	
-	}
 
 	// CONFIRM EDIT FOLDER
 	document.getElementById("folder_edit_confirm").onmousedown = function(event) {

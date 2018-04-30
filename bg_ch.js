@@ -105,7 +105,6 @@ function ChromeLoadTabs(retry) {
 				ChromeAutoSaveData(3, 1800000);
 				ChromeListeners();
 
-				delete running;
 				delete schedule_update_data;
 				delete schedule_rearrange_tabs;
 				delete DragNodeClass;
@@ -124,6 +123,9 @@ function ChromeLoadTabs(retry) {
 				delete DefaultToolbar;
 				delete DefaultTheme;
 				delete DefaultPreferences;
+
+				delete newTabUrl;
+				delete EmptyTabs;
 
 				delete tt_ids;
 

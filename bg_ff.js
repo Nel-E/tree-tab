@@ -102,7 +102,7 @@ function FirefoxLoadTabs(retry) {
 									running = true;
 									FirefoxAutoSaveData();
 									FirefoxListeners();
-									delete running;
+
 									delete schedule_update_data;
 									delete schedule_rearrange_tabs;
 									delete DragNodeClass;
@@ -121,6 +121,9 @@ function FirefoxLoadTabs(retry) {
 									delete DefaultToolbar;
 									delete DefaultTheme;
 									delete DefaultPreferences;
+									
+									delete newTabUrl;
+									delete EmptyTabs;
 								} else {
 									setTimeout(function() {
 										FirefoxLoadTabs(retry+1);

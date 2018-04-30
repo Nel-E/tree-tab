@@ -89,8 +89,7 @@ function StartChromeListeners() {
 				if (opt.debug) console.log("tab_created: "+message.tabId);
 				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
 
-				if(message.tab.url !== undefined)
-				{
+				if (message.tab.url !== undefined) {
 					for(let i = 0; i < opt.tab_group_regexes.length; i++) {
 						var regexPair = opt.tab_group_regexes[i];
 						if(message.tab.url.match(regexPair[0])) {
@@ -107,8 +106,20 @@ function StartChromeListeners() {
 						}
 					}
 				}
-				tabUrls[message.tab.id] = message.tab.url;
 
+
+				// if (opt.move_tabs_on_url_change != "never") {
+					// tabUrls[message.tab.id] = message.tab.url;
+				// }
+					// console.log("tab_created url:");
+					// console.log(message.tab.url);
+					// console.log("newTabUrl");
+					// console.log(newTabUrl);
+				if ((opt.move_tabs_on_url_change == "from_empty" && message.tab.url == newTabUrl) || opt.move_tabs_on_url_change == "all_new") {
+					EmptyTabs.push(message.tab.id);
+					// console.log(EmptyTabs);
+				}
+				
 				if (message.parentTabId != undefined) {
 					AppendTab(message.tab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
 				} else {
@@ -164,8 +175,14 @@ function StartChromeListeners() {
 							}
 						}
 					} else { // orphan case
-						if(!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
-							if(active_group != "tab_list") {
+						// if (!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
+							// if (active_group != "tab_list") {
+								// SetActiveGroup("tab_list", false, false);
+							// }
+						// }
+						if (message.tab.url != newTabUrl && opt.orphaned_tabs_to_ungrouped === true) {
+						// if (!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
+							if (active_group != "tab_list") {
 								SetActiveGroup("tab_list", false, false);
 							}
 						}
@@ -233,7 +250,16 @@ function StartChromeListeners() {
 				return;
 			}
 			if (message.command == "tab_removed") {
-				delete tabUrls[message.tabId];
+
+				// if (tabUrls[message.tabId]) {
+					// delete tabUrls[message.tabId];
+				// }
+				if (EmptyTabs.indexOf(message.tabId) != -1) {
+					EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
+					// console.log(EmptyTabs);
+				}
+
+
 				if (opt.debug) console.log("tab_removed: "+message.tabId);
 				let mTab = document.getElementById(message.tabId);
 				if (mTab != null) {
@@ -305,34 +331,44 @@ function StartChromeListeners() {
 					}
 					RefreshExpandStates();
 				}
-				if(message.changeInfo.url != undefined)
-				{
-					if((opt.move_tabs_on_url_change === "from_empty" && tabUrls[message.tabId] === newTabUrl) || opt.move_tabs_on_url_change === "always") {
-						for(let i = 0; i < opt.tab_group_regexes.length; i++) {
+				
+				if (message.changeInfo.url != undefined) {
+					if (((opt.move_tabs_on_url_change === "from_empty" || opt.move_tabs_on_url_change === "all_new") && EmptyTabs.indexOf(message.tabId) != -1) || opt.move_tabs_on_url_change === "always") {
+						for (let i = 0; i < opt.tab_group_regexes.length; i++) {
 							var regexPair = opt.tab_group_regexes[i];
-							if(message.changeInfo.url.match(regexPair[0])) {
+							if (message.changeInfo.url.match(regexPair[0])) {
 								var groupId = FindGroupIdByName(regexPair[1]);
-								if(groupId === null) {
+								if (groupId === null) {
 									groupId = AddNewGroup(regexPair[1]);
 								}
-								if(active_group !== groupId) {
+								if (active_group !== groupId) {
 									let updateTab = document.getElementById(message.tabId);
 									let newParent = document.getElementById("ct" + groupId);
 									if (updateTab != null && updateTab.classList.contains("tab") && !message.tab.pinned) {
 										SetTabClass(updateTab.id, false);
 										newParent.appendChild(updateTab);
-										schedule_update_data++;
 									}
 
-									SetActiveGroup(groupId, false, true);
+									SetActiveGroup(groupId, true, true);
 									SetActiveTabInGroup(groupId, updateTab.id);
-									SetActiveTab(updateTab.id);
+									chrome.tabs.update(message.tabId, { active: true });
+									
+									// schedule_update_data++;
+									// SetActiveTab(updateTab.id);
 								}
 								break;
 							}
 						}
 					}
-					tabUrls[message.tabId] = message.changeInfo.url;
+
+					if (EmptyTabs.indexOf(message.tabId) != -1) {
+						EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
+						// console.log(EmptyTabs);
+					}
+
+					
+					// tabUrls[message.tabId] = message.changeInfo.url;
+					
 				}
 				return;
 			}

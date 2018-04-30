@@ -307,9 +307,9 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new") {
 				s.onclick = function(event) {
 					if (event.which == 1) {
-                        newTabButtonClicked = true;
+                        // newTabButtonClicked = true;
 						OpenNewTab();
-                        newTabButtonClicked = false;
+                        // newTabButtonClicked = false;
 					}
 				}
 				s.onmousedown = function(event) {
@@ -572,7 +572,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
 						let d = new Date();
-						ExportSession(d.toLocaleString()+".tt_session", false);
+						ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-"))+".tt_session", false);
 					}
 				}
 			}

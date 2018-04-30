@@ -131,7 +131,7 @@ function RecreateGroup(LoadedGroup) {
 }
 
 
-function ExportSession(filename, save_to_manager) {
+function ExportSession(name, save_to_manager) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 			let tabs = Object.assign({}, response);
@@ -155,11 +155,11 @@ function ExportSession(filename, save_to_manager) {
 						ExportWindows.push(windows[CWin.id]);
 					}
 				});
-				if (filename) {
-					SaveFile(filename, ExportWindows);
+				if (name && !save_to_manager) {
+					SaveFile(name, ExportWindows);
 				}
 				if (save_to_manager) {
-					// AddGroupToStorage(GroupToSave, true);
+					AddSessionToStorage(ExportWindows, name, true);
 				}
 			});
 		});

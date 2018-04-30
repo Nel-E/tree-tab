@@ -58,24 +58,20 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
-function SetRegexes()
-{
+function SetRegexes() {
 	let regexes = document.getElementById('tab_group_regexes');
 	opt.tab_group_regexes = [];
-	for(let child of regexes.children)
-	{
+	for (let child of regexes.children) {
 		var regex = child.children[0].value.trim();
 		var groupName = child.children[1].value.trim();
-		if(regex !== "" && groupName !== "")
-		{
+		if (regex !== "" && groupName !== "") {
 			opt.tab_group_regexes.push([regex, groupName]);
 		}
 	}
 	SavePreferences();
 }
 
-function AddRegexPair()
-{
+function AddRegexPair() {
 	let regexes = document.getElementById('tab_group_regexes');
 	let outer = document.createElement("div");
 
@@ -395,18 +391,6 @@ function SetEvents() {
 		AddRedStylePreview("tab_header" + this.parentNode.id.substr(1), "backgroundColor", "red", true);
 	}});
 	
-	
-	document.getElementById("group_list_default_font_color").onmouseenter = function(event) {
-		document.getElementById("_gtetab_list").style.color = "red";
-		document.getElementById("_gtetab_list2").style.color = "red";
-		
-	}
-	document.getElementById("group_list_default_font_color").onmouseleave = function(event) {
-		document.getElementById("_gtetab_list").style.color = "";
-		document.getElementById("_gtetab_list2").style.color = "";
-	}
-	
-	
 	// scrollbars hover
 	document.getElementById("scrollbar_thumb_hover").onmouseenter = function(event) {
 		AddBlueBackgroundPreview("group_scrollbar_thumb", true);
@@ -682,7 +666,7 @@ function SetEvents() {
 	// }}
 
 	
-// ------------------------------OTHER------------------------------------------------------------------------------------	
+// ------------------------------OTHER-----------------------------------------------------------------------------------	
 
 	// block system dragging
 	document.ondrop = function(event) {
@@ -691,7 +675,11 @@ function SetEvents() {
 	document.ondragover = function(event) {
 		event.preventDefault();
 	}
+	
+// ------------------------------ADD REGEX FILTER-------------------------------------------------------------------------	
 
+	document.getElementById("add_tab_group_regex").onclick = AddRegexPair;
+	
 // ----------------------------RESET TOOLBAR BUTTON-----------------------------------------------------------------------	
 	
 	document.getElementById("options_reset_toolbar_button").onclick = function(event) {if (event.which == 1) {

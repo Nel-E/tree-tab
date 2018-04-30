@@ -297,7 +297,10 @@
 		"message": "Never"
 	},
 	"options_move_on_url_change_from_empty": {
-		"message": "New Tabs Only"
+		"message": "New Tabs Only (Home page)"
+	},
+	"options_move_on_url_change_all_new": {
+		"message": "All new tabs"
 	},
 
 	"options_always_show_close": {
@@ -1020,11 +1023,14 @@
 	
 
 	"manager_window_button_label_import_group": {
-		"message": "Import Group"
+		"message": "Import group"
 	},
 	
 	"manager_window_button_label_import_session": {
-		"message": "Import Session"
+		"message": "Import session"
+	},
+	"manager_window_button_label_save_current_session": {
+		"message": "Save current session"
 	},
 	
 

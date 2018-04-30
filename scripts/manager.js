@@ -50,7 +50,7 @@ function AddGroupToManagerList(hibernated_group) {
 	GroupList.appendChild(HibernatedGroup);
 
 	let ExportGroup = document.createElement("div");
-	ExportGroup.classList = "manager_window_list_button export_hibernated_group"
+	ExportGroup.classList = "manager_window_list_button export_hibernated_group";
 	ExportGroup.onmousedown = function(event) {
 		if (event.which == 1) {
 			let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
@@ -62,7 +62,7 @@ function AddGroupToManagerList(hibernated_group) {
 	HibernatedGroup.appendChild(ExportGroup);
 
 	let LoadGroup = document.createElement("div");
-	LoadGroup.classList = "manager_window_list_button load_hibernated_group"
+	LoadGroup.classList = "manager_window_list_button load_hibernated_group";
 	LoadGroup.onmousedown = function(event) {
 		if (event.which == 1) {
 			let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
@@ -74,7 +74,7 @@ function AddGroupToManagerList(hibernated_group) {
 	HibernatedGroup.appendChild(LoadGroup);
 
 	let DeleteGroup = document.createElement("div");
-	DeleteGroup.classList = "manager_window_list_button delete_hibernated_group"
+	DeleteGroup.classList = "manager_window_list_button delete_hibernated_group";
 	DeleteGroup.onmousedown = function(event) {
 		if (event.which == 1) {
 			let hib_group = this.parentNode;
@@ -151,9 +151,34 @@ function AddSessionToManagerList(saved_session) {
 	SavedSession.classList = "saved_session_row"
 	SessionsList.appendChild(SavedSession);
 	
+	let ExportSession = document.createElement("div");
+	ExportSession.classList = "manager_window_list_button export_saved_session";
+	ExportSession.onmousedown = function(event) {
+		if (event.which == 1) {
+			// let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
+			// chrome.storage.local.get(null, function(storage) {
+				// SaveFile(storage.hibernated_groups[HibernategGroupIndex].group.name+".tt_group", storage.hibernated_groups[HibernategGroupIndex]);
+			// });
+		}
+	}
+	SessionsList.appendChild(ExportSession);
+
+	let LoadSession = document.createElement("div");
+	LoadSession.classList = "manager_window_list_button load_saved_session";
+	LoadSession.onmousedown = function(event) {
+		if (event.which == 1) {
+			// let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
+			// chrome.storage.local.get(null, function(storage) {
+				// RecreateGroup(storage.hibernated_groups[HibernategGroupIndex]);
+			// });
+		}
+	}
+	SessionsList.appendChild(LoadSession);
+
+
 	
 	let DeleteSession = document.createElement("div");
-	DeleteSession.classList = "manager_window_list_button delete_hibernated_session"
+	DeleteSession.classList = "manager_window_list_button delete_hibernated_session";
 	DeleteSession.onmousedown = function(event) {
 		if (event.which == 1) {
 
@@ -217,6 +242,13 @@ function SetManagerEvents() {
 			});
 			this.classList.add("mw_on");
 			RefreshGUI();
+		}
+	}
+
+	document.getElementById("manager_window_button_save_current_session").onmousedown = function(event) {
+		if (event.which == 1) {
+			let d = new Date();
+			ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-")), true);
 		}
 	}
 

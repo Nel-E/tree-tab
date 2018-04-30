@@ -19,6 +19,7 @@ function Run() {
 
 
 function Initialize() {
+	
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
 		CurrentWindowId = tabs[0].windowId;
 

@@ -67,17 +67,24 @@
 		<ul class="edit_dialog" id="manager_window">
 			<div id="manager_window_header"><div id="manager_window_header_title"></div><div id="manager_window_close"><div class="close_img"></div></div></div>
 			
-			<div id="manager_window_toolbar">   <div class="manager_window_toolbar_button mw_on" id="manager_window_toolbar_groups_button">Hibernated Groups</div>  <div class="manager_window_toolbar_button" id="manager_window_toolbar_sessions_button">Saved Sessions</div>   </div>
-			<div id="manager_window_groups_list_title">Hibernated Groups</div>
+			<div id="manager_window_toolbar">
+				<div class="manager_window_toolbar_button mw_on" id="manager_window_toolbar_groups_button"> 
+					<div class="manager_window_toolbar_button_img"></div>
+				</div>
+				<div class="manager_window_toolbar_button" id="manager_window_toolbar_sessions_button">
+					<div class="manager_window_toolbar_button_img"></div>
+				</div>
+			</div>
 			<div id="manager_window_groups_list"></div>
-			<div id="manager_window_sessions_list_title">Saved Sessions</div>
-			<div id="manager_window_sessions_list"></div>
+			<div id="manager_window_sessions_list" style="display: none;"></div>
 			
 		
 			<div id="groups_manager_lower_buttons">
 				<div class="edit_dialog_confirm" id="manager_window_button_import_group"><span class="edit_dialog_button" id="manager_window_button_label_import_group"></span></div>
 				<br>
 				<div class="edit_dialog_confirm" id="manager_window_button_import_session"><span class="edit_dialog_button" id="manager_window_button_label_import_session"></span></div>
+				<br>
+				<div class="edit_dialog_confirm" id="manager_window_button_save_current_session"><span class="edit_dialog_button" id="manager_window_button_label_save_current_session"></span></div>
 			</div>
 				
 		</ul>

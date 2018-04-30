@@ -23,14 +23,23 @@ var CurrentWindowId = 0;
 var SearchIndex = 0;
 var active_group = "tab_list";
 var opt = {};
-var browserId = navigator.userAgent.match("Opera") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
+var browserId = navigator.userAgent.match("Opera|OPR") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
 
-var newTabUrl = "";
-if(browserId == 'F') {
-	newTabUrl = "about:newtab";
-} else {
-	newTabUrl = "https://www.google.com/_/chrome/newtab?ie=UTF-8";
-}
+var newTabUrl = browserId == "F" ? "about:newtab" : "chrome://startpage/";
+// if (browserId == "F") {
+	// newTabUrl = "about:newtab";
+// } else {
+// if (browserId == "O" || browserId == "V") {
+	// newTabUrl = "chrome://startpage/";
+// }
+
+// if (browserId == "C") {
+	// newTabUrl = "https://www.google.com/_/chrome/newtab?ie=UTF-8";
+// }
+// var newTabButtonClicked = false;
+// var tabUrls = {};
+
+var EmptyTabs = [];
 
 var bggroups = {};
 var bgfolders = {};
@@ -39,7 +48,6 @@ var caption_loading = chrome.i18n.getMessage("caption_loading");
 var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
-var newTabButtonClicked = false;
 
 const DefaultToolbar = {
 	"toolbar_main": ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
@@ -96,8 +104,6 @@ const DefaultPreferences = {
 	"tab_group_regexes": [],
 	"move_tabs_on_url_change": "from_empty"
 };
-
-var tabUrls = {};
 
 // *******************             GLOBAL FUNCTIONS                 ************************
 
@@ -165,9 +171,7 @@ function ShowOpenFileDialog(id, extension) {
 }
 
 function SaveFile(filename, data) {
-
-	let file_name = filename.replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-");
-	let file = new File([JSON.stringify(data)], file_name, {type: "text/csv;charset=utf-8"} );
+	let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
 	let body = document.getElementById("body");
 	let savelink = document.createElement("a");
 	savelink.href = URL.createObjectURL(file);
@@ -175,7 +179,7 @@ function SaveFile(filename, data) {
 	savelink.target = "_blank";
 	savelink.style.display = "none";
 	savelink.type = "file";
-	savelink.download = file_name;
+	savelink.download = filename;
 	body.appendChild(savelink);		
 	setTimeout(function() {
 		savelink.click();

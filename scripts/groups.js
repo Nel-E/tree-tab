@@ -83,6 +83,13 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 					// SHOW MENU
 					ShowFGlobalMenu(event);
 				}
+				if (browserId == "V") {
+					chrome.windows.getCurrent({populate: false}, function(window) {
+						if (CurrentWindowId != window.id) {
+							location.reload();
+						}
+					});
+				}
 			}
 			grp.ondragover = function(event) {
 				// PIN,TAB==>GROUP

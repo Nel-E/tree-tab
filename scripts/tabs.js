@@ -691,6 +691,7 @@ function OpenNewTab(pin, parentId) {
 				AppendTab(tab, "pin_list", false, parentId, true, false, true, false, false, true, false);
 				schedule_update_data++;
 			}
+			newTabUrl = tab.url;
 		});
 	} else {
 		chrome.tabs.create({}, function(tab) {
@@ -698,6 +699,9 @@ function OpenNewTab(pin, parentId) {
 				AppendTab(tab, parentId, false, false, (opt.append_orphan_tab == "top" ? false : true), false, true, false, false, true, false);
 				schedule_update_data++;
 			}
+			newTabUrl = tab.url;
+			console.log("OpenNewTab");
+			console.log(newTabUrl);
 		});
 	}
 }
