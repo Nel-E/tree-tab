@@ -88,33 +88,31 @@ function StartChromeListeners() {
 			
 				if (opt.debug) console.log("tab_created: "+message.tabId);
 				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
+				if (opt.debug) console.log("tab's parentTabId: "+message.parentTabId);
+				if (opt.debug) console.log("tab's openerTabId: "+message.tab.openerTabId);
 
-				if (message.tab.url !== undefined) {
-					for(let i = 0; i < opt.tab_group_regexes.length; i++) {
-						var regexPair = opt.tab_group_regexes[i];
-						if(message.tab.url.match(regexPair[0])) {
-							var groupId = FindGroupIdByName(regexPair[1]);
-							if(groupId === null) {
-								groupId = AddNewGroup(regexPair[1]);
-							}
-							if(active_group !== groupId) {
-								SetActiveGroup(groupId, true, true);
-								// It becomes an orphan if it's being opened in a different group.
-								message.parentTabId = undefined;
-								message.tab.openerTabId = undefined;
-							}
-						}
-					}
-				}
+				// if (message.tab.url !== undefined) {
+					// for (let i = 0; i < opt.tab_group_regexes.length; i++) {
+						// var regexPair = opt.tab_group_regexes[i];
+						// if (message.tab.url.match(regexPair[0])) {
+							// var groupId = FindGroupIdByName(regexPair[1]);
+							// if(groupId === null) {
+								// groupId = AddNewGroup(regexPair[1]);
+							// }
+							// if (active_group !== groupId) {
+								// SetActiveGroup(groupId, true, true);
+								// // It becomes an orphan if it's being opened in a different group.
+								// message.parentTabId = undefined;
+								// message.tab.openerTabId = undefined;
+							// }
+						// }
+					// }
+				// }
 
 
 				// if (opt.move_tabs_on_url_change != "never") {
 					// tabUrls[message.tab.id] = message.tab.url;
 				// }
-					// console.log("tab_created url:");
-					// console.log(message.tab.url);
-					// console.log("newTabUrl");
-					// console.log(newTabUrl);
 				if ((opt.move_tabs_on_url_change == "from_empty" && message.tab.url == newTabUrl) || opt.move_tabs_on_url_change == "all_new") {
 					EmptyTabs.push(message.tab.id);
 					// console.log(EmptyTabs);

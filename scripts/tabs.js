@@ -700,8 +700,8 @@ function OpenNewTab(pin, parentId) {
 				schedule_update_data++;
 			}
 			newTabUrl = tab.url;
-			console.log("OpenNewTab");
-			console.log(newTabUrl);
+			// console.log("OpenNewTab");
+			// console.log(newTabUrl);
 		});
 	}
 }

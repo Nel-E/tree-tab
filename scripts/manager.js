@@ -161,7 +161,7 @@ function AddSessionToManagerList(saved_session) {
 			// });
 		}
 	}
-	SessionsList.appendChild(ExportSession);
+	SavedSession.appendChild(ExportSession);
 
 	let LoadSession = document.createElement("div");
 	LoadSession.classList = "manager_window_list_button load_saved_session";
@@ -173,7 +173,7 @@ function AddSessionToManagerList(saved_session) {
 			// });
 		}
 	}
-	SessionsList.appendChild(LoadSession);
+	SavedSession.appendChild(LoadSession);
 
 
 	
@@ -181,7 +181,20 @@ function AddSessionToManagerList(saved_session) {
 	DeleteSession.classList = "manager_window_list_button delete_hibernated_session";
 	DeleteSession.onmousedown = function(event) {
 		if (event.which == 1) {
-
+			let saved_session = this.parentNode;
+					console.log(     saved_session             );
+			let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
+					console.log(     SessionIndex             );
+		
+			chrome.storage.local.get(null, function(storage) {
+				let S_Sessions = storage.saved_sessions;
+				console.log(     S_Sessions             );
+				S_Sessions.splice(SessionIndex, 1);
+				
+				chrome.storage.local.set({saved_sessions: S_Sessions});
+				console.log(     S_Sessions             );
+				saved_session.parentNode.removeChild(saved_session);
+			});
 		}
 	}
 	SavedSession.appendChild(DeleteSession);
