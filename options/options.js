@@ -144,8 +144,7 @@ function GetOptions(storage) {
 		}
 	}
 	
-	for(let i = 0; i < opt.tab_group_regexes.length; i++)
-	{
+	for (let i = 0; i < opt.tab_group_regexes.length; i++) {
 		let regexPair = opt.tab_group_regexes[i];
 		let outer = AddRegexPair();
 		outer.children[0].value = regexPair[0];

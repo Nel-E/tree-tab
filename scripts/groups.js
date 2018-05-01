@@ -197,17 +197,46 @@ function AddNewGroup(Name, FontColor) {
 }
 
 function FindGroupIdByName(name) {
-	for(let key in bggroups) {
-		if(!bggroups.hasOwnProperty(key)) {
+	for (let key in bggroups) {
+		if (!bggroups.hasOwnProperty(key)) {
 			continue;
 		}
-
-		if(bggroups[key].name === name) {
+		if (bggroups[key].name === name) {
 			return key;
 		}
 	}
 	return null;
 }
+
+function AppendTabToGroupOnRegexMatch(tabId, url) {
+	for (let i = 0; i < opt.tab_group_regexes.length; i++) {
+		var regexPair = opt.tab_group_regexes[i];
+		if (url.match(regexPair[0])) {
+			var groupId = FindGroupIdByName(regexPair[1]);
+			if (groupId === null) {
+				groupId = AddNewGroup(regexPair[1]);
+			}
+			if (active_group !== groupId) {
+				let updateTab = document.getElementById(tabId);
+				let newParent = document.getElementById("ct" + groupId);
+				// if (updateTab != null && updateTab.classList.contains("tab")/*  && !message.tab.pinned WE DONT HAVE TAB OBJECT IN CHANGEIFNO*/) {
+				if (updateTab != null && updateTab.classList.contains("tab")) {
+					// SetTabClass(updateTab.id, false);  IF WE ARE HERE TAB HAS CLASS TAB, SO IT'S NOT PINNED
+					newParent.appendChild(updateTab);
+				}
+
+				SetActiveGroup(groupId, true, true);
+				SetActiveTabInGroup(groupId, updateTab.id);
+				chrome.tabs.update(tabId, { active: true });
+				
+				// schedule_update_data++;
+				// SetActiveTab(updateTab.id);
+			}
+			break;
+		}
+	}
+}
+
 
 // remove group, delete tabs if close_tabs is true
 function GroupRemove(groupId, close_tabs) {

@@ -147,7 +147,7 @@ function SetMenu() {
 							if (menuItemNode.classList.contains("tab")) {
 								OpenNewTab(false, menuItemNode.id);
 							} else {
-								OpenNewTab();
+								OpenNewTab(false, active_group);
 							}
 						}
 					}

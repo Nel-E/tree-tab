@@ -90,32 +90,9 @@ function StartChromeListeners() {
 				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
 				if (opt.debug) console.log("tab's parentTabId: "+message.parentTabId);
 				if (opt.debug) console.log("tab's openerTabId: "+message.tab.openerTabId);
-
-				// if (message.tab.url !== undefined) {
-					// for (let i = 0; i < opt.tab_group_regexes.length; i++) {
-						// var regexPair = opt.tab_group_regexes[i];
-						// if (message.tab.url.match(regexPair[0])) {
-							// var groupId = FindGroupIdByName(regexPair[1]);
-							// if(groupId === null) {
-								// groupId = AddNewGroup(regexPair[1]);
-							// }
-							// if (active_group !== groupId) {
-								// SetActiveGroup(groupId, true, true);
-								// // It becomes an orphan if it's being opened in a different group.
-								// message.parentTabId = undefined;
-								// message.tab.openerTabId = undefined;
-							// }
-						// }
-					// }
-				// }
-
-
-				// if (opt.move_tabs_on_url_change != "never") {
-					// tabUrls[message.tab.id] = message.tab.url;
-				// }
-				if ((opt.move_tabs_on_url_change == "from_empty" && message.tab.url == newTabUrl) || opt.move_tabs_on_url_change == "all_new") {
-					EmptyTabs.push(message.tab.id);
-					// console.log(EmptyTabs);
+				
+				if (opt.move_tabs_on_url_change == "from_empty" && message.tab.url == newTabUrl) {
+					EmptyTabs.push(message.tabId);
 				}
 				
 				if (message.parentTabId != undefined) {
@@ -173,17 +150,15 @@ function StartChromeListeners() {
 							}
 						}
 					} else { // orphan case
-						// if (!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
-							// if (active_group != "tab_list") {
-								// SetActiveGroup("tab_list", false, false);
-							// }
-						// }
-						if (message.tab.url != newTabUrl && opt.orphaned_tabs_to_ungrouped === true) {
-						// if (!newTabButtonClicked && opt.orphaned_tabs_to_ungrouped === true) {
+
+						// if set to append orphan tabs to ungrouped group
+						// if tab is still not present, basically, not opened by OpenNewTab(), it will switch to ungrouped group
+						if (opt.orphaned_tabs_to_ungrouped === true && document.getElementById(message.tabId) == null && !message.tab.pinned) {
 							if (active_group != "tab_list") {
 								SetActiveGroup("tab_list", false, false);
 							}
 						}
+
 						if (opt.append_orphan_tab == "after_active") {
 							AppendTab(message.tab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (message.tab.pinned ? true : false), false, true, false, false, true, false);
 						}
@@ -194,6 +169,11 @@ function StartChromeListeners() {
 							AppendTab(message.tab, false, false, false, true, false, true, false, false, true, false);
 						}
 					}
+				}
+
+				// if set to append all new tabs when url matches pre-set group
+				if (opt.move_tabs_on_url_change === "all_new") {
+					AppendTabToGroupOnRegexMatch(message.tabId, message.tab.url);
 				}
 				
 				if (message.tab.openerTabId) { // check if openerTabId is defined, if it's in DOM and if it's closed, then change it to open
@@ -249,14 +229,9 @@ function StartChromeListeners() {
 			}
 			if (message.command == "tab_removed") {
 
-				// if (tabUrls[message.tabId]) {
-					// delete tabUrls[message.tabId];
-				// }
-				if (EmptyTabs.indexOf(message.tabId) != -1) {
+			if (EmptyTabs.indexOf(message.tabId) != -1) {
 					EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
-					// console.log(EmptyTabs);
 				}
-
 
 				if (opt.debug) console.log("tab_removed: "+message.tabId);
 				let mTab = document.getElementById(message.tabId);
@@ -299,6 +274,7 @@ function StartChromeListeners() {
 				return;
 			}
 			if (message.command == "tab_updated") {
+				
 				if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
 					setTimeout(function() {
 						GetFaviconAndTitle(message.tabId, true);
@@ -330,44 +306,17 @@ function StartChromeListeners() {
 					RefreshExpandStates();
 				}
 				
-				if (message.changeInfo.url != undefined) {
-					if (((opt.move_tabs_on_url_change === "from_empty" || opt.move_tabs_on_url_change === "all_new") && EmptyTabs.indexOf(message.tabId) != -1) || opt.move_tabs_on_url_change === "always") {
-						for (let i = 0; i < opt.tab_group_regexes.length; i++) {
-							var regexPair = opt.tab_group_regexes[i];
-							if (message.changeInfo.url.match(regexPair[0])) {
-								var groupId = FindGroupIdByName(regexPair[1]);
-								if (groupId === null) {
-									groupId = AddNewGroup(regexPair[1]);
-								}
-								if (active_group !== groupId) {
-									let updateTab = document.getElementById(message.tabId);
-									let newParent = document.getElementById("ct" + groupId);
-									if (updateTab != null && updateTab.classList.contains("tab") && !message.tab.pinned) {
-										SetTabClass(updateTab.id, false);
-										newParent.appendChild(updateTab);
-									}
-
-									SetActiveGroup(groupId, true, true);
-									SetActiveTabInGroup(groupId, updateTab.id);
-									chrome.tabs.update(message.tabId, { active: true });
-									
-									// schedule_update_data++;
-									// SetActiveTab(updateTab.id);
-								}
-								break;
-							}
-						}
+				
+				// if set to append when url changes and matches pre-set group
+				if (message.changeInfo.url != undefined && message.changeInfo.url != newTabUrl) {
+					if ((opt.move_tabs_on_url_change === "from_empty" && EmptyTabs.indexOf(message.tabId) != -1) || opt.move_tabs_on_url_change === "always") {
+						AppendTabToGroupOnRegexMatch(message.tabId, message.changeInfo.url);
 					}
-
 					if (EmptyTabs.indexOf(message.tabId) != -1) {
 						EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
-						// console.log(EmptyTabs);
 					}
-
-					
-					// tabUrls[message.tabId] = message.changeInfo.url;
-					
 				}
+				
 				return;
 			}
 			if (message.command == "remote_update") {

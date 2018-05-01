@@ -288,19 +288,19 @@
 		"message": "Always place orphan tabs in the 'ungrouped' group"
 	},
 	"options_move_on_url_change": {
-		"message": "Move tabs that match regexes when URL changes"
+		"message": "Move tabs that match regexes"
 	},
 	"options_move_on_url_change_always": {
-		"message": "Always"
+		"message": "always when URL changes"
 	},
 	"options_move_on_url_change_never": {
-		"message": "Never"
+		"message": "never"
 	},
 	"options_move_on_url_change_from_empty": {
-		"message": "New Tabs Only (Home page)"
+		"message": "when URL changes in New tab only"
 	},
 	"options_move_on_url_change_all_new": {
-		"message": "All new tabs"
+		"message": "when tab is created"
 	},
 
 	"options_always_show_close": {
