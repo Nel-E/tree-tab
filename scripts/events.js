@@ -23,7 +23,7 @@ function SetEvents() {
 		}
 	}
 	document.oncontextmenu = function(event){
-		if (!event.ctrlKey && event.target.id != "filter_box") {
+		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
 			event.preventDefault();
 		}
 	}	
@@ -334,6 +334,11 @@ function RemoveHeadersHoverClass() {
 	});
 }
 
+
+
+
+
+
 function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected) {
 	if (opt.debug) {
 		console.log("function: DropToTarget START"); console.log("TargetNode"); console.log(TargetNode); console.log("TabsIdsSelected"); console.log(TabsIdsSelected); console.log("TabsIds"); console.log(TabsIds);
@@ -342,71 +347,100 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 
 	if (TargetNode != null) {
 
-		let Append;
+		// let Append;
 		let pinTabs = false;
 
 		if (DragNodeClass == "tab") {
-			if (TargetNode.classList.contains("pin") && TargetNode.classList.contains("before")) {
+			if (TargetNode.classList.contains("pin")) {
 				pinTabs = true;
-				TabsIds.forEach(function(tabId){
-					InsterBeforeNode(document.getElementById(tabId), TargetNode);
-				});
-			}
-			if (TargetNode.classList.contains("pin") && TargetNode.classList.contains("after")) {
-				pinTabs = true;
-				for (let i = TabsIds.length-1; i >= 0; i--) {
-					InsterAfterNode(document.getElementById(TabsIds[i]), TargetNode);
+				if (TargetNode.classList.contains("before")) {
+					TabsIds.forEach(function(tabId){
+						InsterBeforeNode(document.getElementById(tabId), TargetNode);
+					});
+				}
+				if (TargetNode.classList.contains("after")) {
+					for (let i = TabsIds.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(TabsIds[i]), TargetNode);
+					}
 				}
 			}
-			
-			if (TargetNode.id == "pin_list") { // dropped on pin_list
+
+			if (TargetNode.classList.contains("tab")) {
+				if (TargetNode.classList.contains("before")) {
+					TabsIdsSelected.forEach(function(tabId){
+						InsterBeforeNode(document.getElementById(tabId), TargetNode);
+					});
+				}
+				if (TargetNode.classList.contains("after")) {
+					for (let i = TabsIdsSelected.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(TabsIdsSelected[i]), TargetNode);
+					}
+				}
+				if (TargetNode.classList.contains("inside")) {
+					TabsIdsSelected.forEach(function(tabId){
+						AppendToNode(document.getElementById(tabId), TargetNode.childNodes[1]);
+					});
+				}
+			}
+
+			if (TargetNode.id == "pin_list") {
 				pinTabs = true;
 				TabsIds.forEach(function(tabId){
 					AppendToNode(document.getElementById(tabId), TargetNode);
 				});
 			}
 
-
-			if ((TargetNode.classList.contains("tab") || TargetNode.classList.contains("folder")) && TargetNode.classList.contains("before")) {
+			if (TargetNode.classList.contains("group")) {
 				TabsIdsSelected.forEach(function(tabId){
-					InsterBeforeNode(document.getElementById(tabId), TargetNode);
+					AppendToNode(document.getElementById(tabId), TargetNode.childNodes[1]);
 				});
 			}
-			if ((TargetNode.classList.contains("tab") || TargetNode.classList.contains("folder")) && TargetNode.classList.contains("after")) {
-				for (let i = TabsIdsSelected.length-1; i >= 0; i--) {
-					InsterAfterNode(document.getElementById(TabsIdsSelected[i]), TargetNode);
-				}
-			}
 
-
-			if (TargetNode.classList.contains("inside") || TargetNode.classList.contains("group")) { // dropped on tab or folder or on group (tab list)
-				Append = document.getElementById("ct" + TargetNode.id);
-			}
-			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
-				Append = document.getElementById("ct" + (TargetNode.id.substr(1)));
+			if (TargetNode.classList.contains("folder")) {
+				TabsIdsSelected.forEach(function(tabId){
+					AppendToNode(document.getElementById(tabId), TargetNode.childNodes[2]);
+				});
 			}
 			
+			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
+				TabsIdsSelected.forEach(function(tabId){
+					AppendToNode(document.getElementById(tabId), document.getElementById("ct" + (TargetNode.id.substr(1))));
+				});
+			}
 		}
 
 		
 		if (DragNodeClass == "folder") {
-			if (TargetNode.classList.contains("folder") && TargetNode.classList.contains("before")) { // dropped on folder
-				FoldersSelected.forEach(function(folderId){
-					InsterBeforeNode(document.getElementById(folderId), TargetNode);
-				});
-			}
-			if (TargetNode.classList.contains("folder") && TargetNode.classList.contains("after")) {
-				for(let i = FoldersSelected.length-1; i >= 0; i--) {
-					InsterAfterNode(document.getElementById(FoldersSelected[i]), TargetNode);
+			if (TargetNode.classList.contains("folder")) { // dropped on folder
+				if (TargetNode.classList.contains("before")) {
+					FoldersSelected.forEach(function(folderId){
+						InsterBeforeNode(document.getElementById(folderId), TargetNode);
+					});
+				}
+				if (TargetNode.classList.contains("after")) {
+					for(let i = FoldersSelected.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(FoldersSelected[i]), TargetNode);
+					}
+				}
+				if (TargetNode.classList.contains("inside")) {
+					FoldersSelected.forEach(function(folderId){
+						AppendToNode(document.getElementById(folderId), TargetNode.childNodes[1]);
+					});
 				}
 			}
-			if (TargetNode.classList.contains("inside") || TargetNode.classList.contains("group")) { // dropped on tab or folder or on group (tab list)
-				Append = document.getElementById("cf" + TargetNode.id);
-			}
-			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
-				Append = document.getElementById("cf" + TargetNode.id.substr(1));
+			
+			if (TargetNode.classList.contains("group")) {
+				FoldersSelected.forEach(function(folderId){
+					AppendToNode(document.getElementById(folderId), TargetNode.childNodes[0]);
+				});
 			}
 			
+			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
+				FoldersSelected.forEach(function(folderId){
+					AppendToNode(document.getElementById(folderId),  document.getElementById("cf" + TargetNode.id.substr(1)));
+				});
+			}
+
 			setTimeout(function() {
 				SaveFolders();
 			}, 600);
@@ -426,19 +460,25 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			}		
 		}
 
-		TabsIds.forEach(function(tb){
-			SetTabClass(tb, pinTabs);
-		});
+		// TabsIds.forEach(function(tb){
+			// SetTabClass(tb, pinTabs);
+		// });
+		// TabsIdsSelected.forEach(function(tb){
+			// SetTabClass(tb, pinTabs);
+		// });
+		
+		SetMultiTabsClass(TabsIds, pinTabs);
+		// SetMultiTabsClass(TabsIdsSelected, pinTabs);
 
-		if (Append) {
-			FoldersSelected.forEach(function(folderId){
-				AppendToNode(document.getElementById(folderId), Append);
-			});
-			TabsIdsSelected.forEach(function(tabId){
-				AppendToNode(document.getElementById(tabId), Append);
-			});
+		// if (Append) {
+			// FoldersSelected.forEach(function(folderId){
+				// AppendToNode(document.getElementById(folderId), Append);
+			// });
+			// TabsIdsSelected.forEach(function(tabId){
+				// AppendToNode(document.getElementById(tabId), Append);
+			// });
 			// ScrollToTab(TabsIds[0]);
-		}
+		// }
 		
 
 		// recheck new structure
@@ -480,8 +520,10 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			console.log("DropToTarget END");
 		}
 	}, 300);
-	CleanUpDragClasses();
-	RemoveHighlight();
+	setTimeout(function() {
+		CleanUpDragClasses();
+		RemoveHighlight();
+	}, 50);
 }
 
 

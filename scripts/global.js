@@ -4,16 +4,18 @@
 
 // **********         GLOBAL VARIABLES FOR BACKGROUND, OPTIONS AND SIDEBAR         ***************
 
+// BACKGROUND VARIABLES
 var running = false;
 var schedule_save = -999;
-var schedule_update_data = 0;
-var schedule_rearrange_tabs = 0;
 var windows = {};
 var tabs = {};
 var tt_ids = {};
 
 
-// Drag&Drop
+// SIDEBAR VARIABLES
+var schedule_update_data = 0;
+var schedule_rearrange_tabs = 0;
+
 var DragNodeClass = "";
 var DragOverTimer = true;
 var DragTreeDepth = 0;
@@ -26,19 +28,6 @@ var opt = {};
 var browserId = navigator.userAgent.match("Opera|OPR") !== null ? "O" : ( navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" )  );
 
 var newTabUrl = browserId == "F" ? "about:newtab" : "chrome://startpage/";
-// if (browserId == "F") {
-	// newTabUrl = "about:newtab";
-// } else {
-// if (browserId == "O" || browserId == "V") {
-	// newTabUrl = "chrome://startpage/";
-// }
-
-// if (browserId == "C") {
-	// newTabUrl = "https://www.google.com/_/chrome/newtab?ie=UTF-8";
-// }
-// var newTabButtonClicked = false;
-// var tabUrls = {};
-
 var EmptyTabs = [];
 
 var bggroups = {};
@@ -49,6 +38,8 @@ var caption_searchbox = chrome.i18n.getMessage("caption_searchbox");
 var caption_ungrouped_group = chrome.i18n.getMessage("caption_ungrouped_group");
 var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
 
+
+// DEFAULTS NEEDED FOR START AND FOR OPTIONS PAGE
 const DefaultToolbar = {
 	"toolbar_main": ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
 	"toolbar_search": ["button_filter_type", "filter_search_go_prev", "filter_search_go_next"],

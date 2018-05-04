@@ -128,7 +128,7 @@ function AddGroupToManagerList(hibernated_group) {
 	let name = document.createElement("div");
 	name.contentEditable = true;
 	name.textContent = hibernated_group.group.name;
-	name.classList = "manager_window_group_name";
+	name.classList = "manager_window_group_name text_input";
 	name.oninput = function(event) {
 		console.log(event);
 		console.log(this.textContent);
@@ -178,7 +178,7 @@ function AddSessionToManagerList(saved_session) {
 
 	
 	let DeleteSession = document.createElement("div");
-	DeleteSession.classList = "manager_window_list_button delete_hibernated_session";
+	DeleteSession.classList = "manager_window_list_button delete_saved_session";
 	DeleteSession.onmousedown = function(event) {
 		if (event.which == 1) {
 			let saved_session = this.parentNode;
@@ -235,8 +235,11 @@ function SetManagerEvents() {
 
 	document.getElementById("manager_window_toolbar_groups_button").onmousedown = function(event) {
 		if (event.which == 1) {
-			document.getElementById("manager_window_sessions_list").style.display = "none";
-			document.getElementById("manager_window_groups_list").style.display = "";
+			
+			document.querySelectorAll(".manager_window_panel").forEach(function(s){
+				s.classList.remove("mw_pan_on");
+			});
+			document.getElementById("manager_window_groups_panel").classList.add("mw_pan_on");
 			
 			document.querySelectorAll(".mw_on").forEach(function(s){
 				s.classList.remove("mw_on");
@@ -248,8 +251,12 @@ function SetManagerEvents() {
 	}
 	document.getElementById("manager_window_toolbar_sessions_button").onmousedown = function(event) {
 		if (event.which == 1) {
-			document.getElementById("manager_window_sessions_list").style.display = "";
-			document.getElementById("manager_window_groups_list").style.display = "none";
+
+			document.querySelectorAll(".manager_window_panel").forEach(function(s){
+				s.classList.remove("mw_pan_on");
+			});
+			document.getElementById("manager_window_sessions_panel").classList.add("mw_pan_on");
+
 			document.querySelectorAll(".mw_on").forEach(function(s){
 				s.classList.remove("mw_on");
 			});

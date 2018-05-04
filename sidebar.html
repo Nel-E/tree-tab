@@ -29,6 +29,7 @@
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_2.css" id="tabs_margin_2" />
 
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_colors.css" id="theme_colors" />
+		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_manager.css" id="manager" />
 		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme.css" id="theme" />
 	</head>
 	<body id="body" class="sidebar_body">
@@ -50,7 +51,7 @@
 		<input type="color" id="color_picker" style="position:absolute; left:-1000px; top:-1000px; width:1px; height:1px; overflow:hidden;">
 
 		<ul class="edit_dialog" id="group_edit">
-			<input class="edit_dialog_edit_name" id="group_edit_name" type="text"></input>
+			<input class="edit_dialog_edit_name text_input" id="group_edit_name" type="text"></input>
 			<div class="group_edit_color" id="group_edit_font"></div>
 			<br>
 			<div class="edit_dialog_discard" id="group_edit_discard"><span class="edit_dialog_button" id="group_edit_button_cancel"></span></div>
@@ -58,7 +59,7 @@
 		</ul>
 		
 		<ul class="edit_dialog" id="folder_edit">
-			<input class="edit_dialog_edit_name" id="folder_edit_name" type="text"></input>
+			<input class="edit_dialog_edit_name text_input" id="folder_edit_name" type="text"></input>
 			<br>
 			<div class="edit_dialog_discard" id="folder_edit_discard"><span class="edit_dialog_button" id="folder_edit_button_cancel"></span></div>
 			<div class="edit_dialog_confirm" id="folder_edit_confirm"><span class="edit_dialog_button" id="folder_edit_button_confirm"></span></div>
@@ -75,8 +76,17 @@
 					<div class="manager_window_toolbar_button_img"></div>
 				</div>
 			</div>
-			<div id="manager_window_groups_list"></div>
-			<div id="manager_window_sessions_list" style="display: none;"></div>
+			<div class="manager_window_panel mw_pan_on" id="manager_window_groups_panel">
+				<div class="manager_window_list" id="manager_window_groups_list"></div>
+				
+				<div id="manager_window_panel_lower_buttons">
+					<div class="edit_dialog_confirm" id="manager_window_button_import_group"><span class="edit_dialog_button" id="manager_window_button_label_import_group"></span></div>
+				</div>
+				
+			</div>
+			<div class="manager_window_panel" id="manager_window_sessions_panel">
+				<div class="manager_window_list" id="manager_window_sessions_list"></div>
+			</div>
 			
 		
 			<div id="groups_manager_lower_buttons">

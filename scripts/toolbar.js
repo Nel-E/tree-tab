@@ -155,6 +155,7 @@ function RecreateToolbar(NewToolbar) {
 		SearchShelf.appendChild(SearchBox);
 		
 		let SearchInput = document.createElement("input");
+		SearchInput.classList = "text_input";
 		SearchInput.id = "filter_box";
 		SearchInput.type = "text";
 		SearchInput.placeholder = caption_searchbox;

@@ -356,6 +356,9 @@
 	"options_action_tab_activate_previous_active": {
 		"message": "go back to previous active tab (works only on unpinned tabs)"
 	},
+	"options_action_tab_undo_close": {
+		"message": "reopen last closed tab"
+	},
 
 
 
@@ -366,14 +369,17 @@
 	"options_dbclick_group": {
 		"message": "Action for double click on empty space on the left side or below the tabs"
 	},
-	"options_action__group_none": {
+	"options_action_group_none": {
 		"message": "nothing"
 	},
-	"options_action__group_new": {
+	"options_action_group_new": {
 		"message": "open new tab"
 	},
-	"options_action__group_activate_previous_active": {
+	"options_action_group_activate_previous_active": {
 		"message": "go back to previous active tab (works only on unpinned tabs)"
+	},
+	"options_action_group_undo_close_tab": {
+		"message": "reopen last closed tab"
 	},
 
 	

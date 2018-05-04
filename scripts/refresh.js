@@ -80,16 +80,6 @@ async function RefreshGUI() {
 	groups.style.height = groupsHeight + "px";
 	groups.style.width = (document.body.clientWidth - toolbar_groupsWidth - 1) + "px";
 
-
-
-	let ManagerWindow = document.getElementById("manager_window");
-	
-	let ManagerWindowGroupsList = document.getElementById("manager_window_groups_list");
-	let ManagerWindowGroupsListHeight = 8 + ManagerWindowGroupsList.children.length * 18;
-	
-
-	let ManagerWindowSessionsList = document.getElementById("manager_window_sessions_list");
-	let ManagerWindowSessionsListHeight = 8 + ManagerWindowSessionsList.children.length * 18;
 	
 	// let total = ManagerWindowGroupsListHeight + ManagerWindowSessionsListHeight;
 	// if (total > document.body.clientHeight - 200) {
@@ -104,21 +94,30 @@ async function RefreshGUI() {
 	// ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
 
 
-	if (ManagerWindowGroupsListHeight > document.body.clientHeight - 300) {
-		ManagerWindowGroupsList.style.height = document.body.clientHeight - 300 + "px";
+	
+	let ManagerWindow = document.getElementById("manager_window");
+	
+	let ManagerWindowList = document.querySelector(".mw_pan_on>.manager_window_list");
+	let ManagerWindowListHeight = 12 + ManagerWindowList.children.length * 18;
+	
+
+
+	
+	if (ManagerWindowListHeight > document.body.clientHeight - 600) {
+		ManagerWindowList.style.height = document.body.clientHeight - 600 + "px";
 	} else {
-		ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight + "px";
+		ManagerWindowList.style.height = ManagerWindowListHeight + "px";
 	}
 	
-	if (ManagerWindowSessionsListHeight > document.body.clientHeight - 300) {
-		ManagerWindowSessionsList.style.height = document.body.clientHeight - 300 + "px";
-	} else {
-		ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
-	}
+	// if (ManagerWindowSessionsListHeight > document.body.clientHeight - 300) {
+		// ManagerWindowSessionsList.style.height = document.body.clientHeight - 300 + "px";
+	// } else {
+		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
+	// }
 	
 	
 	
-	ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
+	ManagerWindow.style.height = ManagerWindowListHeight.clientHeight + 700 + "px";
 
 
 

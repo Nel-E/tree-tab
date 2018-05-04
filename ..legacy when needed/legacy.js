@@ -77,23 +77,15 @@ function LoadV015(retry){
 			}
 		}
 
-		if (browserId == "F") {
-			// append ids to firefox tabs
-			qtabs.forEach(function(Tab){
-				AppendTabTTId(Tab.id);
-			});
-			qtabs.forEach(function(Tab){
-				tabs_to_save.push({id: Tab.id, ttid: tabs[tabId].ttid, parent: tabs[Tab.id].parent, index: tabs[Tab.id].index, expand: tabs[Tab.id].expand});
-			});
-		} else {
-			// create new hashes
-			qtabs.forEach(function(Tab){
-				ChromeHashURL(Tab);
-			});
-			qtabs.forEach(function(Tab){
-				tabs_to_save.push({id: Tab.id, hash: tabs[Tab.id].hash, parent: tabs[Tab.id].parent, index: tabs[Tab.id].index, expand: tabs[Tab.id].expand});
-			});
-		}
+
+		// create new hashes
+		qtabs.forEach(function(Tab){
+			ChromeHashURL(Tab);
+		});
+		qtabs.forEach(function(Tab){
+			tabs_to_save.push({id: Tab.id, hash: tabs[Tab.id].hash, parent: tabs[Tab.id].parent, index: tabs[Tab.id].index, expand: tabs[Tab.id].expand});
+		});
+
 		localStorage["t_count"] = JSON.stringify(qtabs.length);
 		localStorage["tabs"] = JSON.stringify(tabs_to_save);
 		for (var t = 0; t < 9999; t++){

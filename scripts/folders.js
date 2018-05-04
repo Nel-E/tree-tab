@@ -302,7 +302,7 @@ function ShowRenameFolderDialog(FolderId) { // Rename folder popup
 function FolderRenameConfirm() { // when pressed OK in folder popup
 	let name = document.getElementById("folder_edit_name");
 	let FolderId = document.getElementById("folder_edit").getAttribute("FolderId");
-	name.value = name.value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
+	// name.value = name.value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
 	bgfolders[FolderId].name = name.value;
 	document.getElementById("folder_title" + FolderId).textContent = name.value;
 	HideRenameDialogs();

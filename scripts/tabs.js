@@ -175,6 +175,13 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 		}
 		
 		th.onmousedown = function(event) {
+			if (browserId == "V") {
+				chrome.windows.getCurrent({populate: false}, function(window) {
+					if (CurrentWindowId != window.id) {
+						location.reload();
+					}
+				});
+			}
 			event.stopImmediatePropagation();
 			if (event.which == 1) {
 				// SELECT TAB/PIN
@@ -341,13 +348,28 @@ function SetTabClass(tabId, pin) {
 		RefreshGUI();
 	}
 }
+function SetMultiTabsClass(TabsIds, pin) {
+	TabsIds.forEach(function(tabId){
+		SetTabClass(tabId, pin);
+	});
+}
 
-function SetActiveTab(tabId) {
+function SetActiveTab(tabId, switchToGroup) {
 	let Tab = document.getElementById(tabId);
 	if (Tab != null) {
+		let TabGroup = GetParentsByClass(Tab, "group");
+		if (TabGroup.length) {
+			if (Tab.classList.contains("tab")) {
+				SetActiveTabInGroup(TabGroup[0].id, tabId);
+			}
+			if (switchToGroup) {
+				SetActiveGroup(TabGroup[0].id, false, true);
+			}
+		}
 		document.querySelectorAll(".selected_folder").forEach(function(s){
 			s.classList.remove("selected_folder");
 		});
+		// document.querySelectorAll(".pin, #"+active_group+" .tab"+(TabGroup.length ? ", #"+TabGroup[0].id+" .tab" : "")).forEach(function(s){
 		document.querySelectorAll(".pin, #"+active_group+" .tab").forEach(function(s){
 			s.classList.remove("active_tab");
 			s.classList.remove("selected_tab");
@@ -360,9 +382,14 @@ function SetActiveTab(tabId) {
 		Tab.classList.remove("attention");
 		Tab.classList.add("active_tab");
 		ScrollToTab(tabId);
-		if (Tab.classList.contains("tab")) {
-			SetActiveTabInGroup(active_group, tabId);
-		}
+		// if (TabGroup.length) {
+			// if (Tab.classList.contains("tab")) {
+				// SetActiveTabInGroup(TabGroup[0].id, tabId);
+			// }
+			// if (switchToGroup) {
+				// SetActiveGroup(TabGroup[0].id, false, true);
+			// }
+		// }
 	}
 }
 
@@ -854,6 +881,13 @@ function ActionClickTab(TabNode, bgOption) {
 			CloseTabs([parseInt(TabNode.id)]);
 		}
 	}
+	if (bgOption == "undo_close_tab") {
+		chrome.sessions.getRecentlyClosed( null, function(sessions) {
+			if (sessions.length > 0) {
+				chrome.sessions.restore(null, function(restored) {});
+			}
+		});
+	}
 	if (bgOption == "reload_tab") {
 		chrome.tabs.reload(parseInt(TabNode.id));
 	}
@@ -891,7 +925,7 @@ function TabStartDrag(Node, event) {
 			s.classList.remove("selected_tab");
 			s.classList.remove("selected_last");
 		});
-		document.querySelectorAll(".group#"+active_group+" .selected_tab").forEach(function(s){
+		document.querySelectorAll("#pin_list .selected_tab, .group#"+active_group+" .selected_tab").forEach(function(s){
 			TabsIdsSelected.push(parseInt(s.id));
 		});
 	} else {

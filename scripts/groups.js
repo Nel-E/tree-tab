@@ -74,6 +74,7 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 				event.stopImmediatePropagation();
 				if (event.which == 1 && event.target == this && event.clientX < (this.childNodes[0].getBoundingClientRect().width + this.getBoundingClientRect().left)) {
 					HideMenus();
+					return false;
 				}
 				if (event.which == 2) {
 					event.preventDefault();
@@ -369,7 +370,7 @@ function GroupEditConfirm() {
 	let groupId = document.getElementById("group_edit").getAttribute("groupId");
 	if (bggroups[groupId]) {
 		let GroupEditName = document.getElementById("group_edit_name");
-		GroupEditName.value = GroupEditName.value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
+		// GroupEditName.value = GroupEditName.value.replace(/[\f\n\r\v\t\<\>\+\-\(\)\.\,\;\:\~\/\|\?\@\!\"\'\£\$\%\&\^\#\=\*\[\]]?/gi, "");
 		bggroups[groupId].name = GroupEditName.value;
 		let GroupEditFont = document.getElementById("group_edit_font");
 		let DefaultGroupButtonFontColor = window.getComputedStyle(document.getElementById("body"), null).getPropertyValue("--group_list_default_font_color");
@@ -419,7 +420,6 @@ function GroupsToolbarToggle() {
 }
 
 function ActionClickGroup(Node, bgOption) {
-	// console.log(Node.id)
 	if (bgOption == "new_tab") {
 		if (Node.id == "pin_list") {
 			OpenNewTab(true, undefined);
@@ -430,6 +430,13 @@ function ActionClickGroup(Node, bgOption) {
 	}
 	if (bgOption == "activate_previous_active") {
 		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
+	}
+	if (bgOption == "undo_close_tab") {
+		chrome.sessions.getRecentlyClosed( null, function(sessions) {
+			if (sessions.length > 0) {
+				chrome.sessions.restore(null, function(restored) {});
+			}
+		});
 	}
 }
 

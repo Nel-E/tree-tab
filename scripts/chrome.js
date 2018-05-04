@@ -84,119 +84,120 @@ function StartChromeListeners() {
 			
 			// I WANT TO MOVE THIS LOGIC TO THE BACKGROUND SCRIPT!
 			
-			if (message.command == "tab_created") { // if set to treat unparented tabs as active tab's child
-			
-				if (opt.debug) console.log("tab_created: "+message.tabId);
-				if (opt.debug) console.log("tab is pinned: "+message.tab.pinned);
-				if (opt.debug) console.log("tab's parentTabId: "+message.parentTabId);
-				if (opt.debug) console.log("tab's openerTabId: "+message.tab.openerTabId);
-				
-				if (opt.move_tabs_on_url_change == "from_empty" && message.tab.url == newTabUrl) {
-					EmptyTabs.push(message.tabId);
+			if (message.command == "tab_created") {
+				if (document.getElementById(message.tabId) != null) {
+					return;
 				}
-				
-				if (message.parentTabId != undefined) {
-					AppendTab(message.tab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
-				} else {
-					if (opt.append_orphan_tab == "as_child" && message.tab.openerTabId == undefined && document.querySelector("#"+active_group+" .active_tab")) {
-						if (opt.debug) console.log("ignore orphan case, append tab as child");
-						message.tab.openerTabId = document.querySelector("#"+active_group+" .active_tab").id;
+				chrome.tabs.get(message.tabId, function(NewTab) { // get tab again as reported tab's url is empty! Also for some reason firefox sends tab with "active == false" even if tab is active (THIS IS POSSIBLY A NEW BUG IN FF 60.01!)
+					if (opt.debug) console.log("tab_created: "+message.tabId);
+					
+					if (opt.move_tabs_on_url_change == "from_empty" && NewTab.url == newTabUrl) {
+						EmptyTabs.push(message.tabId);
 					}
-					if (message.tab.openerTabId) { // child case
-						if (opt.append_child_tab == "after_active") {
-							if (opt.debug) console.log("child case, tab will append after active");
-							AppendTab(message.tab, false, false, document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : false, false, false, true, false, false, true, false);
-						} else {
-							let Parents = GetParentsByClass(document.getElementById(message.tab.openerTabId), "tab");
-							if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree
-								if (opt.append_child_tab == "top") {
-									if (opt.debug) console.log("child case, in tree limit, tab will append on top");
-									AppendTab(message.tab, message.tab.openerTabId, false, false, (message.tab.pinned ? true : false), false, true, false, false, true, false);
+					
+					if (message.parentTabId != undefined) {
+						AppendTab(NewTab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
+					} else {
+						if (opt.append_orphan_tab == "as_child" && NewTab.openerTabId == undefined && document.querySelector("#"+active_group+" .active_tab")) {
+							if (opt.debug) console.log("ignore orphan case, append tab as child");
+							NewTab.openerTabId = document.querySelector("#"+active_group+" .active_tab").id;
+						}
+						if (NewTab.openerTabId) { // child case
+							if (opt.append_child_tab == "after_active") {
+								if (opt.debug) console.log("child case, tab will append after active");
+								AppendTab(NewTab, false, false, document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : false, false, false, true, false, false, true, false);
+							} else {
+								let Parents = GetParentsByClass(document.getElementById(NewTab.openerTabId), "tab");
+								if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree
+									if (opt.append_child_tab == "top") {
+										if (opt.debug) console.log("child case, in tree limit, tab will append on top");
+										AppendTab(NewTab, NewTab.openerTabId, false, false, (NewTab.pinned ? true : false), false, true, false, false, true, false);
+									}
+									if (opt.append_child_tab == "bottom") {
+										if (opt.debug) console.log("child case, in tree limit, tab will append on bottom");
+										AppendTab(NewTab, NewTab.openerTabId, false, false, true, false, true, false, false, true, false);
+									}
 								}
-								if (opt.append_child_tab == "bottom") {
-									if (opt.debug) console.log("child case, in tree limit, tab will append on bottom");
-									AppendTab(message.tab, message.tab.openerTabId, false, false, true, false, true, false, false, true, false);
+								if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
+									if (opt.debug) console.log("child case, surpassed tree limit");
+									if (opt.append_child_tab_after_limit == "after") {
+										if (opt.debug) console.log("tab will append after active");
+										AppendTab(NewTab, false, false, NewTab.openerTabId, true, false, true, false, false, true, false);
+									}
+									if (opt.append_child_tab_after_limit == "top") {
+										if (opt.debug) console.log("tab will append on top");
+										AppendTab(NewTab, document.getElementById(NewTab.openerTabId).parentNode.parentNode.id, false, false, (NewTab.pinned ? true : false), false, true, false, false, true, false);
+									}
+									if (opt.append_child_tab_after_limit == "bottom") {
+										if (opt.debug) console.log("tab will append on bottom");
+										AppendTab(NewTab, document.getElementById(NewTab.openerTabId).parentNode.parentNode.id, false, false, true, false, true, false, false, true, false);
+									}
 								}
 							}
-							if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
-								if (opt.debug) console.log("child case, surpassed tree limit");
+							if (opt.max_tree_depth == 0) { // place tabs flat
+								if (opt.debug) console.log("max_tree_depth is 0, tabs are placed on the same level");
 								if (opt.append_child_tab_after_limit == "after") {
 									if (opt.debug) console.log("tab will append after active");
-									AppendTab(message.tab, false, false, message.tab.openerTabId, true, false, true, false, false, true, false);
+									AppendTab(NewTab, false, false, NewTab.openerTabId, false, false, true, false, false, true, false);
 								}
 								if (opt.append_child_tab_after_limit == "top") {
 									if (opt.debug) console.log("tab will append on top");
-									AppendTab(message.tab, document.getElementById(message.tab.openerTabId).parentNode.parentNode.id, false, false, (message.tab.pinned ? true : false), false, true, false, false, true, false);
+									AppendTab(NewTab, false, false, false, false, false, true, false, false, true, false);
 								}
 								if (opt.append_child_tab_after_limit == "bottom") {
 									if (opt.debug) console.log("tab will append on bottom");
-									AppendTab(message.tab, document.getElementById(message.tab.openerTabId).parentNode.parentNode.id, false, false, true, false, true, false, false, true, false);
+									AppendTab(NewTab, false, false, false, true, false, true, false, false, true, false);
 								}
 							}
-						}
-						if (opt.max_tree_depth == 0) { // place tabs flat
-							if (opt.debug) console.log("max_tree_depth is 0, tabs are placed on the same level");
-							if (opt.append_child_tab_after_limit == "after") {
-								if (opt.debug) console.log("tab will append after active");
-								AppendTab(message.tab, false, false, message.tab.openerTabId, false, false, true, false, false, true, false);
-							}
-							if (opt.append_child_tab_after_limit == "top") {
-								if (opt.debug) console.log("tab will append on top");
-								AppendTab(message.tab, false, false, false, false, false, true, false, false, true, false);
-							}
-							if (opt.append_child_tab_after_limit == "bottom") {
-								if (opt.debug) console.log("tab will append on bottom");
-								AppendTab(message.tab, false, false, false, true, false, true, false, false, true, false);
-							}
-						}
-					} else { // orphan case
+						} else { // orphan case
 
-						// if set to append orphan tabs to ungrouped group
-						// if tab is still not present, basically, not opened by OpenNewTab(), it will switch to ungrouped group
-						if (opt.orphaned_tabs_to_ungrouped === true && document.getElementById(message.tabId) == null && !message.tab.pinned) {
-							if (active_group != "tab_list") {
-								SetActiveGroup("tab_list", false, false);
+							// if set to append orphan tabs to ungrouped group
+							// if tab is still not present, basically, not opened by OpenNewTab(), it will switch to ungrouped group
+							// if (opt.orphaned_tabs_to_ungrouped === true && document.getElementById(message.tabId) == null && !NewTab.pinned) {
+							if (opt.orphaned_tabs_to_ungrouped === true && !NewTab.pinned) {
+								if (active_group != "tab_list") {
+									SetActiveGroup("tab_list", false, false);
+								}
 							}
-						}
 
-						if (opt.append_orphan_tab == "after_active") {
-							AppendTab(message.tab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (message.tab.pinned ? true : false), false, true, false, false, true, false);
-						}
-						if (opt.append_orphan_tab == "top") {
-							AppendTab(message.tab, false, false, false, false, false, true, false, false, true, false);
-						}
-						if (opt.append_orphan_tab == "bottom" || opt.append_orphan_tab == "as_child") {
-							AppendTab(message.tab, false, false, false, true, false, true, false, false, true, false);
+							if (opt.append_orphan_tab == "after_active") {
+								AppendTab(NewTab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (NewTab.pinned ? true : false), false, true, false, false, true, false);
+							}
+							if (opt.append_orphan_tab == "top") {
+								AppendTab(NewTab, false, false, false, false, false, true, false, false, true, false);
+							}
+							if (opt.append_orphan_tab == "bottom" || opt.append_orphan_tab == "as_child") {
+								AppendTab(NewTab, false, false, false, true, false, true, false, false, true, false);
+							}
 						}
 					}
-				}
-
-				// if set to append all new tabs when url matches pre-set group
-				if (opt.move_tabs_on_url_change === "all_new") {
-					AppendTabToGroupOnRegexMatch(message.tabId, message.tab.url);
-				}
-				
-				if (message.tab.openerTabId) { // check if openerTabId is defined, if it's in DOM and if it's closed, then change it to open
-					let openerTab = document.querySelector(".c[id='"+message.tab.openerTabId+"']");
-					if (openerTab != null) {
-						openerTab.classList.remove("c");
-						openerTab.classList.add("o");
+					if (opt.move_tabs_on_url_change === "all_new") {
+						AppendTabToGroupOnRegexMatch(message.tabId, NewTab.url);
 					}
-				}
-				if (opt.syncro_tabbar_tabs_order) {
-					let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
-						return parseInt(s.id);
-					});
-					chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
-				}
-				RefreshExpandStates();
-				setTimeout(function() {
-					schedule_update_data++;
-				}, 500);
-				setTimeout(function() {
-					RefreshCounters();
-					RefreshGUI();
-				},50);
+
+					if (NewTab.openerTabId) { // check if openerTabId is defined, if it's in DOM and if it's closed, then change it to open
+						let openerTab = document.querySelector(".c[id='"+NewTab.openerTabId+"']");
+						if (openerTab != null) {
+							openerTab.classList.remove("c");
+							openerTab.classList.add("o");
+						}
+					}
+					if (opt.syncro_tabbar_tabs_order) {
+						let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
+							return parseInt(s.id);
+						});
+						chrome.tabs.move(message.tabId, {index: tabIds.indexOf(message.tabId)});
+					}
+
+					RefreshExpandStates();
+					setTimeout(function() {
+						schedule_update_data++;
+					}, 500);
+					setTimeout(function() {
+						RefreshCounters();
+						RefreshGUI();
+					},50);
+				});
 				return;
 			}
 			if (message.command == "tab_attached") {
@@ -266,7 +267,7 @@ function StartChromeListeners() {
 				return;
 			}
 			if (message.command == "tab_activated") {
-				SetActiveTab(message.tabId);
+				SetActiveTab(message.tabId, true);
 				return;
 			}
 			if (message.command == "tab_attention") {
