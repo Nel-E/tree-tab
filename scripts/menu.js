@@ -629,7 +629,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					OpenManagerWindow(active_group);
+					OpenManagerWindow();
 					HideMenus();
 				}
 			}				
@@ -639,9 +639,11 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					// HideRenameDialogs();
 					ExportGroup(menuItemNode.id, false, true);
 					HideMenus();
+					setTimeout(function() {
+						GroupRemove(menuItemNode.id, true);
+					}, 100);
 				}
 			}				
 		}

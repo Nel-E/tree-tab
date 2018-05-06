@@ -149,26 +149,19 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 				this.classList.remove("close_hover");
 			}
 		}
-		tb.ondragenter = function(event) {
-			this.childNodes[1].style.zIndex = 99999;
-		}
-
 
 		th.onclick = function(event) {
 			event.stopImmediatePropagation();
 			if (document.getElementById("main_menu").style.top != "-1000px") {
 				HideMenus();
 			} else {
-				// if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("tab_title") || event.target.classList.contains("tab_header"))) {
 				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("tab_header")) {
 					DeselectTabs();
-					// SetActiveTab(this.parentNode.id);
 					chrome.tabs.update(parseInt(this.parentNode.id), { active: true });
 				}
 			}
 		}
 		th.ondblclick = function(event) {
-			// if (event.target.classList && (event.target.classList.contains("tab_title") || event.target.classList.contains("tab_header"))) {
 			if (event.target.classList && event.target.classList.contains("tab_header")) {
 				ActionClickTab(this.parentNode, opt.dbclick_tab);
 			}
@@ -184,7 +177,6 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 			}
 			event.stopImmediatePropagation();
 			if (event.which == 1) {
-				// SELECT TAB/PIN
 				EventSelectTab(event, this.parentNode);
 			}
 			if (event.which == 2) {
@@ -363,7 +355,7 @@ function SetActiveTab(tabId, switchToGroup) {
 				SetActiveTabInGroup(TabGroup[0].id, tabId);
 			}
 			if (switchToGroup) {
-				SetActiveGroup(TabGroup[0].id, false, true);
+				SetActiveGroup(TabGroup[0].id, false, false); // not going to scroll, because mostly it's going to change to a new active in group AFTER switch, so we are not going to scroll to previous active tab
 			}
 		}
 		document.querySelectorAll(".selected_folder").forEach(function(s){
@@ -382,14 +374,6 @@ function SetActiveTab(tabId, switchToGroup) {
 		Tab.classList.remove("attention");
 		Tab.classList.add("active_tab");
 		ScrollToTab(tabId);
-		// if (TabGroup.length) {
-			// if (Tab.classList.contains("tab")) {
-				// SetActiveTabInGroup(TabGroup[0].id, tabId);
-			// }
-			// if (switchToGroup) {
-				// SetActiveGroup(TabGroup[0].id, false, true);
-			// }
-		// }
 	}
 }
 

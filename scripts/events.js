@@ -523,6 +523,17 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 	setTimeout(function() {
 		CleanUpDragClasses();
 		RemoveHighlight();
+		
+		chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
+			let Tab = document.getElementById(activeTab[0].id);
+			if (Tab != null && Tab.classList.contains("tab")) {
+				let TabGroup = GetParentsByClass(Tab, "group");
+				if (TabGroup.length > 0 && TabGroup[0].id != active_group) {
+					SetActiveTab(activeTab[0].id, true);
+				}
+			}
+		});
+		
 	}, 50);
 }
 

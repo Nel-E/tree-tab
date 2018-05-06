@@ -417,3 +417,15 @@ function ImportMergeTabs() {
 		});
 	}	 
 }
+
+
+function StartAutoSaveSession() {
+	if (opt.autosave_interval > 0) {
+		AutoSaveSession = setInterval(function() {
+			console.log("AutoSaveSession");
+				// clearInterval(AutoSaveSession);
+			// }
+			
+		}, opt.autosave_interval * 1000);
+	}
+}

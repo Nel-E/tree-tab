@@ -95,7 +95,6 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 			grp.ondragover = function(event) {
 				// PIN,TAB==>GROUP
 				if (event.target.id == this.id && (DragNodeClass == "tab" || DragNodeClass == "folder")) {
-				// if (event.target.id == this.id) {
 					RemoveHighlight();
 					this.classList.add("highlighted_drop_target");
 				}
@@ -210,34 +209,31 @@ function FindGroupIdByName(name) {
 }
 
 function AppendTabToGroupOnRegexMatch(tabId, url) {
-	for (let i = 0; i < opt.tab_group_regexes.length; i++) {
-		var regexPair = opt.tab_group_regexes[i];
-		if (url.match(regexPair[0])) {
-			var groupId = FindGroupIdByName(regexPair[1]);
-			if (groupId === null) {
-				groupId = AddNewGroup(regexPair[1]);
-			}
-			if (active_group !== groupId) {
-				let updateTab = document.getElementById(tabId);
-				let newParent = document.getElementById("ct" + groupId);
-				// if (updateTab != null && updateTab.classList.contains("tab")/*  && !message.tab.pinned WE DONT HAVE TAB OBJECT IN CHANGEIFNO*/) {
-				if (updateTab != null && updateTab.classList.contains("tab")) {
-					// SetTabClass(updateTab.id, false);  IF WE ARE HERE TAB HAS CLASS TAB, SO IT'S NOT PINNED
-					newParent.appendChild(updateTab);
-				}
+	let Tab = document.getElementById(tabId);
 
-				SetActiveGroup(groupId, true, true);
-				SetActiveTabInGroup(groupId, updateTab.id);
-				chrome.tabs.update(tabId, { active: true });
-				
-				// schedule_update_data++;
-				// SetActiveTab(updateTab.id);
+	if (Tab != null && Tab.classList.contains("tab")) {
+		let TabGroup = GetParentsByClass(Tab, "group");
+
+		for (let i = 0; i < opt.tab_group_regexes.length; i++) {
+			let regexPair = opt.tab_group_regexes[i];
+			if (url.match(regexPair[0])) {
+				let groupId = FindGroupIdByName(regexPair[1]);
+				if (groupId === null) {
+					groupId = AddNewGroup(regexPair[1]);
+				}
+				if (TabGroup.length > 0 && TabGroup[0].id !== groupId) {
+					let newParent = document.getElementById("ct" + groupId);
+					newParent.appendChild(Tab);
+					SetActiveGroup(groupId, true, true);
+					SetActiveTabInGroup(groupId, Tab.id);
+					chrome.tabs.update(tabId, { active: true });
+				}
+				break;
 			}
-			break;
 		}
 	}
-}
 
+}
 
 // remove group, delete tabs if close_tabs is true
 function GroupRemove(groupId, close_tabs) {
@@ -263,23 +259,25 @@ function GroupRemove(groupId, close_tabs) {
 		RefreshExpandStates();
 		RefreshCounters();
 	}
-	delete bggroups[groupId];
-	if (groupId == active_group) {
-		if (document.getElementById("_"+groupId).previousSibling) {
-			SetActiveGroup((document.getElementById("_"+groupId).previousSibling.id).substr(1), true, true);
-		} else {
-			if (document.getElementById("_"+groupId).nextSibling) {
-				SetActiveGroup((document.getElementById("_"+groupId).nextSibling.id).substr(1), true, true);
+	if (groupId != "tab_list") {
+		delete bggroups[groupId];
+		if (groupId == active_group) {
+			if (document.getElementById("_"+groupId).previousSibling) {
+				SetActiveGroup((document.getElementById("_"+groupId).previousSibling.id).substr(1), true, true);
 			} else {
-				SetActiveGroup("tab_list", true, true);
+				if (document.getElementById("_"+groupId).nextSibling) {
+					SetActiveGroup((document.getElementById("_"+groupId).nextSibling.id).substr(1), true, true);
+				} else {
+					SetActiveGroup("tab_list", true, true);
+				}
 			}
 		}
+		let group = document.getElementById(groupId);
+		group.parentNode.removeChild(group);	
+		let groupButton = document.getElementById("_"+groupId);
+		groupButton.parentNode.removeChild(groupButton);	
 	}
 	SaveGroups();
-	let group = document.getElementById(groupId);
-	group.parentNode.removeChild(group);	
-	let groupButton = document.getElementById("_"+groupId);
-	groupButton.parentNode.removeChild(groupButton);	
 	schedule_update_data++;
 }
 

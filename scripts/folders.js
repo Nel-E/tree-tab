@@ -118,10 +118,7 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalCla
 			}
 			// edit folder
 			fh.ondblclick = function(event) {
-				// if (event.which == 1 && !event.shiftKey && !event.ctrlKey && (event.target.classList.contains("folder_title") || event.target.classList.contains("folder_header"))) {
 				if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("folder_header")) {
-				// if (event.which == 1) {
-					// ShowRenameFolderDialog(this.parentNode.id);
 					ActionClickFolder(this.parentNode, opt.dbclick_folder);
 				}
 			}

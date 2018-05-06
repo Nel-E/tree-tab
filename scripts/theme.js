@@ -5,7 +5,7 @@
 
 function Loadi18n() {
 	// toolbar labels
-	document.querySelectorAll(".button").forEach(function(s){
+	document.querySelectorAll(".button, .manager_window_toolbar_button").forEach(function(s){
 		s.title = chrome.i18n.getMessage(s.id);
 	});
 	// menu labels and edit group dialog labels

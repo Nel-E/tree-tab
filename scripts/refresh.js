@@ -89,24 +89,25 @@ async function RefreshGUI() {
 	// } else {
 		// ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight + "px";
 		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
-		
 	// }
 	// ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
 
 
 	
-	let ManagerWindow = document.getElementById("manager_window");
 	
-	let ManagerWindowList = document.querySelector(".mw_pan_on>.manager_window_list");
-	let ManagerWindowListHeight = 12 + ManagerWindowList.children.length * 18;
+	let PanelList = document.querySelector(".mw_pan_on>.manager_window_list");
+	let PanelListHeight = 3 + PanelList.children.length * 18;
 	
+	let ManagerWindowPanelButtons = document.querySelector(".mw_pan_on>.manager_window_panel_lower_buttons");
+	let ManagerWindowPanelButtonsHeight = ManagerWindowPanelButtons.clientHeight;
+	
+	let MaxAllowedHeight = document.body.clientHeight - 140;
 
-
 	
-	if (ManagerWindowListHeight > document.body.clientHeight - 600) {
-		ManagerWindowList.style.height = document.body.clientHeight - 600 + "px";
+	if (PanelListHeight + ManagerWindowPanelButtonsHeight < MaxAllowedHeight) {
+		PanelList.style.height = PanelListHeight + "px";
 	} else {
-		ManagerWindowList.style.height = ManagerWindowListHeight + "px";
+		PanelList.style.height = MaxAllowedHeight - ManagerWindowPanelButtonsHeight + "px";
 	}
 	
 	// if (ManagerWindowSessionsListHeight > document.body.clientHeight - 300) {
@@ -117,7 +118,9 @@ async function RefreshGUI() {
 	
 	
 	
-	ManagerWindow.style.height = ManagerWindowListHeight.clientHeight + 700 + "px";
+	let ManagerWindow = document.getElementById("manager_window");
+	// ManagerWindow.style.height = PanelListHeight.clientHeight + 700 + "px";
+	ManagerWindow.style.height = PanelList.clientHeight + ManagerWindowPanelButtonsHeight + 56 + "px";
 
 
 

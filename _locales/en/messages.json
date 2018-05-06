@@ -1075,6 +1075,19 @@
 	
 	"button_manager_window": {
 		"message": "Open manager window"
+	},
+
+	"manager_window_groups_button": {
+		"message": "Hibernated groups"
+	},
+	"manager_window_sessions_button": {
+		"message": "Saved sessions"
+	},
+	"manager_window_autosave_button": {
+		"message": "Auto saved sessions"
+	},
+	"manager_window_button_label_hibernate_group": {
+		"message": "Hibernate current group"
 	}
 	
 

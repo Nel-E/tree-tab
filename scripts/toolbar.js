@@ -447,8 +447,11 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			// SHOW GROUP MANAGER
 			if (s.id == "button_manager_window") {
 				s.onmousedown = function(event) {
-					if (event.which == 1) {
-						OpenManagerWindow(active_group);
+					console.log(document.getElementById("manager_window").style.top);
+					if (event.which == 1 && document.getElementById("manager_window").style.top == "-500px") {
+						OpenManagerWindow();
+					} else {
+						HideRenameDialogs();
 					}
 				}
 			}

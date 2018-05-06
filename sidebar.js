@@ -80,6 +80,7 @@ function Initialize() {
 							RearrangeBrowserTabs();
 						}
 						RestorePinListRowSettings();
+						StartAutoSaveSession();
 						if (browserId == "V") {
 							VivaldiRefreshMediaIcons();
 						}
@@ -98,7 +99,6 @@ function Initialize() {
 							delete DefaultToolbar;
 							delete DefaultTheme;
 							delete DefaultPreferences;
-
 						}, 5000);
 						if (browserId != "F") {
 							if (Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }

@@ -13,6 +13,7 @@ var tt_ids = {};
 
 
 // SIDEBAR VARIABLES
+var AutoSaveSession;
 var schedule_update_data = 0;
 var schedule_rearrange_tabs = 0;
 
@@ -93,7 +94,8 @@ const DefaultPreferences = {
 	"debug": false,
 	"orphaned_tabs_to_ungrouped": false,
 	"tab_group_regexes": [],
-	"move_tabs_on_url_change": "from_empty"
+	"move_tabs_on_url_change": "never",
+	"autosave_interval": 5
 };
 
 // *******************             GLOBAL FUNCTIONS                 ************************
