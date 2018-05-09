@@ -9,7 +9,7 @@ function Loadi18n() {
 		s.title = chrome.i18n.getMessage(s.id);
 	});
 	// menu labels and edit group dialog labels
-	document.querySelectorAll(".menu_item, .edit_dialog_button, #manager_window_header_title").forEach(function(s){
+	document.querySelectorAll(".menu_item, .edit_dialog_button, #manager_window_header_title, .manager_window_label").forEach(function(s){
 		s.textContent = chrome.i18n.getMessage(s.id);
 	});
 }

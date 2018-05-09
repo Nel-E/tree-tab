@@ -1422,7 +1422,8 @@ div {
 	display: none;
 	word-wrap: normal;
 	white-space: initial;
-	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif; font-size: 12px;
+	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
+	font-size: 12px;
 	border: 1px solid var(--tabs_menu_border);
 	padding: 0px 0px 0px 0px;
 	color: var(--tabs_menu_font);

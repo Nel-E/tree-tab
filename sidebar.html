@@ -82,34 +82,32 @@
 
 
 			<div class="manager_window_panel mw_pan_on" id="manager_window_groups_panel">
-				<div class="manager_window_list" id="manager_window_groups_list"></div>
-				
-				<div class="manager_window_panel_lower_buttons">
+				<div class="manager_window_panel_buttons">
 					<div class="edit_dialog_confirm" id="manager_window_button_import_group"><span class="edit_dialog_button" id="manager_window_button_label_import_group"></span></div>
 					<div class="edit_dialog_confirm" id="manager_window_button_hibernate_group"><span class="edit_dialog_button" id="manager_window_button_label_hibernate_group"></span></div>
 				</div>
+				<div class="manager_window_list" id="manager_window_groups_list"></div>
 			</div>
 
 			<div class="manager_window_panel" id="manager_window_sessions_panel">
-				<div class="manager_window_list" id="manager_window_sessions_list"></div>
-				<div class="manager_window_panel_lower_buttons">
+				<div class="manager_window_panel_buttons">
 					<div class="edit_dialog_confirm" id="manager_window_button_import_session"><span class="edit_dialog_button" id="manager_window_button_label_import_session"></span></div>
 					<div class="edit_dialog_confirm" id="manager_window_button_save_current_session"><span class="edit_dialog_button" id="manager_window_button_label_save_current_session"></span></div>
 				</div>
+				<div class="manager_window_list" id="manager_window_sessions_list"></div>
 			</div>
 			
 			<div class="manager_window_panel" id="manager_window_autosave_panel">
-				<div class="manager_window_list" id="manager_window_autosessions_list"></div>
-				<div class="manager_window_panel_lower_buttons">
-				
-				
-						<input class="input_number" type="number" style="width:80px;" min="0" max="99999" step="1" id="manager_window_autosessions_maximum_saves"></input>
+				<div class="manager_window_panel_buttons">
+						<span class="manager_window_label" id="manager_window_autosessions_maximum_saves_label"></span>
 						<br>
+						<input class="input_number" type="number" min="0" max="99999" step="1" id="manager_window_autosessions_maximum_saves"></input>
 						<br>
+						<span class="manager_window_label" id="manager_window_autosessions_save_timer_label"></span>
 						<br>
-						<input class="input_number" type="number" style="width:80px;" min="0" max="99999" step="1" id="manager_window_autosessions_save_timer"></input>
-			
+						<input class="input_number" type="number" min="0" max="99999" step="1" id="manager_window_autosessions_save_timer"></input>
 				</div>
+				<div class="manager_window_list" id="manager_window_autosessions_list"></div>
 			</div>
 			
 		</ul>
@@ -176,13 +174,12 @@
 			<li class="menu_item" id="menu_delete_group_tabs_close"></li>
 			<div class="separator" id="separator_gunlo"></div>
 			<li class="menu_item" id="menu_groups_unload"></li>
-			<div class="separator" id="separator_ghmanagr"></div>
-			<li class="menu_item" id="menu_manager_window"></li>
 			<div class="separator" id="separator_ghiber"></div>
 			<li class="menu_item" id="menu_groups_hibernate"></li>
 			<div class="separator" id="separator_gbk"></div>
 			<li class="menu_item" id="menu_bookmark_group"></li>
 			<div class="separator" id="separator_tts"></div>
+			<li class="menu_item" id="menu_manager_window"></li>
 			<li class="menu_item" id="menu_treetabs_settings"></li>
 		</ul>
 

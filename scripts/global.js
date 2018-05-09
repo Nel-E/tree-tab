@@ -95,6 +95,7 @@ const DefaultPreferences = {
 	"orphaned_tabs_to_ungrouped": false,
 	"tab_group_regexes": [],
 	"move_tabs_on_url_change": "never",
+	"autosave_max_to_keep": 3,
 	"autosave_interval": 5
 };
 

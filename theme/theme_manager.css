@@ -1,14 +1,10 @@
 /* MANAGER_WINDOW */
 
 #manager_window {
-	/* pointer-events: none; */
 	top: 50px;
 	left: 0px;
 	height: auto;
-	/* max-height: 97%; */
 	width: calc(100% - 3px);
-	/* border: none; */
-	/* background-color: transparent; */
 	border: 1px solid var(--tabs_menu_border);
 	background-color: var(--tabs_menu_background);
 }
@@ -44,11 +40,6 @@
 	border: 1px solid var(--close_hover_border);
 	background-color: var(--close_hover_background);
 }
-
-
-
-
-
 
 
 
@@ -121,72 +112,83 @@
 
 
 
-/* LOWER BUTTONS */
+/* PANEL BUTTONS */
 
-.manager_window_panel_lower_buttons {
+.manager_window_panel_buttons {
+	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
+	font-size: 11px;
 	position: relative;
-	top: 3px;
+	top: 1px;
 	left: 2px;
-	height: 27px;
+	height: 22px;
 	width: calc(100% - 6px);
-	/* border: 1px solid red; */
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+#manager_window_autosave_panel>.manager_window_panel_buttons {
+	overflow: hidden;
 }
 
 #manager_window_button_import_group {
-	top: 6px;
+	top: 3px;
 	left: 0px;
 	width: calc(50% - 2px);
 }
 #manager_window_button_hibernate_group {
-	top: 6px;
+	top: 3px;
 	left: calc(50% + 2px);
 	width: calc(50% - 2px);
 }
 
 
-#manager_window_autosave_panel>.manager_window_panel_lower_buttons {
-	height: 127px;
+#manager_window_autosave_panel>.manager_window_panel_buttons {
+	height: 78px;
 }
 
 
 #manager_window_button_import_session {
-	top: 6px;
+	top: 3px;
 	left: 0px;
 	width: calc(50% - 2px);
 }
 #manager_window_button_save_current_session {
-	top: 6px;
+	top: 3px;
 	left: calc(50% + 2px);
 	width: calc(50% - 2px);
 }
 
 
 
+#manager_window_autosessions_maximum_saves_label {
+	position: relative;
+	top: 3px;
+	left: 3px;
+}
+
+#manager_window_autosessions_save_timer_label {
+	position: relative;
+	top: 7px;
+	left: 3px;
+}
+
+#manager_window_autosessions_maximum_saves {
+	position: relative;
+	top: 5px;
+	left: 3px;
+	width: calc(100% - 8px);
+}
+
+#manager_window_autosessions_save_timer {
+	position: relative;
+	top: 9px;
+	left: 3px;
+	width: calc(100% - 8px);
+}
 
 
 
-/* #groups_manager_lower_buttons {
-	position: relative;
-}
-#manager_window_button_import_group {
-	position: relative;
-	right: 10px;
-	bottom: 10px;
-	
-}
-#manager_window_button_import_session {
-	position: relative;
-	left: 10px;
-	bottom: 10px;
-	
-}
-#manager_window_button_save_current_session {
-	position: relative;
-	left: 10px;
-	bottom: 10px;
-	
-}
- */
+
 /* PANELS */
 
 .manager_window_panel {
@@ -197,14 +199,6 @@
 .manager_window_panel.mw_pan_on {
 	display: block;
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -223,19 +217,12 @@
 
 
 .manager_window_toolbar_button {
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	vertical-align: top;
 	width: 24px;
 	height: 24px;
-
 	border: 1px solid var(--toolbar_background);
-
-/* 	border-left: 1px solid var(--toolbar_border_bottom);
-	border-right: 1px solid var(--toolbar_border_bottom);
- */
-
-	/* margin-top: -1px; */
 }
 
 .mw_on {
@@ -266,11 +253,9 @@
 
 .manager_window_toolbar_button:not(.mw_on) {
 	background-color: var(--button_background);
-	/* border: 1px solid var(--button_border); */
 }
 .manager_window_toolbar_button:hover:not(.mw_on) {
 	background-color: var(--button_hover_background);
-	/* border: 1px solid var(--button_hover_border); */
 	border: 1px solid var(--button_hover_background);
 }
 .manager_window_toolbar_button:hover:not(.mw_on)>.manager_window_toolbar_button_img {
@@ -282,10 +267,10 @@
 	left: 2px;
 }
 #manager_window_sessions_button {
-	left: -1px;
+	left: 28px;
 }
 #manager_window_autosave_button {
-	left: -5px;
+	left: 54px;
 }
 
 

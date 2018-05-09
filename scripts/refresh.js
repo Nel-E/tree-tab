@@ -98,7 +98,7 @@ async function RefreshGUI() {
 	let PanelList = document.querySelector(".mw_pan_on>.manager_window_list");
 	let PanelListHeight = 3 + PanelList.children.length * 18;
 	
-	let ManagerWindowPanelButtons = document.querySelector(".mw_pan_on>.manager_window_panel_lower_buttons");
+	let ManagerWindowPanelButtons = document.querySelector(".mw_pan_on>.manager_window_panel_buttons");
 	let ManagerWindowPanelButtonsHeight = ManagerWindowPanelButtons.clientHeight;
 	
 	let MaxAllowedHeight = document.body.clientHeight - 140;

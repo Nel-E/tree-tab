@@ -38,6 +38,13 @@ function ExportGroup(groupId, filename, save_to_manager) {
 				}
 			});
 		});
+	} else {
+		if (filename) {
+			SaveFile(filename, GroupToSave);
+		}
+		if (save_to_manager) {
+			AddGroupToStorage(GroupToSave, true);
+		}
 	}
 }
 
@@ -131,7 +138,7 @@ function RecreateGroup(LoadedGroup) {
 }
 
 
-function ExportSession(name, save_to_manager) {
+function ExportSession(name, save_to_file, save_to_manager, save_to_autosave_manager) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
 			let tabs = Object.assign({}, response);
@@ -155,11 +162,14 @@ function ExportSession(name, save_to_manager) {
 						ExportWindows.push(windows[CWin.id]);
 					}
 				});
-				if (name && !save_to_manager) {
+				if (save_to_file) {
 					SaveFile(name, ExportWindows);
 				}
 				if (save_to_manager) {
 					AddSessionToStorage(ExportWindows, name, true);
+				}
+				if (save_to_autosave_manager) {
+					AddAutosaveSessionToStorage(ExportWindows, name)
 				}
 			});
 		});
@@ -171,8 +181,6 @@ function ImportSession(recreate_session, save_to_manager) {
 	let fr = new FileReader();
 	if (file.files[0] == undefined) return;
 	fr.readAsText(file.files[file.files.length-1]);
-	
-	// console.log(  (file.files[file.files.length-1].name).replace(".tt_session", "")   );
 	
 	fr.onload = function() {
 		let data = fr.result;
@@ -186,20 +194,14 @@ function ImportSession(recreate_session, save_to_manager) {
 		if (save_to_manager) {
 			AddSessionToStorage(LoadedSession, (file.files[file.files.length-1].name).replace(".tt_session", ""), true);
 		}
-		
-		
-		
 	}	 
 }
 
 function AddSessionToStorage(session, name, add_to_manager) {
 	chrome.storage.local.get(null, function(storage) {
-			if (opt.debug) {
-				console.log(storage);
-			}
-			
-			// let d = new Date();
-			// d.toLocaleString()
+		if (opt.debug) {
+			console.log(storage);
+		}
 			
 		if (storage.saved_sessions == undefined) {
 			let saved_sessions = [];
@@ -212,7 +214,6 @@ function AddSessionToStorage(session, name, add_to_manager) {
 			let saved_sessions = storage.saved_sessions;
 			saved_sessions.push({name: name, session: session});
 			
-			
 			chrome.storage.local.set({saved_sessions: saved_sessions});
 			if (add_to_manager) {
 				AddSessionToManagerList(saved_sessions[saved_sessions.length-1]);
@@ -220,6 +221,27 @@ function AddSessionToStorage(session, name, add_to_manager) {
 		}
 	});
 
+}
+
+function AddAutosaveSessionToStorage(session, name) {
+	chrome.storage.local.get(null, function(storage) {
+		if (storage.saved_sessions_automatic == undefined) {
+			let s = [];
+			s.push({name: name, session: session});
+			chrome.storage.local.set({saved_sessions_automatic: s});
+		} else {
+			let s = storage.saved_sessions_automatic;
+			s.unshift({name: name, session: session});
+			if (s[opt.autosave_max_to_keep]) {
+				s.splice(opt.autosave_max_to_keep,(s.length-opt.autosave_max_to_keep));
+			}
+			chrome.storage.local.set({saved_sessions_automatic: s});
+		}
+		
+		if (opt.debug) {
+			console.log(storage.saved_sessions_automatic);
+		}
+	});
 }
 
 
@@ -420,12 +442,18 @@ function ImportMergeTabs() {
 
 
 function StartAutoSaveSession() {
-	if (opt.autosave_interval > 0) {
+	if (opt.autosave_interval > 0 && opt.autosave_max_to_keep > 0) {
 		AutoSaveSession = setInterval(function() {
-			console.log("AutoSaveSession");
-				// clearInterval(AutoSaveSession);
-			// }
 			
-		}, opt.autosave_interval * 1000);
+			let d = new Date();
+			ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-")), false, false, true);
+			
+			if (document.getElementById("manager_window").style.top != "-500px") {
+				chrome.storage.local.get(null, function(storage) {
+					ReAddSessionAutomaticToManagerList(storage);
+				});
+			}
+		
+		}, opt.autosave_interval * 60000);
 	}
 }

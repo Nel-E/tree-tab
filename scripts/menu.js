@@ -44,14 +44,14 @@ function ShowTabMenu(TabNode, event) {
 			document.getElementById("menu_close").style.display = "";
 		}
 
-		document.querySelectorAll("#menu_new_pin, #separator_unpt, #menu_unpin_tab, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close_other, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+		document.querySelectorAll("#menu_new_pin, #separator_unpt, #menu_unpin_tab, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close_other, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 			s.style.display = "";
 		});
 	}
 	
 	if (TabNode.classList.contains("tab")) {
 
-		document.querySelectorAll("#menu_bookmark_tree, #menu_new_tab, #separator_pit, #menu_pin_tab, #separator_newf, #menu_new_folder, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close, #menu_close_other, #separator_mut, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+		document.querySelectorAll("#menu_bookmark_tree, #menu_new_tab, #separator_pit, #menu_pin_tab, #separator_newf, #menu_new_folder, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close, #menu_close_other, #separator_mut, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 			s.style.display = "";
 		});
 
@@ -79,7 +79,7 @@ function ShowFolderMenu(FolderNode, event) {
 	HideMenus();
 	menuItemNode = FolderNode;
 	
-	document.querySelectorAll("#menu_mute_tab, #menu_unmute_tab, #menu_unload, #menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #separator_colla, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_mute_tab, #menu_unmute_tab, #separator_unlo, #menu_unload, #menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
 
@@ -98,7 +98,7 @@ function ShowFGlobalMenu(event) {
 	HideMenus();
 
 
-	document.querySelectorAll("#menu_new_pin, #menu_new_tab, #menu_new_folder, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_newg, #menu_new_group, #separator_gbk, #menu_bookmark_group, #separator_tts, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_new_pin, #menu_new_tab, #menu_new_folder, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_newg, #menu_new_group, #separator_gbk, #menu_bookmark_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
 	ShowMenu(document.getElementById("main_menu"), event);
@@ -108,7 +108,7 @@ function ShowFGroupMenu(GroupNode, event) {
 	HideMenus();
 	menuItemNode = GroupNode;
 	
-	document.querySelectorAll("#menu_manager_window, #menu_new_group, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_treetabs_settings, #menu_groups_hibernate").forEach(function(s){
+	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_groups_hibernate, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
 	if (menuItemNode.id == "tab_list") {

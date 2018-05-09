@@ -1088,6 +1088,26 @@
 	},
 	"manager_window_button_label_hibernate_group": {
 		"message": "Hibernate current group"
+	},
+	
+	"manager_window_autosessions_maximum_saves_label": {
+		"message": "Number of autosaves to keep:"
+	},
+	
+	"manager_window_autosessions_save_timer_label": {
+		"message": "Autosave every (minutes):"
+	},
+
+	"manager_window_delete_icon": {
+		"message": "Remove"
+	},
+	
+	"manager_window_savetofile_icon": {
+		"message": "Save to file"
+	},
+	
+	"manager_window_load_icon": {
+		"message": "Load"
 	}
 	
 

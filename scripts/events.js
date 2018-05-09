@@ -520,20 +520,19 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			console.log("DropToTarget END");
 		}
 	}, 300);
+
 	setTimeout(function() {
-		CleanUpDragClasses();
-		RemoveHighlight();
-		
-		chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
-			let Tab = document.getElementById(activeTab[0].id);
-			if (Tab != null && Tab.classList.contains("tab")) {
-				let TabGroup = GetParentsByClass(Tab, "group");
-				if (TabGroup.length > 0 && TabGroup[0].id != active_group) {
+		if (TargetNode.classList.contains("group_button") && (DragNodeClass == "tab" || DragNodeClass == "folder")) {
+			chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
+				let Tab = document.getElementById(activeTab[0].id);
+				if (Tab != null && TabsIds.indexOf(activeTab[0].id) != -1) {
+					SetActiveGroup(TargetNode.id.substr(1), false, false);
 					SetActiveTab(activeTab[0].id, true);
 				}
-			}
-		});
-		
+			});
+		}
+		CleanUpDragClasses();
+		RemoveHighlight();
 	}, 50);
 }
 
