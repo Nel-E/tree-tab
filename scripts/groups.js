@@ -326,6 +326,20 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 		chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: CurrentWindowId});
 		RefreshExpandStates();
 		RefreshCounters();
+		
+		if (browserId == "F" && opt.hide_other_groups_tabs_firefox) {
+			let HideTabIds = Array.prototype.map.call(document.querySelectorAll(".group:not([id='"+groupId+"']) .tab"), function(s){
+				return parseInt(s.id);
+			});
+			let ShowTabIds = Array.prototype.map.call(document.querySelectorAll("#"+groupId+" .tab"), function(s){
+				return parseInt(s.id);
+			});
+
+			browser.tabs.hide(HideTabIds);
+			browser.tabs.show(ShowTabIds);
+		}
+		
+		
 	}
 }
 

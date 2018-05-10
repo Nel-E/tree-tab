@@ -60,6 +60,7 @@ const DefaultTheme = {
 };
 
 const DefaultPreferences = {
+	"hide_other_groups_tabs_firefox": false,
 	"show_toolbar": true,
 	"skip_load": false,
 	"pin_list_multi_row": true,
@@ -95,8 +96,8 @@ const DefaultPreferences = {
 	"orphaned_tabs_to_ungrouped": false,
 	"tab_group_regexes": [],
 	"move_tabs_on_url_change": "never",
-	"autosave_max_to_keep": 3,
-	"autosave_interval": 5
+	"autosave_max_to_keep": 5,
+	"autosave_interval": 15
 };
 
 // *******************             GLOBAL FUNCTIONS                 ************************
@@ -150,10 +151,10 @@ function SavePreferences() {
 	chrome.runtime.sendMessage({command: "reload_options", opt: opt});
 }
 
-function ShowOpenFileDialog(id, extension) {
+function ShowOpenFileDialog(extension) {
 	let body = document.getElementById("body");
 	let inp = document.createElement("input");
-	inp.id = id;
+	inp.id = "file_import";
 	inp.type = "file";
 	inp.accept = extension;
 	inp.style.display = "none";

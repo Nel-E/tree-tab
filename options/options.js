@@ -621,7 +621,7 @@ function SetEvents() {
 
 	// options that need reload
 	document.onclick = function(event) {if (event.which == 1) {
-		if (event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "allow_pin_close" || event.target.id == "switch_with_scroll" || event.target.id == "always_show_close" || event.target.id == "never_show_close" || 
+		if (event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "allow_pin_close" || event.target.id == "switch_with_scroll" || event.target.id == "always_show_close" || event.target.id == "never_show_close" || event.target.id == "hide_other_groups_tabs_firefox" || 
 			event.target.id == "collapse_other_trees" || event.target.id == "show_counter_tabs" || event.target.id == "show_counter_tabs_hints" || event.target.id == "syncro_tabbar_tabs_order" || event.target.id == "syncro_tabbar_groups_tabs_order" || event.target.id == "groups_toolbar_default") {
 			setTimeout(function() {
 				chrome.runtime.sendMessage({command: "reload_sidebar"});
@@ -724,7 +724,7 @@ function SetEvents() {
 
 	// import theme preset button
 	document.getElementById("options_import_theme_button").onclick = function(event) {if (event.which == 1) {
-		let inputFile = ShowOpenFileDialog("import_theme", ".tt_theme");
+		let inputFile = ShowOpenFileDialog(".tt_theme");
 		inputFile.onchange = function(event) {
 			ImportTheme();
 		}						

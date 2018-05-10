@@ -318,7 +318,7 @@ function CheckTheme(theme) {
 
 
 function ImportTheme() {
-	var file = document.getElementById("import_theme");
+	var file = document.getElementById("file_import");
 	var fr = new FileReader();
 	if (file.files[0] == undefined) return;
 	fr.readAsText(file.files[0]);

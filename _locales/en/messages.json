@@ -479,6 +479,10 @@
 		"message": "Synchronize browser tabs order after drag&drop of the group tabs. Tabs will sort for a long time, if browser has a lot of tabs open. This option is needed for correct ctrl+tab switching. You can disable this option if you don't use keyboard shortcuts."
 	},
 
+	"options_hide_other_groups_tabs_firefox": {
+		"message": "Show Firefox tabs from current group only. Requires change in about:config, find 'extensions.webextensions.tabhide.enabled' and set it to true."
+	},
+
 
 
 
@@ -1104,6 +1108,9 @@
 	
 	"manager_window_savetofile_icon": {
 		"message": "Save to file"
+	},
+	"manager_window_merge_icon": {
+		"message": "Load and merge"
 	},
 	
 	"manager_window_load_icon": {

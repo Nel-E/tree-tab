@@ -500,7 +500,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_import_group") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let inputFile = ShowOpenFileDialog("file_import_group", ".tt_group");
+						let inputFile = ShowOpenFileDialog(".tt_group");
 						inputFile.onchange = function(event) {
 							ImportGroup(true, false);
 						}
@@ -561,9 +561,9 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_import_bak") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let inputFile = ShowOpenFileDialog("file_import_backup", ".tt_session");
+						let inputFile = ShowOpenFileDialog(".tt_session");
 						inputFile.onchange = function(event) {
-							ImportSession(true, false);
+							ImportSession(true, false, false);
 						}
 					}
 				}
@@ -581,9 +581,10 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_import_merge_bak") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let inputFile = ShowOpenFileDialog("file_import_merge_backup", ".tt_session");
+						let inputFile = ShowOpenFileDialog(".tt_session");
 						inputFile.onchange = function(event) {
-							ImportMergeTabs();
+							ImportSession(false, false, true);
+							// ImportMergeTabs();
 						}						
 					}
 				}

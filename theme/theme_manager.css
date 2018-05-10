@@ -88,6 +88,11 @@
 	mask-image: url(../theme/toolbar_import.svg);
 }
 
+.merge_saved_session {
+	-webkit-mask-image: url(../theme/toolbar_merge.svg);
+	mask-image: url(../theme/toolbar_merge.svg);
+}
+
 .delete_saved_session,
 .delete_hibernated_group {
 	-webkit-mask-image: url(../theme/toolbar_trashcan.svg);

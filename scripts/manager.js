@@ -188,6 +188,21 @@ function AddSessionToManagerList(saved_session) {
 	}
 	SavedSessionRow.appendChild(LoadSessionIcon);
 
+	let MergeSessionIcon = document.createElement("div");
+	MergeSessionIcon.classList = "manager_window_list_button merge_saved_session";
+	MergeSessionIcon.title = chrome.i18n.getMessage("manager_window_merge_icon");
+	MergeSessionIcon.onmousedown = function(event) {
+		if (event.which == 1) {
+			let saved_session = this.parentNode;
+			let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
+			chrome.storage.local.get(null, function(storage) {
+				let S_Sessions = storage.saved_sessions;
+				ImportMergeTabs(S_Sessions[SessionIndex].session);
+			});
+		}
+	}
+	SavedSessionRow.appendChild(MergeSessionIcon);
+
 	let name = document.createElement("div");
 	name.contentEditable = true;
 	name.textContent = saved_session.name;
@@ -248,6 +263,23 @@ function AddSessionAutomaticToManagerList(saved_session) {
 	SavedSessionRow.appendChild(LoadSessionIcon);
 
 	
+	let MergeSessionIcon = document.createElement("div");
+	MergeSessionIcon.classList = "manager_window_list_button merge_saved_session";
+	MergeSessionIcon.title = chrome.i18n.getMessage("manager_window_merge_icon");
+	MergeSessionIcon.onmousedown = function(event) {
+		if (event.which == 1) {
+			let saved_session = this.parentNode;
+			let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
+			chrome.storage.local.get(null, function(storage) {
+				let S_Sessions = storage.saved_sessions_automatic;
+				// RecreateSession(S_Sessions[SessionIndex].session);
+				ImportMergeTabs(S_Sessions[SessionIndex].session);
+			});
+		}
+	}
+	SavedSessionRow.appendChild(MergeSessionIcon);
+
+	
 
 	let name = document.createElement("div");
 	name.textContent = saved_session.name;
@@ -285,9 +317,9 @@ function SetManagerEvents() {
 	
 	document.getElementById("manager_window_button_import_group").onmousedown = function(event) {
 		if (event.which == 1) {
-			let inputFile = ShowOpenFileDialog("file_import_group", ".tt_group");
+			let inputFile = ShowOpenFileDialog(".tt_group");
 			inputFile.onchange = function(event) {
-				ImportGroup(true, false);
+				ImportGroup(false, true);
 			}
 		}
 	}
@@ -312,9 +344,9 @@ function SetManagerEvents() {
 	}
 	document.getElementById("manager_window_button_import_session").onmousedown = function(event) {
 		if (event.which == 1) {
-			let inputFile = ShowOpenFileDialog("file_import_backup", ".tt_session");
+			let inputFile = ShowOpenFileDialog(".tt_session");
 			inputFile.onchange = function(event) {
-				ImportSession(false, true);
+				ImportSession(false, true, false);
 			}
 		}
 	}

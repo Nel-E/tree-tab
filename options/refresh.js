@@ -13,6 +13,8 @@ function RefreshFields() {
 		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s){
 			s.style.display = "none";
 		});
+	} else {
+		document.getElementById("firefox_option_hide_other_groups_tabs_firefox").style.display = "none";
 	}
 	if (browserId == "V") {
 		let WebPanelUrlBox = document.getElementById("url_for_web_panel");
