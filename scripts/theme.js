@@ -162,20 +162,20 @@ function AddNewTheme() {
 	SelectedTheme = Object.assign({}, DefaultTheme);
 	SelectedTheme["ColorsSet"] = {};
 
-	let Names = [];
+	// let Names = [];
 	
-	for (let i = 0; i < ThemeList.options.length; i++) {
-		Names.push(ThemeList.options[i].text);
-	}
+	// for (let i = 0; i < ThemeList.options.length; i++) {
+		// Names.push(ThemeList.options[i].text);
+	// }
 	
-	while (Names.indexOf(NewName) != -1) {
-		let matched = NewName.match(/\(\d+\)+/);
-		if (matched != null && matched.length > 0) {
-			NewName = NewName.replace(matched[0], ("(" + (parseInt(matched[0].match(/\d+/)[0]) + 1 ) + ")")         );
-		} else {
-			NewName = NewName + "(1)";
-		}
-	}
+	// while (Names.indexOf(NewName) != -1) {
+		// let matched = NewName.match(/\(\d+\)+/);
+		// if (matched != null && matched.length > 0) {
+			// NewName = NewName.replace(matched[0], ("(" + (parseInt(matched[0].match(/\d+/)[0]) + 1 ) + ")")         );
+		// } else {
+			// NewName = NewName + "(1)";
+		// }
+	// }
 	
 	ThemeNameBox.value = NewName;
 	SelectedTheme["theme_name"] = NewName;
@@ -236,12 +236,12 @@ function RenameSelectedTheme() {
 	let ThemeList = document.getElementById("theme_list");
 	let ThemeNameBox = document.getElementById("new_theme_name");
 
-	for (let i = 0; i < ThemeList.options.length; i++) {
-		if (ThemeNameBox.value == ThemeList.options[i].text){
-			alert(chrome.i18n.getMessage("options_there_is_a_theme_with_this_name"));
-			return;
-		}
-	}
+	// for (let i = 0; i < ThemeList.options.length; i++) {
+		// if (ThemeNameBox.value == ThemeList.options[i].text){
+			// alert(chrome.i18n.getMessage("options_there_is_a_theme_with_this_name"));
+			// return;
+		// }
+	// }
 	
 	if (ThemeNameBox.value == "") {
 		alert(chrome.i18n.getMessage("options_theme_name_cannot_be_empty"));
@@ -254,10 +254,7 @@ function RenameSelectedTheme() {
 		ThemeList.options[ThemeList.selectedIndex].text = ThemeNameBox.value;
 		SelectedTheme["theme_name"] = ThemeNameBox.value;
 		LSthemes[current_theme]["theme_name"] = ThemeNameBox.value;
-		
-		
-		console.log(LSthemes);
-
+		// console.log(LSthemes);
 		chrome.storage.local.set({themes: LSthemes});
 		chrome.storage.local.set({current_theme: current_theme});
 	});
@@ -353,25 +350,25 @@ function ImportTheme() {
 			SelectedTheme["TabsMargins"] = correctedTheme["TabsMargins"];
 			SelectedTheme["theme_version"] = DefaultTheme["theme_version"];
 			
-			let Names = [];
-			for (let i = 0; i < ThemeList.options.length; i++) {
-				Names.push(ThemeList.options[i].text);
-			}
+			// let Names = [];
+			// for (let i = 0; i < ThemeList.options.length; i++) {
+				// Names.push(ThemeList.options[i].text);
+			// }
 			
-			if (Names.indexOf(correctedTheme.theme_name) == -1) {
+			// if (Names.indexOf(correctedTheme.theme_name) == -1) {
 				SelectedTheme["theme_name"] = correctedTheme.theme_name;
-			} else {
-				let NewName = correctedTheme.theme_name;
-				while (Names.indexOf(NewName) != -1) {
-					let matched = NewName.match(/\(\d+\)+/);
-					if (matched != null && matched.length > 0) {
-						NewName = NewName.replace(matched[0], ("(" + (parseInt(matched[0].match(/\d+/)[0]) + 1 ) + ")")         );
-					} else {
-						NewName = NewName + "(1)";
-					}
-				}
-				SelectedTheme["theme_name"] = NewName;
-			}
+			// } else {
+				// let NewName = correctedTheme.theme_name;
+				// while (Names.indexOf(NewName) != -1) {
+					// let matched = NewName.match(/\(\d+\)+/);
+					// if (matched != null && matched.length > 0) {
+						// NewName = NewName.replace(matched[0], ("(" + (parseInt(matched[0].match(/\d+/)[0]) + 1 ) + ")")         );
+					// } else {
+						// NewName = NewName + "(1)";
+					// }
+				// }
+				// SelectedTheme["theme_name"] = NewName;
+			// }
 			
 			themes.push(ThemeId);
 			SaveTheme(ThemeId);

@@ -16,6 +16,7 @@
 }
 
 .toolbar_shelf .button_img,
+.button.on .button_img,
 .button_img {
 	background-color: #808080;
 }

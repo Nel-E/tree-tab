@@ -446,7 +446,7 @@ function StartAutoSaveSession() {
 		AutoSaveSession = setInterval(function() {
 			
 			let d = new Date();
-			ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-")), false, false, true);
+			ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉")), false, false, true);
 			
 			if (document.getElementById("manager_window").style.top != "-500px") {
 				chrome.storage.local.get(null, function(storage) {

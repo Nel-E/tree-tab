@@ -307,7 +307,7 @@ function SetManagerEvents() {
 	document.getElementById("manager_window_button_save_current_session").onmousedown = function(event) {
 		if (event.which == 1) {
 			let d = new Date();
-			ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-")), false, true, false);
+			ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉")), false, true, false);
 		}
 	}
 	document.getElementById("manager_window_button_import_session").onmousedown = function(event) {

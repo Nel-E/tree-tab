@@ -573,7 +573,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
 						let d = new Date();
-						ExportSession((d.toLocaleString().replace("/", "-").replace("/", "-").replace(":", "-").replace(":", "-"))+".tt_session", true, false, false);
+						ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉"))+".tt_session", true, false, false);
 					}
 				}
 			}

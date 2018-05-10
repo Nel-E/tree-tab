@@ -326,6 +326,7 @@ div {
 	border-bottom: 1px solid var(--toolbar_border_bottom);
 	background-color: var(--toolbar_shelf_background);
 	overflow: hidden;
+	z-index: 200;
 }
 
 .button.disabled {
@@ -338,9 +339,6 @@ div {
 	vertical-align: top;
 	width: 24px;
 	height: 24px;
-	/* top: 0px; */
-	/* left: 0px; */
-	/* margin-right: 1px; */
 }
 
 .button_img {
@@ -373,13 +371,17 @@ div {
 
 .button.on {
 	top: -1px;
-	width: 24px;
 	height: 27px;
+	width: 26px;
 	background-color: var(--button_on_background);
 	border: 1px solid var(--toolbar_border_bottom);
+	margin-left: -1px;
+	margin-right: -1px;
+	z-index: 100;
 }
 .button.on .button_img {
 	top: 2px;
+	left: 2px;
 	background-color: var(--button_on_icons);
 }
 
@@ -846,6 +848,7 @@ div {
 	background-image: url(../theme/icon_empty.svg);
 	background-size: var(--favicon_width) var(--favicon_height);
 	background-position: var(--favicon_left), center;
+	/* background-image: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%), url(../theme/icon_empty.svg); */
 }
 
 .group>.children_tabs>:last-child {

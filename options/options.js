@@ -236,11 +236,11 @@ function SetEvents() {
 	}}
 
 // --------------------------------ADD RED AND BLUE PREVIEWS---------------------------------------------------------------
-	document.body.onmousedown = function(event) {
-		if (event.which == 1 && (event.target.id || event.target.classList)) {
-			console.log(event.target);
-		}
-	}
+	// document.body.onmousedown = function(event) {
+		// if (event.which == 1 && (event.target.id || event.target.classList)) {
+			// console.log(event.target);
+		// }
+	// }
 	
 	
 	document.querySelectorAll("#scrollbar_thumb_hover, #options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down, #options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down, .pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font").forEach(function(s){s.onmouseleave = function(event) {

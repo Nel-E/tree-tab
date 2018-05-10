@@ -484,7 +484,7 @@ ul:not(.menu) li {
 .tab_color_options_row {
 	z-index: 2000;
 	position:relative;
-	margin-top: var(--margin_top_tab);
+	margin-top: var(--margin_tab_top);
 	width: 740px;
 	height: calc(var(--tab_height) + 2px);
 	pointer-events: none;
