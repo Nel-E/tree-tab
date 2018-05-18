@@ -10,7 +10,6 @@ function FirefoxStart(retry) {
 			}, 2000);
 		} else {
 			FirefoxLoadTabs(0);
-			FirefoxMessageListeners();
 			if (retry > 0) {
 				chrome.runtime.sendMessage({command: "reload_sidebar"});
 			}
@@ -36,6 +35,16 @@ function FirefoxLoadTabs(retry) {
 			let lastWinId = w[w.length-1].id;
 			let lastTabId = w[w.length-1].tabs[w[w.length-1].tabs.length-1].id;
 			let WinCount = w.length;
+
+			if (opt.debug == true) {
+				if (storage.debug_log != undefined) {
+					debug =  storage.debug_log;
+				}
+				if (retry == 0) {
+					pushlog("TreeTabs background start");
+				}
+			}
+
 			for (let wIndex = 0; wIndex < WinCount; wIndex++) {
 				let winIndex = wIndex;
 				let winId = w[winIndex].id;
@@ -93,15 +102,14 @@ function FirefoxLoadTabs(retry) {
 								}
 
 								if (opt.debug){
-									console.log("FirefoxLoadTabs, retry: "+retry);
-									console.log("Current windows count is: "+w.length);
-									console.log("Current tabs count is: "+tabs_count);
-									console.log("Matching tabs: "+tabs_matched);
-									console.log("Current windows:");
-									console.log(w);
-									console.log("Storage is:");
-									console.log(storage);
+									pushlog("FirefoxLoadTabs, retry: "+retry);
+									pushlog("Current windows count is: "+w.length);
+									pushlog("Current tabs count is: "+tabs_count);
+									pushlog("Matching tabs: "+tabs_matched);
+									pushlog("Current windows:");
+									pushlog(w);
 								}
+
 
 								// will try to find tabs for 3 times
 								if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
@@ -132,7 +140,7 @@ function FirefoxLoadTabs(retry) {
 									delete EmptyTabs;
 								} else {
 									if (opt.debug){
-										console.log("Attempt "+retry+" failed, matched tabs was below 50%");
+										pushlog("Attempt "+retry+" failed, matched tabs was below 50%");
 									}
 									setTimeout(function() {
 										FirefoxLoadTabs(retry+1);
@@ -141,7 +149,7 @@ function FirefoxLoadTabs(retry) {
 							}
 						});
 					}
-				});			
+				});
 			}
 		});
 	});
@@ -170,6 +178,9 @@ async function FirefoxAutoSaveData() {
 				}
 				schedule_save--;
 			});
+		}
+		if (opt.debug == true) {
+			chrome.storage.local.set({debug_log: debug});
 		}
 	}, 1000);
 }
@@ -359,8 +370,7 @@ function FirefoxListeners() {
 }
 function FirefoxMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		if (opt.debug) console.log("message to background:");
-		if (opt.debug) console.log(message);
+
 		if (message.command == "reload") {
 			window.location.reload();
 			return;
@@ -500,11 +510,15 @@ function FirefoxMessageListeners() {
 					if (tabs[message.tabs[j].parent]) {
 						tabs[message.tabs[j].id].parent_ttid = tabs[message.tabs[j].parent].ttid;
 					} else {
-						tabs[message.tabs[j].id].parent_ttid = AppendTabTTId(message.tabs[j].parent);
+						tabs[message.tabs[j].id].parent_ttid = "";
 					}
 				}
 			}
 			schedule_save++;
+			return;
+		}
+		if (message.command == "debug") {
+			pushlog(message.log);
 			return;
 		}
 	});

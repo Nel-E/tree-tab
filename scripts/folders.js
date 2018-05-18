@@ -5,6 +5,9 @@
 function AddNewFolder(folderId, ParentId, Name, Index, ExpandState, AdditionalClass, SetEvents) {
 	var newId = folderId ? folderId : GenerateNewFolderID();
 	bgfolders[newId] = { id: newId, parent: (ParentId ? ParentId : ""), index: (Index ? Index : 0), name: (Name ? Name : caption_noname_group), expand: (ExpandState ? ExpandState : "") };
+	if (opt.debug) {
+		log("f: AddNewFolder, folder: "+JSON.stringify(bgfolders[newId]));
+	}
 	AppendFolder(newId, caption_noname_group, (ParentId ? ParentId : ""), undefined, SetEvents, AdditionalClass);
 	SaveFolders();
 	RefreshCounters();
@@ -13,6 +16,9 @@ function AddNewFolder(folderId, ParentId, Name, Index, ExpandState, AdditionalCl
 }
 
 function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalClass) {
+	if (opt.debug) {
+		log("f: AppendFolder, folder: "+JSON.stringify(bgfolders[folderId]));
+	}
 	let ClassList = "folder ";
 	if (AdditionalClass != undefined) {
 		ClassList = ClassList + AdditionalClass;
@@ -186,6 +192,9 @@ function GenerateNewFolderID() {
 }
 
 function AppendFolders(Folders) {
+	if (opt.debug) {
+		log("f: AppendFolders, Folders: "+JSON.stringify(Folders));
+	}
 	for (var folderId in Folders) {
 		AppendFolder(folderId, Folders[folderId].name, Folders[folderId].parent, Folders[folderId].expand, true, undefined);
 	}
@@ -208,6 +217,9 @@ function SaveFolders() {
 }
 
 function RearrangeFolders(first_loop) {
+	if (opt.debug) {
+		log("f: RearrangeFolders");
+	}
 	document.querySelectorAll(".folder").forEach(function(s){
 		if (bgfolders[s.id] && s.parentNode.childNodes[bgfolders[s.id].index]) {
 			let Ind = Array.from(s.parentNode.children).indexOf(s);
@@ -225,6 +237,9 @@ function RearrangeFolders(first_loop) {
 }
 
 function RemoveFolder(FolderId) {
+	if (opt.debug) {
+		log("f: RemoveFolder, folderId "+FolderId);
+	}
 	let folder = document.getElementById(FolderId);
 	if (folder != null) {
 		let CF = folder.childNodes[1]; // CF stands for DIV with children folders
@@ -280,6 +295,9 @@ function RemoveFolder(FolderId) {
 // }
 
 function ShowRenameFolderDialog(FolderId) { // Rename folder popup
+	if (opt.debug) {
+		log("f: ShowRenameFolderDialog, folderId "+FolderId);
+	}
 	HideRenameDialogs();
 	if (bgfolders[FolderId]) {
 		let name = document.getElementById("folder_edit_name");
@@ -303,17 +321,26 @@ function FolderRenameConfirm() { // when pressed OK in folder popup
 	bgfolders[FolderId].name = name.value;
 	document.getElementById("folder_title" + FolderId).textContent = name.value;
 	HideRenameDialogs();
+	if (opt.debug) {
+		log("f: FolderRenameConfirm, folderId "+FolderId+", name: "+name.value);
+	}
 	chrome.runtime.sendMessage({command: "save_folders", folders: bgfolders, windowId: CurrentWindowId});
 	RefreshCounters();
 }
 
 function DeselectFolders() {
+	if (opt.debug) {
+		log("f: DeselectFolders");
+	}
 	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
 		s.classList.remove("selected_folder");
 	});
 }
 
 function ActionClickFolder(FolderNode, bgOption) {
+	if (opt.debug) {
+		log("f: ActionClickFolder, folderId "+FolderNode.id+", bgOption: "+bgOption);
+	}
 	if (bgOption == "rename_folder") {
 		ShowRenameFolderDialog(FolderNode.id);
 	}
@@ -339,6 +366,9 @@ function ActionClickFolder(FolderNode, bgOption) {
 }
 
 function FolderStartDrag(Node, event) {
+	if (opt.debug) {
+		log("f: FolderStartDrag, folderId "+Node.id);
+	}
 	event.stopPropagation();
 	event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 	event.dataTransfer.setData("text", "");
@@ -346,8 +376,6 @@ function FolderStartDrag(Node, event) {
 	CleanUpDragClasses();
 	EmptyDragAndDrop();
 
-	if (opt.debug) console.log("started dragging folder");
-	
 	DragNodeClass = "folder";
 	
 	let TabsIds = [];
@@ -363,7 +391,6 @@ function FolderStartDrag(Node, event) {
 			s.classList.remove("selected_folder");
 		});
 	} else {
-		if (opt.debug) console.log(Node.parentNode.classList);
 		FreezeSelected();
 		Node.parentNode.classList.add("selected_folder_temporarly");
 		Node.parentNode.classList.add("selected_folder");
@@ -419,6 +446,9 @@ function FolderStartDrag(Node, event) {
 }
 
 function FolderDragOver(Node, event) {
+	if (opt.debug) {
+		log("f: debug, folderId "+Node.id);
+	}
 	if (Node.parentNode.classList.contains("dragged_tree") == false) {
 
 		let P = (GetParentsByClass(Node, "folder")).length + DragTreeDepth;

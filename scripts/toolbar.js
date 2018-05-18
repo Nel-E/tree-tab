@@ -324,13 +324,11 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 					if (event.which == 3) {
 						chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
 							if (activeTab[0].pinned && opt.pin_list_multi_row == false) {
-								console.log(activeTab[0].id);
 								ScrollToTab(activeTab[0].id);
 							}
 							if (activeTab[0].pinned == false) {
 								let Tab = document.getElementById(activeTab[0].id);
 								let groupId = GetParentsByClass(Tab, "group")[0].id;
-								console.log(groupId);
 								SetActiveGroup(groupId, true, true);
 							}
 						});
@@ -604,6 +602,17 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 							chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "url", windowId: CurrentWindowId});
 						}
 						FindTab(document.getElementById("filter_box").value);
+					}
+				}
+			}
+
+			// EMERGENCY RELOAD
+			if (s.id == "button_reboot") {
+				s.onmousedown = function(event) {
+					if (event.which == 1) {
+						chrome.runtime.sendMessage({command: "reload"});
+						chrome.runtime.sendMessage({command: "reload_sidebar"});
+						location.reload();
 					}
 				}
 			}

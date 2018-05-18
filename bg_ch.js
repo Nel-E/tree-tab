@@ -2,6 +2,7 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
+
 function ChromeLoadTabs(retry) {
 	chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(w) {
 		chrome.storage.local.get(null, function(storage) {
@@ -25,6 +26,15 @@ function ChromeLoadTabs(retry) {
 			// if loaded windows mismatch, then try to load back
 			if (LoadedWindows.length < w_count) {
 				LoadedWindows =  storage["windows_BAK"+bak] ? storage["windows_BAK"+bak] : [];
+			}
+
+			if (opt.debug == true) {
+				if (storage.debug_log != undefined) {
+					debug =  storage.debug_log;
+				}
+				if (retry == 0) {
+					pushlog("TreeTabs background start");
+				}
 			}
 
 			// CACHED COUNTS
@@ -103,16 +113,14 @@ function ChromeLoadTabs(retry) {
 			}
 
 			if (opt.debug){
-				console.log("ChromeLoadTabs, retry: "+retry);
-				console.log("Current windows count is: "+w.length);
-				console.log("Saved windows count is: "+LoadedWindows.length);
-				console.log("Current tabs count is: "+CurrentTabsCount);
-				console.log("Loaded tabs count is: "+LoadedTabsCount);
-				console.log("Matching tabs: "+tabs_matched);
-				console.log("Current windows:");
-				console.log(w);
-				console.log("Storage is:");
-				console.log(storage);
+				pushlog("ChromeLoadTabs, retry: "+retry);
+				pushlog("Current windows count is: "+w.length);
+				pushlog("Saved windows count is: "+LoadedWindows.length);
+				pushlog("Current tabs count is: "+CurrentTabsCount);
+				pushlog("Loaded tabs count is: "+LoadedTabsCount);
+				pushlog("Matching tabs: "+tabs_matched);
+				pushlog("Current windows:");
+				pushlog(w);
 			}
 
 			// will loop trying to find tabs
@@ -151,7 +159,7 @@ function ChromeLoadTabs(retry) {
 
 			} else {
 				if (opt.debug){
-					console.log("Attempt "+retry+" failed, matched tabs was below 50%");
+					pushlog("Attempt "+retry+" failed, matched tabs was below 50%");
 				}
 				setTimeout(function() {
 					ChromeLoadTabs(retry+1);
@@ -218,6 +226,11 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 				schedule_save--;
 			});
 		}
+
+		if (opt.debug == true) {
+			chrome.storage.local.set({debug_log: debug});
+		}
+
 	}, LoopTimer);
 }
 function ChromeHashURL(tab) {
@@ -311,8 +324,7 @@ function ChromeListeners() { // start all listeners
 }	
 function ChromeMessageListeners() {
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-		if (opt.debug) console.log("message to background:");
-		if (opt.debug) console.log(message);
+
 		if (message.command == "reload") {
 			window.location.reload();
 			return;
@@ -438,6 +450,10 @@ function ChromeMessageListeners() {
 				}
 			}
 			schedule_save++;
+			return;
+		}
+		if (message.command == "debug") {
+			pushlog(message.log);
 			return;
 		}
 	});

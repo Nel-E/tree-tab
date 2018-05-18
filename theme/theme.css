@@ -163,6 +163,11 @@ div {
 	mask-image: url(../theme/toolbar_load_bak3.svg);
 }
 
+#button_reboot>.button_img {
+	-webkit-mask-image: url(../theme/toolbar_alert.svg);
+	mask-image: url(../theme/toolbar_alert.svg);
+}
+
 #button_backup>.button_img {
 	-webkit-mask-image: url(../theme/toolbar_save.svg);
 	mask-image: url(../theme/toolbar_save.svg);

@@ -5,6 +5,7 @@
 // **********         GLOBAL VARIABLES FOR BACKGROUND, OPTIONS AND SIDEBAR         ***************
 
 // BACKGROUND VARIABLES
+let debug = [];
 var running = false;
 var schedule_save = -999;
 var windows = {};
@@ -44,7 +45,7 @@ var caption_noname_group = chrome.i18n.getMessage("caption_noname_group");
 const DefaultToolbar = {
 	"toolbar_main": ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
 	"toolbar_search": ["button_filter_type", "filter_search_go_prev", "filter_search_go_next"],
-	"toolbar_shelf_tools": (browserId == "F" ? ["button_manager_window", "button_options", "button_unload", "button_detach"] : ["button_manager_window", "button_options", "button_bookmarks", "button_downloads", "button_history", "button_settings", "button_extensions", "button_unload", "button_detach"]),
+	"toolbar_shelf_tools": (browserId == "F" ? ["button_manager_window", "button_options", "button_unload", "button_detach", "button_reboot"] : ["button_manager_window", "button_options", "button_bookmarks", "button_downloads", "button_history", "button_settings", "button_extensions", "button_unload", "button_detach", "button_reboot"]),
 	"toolbar_shelf_groups": ["button_groups_toolbar_hide", "button_new_group", "button_remove_group", "button_edit_group", "button_import_group", "button_export_group"],
 	"toolbar_shelf_backup": (browserId == "F" ? ["button_import_bak", "button_import_merge_bak", "button_export_bak"] : ["button_import_bak", "button_import_merge_bak", "button_export_bak", "button_load_bak1", "button_load_bak2", "button_load_bak3"]),
 	"toolbar_shelf_folders": ["button_new_folder", "button_remove_folder", "button_edit_folder"]
@@ -165,8 +166,8 @@ function ShowOpenFileDialog(extension) {
 	return inp;
 }
 
-function SaveFile(filename, data) {
-	let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
+function SaveFile(filename, extension, data) {
+	let file = new File([JSON.stringify(data)], filename+"."+extension, {type: "text/"+extension+";charset=utf-8"} );
 	let body = document.getElementById("body");
 	let savelink = document.createElement("a");
 	savelink.href = URL.createObjectURL(file);
@@ -174,7 +175,7 @@ function SaveFile(filename, data) {
 	savelink.target = "_blank";
 	savelink.style.display = "none";
 	savelink.type = "file";
-	savelink.download = filename;
+	savelink.download = filename+"."+extension;
 	body.appendChild(savelink);		
 	setTimeout(function() {
 		savelink.click();
@@ -182,46 +183,19 @@ function SaveFile(filename, data) {
 			savelink.parentNode.removeChild(savelink);
 		}, 60000);
 	}, 10);
+}
 
+function log(log) {
+	if (opt.debug) {
+		chrome.runtime.sendMessage({command: "debug", log: log});
+	}
+}
 
-	// let file = new File([JSON.stringify(data)], "test.qpa", {type: "text/csv;charset=utf-8"} );
-	// console.log(file.size);
-	
-	// chrome.downloads.download({
-		// url: URL.createObjectURL(file),
-		// conflictAction: 'prompt',
-		// filename: "file.txt",
-		// saveAs: true    
-	// });
-
-	// let file = new Blob([JSON.stringify(data)], {type: "text/csv;charset=utf-8"} );
-	// chrome.downloads.download({
-		// url: URL.createObjectURL(file),
-		// conflictAction: 'prompt',
-		// filename: "file.txt",
-		// saveAs: true    
-	// });
-
-
-	// chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
-		// chrome.tabs.create({url: "download.html"}, function(tab) {
-			// setTimeout(function() {
-				// chrome.runtime.sendMessage({command: "show_save_file_dialog", browserId: browserId, currentTabId: activeTab[0].id, selfTabId: tab.id, data: data, filename: filename});
-			// }, 300);
-		// });
-	// });
-
-
-	// let file = new File([JSON.stringify(data)], filename, {type: "text/csv;charset=utf-8"} );
-	// let body = document.getElementById("body");
-	// let savelink = document.createElement("a");
-	// savelink.target = "_blank";
-	// savelink.style.display = "none";
-	// savelink.type = "file";
-	// savelink.download = filename;
-	// savelink.href = URL.createObjectURL(file);
-	// body.appendChild(savelink);
-	// savelink.click();
-	// savelink.parentNode.removeChild(savelink);
-	
+function pushlog(log) {
+	debug.push(log);
+	if (debug.length > 100) {
+		debug.splice(0, 1);
+	}
+	console.log(log);
+	schedule_save++;
 }

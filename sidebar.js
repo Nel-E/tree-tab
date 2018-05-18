@@ -17,7 +17,6 @@ function Run() {
 	});
 }
 
-
 function Initialize() {
 	
 	chrome.tabs.query({currentWindow: true}, function(tabs) {
@@ -46,20 +45,20 @@ function Initialize() {
 						// APPEND FOLDERS
 						AppendFolders(bgfolders);
 						// APPEND TABS
+						let ti = 0;
 						let tc = tabs.length;
-						for (var ti = 0; ti < tc; ti++) {
+						for (ti = 0; ti < tc; ti++) {
 							AppendTab(tabs[ti], false, false, false, true, false, true, false, true, false, false);
 						}
-						for (var ti = 0; ti < tc; ti++) {
+						for (ti = 0; ti < tc; ti++) {
 							if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
 								let TabParent = document.getElementById("ct"+bgtabs[tabs[ti].id].parent) ;
-
 								if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #ct"+bgtabs[tabs[ti].id].parent) == null) {
 									TabParent.appendChild(document.getElementById(tabs[ti].id));
 								}
 							}
 						}
-						for (var ti = 0; ti < tc; ti++) {
+						for (ti = 0; ti < tc; ti++) {
 							if (bgtabs[tabs[ti].id] && !tabs[ti].pinned && bgtabs[tabs[ti].id].expand != "") {
 								document.getElementById(tabs[ti].id).classList.add(bgtabs[tabs[ti].id].expand);
 							}
@@ -88,9 +87,13 @@ function Initialize() {
 							RefreshExpandStates();
 							RefreshCounters();
 							SetActiveTabInEachGroup();
+							if (browserId == "F" && opt.skip_load == false && storage.emergency_reload == undefined) {
+								RecheckFirefox();
+							}
 						}, 1000);
 						setTimeout(function() {
 							UpdateData();
+							delete debug;
 							delete running;
 							delete schedule_save;
 							delete windows;
@@ -99,6 +102,9 @@ function Initialize() {
 							delete DefaultToolbar;
 							delete DefaultTheme;
 							delete DefaultPreferences;
+							if (storage.emergency_reload != undefined) {
+								chrome.storage.local.remove("emergency_reload");
+							}
 						}, 5000);
 						if (browserId != "F") {
 							if (Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }

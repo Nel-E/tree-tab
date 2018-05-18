@@ -464,7 +464,6 @@ function SetEvents() {
 	// close x
 	document.getElementById("close_x").onmouseenter = function(event) {
 		AddRedStylePreview("close_img11", "backgroundColor", "red", true);
-		// console.log(this.style);
 	}
 	// close x hover
 	document.getElementById("close_hover_x").onmouseenter = function(event) {
@@ -638,8 +637,6 @@ function SetEvents() {
 	// set dropdown menu options
 	for (let i = 0; i < DropDownList.length; i++) {
 		document.getElementById(DropDownList[i]).onchange = function(event) {
-// console.log(opt[this.id]);
-// console.log(this.value);
 			opt[this.id] = this.value;
 			SavePreferences();
 			setTimeout(function() {
@@ -736,7 +733,7 @@ function SetEvents() {
 		if (ThemeList.options.length == 0) {
 			alert(chrome.i18n.getMessage("options_no_theme_to_export"));
 		} else {
-			SaveFile(ThemeList.options[ThemeList.selectedIndex].text + ".tt_theme", SelectedTheme);
+			SaveFile(ThemeList.options[ThemeList.selectedIndex].text, "tt_theme", SelectedTheme);
 		}
 	}}
 
@@ -891,6 +888,36 @@ function SetEvents() {
 	}
 
 
+
+// ----------------------EXPORT DEBUG LOG---------------------------------------------------------------------------------	
+	document.getElementById("options_export_debug").onclick = function(event) {if (event.which == 1) {
+		chrome.storage.local.get(null, function(storage) {
+			SaveFile("TreeTabs", "log", storage);
+		});
+	}}
+
+// ----------------------IMPORT DEBUG LOG----------------------------------------------------------------------------	
+	document.getElementById("options_print_debug").onclick = function(event) {if (event.which == 1) {
+		let inputFile = ShowOpenFileDialog(".log");
+		inputFile.onchange = function(event) {
+			let file = document.getElementById("file_import");
+			let fr = new FileReader();
+			if (file.files[0] == undefined) return;
+			fr.readAsText(file.files[file.files.length - 1]);
+			fr.onload = function() {
+				let data = fr.result;
+				file.parentNode.removeChild(file);
+				let LoadedData = JSON.parse(data);
+				// LoadedData.forEach(function(d){
+					// console.log(d);
+				// });
+				// LoadedData.forEach(function(d){
+					console.log(LoadedData);
+				// });
+			}
+		}						
+
+	}}
 
 // ----------------------CLEAR DATA BUTTON--------------------------------------------------------------------------------	
 

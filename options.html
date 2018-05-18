@@ -247,6 +247,7 @@
 					<select id="move_tabs_on_url_change">
 						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_never" value="never"></option>
 						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_from_empty" value="from_empty"></option>
+						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_from_empty_b" value="from_empty_b"></option>
 						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_all_new" value="all_new"></option>
 						<option class="bg_opt_drop_down_menu" id="options_move_on_url_change_always" value="always"></option>
 					</select>
@@ -327,7 +328,7 @@
 		</fieldset>		
 
 
-		<fieldset class="field" id="field_show_toolbar" style="position: relative; width:816px;">
+		<fieldset class="field" id="field_show_toolbar" style="position: relative; width:850px;">
 			<legend id="toolbar_legend">
 				<input type="checkbox" class="opt_checkbox bg_opt" style="position:relative; top:-1px;" id="show_toolbar"></input>
 				<label class="label" style="position:relative; top:-3px;" id="options_toolbar"></label>
@@ -371,51 +372,36 @@
 						<div class="pick_col color_bucket"        id="button_background"        ></div>
 						<div class="pick_col color_bucket"        id="button_hover_background"  ></div>
 						<div class="pick_col color_bucket"        id="button_on_background"     ></div>
-
 						<div class="spacer"></div>
-
 						<div class="pick_col color_toolbar_icon"  id="button_icons"             ></div>
 						<div class="pick_col color_toolbar_icon"  id="button_icons_hover"       ></div>
 						<div class="pick_col color_toolbar_icon"  id="button_on_icons"          ></div>
-
 						<div class="spacer"></div>
-
 						<div class="pick_col color_border"        id="button_border"            ></div>
 						<div class="pick_col color_border"        id="button_hover_border"      ></div>
-
 						<div class="spacer"></div>
 						<div class="spacer"></div>
-
 						<div class="pick_col font_color"          id="filter_box_font"          ></div>
 						<div class="pick_col color_bucket"        id="filter_box_background"    ></div>
 						<div class="pick_col color_border"        id="filter_box_border"        ></div>
 						<div class="pick_col color_x"             id="filter_clear_icon"        ></div>
-
 						<div class="spacer"></div>
 						<div class="spacer"></div>
 						<div class="spacer"></div>
-
 						<div class="pick_col color_bucket"        id="toolbar_background"       ></div>
 						<div class="pick_col color_bucket"        id="toolbar_shelf_background" ></div>
 						<div class="pick_col color_border"        id="toolbar_border_bottom"    ></div>
-
 						<div class="spacer"></div>
 						<div class="spacer"></div>
 						<div class="spacer"></div>
-
 						<div class="pick_col color_bucket"        id="button_shelf_background"  ></div>
 						<div class="pick_col color_bucket"        id="button_shelf_hover_background"  ></div>
-
 						<div class="spacer"></div>
-
 						<div class="pick_col color_toolbar_icon"  id="button_shelf_icons"        ></div>
 						<div class="pick_col color_toolbar_icon"  id="button_shelf_icons_hover"  ></div>
-
 						<div class="spacer"></div>
-
 						<div class="pick_col color_border"        id="button_shelf_border"       ></div>
 						<div class="pick_col color_border"        id="button_shelf_hover_border" ></div>
-
 					</div>
 					<div class="toolbar" id="toolbar_theme" style="position: relative; top: 5px; height: 53px; width: 788px; overflow:hidden;">
 						<div id="toolbar_main_theme">
@@ -817,7 +803,9 @@
 					<td class="label" id="options_debug"></td>
 				</tr>
 			</table>
-
+			<br>
+			<button class="set_button" type="button" id="options_export_debug" style="position: relative; margin:10px;"></button>
+			<button class="set_button" type="button" id="options_print_debug" style="position: relative; margin:10px;"></button>
 		</fieldset>
 		
 		<button class="set_button" type="button" id="options_clear_data" style="margin:10px;"></button>

@@ -9,6 +9,9 @@ function SaveGroups() {
 }
 
 function AppendGroups(Groups) {
+	if (opt.debug) {
+		log("f: AppendGroups, Groups: "+JSON.stringify(Groups));
+	}
 	// let GroupList = document.getElementById("group_list");
 	// let scroll = GroupList.scrollTop;
 
@@ -26,6 +29,9 @@ function AppendGroups(Groups) {
 }
 
 function RearrangeGroupsButtons(first_loop) {
+	if (opt.debug) {
+		log("f: RearrangeGroupsButtons");
+	}
 	document.querySelectorAll(".group_button").forEach(function(s){
 		let groupId = (s.id).substr(1);
 		if (bggroups[groupId]) {
@@ -46,6 +52,9 @@ function RearrangeGroupsButtons(first_loop) {
 }
 
 function RearrangeGroupsLists() {
+	if (opt.debug) {
+		log("f: RearrangeGroupsLists");
+	}
 	let activegroup = document.getElementById(active_group);
 	let scroll = activegroup.scrollTop;
 	let groups = document.getElementById("groups");
@@ -59,6 +68,9 @@ function RearrangeGroupsLists() {
 }
 
 function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
+	if (opt.debug) {
+		log("f: AppendGroupToList, groupId: "+groupId+", group_name: "+group_name+", font_color: "+font_color+", SetEvents: "+SetEvents);
+	}
 	if (document.getElementById(groupId) == null) {
 		let grp = document.createElement("div"); grp.className = "group"; grp.id = groupId; grp.style.display = "none"; document.getElementById("groups").appendChild(grp);
 		let gcf = document.createElement("div"); gcf.className = "children_folders"; gcf.id = "cf"+groupId; grp.appendChild(gcf);
@@ -191,12 +203,18 @@ function GenerateNewGroupID(){
 function AddNewGroup(Name, FontColor) {
 	let newId = GenerateNewGroupID();
 	bggroups[newId] = { id: newId, index: 0, active_tab: 0, prev_active_tab: 0, active_tab_ttid: "", name: (Name ? Name : caption_noname_group), font:  (FontColor ? FontColor : "")  };
+	if (opt.debug) {
+		log("f: AddNewGroup, groupId: "+newId+", Name: "+Name+", FontColor: "+FontColor);
+	}
 	AppendGroupToList(newId, bggroups[newId].name, bggroups[newId].font, true);
 	UpdateBgGroupsOrder();
 	return newId;
 }
 
 function FindGroupIdByName(name) {
+	if (opt.debug) {
+		log("f: FindGroupIdByName: "+name);
+	}
 	for (let key in bggroups) {
 		if (!bggroups.hasOwnProperty(key)) {
 			continue;
@@ -209,6 +227,9 @@ function FindGroupIdByName(name) {
 }
 
 function AppendTabToGroupOnRegexMatch(tabId, url) {
+	if (opt.debug) {
+		log("f: AppendTabToGroupOnRegexMatch, tabId: "+tabId+", url: "+url);
+	}
 	let Tab = document.getElementById(tabId);
 
 	if (Tab != null && Tab.classList.contains("tab")) {
@@ -291,7 +312,9 @@ function UpdateBgGroupsOrder() {
 }
 
 function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
-	if (opt.debug) console.log("function: SetActiveGroup");
+	if (opt.debug) {
+		log("f: SetActiveGroup, groupId: "+groupId+", switch_to_active_in_group: "+switch_to_active_in_group+", scroll_to_active: "+scroll_to_active);
+	}
 	let group = document.getElementById(groupId);
 	if (group != null) {
 		active_group = groupId;

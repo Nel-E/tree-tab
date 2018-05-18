@@ -5,8 +5,7 @@
 document.addEventListener("DOMContentLoaded", Init(), false);
 
 function Init() {
-	setTimeout(function() {
-		FirefoxMessageListeners();
-		FirefoxStart(0);
-	}, 500);
+	ConvertLegacyStorage();
+	ChromeMessageListeners();
+	ChromeLoadTabs(0);
 }

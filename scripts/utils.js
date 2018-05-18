@@ -3,6 +3,60 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 
+function RecheckFirefox() {
+	chrome.tabs.query({pinned: false, currentWindow: true}, function(tabs) {
+		let last_tabId = tabs[tabs.length-1].id;
+		let p = [];
+		let p_tt = [];
+		let t_ref = {};
+		let t_ind = 0;
+		let ok = 0;
+		let ti = 0;
+		let tc = tabs.length;
+		for (ti = 0; ti < tc; ti++) {
+			let tabId = tabs[ti].id;
+			p.push("");
+			p_tt.push("");
+			let t = Promise.resolve(browser.sessions.getTabValue(tabId, "TTdata")).then(function(TabData) {
+				if (TabData != undefined) {
+					t_ref[TabData.ttid] = tabs[t_ind].id;
+					p_tt[t_ind] = TabData.parent_ttid;
+					p[t_ind] = TabData.parent;
+				}
+				t_ind++;
+				if (tabId == last_tabId) {
+					let i = 0;
+					for (i = 0; i < p.length; i++) {
+						if (t_ref[p_tt[i]]) {
+							p[i] = t_ref[p_tt[i]];
+						}						
+					}
+					for (i = 0; i < p.length; i++) {
+						let Tab = document.getElementById(tabs[i].id);
+						if (Tab && p[i] == Tab.parentNode.parentNode.id) {
+							ok++;
+						}
+					}
+					if (ok < tabs.length*0.5) {
+						if (opt.debug) {
+							log("emergency reload");
+						}
+						chrome.storage.local.set({emergency_reload: true});
+						chrome.runtime.sendMessage({command: "reload"});
+						chrome.runtime.sendMessage({command: "reload_sidebar"});
+						location.reload();
+					} else {
+						if (opt.debug) {
+							log("f: RecheckFirefox, ok");
+						}
+					}
+				}
+			});
+		}
+	});
+}
+
+
 function AppendToNode(Node, AppendNode) {
 	if (Node != null && AppendNode != null) {
 		AppendNode.appendChild(Node);
@@ -69,7 +123,11 @@ function HexToRGB(hex, alpha){
 }
 
 function GetSelectedFolders() {
-	if (opt.debug) console.log("function: GetSelectedFolders");
+	
+	if (opt.debug) {
+		log("f: GetSelectedFolders");
+	}
+	
 	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
 	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
 		res.FoldersSelected.push(s.id);
@@ -84,12 +142,10 @@ function GetSelectedFolders() {
 			res.TabsIdsParents.push(tc.parentNode.id);
 		});
 	});
-	if (opt.debug) console.log(res);
 	return res;
 }
 
 function GetSelectedTabs() {
-	if (opt.debug) console.log("function: GetSelectedTabs");
 	// let res = {urls: [], TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
 	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
 	document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
@@ -111,7 +167,6 @@ function GetSelectedTabs() {
 			res.TabsIdsParents.push(tc.parentNode.id);
 		});
 	});
-	if (opt.debug) console.log(res);
 	return res;
 }
 

@@ -6,10 +6,11 @@
 function OpenManagerWindow() {
 	HideRenameDialogs();
 
+	if (opt.debug) {
+		log("f: OpenManagerWindow");
+	}
+
 	chrome.storage.local.get(null, function(storage) {
-
-		if (opt.debug) console.log(storage);
-
 		let ManagerWindow = document.getElementById("manager_window");
 		ManagerWindow.style.display = "block";
 	
@@ -21,13 +22,13 @@ function OpenManagerWindow() {
 		while (GroupList.hasChildNodes()) {
 			GroupList.removeChild(GroupList.firstChild);
 		}
-						
+
 		let SessionsList = document.getElementById("manager_window_sessions_list");
 		while (SessionsList.hasChildNodes()) {
 			SessionsList.removeChild(SessionsList.firstChild);
 		}
 
-						
+		
 		if (storage.hibernated_groups != undefined) {
 			storage.hibernated_groups.forEach(function(hibernated_group){
 				AddGroupToManagerList(hibernated_group);
@@ -82,8 +83,8 @@ function AddGroupToManagerList(hibernated_group) {
 		if (event.which == 1) {
 			let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
 			chrome.storage.local.get(null, function(storage) {
-				let filename = storage.hibernated_groups[HibernategGroupIndex].group.name == "" ? caption_noname_group+".tt_group" : storage.hibernated_groups[HibernategGroupIndex].group.name+".tt_group";
-				SaveFile(filename, storage.hibernated_groups[HibernategGroupIndex]);
+				let filename = storage.hibernated_groups[HibernategGroupIndex].group.name == "" ? caption_noname_group : storage.hibernated_groups[HibernategGroupIndex].group.name;
+				SaveFile(filename, "tt_group", storage.hibernated_groups[HibernategGroupIndex]);
 			});
 		}
 	}
@@ -165,8 +166,8 @@ function AddSessionToManagerList(saved_session) {
 			let saved_session = this.parentNode;
 			let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
 			chrome.storage.local.get(null, function(storage) {
-				let filename = storage.saved_sessions[SessionIndex].name == "" ? caption_noname_group+".tt_session" : storage.saved_sessions[SessionIndex].name+".tt_session";
-				SaveFile(filename, storage.saved_sessions[SessionIndex].session);
+				let filename = storage.saved_sessions[SessionIndex].name == "" ? caption_noname_group : storage.saved_sessions[SessionIndex].name;
+				SaveFile(filename, "tt_session", storage.saved_sessions[SessionIndex].session);
 			});
 		}
 	}

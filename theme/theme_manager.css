@@ -216,7 +216,7 @@
 	
 	height: 26px;
 	width: 100%;
-	border-top: 1px solid var(--tabs_menu_border);
+	border-top: 1px solid var(--toolbar_border_bottom);
 	border-bottom: 1px solid var(--toolbar_border_bottom);
 	background-color: var(--toolbar_background);
 }
@@ -244,13 +244,13 @@
 
 
 .mw_on {
-	border-bottom: 1px solid var(--toolbar_shelf_background);
-	border-top: 1px solid var(--toolbar_shelf_background);
+	border-bottom: none;
+	border-top: none;
 	border-left: 1px solid var(--toolbar_border_bottom);
 	border-right: 1px solid var(--toolbar_border_bottom);
 	background-color: var(--toolbar_shelf_background);
 
-	height: 26px;
+	height: 27px;
 	width: 26px;
 	z-index: 100;
 }
@@ -258,6 +258,7 @@
 
 
 .mw_on>.manager_window_toolbar_button_img {
+	top: 2px;
 	left: 2px;
 }
 

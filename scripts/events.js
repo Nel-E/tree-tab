@@ -3,6 +3,10 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 function SetEvents() {
+	if (opt.debug) {
+		log("f: SetEvents, adding global events.");
+	}
+
 	let PinList = document.getElementById("pin_list");
 	
 	if (!opt.switch_with_scroll) {
@@ -189,6 +193,9 @@ function SetEvents() {
 
 	
 	document.body.ondragover = function(event) {
+		if (opt.debug) {
+			log("drag over: "+event.target.id);
+		}
 		event.preventDefault();
 		if (event.target.parentNode.classList.contains("c") && event.target.parentNode.classList.contains("dragged_tree") == false) {
 			if (DragOverTimer && opt.open_tree_on_hover) {
@@ -201,7 +208,7 @@ function SetEvents() {
 
 	document.ondrop = function(event) {
 		if (opt.debug) {
-			console.log("drop");
+			log("dropped on window: "+CurrentWindowId);
 		}
 
 		let TabsIds = event.dataTransfer.getData("TabsIds") ? JSON.parse(event.dataTransfer.getData("TabsIds")) : [];
@@ -234,7 +241,10 @@ function SetEvents() {
 				DropToTarget(target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected);
 			} else {
 				(TabsIds).forEach(function(TabId) {
-					if (opt.debug) console.log("DragAndDrop: will now move tab: "+TabId);
+					if (opt.debug) {
+						log("DragAndDrop: will now move tab: "+TabId);
+					}
+
 					chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
 						if (browserId == "F") {																																// MOZILLA BUG 1398272
 							let MovedTabId = MovedTab[0] != undefined ? MovedTab[0].id : (MovedTab.id != undefined ? MovedTab.id : TabId);		// MOZILLA BUG 1398272
@@ -252,7 +262,7 @@ function SetEvents() {
 								(TabsIdsSelected).forEach(function(selectedTabId) {
 									let selectedTab = document.getElementById(selectedTabId);
 									if (selectedTab != null) {
-										// selectedTab.classList.add("selected_temporarly");
+										selectedTab.classList.add("selected_temporarly");
 										selectedTab.classList.add("selected_tab");
 									}
 								});
@@ -268,8 +278,9 @@ function SetEvents() {
 
 	document.ondragleave = function(event) {
 		if (opt.debug) {
-			console.log("global dragleave");
+			log("global dragleave");
 		}
+
 		if (event.target.classList) {
 			if (event.target.classList.contains("drag_enter_center")) {
 				DragOverTimer = false;
@@ -279,11 +290,11 @@ function SetEvents() {
 	}
 
 	document.ondragend = function(event) {
-		// if (opt.debug) {console.log("document dragend");}
+		// log("document dragend");
 		// DETACHING TEMPORARILY DISABLED PLEASE USE MENU OR TOOLBAR!
 		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
 			// if ((browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight)))||	(browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight))) {
-				// if (opt.debug) console.log("dragged outside sidebar");
+				// log("dragged outside sidebar");
 				// if (DragNodeClass == "tab") {
 					// Detach(DragAndDrop.TabsIds, {});
 				// }
@@ -304,6 +315,10 @@ function SetEvents() {
 
 
 function BindTabsSwitchingToMouseWheel(Id) {
+	if (opt.debug) {
+		log("f: BindTabsSwitchingToMouseWheel, binding tabs switch to group: "+Id);
+	}
+
 	document.getElementById(Id).onwheel = function(event) {
 		event.preventDefault();
 		let prev = event.deltaY < 0;
@@ -318,7 +333,7 @@ function BindTabsSwitchingToMouseWheel(Id) {
 function RemoveHighlight() {
 	document.querySelectorAll(".highlighted_drop_target").forEach(function(s){
 		if (opt.debug) {
-			console.log("removing highlight of: " + s.id);
+			log("removing highlight of: " + s.id);
 		}
 		s.classList.remove("before");
 		s.classList.remove("after");
@@ -329,6 +344,9 @@ function RemoveHighlight() {
 
 function RemoveHeadersHoverClass() {
 	document.querySelectorAll(".folder_header_hover, .tab_header_hover").forEach(function(s){
+		if (opt.debug) {
+			log("removing hover of: " + s.id);
+		}
 		s.classList.remove("folder_header_hover");
 		s.classList.remove("tab_header_hover");
 	});
@@ -340,12 +358,11 @@ function RemoveHeadersHoverClass() {
 
 
 function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected) {
-	if (opt.debug) {
-		console.log("function: DropToTarget START"); console.log("TargetNode"); console.log(TargetNode); console.log("TabsIdsSelected"); console.log(TabsIdsSelected); console.log("TabsIds"); console.log(TabsIds);
-		console.log("TabsIdsParents"); console.log(TabsIdsParents); console.log("Folders"); console.log(Folders); console.log("FoldersSelected"); console.log(FoldersSelected);
-	}
-
 	if (TargetNode != null) {
+
+		if (opt.debug) {
+			log("f: DropToTarget, TargetNode: "+TargetNode.id+", TabsIdsSelected: "+JSON.stringify(TabsIdsSelected)+", TabsIds: "+JSON.stringify(TabsIds)+", TabsIdsParents: "+JSON.stringify(TabsIdsParents)+", Folders: "+JSON.stringify(Folders)+", FoldersSelected: "+JSON.stringify(FoldersSelected)  );
+		}
 
 		// let Append;
 		let pinTabs = false;
@@ -446,6 +463,16 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			}, 600);
 		}
 
+		if (TargetNode.classList.contains("group_button") && (DragNodeClass == "tab" || DragNodeClass == "folder")) {
+			chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
+				let Tab = document.getElementById(activeTab[0].id);
+				if (Tab != null && TabsIds.indexOf(activeTab[0].id) != -1) {
+					SetActiveGroup(TargetNode.id.substr(1), false, false);
+					SetActiveTab(activeTab[0].id, true);
+				}
+			});
+		}
+
 		if (DragNodeClass == "group") {
 			if (TargetNode.classList.contains("before")) {
 				InsterBeforeNode(document.querySelector(".dragged_group_button"), TargetNode);
@@ -459,27 +486,9 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 				schedule_rearrange_tabs++;
 			}		
 		}
-
-		// TabsIds.forEach(function(tb){
-			// SetTabClass(tb, pinTabs);
-		// });
-		// TabsIdsSelected.forEach(function(tb){
-			// SetTabClass(tb, pinTabs);
-		// });
 		
 		SetMultiTabsClass(TabsIds, pinTabs);
 		// SetMultiTabsClass(TabsIdsSelected, pinTabs);
-
-		// if (Append) {
-			// FoldersSelected.forEach(function(folderId){
-				// AppendToNode(document.getElementById(folderId), Append);
-			// });
-			// TabsIdsSelected.forEach(function(tabId){
-				// AppendToNode(document.getElementById(tabId), Append);
-			// });
-			// ScrollToTab(TabsIds[0]);
-		// }
-		
 
 		// recheck new structure
 		if (TabsIds.length) {
@@ -498,9 +507,11 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
 				return parseInt(s.id);
 			});
+			
 			if (opt.debug) {
-				console.log("After DropToTarget, will Syncro tabbar tabs order, TabsIds array is:"); console.log(TabsIds);
+				log(  "f: DropToTarget, will Syncro tabbar tabs order, TabsIds array is:"+JSON.stringify(TabsIds)  );
 			}
+				
 			chrome.tabs.move(TabsIds, {index: tabIds.indexOf(TabsIds[0])});
 			setTimeout(function() {
 				schedule_rearrange_tabs++;
@@ -517,33 +528,30 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 		EmptyDragAndDrop();
 
 		if (opt.debug) {
-			console.log("DropToTarget END");
+			log("DropToTarget END");
 		}
 	}, 300);
 
 	setTimeout(function() {
-		if (TargetNode.classList.contains("group_button") && (DragNodeClass == "tab" || DragNodeClass == "folder")) {
-			chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
-				let Tab = document.getElementById(activeTab[0].id);
-				if (Tab != null && TabsIds.indexOf(activeTab[0].id) != -1) {
-					SetActiveGroup(TargetNode.id.substr(1), false, false);
-					SetActiveTab(activeTab[0].id, true);
-				}
-			});
-		}
 		CleanUpDragClasses();
 		RemoveHighlight();
-	}, 50);
+	}, 100);
 }
 
 
 function FreezeSelected() {
 	document.querySelectorAll(".selected_tab").forEach(function(s){
+		if (opt.debug) {
+			log("freezing selected tab: " + s.id);
+		}
 		s.classList.add("selected_frozen");
 		s.classList.remove("selected_tab");
 		s.classList.remove("selected_last");
 	});
 	document.querySelectorAll(".selected_folder").forEach(function(s){
+		if (opt.debug) {
+			log("freezing selected folder: " + s.id);
+		}
 		s.classList.add("selected_folder_frozen");
 		s.classList.remove("selected_folder");
 	});
@@ -551,6 +559,9 @@ function FreezeSelected() {
 
 
 function CleanUpDragClasses() {
+	if (opt.debug) {
+		log("f: CleanUpDragClasses, unfreezing and removing temporary classes...");
+	}
 	document.querySelectorAll(".selected_frozen").forEach(function(s){
 		s.classList.add("selected_tab");
 		s.classList.remove("selected_frozen");
@@ -582,6 +593,9 @@ function CleanUpDragClasses() {
 }
 
 function EmptyDragAndDrop() {
+	if (opt.debug) {
+		log("f: EmptyDragAndDrop, reset DragOverTimer and removing DragNodeClass...");
+	}
 	DragOverTimer = false;
 	DragNodeClass = "";
 	DragTreeDepth = 0;

@@ -5,8 +5,12 @@
 document.addEventListener("DOMContentLoaded", Init(), false);
 
 function Init() {
-	setTimeout(function() {
+	if (browserId == "F") {
 		FirefoxMessageListeners();
 		FirefoxStart(0);
-	}, 500);
+	} else {
+		// ConvertLegacyStorage();
+		ChromeMessageListeners();
+		ChromeLoadTabs(0);
+	}
 }

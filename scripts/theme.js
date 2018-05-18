@@ -254,7 +254,6 @@ function RenameSelectedTheme() {
 		ThemeList.options[ThemeList.selectedIndex].text = ThemeNameBox.value;
 		SelectedTheme["theme_name"] = ThemeNameBox.value;
 		LSthemes[current_theme]["theme_name"] = ThemeNameBox.value;
-		// console.log(LSthemes);
 		chrome.storage.local.set({themes: LSthemes});
 		chrome.storage.local.set({current_theme: current_theme});
 	});
@@ -263,7 +262,6 @@ function RenameSelectedTheme() {
 
 
 function CheckTheme(theme) {
-	// console.log(theme);
 	if (theme.theme_version < 2) {
 		theme["ColorsSet"]["scrollbar_height"] = theme.ScrollbarPinList + "px";
 		theme["ColorsSet"]["scrollbar_width"] = theme.ScrollbarTabList + "px";

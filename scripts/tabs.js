@@ -6,13 +6,15 @@
 
 
 async function UpdateData() {
-	if (opt.debug) console.log("function: UpdateData");
+	if (opt.debug) {
+		log("f: UpdateData");
+	}
+	
 	setInterval(function() {
 		if (schedule_update_data > 1) {
 			schedule_update_data = 1;
 		}
 		if (schedule_update_data > 0) {
-			if (opt.debug) console.log("updating tabs");
 			let PinInd = 0;
 			let pins_data = [];
 			document.querySelectorAll(".pin").forEach(function(pin){
@@ -31,7 +33,9 @@ async function UpdateData() {
 }
 
 function RearrangeBrowserTabs() {
-	if (opt.debug) console.log("function: RearrangeBrowserTabs");
+	if (opt.debug) {
+		log("f: RearrangeBrowserTabs");
+	}
 	setInterval(function() {
 		if (schedule_rearrange_tabs > 0) {
 			schedule_rearrange_tabs--;
@@ -44,7 +48,9 @@ function RearrangeBrowserTabs() {
 }
 
 async function RearrangeBrowserTabsLoop(tabIds, tabIndex) {
-	if (opt.debug) console.log("function: RearrangeBrowserTabsLoop");
+	if (opt.debug) {
+		log("f: RearrangeBrowserTabsLoop");
+	}
 	if (tabIndex >= 0 && schedule_rearrange_tabs == 0){
 		chrome.tabs.get(tabIds[tabIndex], function(tab) {
 			if (tab && tabIndex != tab.index) {
@@ -292,6 +298,9 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 }
 
 function RemoveTabFromList(tabId) {
+	if (opt.debug) {
+		log("f: RemoveTabFromList, tabId: "+tabId);
+	}
 	let tab = document.getElementById(tabId);
 	if (tab != null) {
 		tab.parentNode.removeChild(tab);
@@ -347,6 +356,9 @@ function SetMultiTabsClass(TabsIds, pin) {
 }
 
 function SetActiveTab(tabId, switchToGroup) {
+	if (opt.debug) {
+		log("f: SetActiveTab, tabId: "+tabId);
+	}
 	let Tab = document.getElementById(tabId);
 	if (Tab != null) {
 		let TabGroup = GetParentsByClass(Tab, "group");
@@ -409,12 +421,17 @@ function ScrollToTab(tabId) {
 }
 
 function Detach(tabsIds, Folders) {
+	if (opt.debug) {
+		log("f: Detach");
+	}
 	chrome.windows.get(CurrentWindowId, {populate : true}, function(window) {
 		if (window.tabs.length == 1 || tabsIds.length == 0) {
 			return;
 		}
 		if (tabsIds.length == window.tabs.length) {
-			if (opt.debug) console.log("You are trying to detach all tabs! Skipping!");
+			if (opt.debug) {
+				log("You are trying to detach all tabs! Skipping!");
+			}
 			return;
 		}
 
@@ -451,7 +468,9 @@ function Detach(tabsIds, Folders) {
 						// chrome.tabs.remove(new_window.tabs[0].id, null);
 						let Confirmations = 0;
 						let GiveUpLimit = 600;
-						if (opt.debug) console.log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
+						if (opt.debug) {
+							log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
+						}
 						var Append = setInterval(function() {
 							chrome.windows.get(new_window.id, function(confirm_new_window) {
 								chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
@@ -460,7 +479,9 @@ function Detach(tabsIds, Folders) {
 									}
 								});
 								GiveUpLimit--;
-								if (opt.debug) console.log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
+								if (opt.debug) {
+									log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
+								}
 								if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
 									clearInterval(Append);
 								}
@@ -479,6 +500,15 @@ function Detach(tabsIds, Folders) {
 }
 
 function CloseTabs(tabsIds) {
+	if (opt.debug) {
+		log("f: CloseTabs, tabsIds are: "+JSON.stringify(tabsIds));
+	}
+	tabsIds.forEach(function(tabId) {
+		let Tab = document.getElementById(tabId);
+		if (Tab != null) {
+			Tab.classList.add("will_be_closed");
+		}
+	});
 	let activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
 	if (activeTab != null && tabsIds.indexOf(parseInt(activeTab.id)) != -1) {
 		SwitchActiveTabBeforeClose(active_group);
@@ -515,33 +545,53 @@ function DiscardTabs(tabsIds) {
 }
 
 function SwitchActiveTabBeforeClose(ActiveGroupId) {
-	if (opt.debug) console.log("function: SwitchActiveTabBeforeClose");
+	if (opt.debug) {
+		log("f: SwitchActiveTabBeforeClose");
+	}
 	let activeGroup = document.getElementById(ActiveGroupId);
-	if (document.querySelectorAll("#"+ActiveGroupId+" .tab").length <= 1 && document.querySelector(".pin.active_tab") == null) {
-		if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
-			if (activeGroup.previousSibling != null) {
-				if (document.querySelectorAll("#"+activeGroup.previousSibling.id+" .tab").length > 0) {
-					SetActiveGroup(activeGroup.previousSibling.id, true, true);
-				} else {
-					SwitchActiveTabBeforeClose(activeGroup.previousSibling.id);
-					return;
-				}
-			} else {
-				SetActiveGroup("tab_list", true, true);
+	
+	if (document.querySelectorAll("#"+ActiveGroupId+" .tab").length <= 1 && document.querySelector(".pin.active_tab") == null) { // CHECK IF CLOSING LAST TAB IN ACTIVE GROUP
+		
+		let pins = document.querySelectorAll(".pin");
+		
+		if (pins.length > 0) { // IF THERE ARE ANY PINNED TABS, ACTIVATE IT
+			if (opt.debug) {
+				log("available pin, switching to: "+pins[pins.length-1].id);
 			}
-		} else {
-			if (activeGroup.nextSibling != null) {
-				if (document.querySelectorAll("#"+activeGroup.nextSibling.id+" .tab").length > 0) {
-					SetActiveGroup(activeGroup.nextSibling.id, true, true);
+			chrome.tabs.update(parseInt(pins[pins.length-1].id), {active: true});
+			return;
+		} else { // NO OTHER CHOICE BUT TO SEEK IN ANOTHER GROUP
+			
+			if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
+				if (activeGroup.previousSibling != null) {
+					if (document.querySelectorAll("#"+activeGroup.previousSibling.id+" .tab").length > 0) {
+						SetActiveGroup(activeGroup.previousSibling.id, true, true);
+					} else {
+						SwitchActiveTabBeforeClose(activeGroup.previousSibling.id);
+						return;
+					}
 				} else {
-					SwitchActiveTabBeforeClose(activeGroup.nextSibling.id);
-					return;
+					SetActiveGroup("tab_list", true, true);
 				}
 			} else {
-				SetActiveGroup("tab_list", true, true);
+				if (activeGroup.nextSibling != null) {
+					if (document.querySelectorAll("#"+activeGroup.nextSibling.id+" .tab").length > 0) {
+						SetActiveGroup(activeGroup.nextSibling.id, true, true);
+					} else {
+						SwitchActiveTabBeforeClose(activeGroup.nextSibling.id);
+						return;
+					}
+				} else {
+					SetActiveGroup("tab_list", true, true);
+				}
 			}
 		}
 	} else {
+		
+		if (opt.debug) {
+			log("available tabs in current group, switching option is: "+opt.after_closing_active_tab);
+		}
+		
 		if (opt.after_closing_active_tab == "above") {
 			ActivatePrevTab(true);
 		}
@@ -568,8 +618,11 @@ function ActivateNextTabBeforeClose() {
 			}
 		}
 	}
-	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+	
+	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+active_group+" .tab.active_tab");
+	
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab:not(.will_be_closed)").length > 1) {
 		if (opt.promote_children && activeTab.childNodes[1].firstChild != null) {
 			chrome.tabs.update(parseInt(activeTab.childNodes[1].firstChild.id), { active: true });
 		} else {
@@ -601,8 +654,11 @@ function ActivatePrevTabBeforeClose() {
 			}
 		}
 	}
-	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+
+	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+active_group+" .tab.active_tab");
+
+	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab:not(.will_be_closed)").length > 1) {
 		if (opt.promote_children && activeTab.childNodes[1].firstChild != null) {
 			chrome.tabs.update(parseInt(activeTab.childNodes[1].firstChild.id), { active: true });
 		} else {
@@ -634,7 +690,10 @@ function ActivateNextTab(allow_reverse) {
 			}
 		}
 	}
-	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+
+	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+active_group+" .tab.active_tab");
+
 	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
 		let FirstChild = activeTab.childNodes[1].firstChild;
 		if (FirstChild != null) {
@@ -673,7 +732,10 @@ function ActivatePrevTab(allow_reverse) {
 			}
 		}
 	}
-	let activeTab = document.querySelector("#"+active_group+" .tab.active_tab");
+
+	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+active_group+" .tab.active_tab");
+
 	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
 		let pSchildren = activeTab.previousSibling != null ? document.querySelectorAll("#ct"+activeTab.previousSibling.id+" .tab") : null;
 		if (activeTab.previousSibling != null && pSchildren.length > 0) {
@@ -711,8 +773,6 @@ function OpenNewTab(pin, parentId) {
 				schedule_update_data++;
 			}
 			newTabUrl = tab.url;
-			// console.log("OpenNewTab");
-			// console.log(newTabUrl);
 		});
 	}
 }

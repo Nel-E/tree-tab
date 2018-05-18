@@ -19,6 +19,9 @@
 	"button_undo": {
 		"message": "Reopen last closed"
 	},
+	"button_reboot": {
+		"message": "Reload Tree Tabs. Try this in case your tree hierarchy is lost after restart."
+	},
 	"button_detach": {
 		"message": "Detach tab"
 	},
@@ -290,17 +293,20 @@
 	"options_move_on_url_change": {
 		"message": "Move tabs that match regexes"
 	},
-	"options_move_on_url_change_always": {
-		"message": "always when URL changes"
-	},
 	"options_move_on_url_change_never": {
 		"message": "never"
 	},
 	"options_move_on_url_change_from_empty": {
-		"message": "when URL changes in New tab only"
+		"message": "when URL changes in Home tab (only Home tab created externally, for example, ctrl+t shortcut)"
+	},
+	"options_move_on_url_change_from_empty_b": {
+		"message": "when URL changes in Home tab"
 	},
 	"options_move_on_url_change_all_new": {
-		"message": "when tab is created"
+		"message": "when tab is created with a matching URL"
+	},
+	"options_move_on_url_change_always": {
+		"message": "always when URL changes to a matching pattern"
 	},
 
 	"options_always_show_close": {
@@ -575,6 +581,13 @@
 
 	"options_reset_toolbar_button": {
 		"message": "Reset toolbar"
+	},
+
+	"options_export_debug": {
+		"message": "Export log file"
+	},
+	"options_print_debug": {
+		"message": "Load log from file"
 	},
 
 
@@ -1049,9 +1062,6 @@
 
 	
 	
-	"warning_exporting_big_amount_of_tabs": {
-		"message": "Importing big amount of tabs can make your browser unresponsive even for hours! Consider dividing your tabs to groups and exporting each group separately."
-	},
 	"caption_ungrouped_group": {
 		"message": "Ungrouped"
 	},
