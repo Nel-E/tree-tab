@@ -323,9 +323,9 @@ function SetTabClass(tabId, pin) {
 			if (document.getElementById("ct"+tabId).childNodes.length > 0) { // flatten out children
 				let tabs = document.querySelectorAll("#ct"+tabId+" .pin, #ct"+tabId+" .tab");
 				for (let i = tabs.length-1; i >= 0; i--) {
-					tabs[i].remove("tab");
-					tabs[i].remove("o");
-					tabs[i].remove("c");
+					tabs[i].classList.remove("tab");
+					tabs[i].classList.remove("o");
+					tabs[i].classList.remove("c");
 					tabs[i].classList.add("pin");
 					InsterAfterNode(tabs[i], Tab);
 					chrome.tabs.update(parseInt(tabs[i].id), {pinned: true});

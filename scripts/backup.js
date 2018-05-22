@@ -142,7 +142,15 @@ function RecreateGroup(LoadedGroup) {
 							LTab.parent = RefsTabs[LTab.parent];
 						}
 					});
-					RearrangeTreeStructure({}, NewFolders, NewTabs);
+					setTimeout(function() {
+						RearrangeTreeStructure({}, NewFolders, NewTabs);
+					}, 1000);
+					setTimeout(function() {
+						RearrangeTreeStructure({}, NewFolders, NewTabs);
+					}, 2000);
+					setTimeout(function() {
+						RearrangeTreeStructure({}, NewFolders, NewTabs);
+					}, 5000);
 				}, 2000);
 			}
 		});

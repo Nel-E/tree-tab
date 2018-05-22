@@ -125,7 +125,6 @@ function ChromeLoadTabs(retry) {
 
 			// will loop trying to find tabs
 			if (opt.skip_load == true || retry >= 5 || (tabs_matched > t_count*0.5)) {
-				schedule_save = 1;
 				running = true;
 				ChromeAutoSaveData(0, 1000);
 				ChromeAutoSaveData(1, 300000);
@@ -157,6 +156,7 @@ function ChromeLoadTabs(retry) {
 
 				delete tt_ids;
 
+				schedule_save = -1; // 2 operations must be made to start saving data
 			} else {
 				if (opt.debug){
 					pushlog("Attempt "+retry+" failed, matched tabs was below 50%");
