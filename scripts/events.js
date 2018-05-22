@@ -491,7 +491,7 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 		// SetMultiTabsClass(TabsIdsSelected, pinTabs);
 
 		// recheck new structure
-		if (TabsIds.length) {
+		if (TabsIds.length && pinTabs == false) {
 			for (var ind = 0; ind < TabsIds.length; ind++) {
 				if (TabsIdsSelected.indexOf(TabsIds[ind]) == -1) {
 					let Tab = document.getElementById(TabsIds[ind]);
