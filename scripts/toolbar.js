@@ -489,7 +489,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_export_group") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						ExportGroup(active_group, bggroups[active_group].name+".tt_group", false);
+						ExportGroup(active_group, bggroups[active_group].name, false);
 					}
 				}
 			}
@@ -571,7 +571,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
 						let d = new Date();
-						ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉"))+".tt_session", true, false, false);
+						ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉")), true, false, false);
 					}
 				}
 			}

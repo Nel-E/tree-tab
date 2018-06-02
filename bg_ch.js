@@ -188,13 +188,28 @@ async function ChromeAutoSaveData(BAK, LoopTimer) {
 				for (let wIndex = 0; wIndex < WinCount; wIndex++) {
 					let winId = w[wIndex].id;
 					if (windows[winId] != undefined && windows[winId].group_bar != undefined && windows[winId].search_filter != undefined && windows[winId].active_shelf != undefined && windows[winId].active_group != undefined && windows[winId].groups != undefined && windows[winId].folders != undefined) {
-						Windows.push({url1: w[wIndex].tabs[0].url, url2: w[wIndex].tabs[w[wIndex].tabs.length-1].url, group_bar: windows[winId].group_bar, search_filter: windows[winId].search_filter, active_shelf: windows[winId].active_shelf, active_group: windows[winId].active_group, groups: windows[winId].groups, folders: windows[winId].folders});
+						Windows.push({
+							url1: w[wIndex].tabs[0].url,
+							url2: w[wIndex].tabs[w[wIndex].tabs.length-1].url,
+							group_bar: windows[winId].group_bar,
+							search_filter: windows[winId].search_filter,
+							active_shelf: windows[winId].active_shelf,
+							active_group: windows[winId].active_group,
+							groups: windows[winId].groups,
+							folders: windows[winId].folders
+						});
 					}
 					let TabsCount = w[wIndex].tabs.length;
 					for (let tabIndex = 0; tabIndex < TabsCount; tabIndex++) {
 						let tabId = w[wIndex].tabs[tabIndex].id;
 						if (tabs[tabId] != undefined && tabs[tabId].hash != undefined && tabs[tabId].parent != undefined && tabs[tabId].index != undefined && tabs[tabId].expand != undefined) {
-							Tabs.push({id: tabId, hash: tabs[tabId].hash, parent: tabs[tabId].parent, index: tabs[tabId].index, expand: tabs[tabId].expand});
+							Tabs.push({
+								id: tabId,
+								hash: tabs[tabId].hash,
+								parent: tabs[tabId].parent,
+								index: tabs[tabId].index,
+								expand: tabs[tabId].expand
+							});
 							counter++;
 						}
 					}
@@ -249,6 +264,44 @@ function ReplaceParents(oldTabId, newTabId) {
 			tabs[tabId].parent = newTabId;
 		}
 	}
+}
+async function DiscardTab(tabId) {
+	let DiscardTimeout = 0;
+	let Discard = setInterval(function() {
+		chrome.tabs.get(tabId, function(tab) {
+			if ((tab.favIconUrl != undefined && tab.favIconUrl != "" && tab.title != undefined && tab.title != "") || tab.status == "complete" || tab.audible) {
+				chrome.tabs.discard(tab.id);
+				clearInterval(Discard);
+			}
+			if (DiscardTimeout > 300) {
+				clearInterval(Discard);
+			}
+		});
+		DiscardTimeout++;
+	}, 2000);
+}
+async function DiscardWindow(windowId) {
+	let DiscardTimeout = 0;
+	let DiscardedTabs = 0;
+	let Discard = setInterval(function() {
+		chrome.windows.get(windowId, {populate: true}, function(w) {
+			for (let i = 0; i < w.tabs.length; i++) {
+				if (w.tabs[i].discarded == false && w.tabs[i].active == false) {
+					if ((w.tabs[i].favIconUrl != undefined && w.tabs[i].favIconUrl != "" && w.tabs[i].title != undefined && w.tabs[i].title != "") || w.tabs[i].status == "complete" || w.tabs[i].audible) {
+						chrome.tabs.discard(w.tabs[i].id);
+						DiscardedTabs++;
+					}
+				}
+			}
+			if (DiscardedTabs == w.tabs.length) {
+				clearInterval(Discard);
+			}
+		});
+		if (DiscardTimeout > 300) {
+			clearInterval(Discard);
+		}
+		DiscardTimeout++;
+	}, 5000);
 }
 function ChromeListeners() { // start all listeners
 	chrome.tabs.onCreated.addListener(function(tab) {
@@ -431,6 +484,8 @@ function ChromeMessageListeners() {
 					tabs[message.tabId].parent = message.tab.parent;
 				}
 				schedule_save++;
+			} else {
+				tabs[tabId] = {hash: 0, parent: message.tab.parent, index: message.tab.index, expand: message.tab.expand};
 			}
 			return;
 		}
@@ -450,6 +505,14 @@ function ChromeMessageListeners() {
 				}
 			}
 			schedule_save++;
+			return;
+		}
+		if (message.command == "discard_tab") {
+			DiscardTab(message.tabId);
+			return;
+		}
+		if (message.command == "discard_window") {
+			DiscardWindow(message.windowId);
 			return;
 		}
 		if (message.command == "debug") {

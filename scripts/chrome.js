@@ -32,7 +32,7 @@ function StartChromeListeners() {
 			}
 			CleanUpDragClasses();
 			DragNodeClass = message.DragNodeClass;
-			DragTreeDepth = Object.assign(0, message.DragTreeDepth);
+			DragTreeDepth = message.DragTreeDepth;
 		}
 
 		if (message.command == "dragend") {
@@ -48,6 +48,14 @@ function StartChromeListeners() {
 				log("message to sidebar "+CurrentWindowId+": message: "+message.command+" folderId: "+message.folderId);
 			}
 			RemoveFolder(message.folderId);
+		}
+		if (message.command == "remove_group") {
+			if (opt.debug) {
+				log("message to sidebar "+CurrentWindowId+": message: "+message.command+" groupId: "+message.groupId);
+			}
+			setTimeout(function() {
+				GroupRemove(message.groupId, false);
+			}, 2000);
 		}
 
 		if (message.command == "reload_sidebar") {
@@ -115,7 +123,7 @@ function StartChromeListeners() {
 						}
 						
 						if (message.parentTabId != undefined) {
-							AppendTab(NewTab, message.parentTabId, false, false, true, message.index, true, false, false, true, false);
+							AppendTab({tab: NewTab, ParentId: message.parentTabId, Append: true, Index: message.index, Scroll: true});
 						} else {
 							if (opt.append_orphan_tab == "as_child" && NewTab.openerTabId == undefined && document.querySelector("#"+active_group+" .active_tab")) {
 								if (opt.debug) {
@@ -128,7 +136,7 @@ function StartChromeListeners() {
 									if (opt.debug) {
 										log("tab_created: child case, tab will append after active, openerTabId: "+NewTab.openerTabId);
 									}
-									AppendTab(NewTab, false, false, document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : false, false, false, true, false, false, true, false);
+									AppendTab({tab: NewTab, InsertAfterId: (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : false), Scroll: true});
 								} else {
 									let Parents = GetParentsByClass(document.getElementById(NewTab.openerTabId), "tab");
 									if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree
@@ -136,13 +144,13 @@ function StartChromeListeners() {
 											if (opt.debug) {
 												log("tab_created: child case, in tree limit, tab will append on top, openerTabId: "+NewTab.openerTabId);
 											}
-											AppendTab(NewTab, NewTab.openerTabId, false, false, (NewTab.pinned ? true : false), false, true, false, false, true, false);
+											AppendTab({tab: NewTab, ParentId: NewTab.openerTabId, Append: (NewTab.pinned ? true : false), Scroll: true});
 										}
 										if (opt.append_child_tab == "bottom") {
 											if (opt.debug) {
 												log("tab_created: child case, in tree limit, tab will append on bottom, openerTabId: "+NewTab.openerTabId);
 											}
-											AppendTab(NewTab, NewTab.openerTabId, false, false, true, false, true, false, false, true, false);
+											AppendTab({tab: NewTab, ParentId: NewTab.openerTabId, Append: true, Scroll: true});
 										}
 									}
 									if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
@@ -153,19 +161,19 @@ function StartChromeListeners() {
 											if (opt.debug) {
 												log("tab_created: tab will append after active, openerTabId: "+NewTab.openerTabId);
 											}
-											AppendTab(NewTab, false, false, NewTab.openerTabId, true, false, true, false, false, true, false);
+											AppendTab({tab: NewTab, InsertAfterId: NewTab.openerTabId, Append: true, Scroll: true});
 										}
 										if (opt.append_child_tab_after_limit == "top") {
 											if (opt.debug) {
 												log("tab_created: tab will append on top, openerTabId: "+NewTab.openerTabId);
 											}
-											AppendTab(NewTab, document.getElementById(NewTab.openerTabId).parentNode.parentNode.id, false, false, (NewTab.pinned ? true : false), false, true, false, false, true, false);
+											AppendTab({tab: NewTab, ParentId: (document.getElementById(NewTab.openerTabId).parentNode.parentNode.id), Append: (NewTab.pinned ? true : false), Scroll: true});
 										}
 										if (opt.append_child_tab_after_limit == "bottom") {
 											if (opt.debug) {
 												log("tab_created: tab will append on bottom, openerTabId: "+NewTab.openerTabId);
 											}
-											AppendTab(NewTab, document.getElementById(NewTab.openerTabId).parentNode.parentNode.id, false, false, true, false, true, false, false, true, false);
+											AppendTab({tab: NewTab, ParentId: (document.getElementById(NewTab.openerTabId).parentNode.parentNode.id), Append: true, Scroll: true});
 										}
 									}
 								}
@@ -177,19 +185,19 @@ function StartChromeListeners() {
 										if (opt.debug) {
 											log("tab_created: tab will append after active");
 										}
-										AppendTab(NewTab, false, false, NewTab.openerTabId, false, false, true, false, false, true, false);
+										AppendTab({tab: NewTab, InsertAfterId: NewTab.openerTabId, Scroll: true});
 									}
 									if (opt.append_child_tab_after_limit == "top") {
 										if (opt.debug) {
 											log("tab_created: tab will append on top");
 										}
-										AppendTab(NewTab, false, false, false, false, false, true, false, false, true, false);
+										AppendTab({tab: NewTab, Scroll: true});
 									}
 									if (opt.append_child_tab_after_limit == "bottom") {
 										if (opt.debug) {
 											log("tab_created: tab will append on bottom");
 										}
-										AppendTab(NewTab, false, false, false, true, false, true, false, false, true, false);
+										AppendTab({tab: NewTab, Append: true, Scroll: true});
 									}
 								}
 							} else { // orphan case
@@ -210,19 +218,19 @@ function StartChromeListeners() {
 									if (opt.debug) {
 										log("tab_created: orphan case, appending tab after active");
 									}
-									AppendTab(NewTab, false, false, (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), (NewTab.pinned ? true : false), false, true, false, false, true, false);
+									AppendTab({tab: NewTab, InsertAfterId: (document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab").id : undefined), Append: (NewTab.pinned ? true : false), Scroll: true});
 								}
 								if (opt.append_orphan_tab == "top") {
 									if (opt.debug) {
 										log("tab_created: orphan case, appending tab on top");
 									}
-									AppendTab(NewTab, false, false, false, false, false, true, false, false, true, false);
+									AppendTab({tab: NewTab, Scroll: true});
 								}
 								if (opt.append_orphan_tab == "bottom" || opt.append_orphan_tab == "as_child") {
 									if (opt.debug) {
 										log("tab_created: orphan case, appending tab on bottom");
 									}
-									AppendTab(NewTab, false, false, false, true, false, true, false, false, true, false);
+									AppendTab({tab: NewTab, Append: true, Scroll: true});
 								}
 							}
 						}
@@ -260,7 +268,8 @@ function StartChromeListeners() {
 				if (opt.debug) {
 					log("chrome event: "+message.command+", tabId: "+message.tabId+", tab is pinned: "+message.tab.pinned+", ParentId: "+message.ParentId);
 				}
-				AppendTab(message.tab, message.ParentId, false, false, true, false, true, false, false, true, false);
+
+				AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: true, SkipMediaIcon: true});
 				RefreshGUI();
 				return;
 			}
@@ -268,8 +277,9 @@ function StartChromeListeners() {
 				if (opt.debug) {
 					log("chrome event: "+message.command+ ", tabId: " + message.tabId);
 				}
-				let ctDetachedParent = document.getElementById(message.tabId).childNodes[1];
-				if (ctDetachedParent != null) {
+				let Tab = document.getElementById(message.tabId);
+				if (Tab != null) {
+					let ctDetachedParent = Tab.childNodes[1];
 					if (opt.promote_children_in_first_child == true && ctDetachedParent.childNodes.length > 1) {
 						let ctNewParent = document.getElementById(ctDetachedParent.firstChild.id).childNodes[1];
 						ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);

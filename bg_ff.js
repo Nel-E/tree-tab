@@ -243,8 +243,45 @@ function ReplaceParents(oldTabId, newTabId) {
 		}
 	}
 }
-let DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};					// MOZILLA BUG 1398272
-// start all listeners
+async function DiscardTab(tabId) {
+	let DiscardTimeout = 0;
+	let Discard = setInterval(function() {
+		chrome.tabs.get(tabId, function(tab) {
+			if ((tab.favIconUrl != undefined && tab.favIconUrl != "" && tab.title != undefined && tab.title != "") || tab.status == "complete" || tab.audible) {
+				chrome.tabs.discard(tab.id);
+				clearInterval(Discard);
+			}
+			if (DiscardTimeout > 300) {
+				clearInterval(Discard);
+			}
+		});
+		DiscardTimeout++;
+	}, 2000);
+}
+async function DiscardWindow(windowId) {
+	let DiscardTimeout = 0;
+	let DiscardedTabs = 0;
+	let Discard = setInterval(function() {
+		chrome.windows.get(windowId, {populate: true}, function(w) {
+			for (let i = 0; i < w.tabs.length; i++) {
+				if (w.tabs[i].discarded == false && w.tabs[i].active == false) {
+					if ((w.tabs[i].favIconUrl != undefined && w.tabs[i].favIconUrl != "" && w.tabs[i].title != undefined && w.tabs[i].title != "") || w.tabs[i].status == "complete" || w.tabs[i].audible) {
+						chrome.tabs.discard(w.tabs[i].id);
+						DiscardedTabs++;
+					}
+				}
+			}
+			if (DiscardedTabs == w.tabs.length) {
+				clearInterval(Discard);
+			}
+		});
+		if (DiscardTimeout > 300) {
+			clearInterval(Discard);
+		}
+		DiscardTimeout++;
+	}, 5000);
+}
+// let DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA = {};					// MOZILLA BUG 1398272
 function FirefoxListeners() {
 	browser.browserAction.onClicked.addListener(function() {
 		browser.sidebarAction.setPanel({panel: (browser.extension.getURL("/sidebar.html")) });
@@ -267,11 +304,11 @@ function FirefoxListeners() {
 		let oldId = tabId;
 		chrome.tabs.get(oldId, function(tab) {
 			ReplaceParents(oldId, tab.id);
-			tt_ids[tabs[oldId].ttid] = tab.id;																// MOZILLA BUG 1398272
-			tabs[tab.id] = tabs[oldId];																		// MOZILLA BUG 1398272
-			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[oldId] = tab.id;				// MOZILLA BUG 1398272
-			DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tab.id] = oldId;				// MOZILLA BUG 1398272
-			browser.sessions.setTabValue( tab.id, "TTdata", tabs[oldId] );							// MOZILLA BUG 1398272
+			// tt_ids[tabs[oldId].ttid] = tab.id;																// MOZILLA BUG 1398272
+			// tabs[tab.id] = tabs[oldId];																		// MOZILLA BUG 1398272
+			// DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[oldId] = tab.id;				// MOZILLA BUG 1398272
+			// DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tab.id] = oldId;				// MOZILLA BUG 1398272
+			// browser.sessions.setTabValue( tab.id, "TTdata", tabs[oldId] );							// MOZILLA BUG 1398272
 			chrome.runtime.sendMessage({command: "tab_attached", windowId: attachInfo.newWindowId, tab: tab, tabId: tab.id, ParentId: tabs[tab.id].parent});
 			schedule_save++;
 		});
@@ -279,18 +316,18 @@ function FirefoxListeners() {
 	
 	chrome.tabs.onDetached.addListener(function(tabId, detachInfo) {
 		chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: tabId});
-		let detachTabId = tabId;
-		if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {																												// MOZILLA BUG 1398272
-			detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];																													// MOZILLA BUG 1398272
-			chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});		// MOZILLA BUG 1398272
-		}																																																							// MOZILLA BUG 1398272
+		// let detachTabId = tabId;
+		// if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {																												// MOZILLA BUG 1398272
+			// detachTabId = DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId];																													// MOZILLA BUG 1398272
+			// chrome.runtime.sendMessage({command: "tab_detached", windowId: detachInfo.oldWindowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});		// MOZILLA BUG 1398272
+		// }																																																							// MOZILLA BUG 1398272
 	});
 	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 		setTimeout(function() {
-			if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {																											// MOZILLA BUG 1398272
-				chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});		// MOZILLA BUG 1398272
-			}																																																						// MOZILLA BUG 1398272
+			// if (DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId] != undefined) {																											// MOZILLA BUG 1398272
+				// chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: DETACHED_TABS___Bug1398272___WTF_ARE_YOU_DOING_MOZILLA[tabId]});		// MOZILLA BUG 1398272
+			// }																																																						// MOZILLA BUG 1398272
 			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		}, 5);
 		// setTimeout(function() {
@@ -490,6 +527,8 @@ function FirefoxMessageListeners() {
 					}
 				}
 				schedule_save++;
+			} else {
+				tabs[tabId] = {ttid: "", parent: message.tab.parent, parent_ttid: "", index: message.tab.index, expand: message.tab.expand};
 			}
 			return;
 		}
@@ -515,6 +554,14 @@ function FirefoxMessageListeners() {
 				}
 			}
 			schedule_save++;
+			return;
+		}
+		if (message.command == "discard_tab") {
+			DiscardTab(message.tabId);
+			return;
+		}
+		if (message.command == "discard_window") {
+			DiscardWindow(message.windowId);
 			return;
 		}
 		if (message.command == "debug") {

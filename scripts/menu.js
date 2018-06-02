@@ -680,23 +680,6 @@ function SetMenu() {
 			}				
 		}
 
-
 	});
 	
-	
-
-	// move tabs to group
-	// $(document).on("mousedown", "#menu_detach_tab_to_new_group, .move_to_group_menu_entry", function(event) {
-		// var tabsIds
-		// if ($(this).is("#menu_detach_tab_to_new_group")) {
-			// bg.dt.DropToGroup = AddNewGroup(575757);
-			// GetColorFromMiddlePixel(vt.menuItemId, bg.dt.DropToGroup);
-		// } else {
-			// bg.dt.DropToGroup = this.id.substr(8);
-		// }
-		// AppendTabsToGroup({tabsIds: DragAndDrop.tabsIds, groupId: bg.dt.DropToGroup, SwitchTabIfHasActive: true, insertAfter: true, RemoveClass: "selected_tab", moveTabs: true});
-	// });
-
-
-
 }

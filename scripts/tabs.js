@@ -29,7 +29,7 @@ async function UpdateData() {
 			chrome.runtime.sendMessage({command: "update_all_tabs", pins: pins_data, tabs: tabs_data});
 			schedule_update_data--;
 		}
-	}, 2000);
+	}, 1000);
 }
 
 function RearrangeBrowserTabs() {
@@ -79,31 +79,32 @@ function RearrangeTreeTabs(tabs, bgtabs, first_loop) {
 	});
 }
 
-function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter) {
-	if (document.getElementById(tab.id) != null) {
-		GetFaviconAndTitle(tab.id, addCounter);
+// AppendTab({tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SkipSetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter, SkipMediaIcon})
+function AppendTab(p) {
+	if (document.getElementById(p.tab.id) != null) {
+		GetFaviconAndTitle(p.tab.id, p.addCounter);
 		return;
 	}	
-	var ClassList = tab.pinned ? "pin" : "tab";
-	if (tab.discarded) {
+	var ClassList = p.tab.pinned ? "pin" : "tab";
+	if (p.tab.discarded) {
 		ClassList = ClassList + " discarded";
 	}
-	if (AdditionalClass != false) {
-		ClassList = ClassList +" "+ AdditionalClass;
+	if (p.AdditionalClass) {
+		ClassList = ClassList +" "+ p.AdditionalClass;
 	}
-	var tb = document.createElement("div"); tb.className =  ClassList; tb.id = tab.id; // TAB
-	var th = document.createElement("div"); th.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+tab.id; if (SetEvents) {th.draggable = true;} tb.appendChild(th); // HEADER
-	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+tab.id; th.appendChild(ex); // EXPAND ARROW
-	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+tab.id; th.appendChild(tt); // TITLE
+	var tb = document.createElement("div"); tb.className =  ClassList; tb.id = p.tab.id; // TAB
+	var th = document.createElement("div"); th.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+p.tab.id; if (!p.SkipSetEvents) {th.draggable = true;} tb.appendChild(th); // HEADER
+	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+p.tab.id; th.appendChild(ex); // EXPAND ARROW
+	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+p.tab.id; th.appendChild(tt); // TITLE
 	if (!opt.never_show_close) {
-		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+tab.id; th.appendChild(cl); // CLOSE BUTTON
-		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+tab.id; cl.appendChild(ci);
+		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+p.tab.id; th.appendChild(cl); // CLOSE BUTTON
+		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+p.tab.id; cl.appendChild(ci);
 	}
-	var mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+tab.id; th.appendChild(mi);
-	var ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+tab.id; tb.appendChild(ct);
-	var di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+tab.id; tb.appendChild(di); // DROP TARGET INDICATOR
+	var mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+p.tab.id; th.appendChild(mi);
+	var ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+p.tab.id; tb.appendChild(ct);
+	var di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+p.tab.id; tb.appendChild(di); // DROP TARGET INDICATOR
 	
-	if (SetEvents) {
+	if (!p.SkipSetEvents) {
 		ct.onclick = function(event) {
 			if (event.target == this && event.which == 1) {
 				DeselectFolders();
@@ -214,13 +215,18 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 		}
 
 		
-		
 		th.ondragenter = function(event) {
 			this.classList.remove("tab_header_hover");
-			DragOverTimer = false;
-			setTimeout(function() {
-				DragOverTimer = true;
-			}, 1000);
+			if (opt.open_tree_on_hover) {
+				if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
+					clearTimeout(DragOverTimer);
+					let This = this;
+					DragOverTimer = setTimeout(function() {
+						This.parentNode.classList.add("o");
+						This.parentNode.classList.remove("c");
+					}, 1500);	
+				}
+			}
 		}
 
 		th.ondragleave = function(event) {
@@ -244,58 +250,61 @@ function AppendTab(tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, 
 	}	
 
 	let parent;
-	if (tab.pinned) {
+	if (p.tab.pinned) {
 		parent = document.getElementById("pin_list");
 	} else {
-		if (ParentId == false || ParentId == undefined || document.getElementById(ParentId) == null || document.querySelector(".pin[id='"+ParentId+"']") != null || ParentId == "pin_list") {
+		if (p.ParentId == false || p.ParentId == undefined || document.getElementById(p.ParentId) == null || document.querySelector(".pin[id='"+p.ParentId+"']") != null || p.ParentId == "pin_list") {
 			parent = document.getElementById("ct"+active_group);
 		} else {
-			parent = document.getElementById("ct"+ParentId);
+			parent = document.getElementById("ct"+p.ParentId);
 			if (parent.children.length == 0) {
 				parent.parentNode.classList.add("o");
 				parent.parentNode.classList.remove("c");
 			}
 		}
 	}	
-	if (Append && parent) {
+	if (p.Append && parent) {
 		parent.appendChild(tb);
 	}
-	if (!Append && parent) {
+	if (!p.Append && parent) {
 		parent.prepend(tb);
 	}
 	
-	if (InsertBeforeId) {
-		let Before = document.getElementById(InsertBeforeId);
+	if (p.InsertBeforeId) {
+		let Before = document.getElementById(p.InsertBeforeId);
 		if (Before != null) {
-			if ((tab.pinned && Before.classList.contains("pin")) || (tab.pinned == false && Before.classList.contains("tab"))) {
+			if ((p.tab.pinned && Before.classList.contains("pin")) || (p.tab.pinned == false && Before.classList.contains("tab"))) {
 				Before.parentNode.insertBefore(tb, Before);
 			}
 		}
 	}
-	if (InsertAfterId) {
-		let After = document.getElementById(InsertAfterId);
+	if (p.InsertAfterId) {
+		let After = document.getElementById(p.InsertAfterId);
 		if (After != null) {
-			if ((tab.pinned && After.classList.contains("pin")) || (tab.pinned == false && After.classList.contains("tab"))) {
+			if ((p.tab.pinned && After.classList.contains("pin")) || (p.tab.pinned == false && After.classList.contains("tab"))) {
 				InsterAfterNode(tb, After);
 			}
 		}
 	}
-	if (Index) {
-		if (tb.parentNode.childNodes.length >= Index) {
-			tb.parentNode.insertBefore(tb, tb.parentNode.childNodes[Index]);
+	if (p.Index) {
+		if (tb.parentNode.childNodes.length >= p.Index) {
+			tb.parentNode.insertBefore(tb, tb.parentNode.childNodes[p.Index]);
 		} else {
 			tb.parentNode.appendChild(tb);
 		}
 	}
-	GetFaviconAndTitle(tab.id, addCounter);
-	RefreshMediaIcon(tab.id);
-	if (tab.active && SkipSetActive == false) {
-		SetActiveTab(tab.id);
+	GetFaviconAndTitle(p.tab.id, p.addCounter);
+	if (!p.SkipMediaIcon) {
+		RefreshMediaIcon(p.tab.id);
 	}
-	if (Scroll) {
-		ScrollToTab(tab.id);
+	if (p.tab.active && !p.SkipSetActive) {
+		SetActiveTab(p.tab.id);
+	}
+	if (p.Scroll) {
+		ScrollToTab(p.tab.id);
 	}
 }
+
 
 function RemoveTabFromList(tabId) {
 	if (opt.debug) {
@@ -352,6 +361,7 @@ function SetTabClass(tabId, pin) {
 function SetMultiTabsClass(TabsIds, pin) {
 	TabsIds.forEach(function(tabId){
 		SetTabClass(tabId, pin);
+		chrome.tabs.update(parseInt(tabId), {pinned: pin});
 	});
 }
 
@@ -438,63 +448,81 @@ function Detach(tabsIds, Folders) {
 		let Indexes = [];
 		let Parents = [];
 		let Expands = [];
-		let NewIds = [];																	// MOZILLA BUG 1398272
+		// let NewIds = [];																	// MOZILLA BUG 1398272
 		let NewTabs = [];
 		let Ind = 0;
 
 		tabsIds.forEach(function(tabId) {
 			let tab = document.getElementById(tabId);
-			NewIds.push(tabId);															// MOZILLA BUG 1398272
+			// NewIds.push(tabId);															// MOZILLA BUG 1398272
 			Indexes.push(Array.from(tab.parentNode.children).indexOf(tab));
 			Parents.push(tab.parentNode.parentNode.id);
 			Expands.push( (tab.classList.contains("c") ? "c" : (tab.classList.contains("o") ? "o" : ""))  );
 		});
 
-		chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
-			tabsIds.forEach(function(tabId) {
-				chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
-					if (browserId == "F") {													// MOZILLA BUG 1398272
-						if (Ind == 0) {														// MOZILLA BUG 1398272
-							NewIds[Ind] = new_window.tabs[0].id;						// MOZILLA BUG 1398272
-						} else {																	// MOZILLA BUG 1398272
-							NewIds[Ind] = MovedTab[0].id;									// MOZILLA BUG 1398272
-						}																			// MOZILLA BUG 1398272
-						NewTabs.push({id: NewIds[Ind], index: Indexes[Ind], parent: ((tabsIds.indexOf(parseInt(Parents[Ind])) != -1) ? NewIds[tabsIds.indexOf(parseInt(Parents[Ind]))] : Parents[Ind]), expand: Expands[Ind]});	// MOZILLA BUG 1398272
-					} else {																		// MOZILLA BUG 1398272
-						NewTabs.push({id: tabsIds[Ind], index: Indexes[Ind], parent: Parents[Ind], expand: Expands[Ind]}); // PUSH TAB FROM INDEX
-					}																				// MOZILLA BUG 1398272
-					Ind++;
-					if (Ind >= Parents.length-1) {
+		chrome.windows.create({state:window.state}, function(new_window) {
+			chrome.tabs.move(tabsIds, {windowId: new_window.id, index:-1}, function(MovedTabs) {
+				
+				
+				
+			// tabsIds.forEach(function(tabId) {
+				// chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
+					// if (browserId == "F") {													// MOZILLA BUG 1398272
+						// if (Ind == 0) {														// MOZILLA BUG 1398272
+							// NewIds[Ind] = new_window.tabs[0].id;						// MOZILLA BUG 1398272
+						// } else {																	// MOZILLA BUG 1398272
+							// NewIds[Ind] = MovedTab[0].id;									// MOZILLA BUG 1398272
+						// }																			// MOZILLA BUG 1398272
+						// NewTabs.push({id: NewIds[Ind], index: Indexes[Ind], parent: ((tabsIds.indexOf(parseInt(Parents[Ind])) != -1) ? NewIds[tabsIds.indexOf(parseInt(Parents[Ind]))] : Parents[Ind]), expand: Expands[Ind]});	// MOZILLA BUG 1398272
+					// } else {																		// MOZILLA BUG 1398272
+						// NewTabs.push({id: tabsIds[Ind], index: Indexes[Ind], parent: Parents[Ind], expand: Expands[Ind]}); // PUSH TAB FROM INDEX
+					// }																				// MOZILLA BUG 1398272
+					// Ind++;
+					// if (Ind >= Parents.length-1) {
 						// chrome.tabs.remove(new_window.tabs[0].id, null);
-						let Confirmations = 0;
-						let GiveUpLimit = 600;
-						if (opt.debug) {
-							log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
-						}
-						var Append = setInterval(function() {
-							chrome.windows.get(new_window.id, function(confirm_new_window) {
-								chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
-									if (response) {
-										Confirmations++;
-									}
-								});
-								GiveUpLimit--;
-								if (opt.debug) {
-									log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
-								}
-								if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
-									clearInterval(Append);
-								}
-							});
-						}, 1000);
+						// let Confirmations = 0;
+						// let GiveUpLimit = 600;
+						// if (opt.debug) {
+							// log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
+						// }
+
+						// chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: Folders});
+
+						// for (let tInd = 0; tInd < NewTabs.length; tInd++) {
+							// chrome.runtime.sendMessage({command: "update_tab", tabId: NewTabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
+						// }	
+						
+						// var Append = setInterval(function() {
+							// chrome.windows.get(new_window.id, function(confirm_new_window) {
+								// chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
+									// if (response) {
+										// Confirmations++;
+									// }
+								// });
+								// GiveUpLimit--;
+								// if (opt.debug) {
+									// log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
+								// }
+								// if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
+									// clearInterval(Append);
+								// }
+							// });
+						// }, 1000);
+						
 						if (Folders && Object.keys(Folders).length > 0) {
 							for (var folder in Folders) {
 								RemoveFolder(Folders[folder].id);
 							}
 						}
-					}
+						
+						setTimeout(function() {
+							chrome.tabs.remove(new_window.tabs[0].id, null);
+						}, 500);
+				
+						
+					// }
 				});
-			});
+			// });
 		});
 	});
 }
@@ -761,7 +789,7 @@ function OpenNewTab(pin, parentId) {
 	if (pin) {
 		chrome.tabs.create({pinned: true}, function(tab) {
 			if (parentId) {
-				AppendTab(tab, "pin_list", false, parentId, true, false, true, false, false, true, false);
+				AppendTab({tab: tab, ParentId: "pin_list", InsertAfterId: parentId, Append: true, Scroll: true});
 				schedule_update_data++;
 			}
 			newTabUrl = tab.url;
@@ -769,7 +797,7 @@ function OpenNewTab(pin, parentId) {
 	} else {
 		chrome.tabs.create({}, function(tab) {
 			if (parentId) {
-				AppendTab(tab, parentId, false, false, (opt.append_orphan_tab == "top" ? false : true), false, true, false, false, true, false);
+				AppendTab({tab: tab, ParentId: parentId, Append: (opt.append_orphan_tab == "top" ? false : true), Scroll: true});
 				schedule_update_data++;
 			}
 			newTabUrl = tab.url;
@@ -936,8 +964,14 @@ function ActionClickTab(TabNode, bgOption) {
 		chrome.tabs.reload(parseInt(TabNode.id));
 	}
 	if (bgOption == "unload_tab") {
-		SwitchActiveTabBeforeClose(active_group);
-		DiscardTabs([parseInt(TabNode.id)]);
+		if (TabNode.classList.contains("active_tab")) {
+			SwitchActiveTabBeforeClose(active_group);
+			setTimeout(function() {
+				DiscardTabs([parseInt(TabNode.id)]);
+			}, 500);
+		} else {
+			DiscardTabs([parseInt(TabNode.id)]);
+		}
 	}
 	if (bgOption == "activate_previous_active" && TabNode.classList.contains("active_tab")) {
 		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
@@ -977,6 +1011,7 @@ function TabStartDrag(Node, event) {
 		Node.classList.add("selected_temporarly");
 		Node.classList.add("selected_tab");
 		TabsIdsSelected.push(parseInt(Node.id));
+		event.dataTransfer.setData("DraggedTabNode", Node.id);
 	}
 	
 	document.querySelectorAll("[id='"+Node.id+"'], [id='"+Node.id+"'] .tab").forEach(function(s){
@@ -1003,6 +1038,8 @@ function TabStartDrag(Node, event) {
 
 	DragAndDropData = {TabsIds: TabsIds, TabsIdsParents: TabsIdsParents, TabsIdsSelected: TabsIdsSelected};
 	
+	event.dataTransfer.setData("Class", "tab");
+
 	event.dataTransfer.setData("TabsIds", JSON.stringify(TabsIds));
 	event.dataTransfer.setData("TabsIdsParents", JSON.stringify(TabsIdsParents));
 	event.dataTransfer.setData("TabsIdsSelected", JSON.stringify(TabsIdsSelected));
@@ -1012,6 +1049,11 @@ function TabStartDrag(Node, event) {
 		DragNodeClass: "tab",
 		DragTreeDepth: DragTreeDepth
 	});
+	
+	if (opt.debug) {
+		log("f: TabStartDrag, Node: "+Node.id+", TabsIdsSelected: "+JSON.stringify(TabsIdsSelected)+", TabsIds: "+JSON.stringify(TabsIds)+", TabsIdsParents: "+JSON.stringify(TabsIdsParents) );
+	}
+	
 }
 
 function TabDragOver(Node, event) {

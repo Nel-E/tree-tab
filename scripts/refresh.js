@@ -81,20 +81,6 @@ async function RefreshGUI() {
 	groups.style.width = (document.body.clientWidth - toolbar_groupsWidth - 1) + "px";
 
 	
-	// let total = ManagerWindowGroupsListHeight + ManagerWindowSessionsListHeight;
-	// if (total > document.body.clientHeight - 200) {
-		// let cut = (total - (document.body.clientHeight - 200))/2;
-		// ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight - cut + "px";
-		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight - cut + "px";
-	// } else {
-		// ManagerWindowGroupsList.style.height = ManagerWindowGroupsListHeight + "px";
-		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
-	// }
-	// ManagerWindow.style.height = ManagerWindowGroupsList.clientHeight + ManagerWindowSessionsList.clientHeight + 300 + "px";
-
-
-	
-	
 	let PanelList = document.querySelector(".mw_pan_on>.manager_window_list");
 	let PanelListHeight = 3 + PanelList.children.length * 18;
 	
@@ -110,27 +96,9 @@ async function RefreshGUI() {
 		PanelList.style.height = MaxAllowedHeight - ManagerWindowPanelButtonsHeight + "px";
 	}
 	
-	// if (ManagerWindowSessionsListHeight > document.body.clientHeight - 300) {
-		// ManagerWindowSessionsList.style.height = document.body.clientHeight - 300 + "px";
-	// } else {
-		// ManagerWindowSessionsList.style.height = ManagerWindowSessionsListHeight + "px";
-	// }
-	
-	
 	
 	let ManagerWindow = document.getElementById("manager_window");
-	// ManagerWindow.style.height = PanelListHeight.clientHeight + 700 + "px";
 	ManagerWindow.style.height = PanelList.clientHeight + ManagerWindowPanelButtonsHeight + 56 + "px";
-
-
-
-
-
-
-
-
-	
-	
 }
 
 // set discarded class
@@ -210,7 +178,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 				let title = tab.title ? tab.title : tab.url;
 				let tHeader = t.childNodes[0];
 				let tTitle = tHeader.childNodes[1];
-				if (tab.status == "complete") {
+				if (tab.status == "complete" || tab.discarded) {
 					t.classList.remove("loading");
 					// change title
 					tTitle.textContent = title;
@@ -237,7 +205,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 						}
 					}
 				}
-				if (tab.status == "loading") {
+				if (tab.status == "loading" && tab.discarded == false) {
 					title = tab.title ? tab.title : caption_loading;
 					t.classList.add("loading");
 					tHeader.style.backgroundImage = "";
@@ -313,7 +281,7 @@ async function RefreshCounters() {
 
 async function RefreshTabCounter(tabId) {
 	let t = document.getElementById(tabId);
-	if (t.childNodes[0]) {
+	if (t != null && t.childNodes[0]) {
 		let title = t.childNodes[0].getAttribute("tabTitle");
 		if (t != null && title != null) {
 			if (t.classList.contains("o") || t.classList.contains("c")) {

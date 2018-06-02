@@ -147,6 +147,12 @@ function SetEvents() {
 		document.getElementById(this.getAttribute("PickColor")).style.backgroundColor = this.value;
 	}
 	
+
+	document.getElementById("group_list").ondragleave = function(event) {
+		if (opt.open_tree_on_hover) {
+			clearTimeout(DragOverTimer);
+		}
+	}
 	
 	
 	// CATCH KEYBOARD GLOBAL KEYS
@@ -197,13 +203,6 @@ function SetEvents() {
 			log("drag over: "+event.target.id);
 		}
 		event.preventDefault();
-		if (event.target.parentNode.classList.contains("c") && event.target.parentNode.classList.contains("dragged_tree") == false) {
-			if (DragOverTimer && opt.open_tree_on_hover) {
-				event.target.parentNode.classList.add("o");
-				event.target.parentNode.classList.remove("c");
-				DragOverTimer = false;
-			}
-		}
 	}	
 
 	document.ondrop = function(event) {
@@ -211,6 +210,9 @@ function SetEvents() {
 			log("dropped on window: "+CurrentWindowId);
 		}
 
+		let Class = event.dataTransfer.getData("Class") ? event.dataTransfer.getData("Class") : "";
+		let Group = event.dataTransfer.getData("Group") ? JSON.parse(event.dataTransfer.getData("Group")) : {};
+		let DraggedTabNode = event.dataTransfer.getData("DraggedTabNode") ? event.dataTransfer.getData("DraggedTabNode") : false;
 		let TabsIds = event.dataTransfer.getData("TabsIds") ? JSON.parse(event.dataTransfer.getData("TabsIds")) : [];
 		let TabsIdsParents = event.dataTransfer.getData("TabsIdsParents") ? JSON.parse(event.dataTransfer.getData("TabsIdsParents")) : [];
 		let TabsIdsSelected = event.dataTransfer.getData("TabsIdsSelected") ? JSON.parse(event.dataTransfer.getData("TabsIdsSelected")) : [];
@@ -219,59 +221,83 @@ function SetEvents() {
 		let SourceWindowId = event.dataTransfer.getData("SourceWindowId") ? JSON.parse(event.dataTransfer.getData("SourceWindowId")) : 0;
 		let target = document.querySelector(".highlighted_drop_target");
 
-		event.preventDefault();
+		let ActiveGroup = document.getElementById(active_group);
+		let Scroll = ActiveGroup.scrollTop;
+
+		clearTimeout(DragOverTimer);
+
 		
+		event.preventDefault();
+
 		if (SourceWindowId == CurrentWindowId) {
-			DropToTarget(target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected);
+			if (Class == "group") {
+				DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: [], TabsIdsSelected: [], TabsIdsParents: [], Folders: {}, FoldersSelected: [], Group: Group, Scroll: Scroll});
+			} else {
+				DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
+			}
 		} else {
 			FreezeSelected();
 
+			if (Object.keys(Group).length > 0) {
+				bggroups[Group.id] = Object.assign({}, Group);
+				AppendGroupToList(Group.id, Group.name, Group.font, true);
+			}
+
+
 			if (Object.keys(Folders).length > 0) {
-
-				let SelectedFolders = Object.assign([], FoldersSelected);
-
-				for (var folder in Folders) {
-					AddNewFolder(folder, Folders[folder].parent, Folders[folder].name, Folders[folder].index, Folders[folder].expand, (FoldersSelected.indexOf(folder) != -1 ? "selected_folder" : undefined), true);
-					chrome.runtime.sendMessage({ command: "remove_folder", folderId: Folders[folder].id });
+				for (var folderId in Folders) {
+					AddNewFolder(folderId, Folders[folderId].parent, Folders[folderId].name, Folders[folderId].index, Folders[folderId].expand, (FoldersSelected.indexOf(folderId) != -1 ? "selected_folder" : undefined), true);
+					chrome.runtime.sendMessage({ command: "remove_folder", folderId: folderId });
 				}
 			}
 			
-			let counter = 0;
-			if (TabsIds.length == 0) {
-				DropToTarget(target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected);
-			} else {
-				(TabsIds).forEach(function(TabId) {
+			// let counter = 0;
+			// if (TabsIds.length == 0) {
+				// DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
+			// } else {
 					if (opt.debug) {
-						log("DragAndDrop: will now move tab: "+TabId);
+						log("DragAndDrop: will now move tabs");
 					}
 
-					chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-						if (browserId == "F") {																																// MOZILLA BUG 1398272
-							let MovedTabId = MovedTab[0] != undefined ? MovedTab[0].id : (MovedTab.id != undefined ? MovedTab.id : TabId);		// MOZILLA BUG 1398272
-							if ((TabsIdsParents).indexOf("ct"+TabsIds[counter]) != -1) {																		// MOZILLA BUG 1398272
-								TabsIdsParents[(TabsIdsParents).indexOf("ct"+TabsIds[counter])] = "ct"+MovedTabId;										// MOZILLA BUG 1398272
-							}																																						// MOZILLA BUG 1398272
-							if ((TabsIdsSelected).indexOf(TabsIds[counter]) != -1) {																				// MOZILLA BUG 1398272
-								TabsIdsSelected[(TabsIdsSelected).indexOf(TabsIds[counter])] = MovedTabId;													// MOZILLA BUG 1398272
-							}																																						// MOZILLA BUG 1398272
-							TabsIds[counter] = MovedTabId;																												// MOZILLA BUG 1398272
-						}																																							// MOZILLA BUG 1398272				
-						counter++;
-						if (counter == TabsIds.length) {
-							setTimeout(function() {
-								(TabsIdsSelected).forEach(function(selectedTabId) {
-									let selectedTab = document.getElementById(selectedTabId);
-									if (selectedTab != null) {
-										selectedTab.classList.add("selected_temporarly");
-										selectedTab.classList.add("selected_tab");
-									}
-								});
-								DropToTarget(target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected);
-							}, 200);
-						}
+					chrome.tabs.move(TabsIds, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+						setTimeout(function() {
+							DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
+							chrome.runtime.sendMessage({ command: "remove_group", groupId: Group.id });
+						}, 2000);
 					});
-				});
-			}
+				
+				// (TabsIds).forEach(function(TabId) {
+					// if (opt.debug) {
+						// log("DragAndDrop: will now move tab: "+TabId);
+					// }
+
+					// chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+						// if (browserId == "F") {																																// MOZILLA BUG 1398272
+							// let MovedTabId = MovedTab[0] != undefined ? MovedTab[0].id : (MovedTab.id != undefined ? MovedTab.id : TabId);		// MOZILLA BUG 1398272
+							// if ((TabsIdsParents).indexOf("ct"+TabsIds[counter]) != -1) {																		// MOZILLA BUG 1398272
+								// TabsIdsParents[(TabsIdsParents).indexOf("ct"+TabsIds[counter])] = "ct"+MovedTabId;										// MOZILLA BUG 1398272
+							// }																																						// MOZILLA BUG 1398272
+							// if ((TabsIdsSelected).indexOf(TabsIds[counter]) != -1) {																				// MOZILLA BUG 1398272
+								// TabsIdsSelected[(TabsIdsSelected).indexOf(TabsIds[counter])] = MovedTabId;													// MOZILLA BUG 1398272
+							// }																																						// MOZILLA BUG 1398272
+							// TabsIds[counter] = MovedTabId;																												// MOZILLA BUG 1398272
+						// }																																							// MOZILLA BUG 1398272				
+						// counter++;
+						// if (counter == TabsIds.length) {
+							// setTimeout(function() {
+								// (TabsIdsSelected).forEach(function(selectedTabId) {
+									// let selectedTab = document.getElementById(selectedTabId);
+									// if (selectedTab != null) {
+										// selectedTab.classList.add("selected_temporarly");
+										// selectedTab.classList.add("selected_tab");
+									// }
+								// });
+								// DropToTarget(Class, target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected, Group, Scroll);
+							// }, 400);
+						// }
+					// });
+				// });
+			// }
 		}
 	}
 
@@ -280,16 +306,16 @@ function SetEvents() {
 		if (opt.debug) {
 			log("global dragleave");
 		}
-
-		if (event.target.classList) {
-			if (event.target.classList.contains("drag_enter_center")) {
-				DragOverTimer = false;
-			}
-		}
 		RemoveHighlight();
+		if (opt.open_tree_on_hover) {
+			clearTimeout(DragOverTimer);
+		}
 	}
 
 	document.ondragend = function(event) {
+		if (opt.open_tree_on_hover) {
+			clearTimeout(DragOverTimer);
+		}
 		// log("document dragend");
 		// DETACHING TEMPORARILY DISABLED PLEASE USE MENU OR TOOLBAR!
 		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
@@ -354,108 +380,96 @@ function RemoveHeadersHoverClass() {
 
 
 
-
-
-
-function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected) {
-	if (TargetNode != null) {
-
+// DropToTarget({Class, DraggedTabNode, TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected, Group, Scroll})
+function DropToTarget(p) {
+	if (p.TargetNode != null) {
 		if (opt.debug) {
-			log("f: DropToTarget, TargetNode: "+TargetNode.id+", TabsIdsSelected: "+JSON.stringify(TabsIdsSelected)+", TabsIds: "+JSON.stringify(TabsIds)+", TabsIdsParents: "+JSON.stringify(TabsIdsParents)+", Folders: "+JSON.stringify(Folders)+", FoldersSelected: "+JSON.stringify(FoldersSelected)  );
+			log("f: DropToTarget, DragNodeClass: "+p.Class+", TargetNode: "+p.TargetNode.id+", TabsIdsSelected: "+JSON.stringify(p.TabsIdsSelected)+", TabsIds: "+JSON.stringify(p.TabsIds)+", TabsIdsParents: "+JSON.stringify(p.TabsIdsParents)+", Folders: "+JSON.stringify(p.Folders)+", FoldersSelected: "+JSON.stringify(p.FoldersSelected)  );
 		}
 
-		// let Append;
+		let ActiveGroup = document.getElementById(active_group);
 		let pinTabs = false;
+		let SelectedTabsAppendTarget;
+		let FoldersSelectedAppendTarget;
 
-		if (DragNodeClass == "tab") {
-			if (TargetNode.classList.contains("pin")) {
+		if (p.Class == "tab") {
+			if (p.TargetNode.classList.contains("pin")) {
 				pinTabs = true;
-				if (TargetNode.classList.contains("before")) {
-					TabsIds.forEach(function(tabId){
-						InsterBeforeNode(document.getElementById(tabId), TargetNode);
+				if (p.TargetNode.classList.contains("before")) {
+					p.TabsIds.forEach(function(tabId){
+						InsterBeforeNode(document.getElementById(tabId), p.TargetNode);
 					});
 				}
-				if (TargetNode.classList.contains("after")) {
-					for (let i = TabsIds.length-1; i >= 0; i--) {
-						InsterAfterNode(document.getElementById(TabsIds[i]), TargetNode);
+				if (p.TargetNode.classList.contains("after")) {
+					for (let i = p.TabsIds.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(p.TabsIds[i]), p.TargetNode);
 					}
 				}
 			}
 
-			if (TargetNode.classList.contains("tab")) {
-				if (TargetNode.classList.contains("before")) {
-					TabsIdsSelected.forEach(function(tabId){
-						InsterBeforeNode(document.getElementById(tabId), TargetNode);
+			if (p.TargetNode.classList.contains("tab")) {
+				if (p.TargetNode.classList.contains("before")) {
+					p.TabsIdsSelected.forEach(function(tabId){
+						InsterBeforeNode(document.getElementById(tabId), p.TargetNode);
 					});
 				}
-				if (TargetNode.classList.contains("after")) {
-					for (let i = TabsIdsSelected.length-1; i >= 0; i--) {
-						InsterAfterNode(document.getElementById(TabsIdsSelected[i]), TargetNode);
+				if (p.TargetNode.classList.contains("after")) {
+					for (let i = p.TabsIdsSelected.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(p.TabsIdsSelected[i]), p.TargetNode);
 					}
 				}
-				if (TargetNode.classList.contains("inside")) {
-					TabsIdsSelected.forEach(function(tabId){
-						AppendToNode(document.getElementById(tabId), TargetNode.childNodes[1]);
-					});
+				if (p.TargetNode.classList.contains("inside")) {
+					SelectedTabsAppendTarget = p.TargetNode.childNodes[1];
 				}
+				ActiveGroup.scrollTop = p.Scroll;
 			}
 
-			if (TargetNode.id == "pin_list") {
+			if (p.TargetNode.id == "pin_list") {
 				pinTabs = true;
-				TabsIds.forEach(function(tabId){
-					AppendToNode(document.getElementById(tabId), TargetNode);
-				});
+				SelectedTabsAppendTarget = p.TargetNode;
 			}
 
-			if (TargetNode.classList.contains("group")) {
-				TabsIdsSelected.forEach(function(tabId){
-					AppendToNode(document.getElementById(tabId), TargetNode.childNodes[1]);
-				});
+			if (p.TargetNode.classList.contains("group")) {
+				SelectedTabsAppendTarget = p.TargetNode.childNodes[1];
+				ActiveGroup.scrollTop = p.Scroll;
 			}
 
-			if (TargetNode.classList.contains("folder")) {
-				TabsIdsSelected.forEach(function(tabId){
-					AppendToNode(document.getElementById(tabId), TargetNode.childNodes[2]);
-				});
+			if (p.TargetNode.classList.contains("folder")) {
+				SelectedTabsAppendTarget = p.TargetNode.childNodes[2];
+				ActiveGroup.scrollTop = p.Scroll;
 			}
 			
-			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
-				TabsIdsSelected.forEach(function(tabId){
-					AppendToNode(document.getElementById(tabId), document.getElementById("ct" + (TargetNode.id.substr(1))));
-				});
+			if (p.TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
+				SelectedTabsAppendTarget = document.getElementById("ct" + (p.TargetNode.id.substr(1)));
 			}
 		}
 
 		
-		if (DragNodeClass == "folder") {
-			if (TargetNode.classList.contains("folder")) { // dropped on folder
-				if (TargetNode.classList.contains("before")) {
-					FoldersSelected.forEach(function(folderId){
-						InsterBeforeNode(document.getElementById(folderId), TargetNode);
+		if (p.Class == "folder") {
+			if (p.TargetNode.classList.contains("folder")) { // dropped on folder
+				if (p.TargetNode.classList.contains("before")) {
+					p.FoldersSelected.forEach(function(folderId){
+						InsterBeforeNode(document.getElementById(folderId), p.TargetNode);
 					});
 				}
-				if (TargetNode.classList.contains("after")) {
-					for(let i = FoldersSelected.length-1; i >= 0; i--) {
-						InsterAfterNode(document.getElementById(FoldersSelected[i]), TargetNode);
+				if (p.TargetNode.classList.contains("after")) {
+					for(let i = p.FoldersSelected.length-1; i >= 0; i--) {
+						InsterAfterNode(document.getElementById(p.FoldersSelected[i]), p.TargetNode);
 					}
 				}
-				if (TargetNode.classList.contains("inside")) {
-					FoldersSelected.forEach(function(folderId){
-						AppendToNode(document.getElementById(folderId), TargetNode.childNodes[1]);
-					});
+				if (p.TargetNode.classList.contains("inside")) {
+					FoldersSelectedAppendTarget = p.TargetNode.childNodes[1];
 				}
+				ActiveGroup.scrollTop = p.Scroll;
 			}
 			
-			if (TargetNode.classList.contains("group")) {
-				FoldersSelected.forEach(function(folderId){
-					AppendToNode(document.getElementById(folderId), TargetNode.childNodes[0]);
-				});
+			if (p.TargetNode.classList.contains("group")) {
+				FoldersSelectedAppendTarget = p.TargetNode.childNodes[0];
+				ActiveGroup.scrollTop = p.Scroll;
 			}
 			
-			if (TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
-				FoldersSelected.forEach(function(folderId){
-					AppendToNode(document.getElementById(folderId),  document.getElementById("cf" + TargetNode.id.substr(1)));
-				});
+			if (p.TargetNode.classList.contains("group_button")) { // dropped on group button (group list)
+				FoldersSelectedAppendTarget = document.getElementById("cf" + p.TargetNode.id.substr(1));
 			}
 
 			setTimeout(function() {
@@ -463,22 +477,22 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			}, 600);
 		}
 
-		if (TargetNode.classList.contains("group_button") && (DragNodeClass == "tab" || DragNodeClass == "folder")) {
+		if (p.TargetNode.classList.contains("group_button") && (p.Class == "tab" || p.Class == "folder")) {
 			chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
 				let Tab = document.getElementById(activeTab[0].id);
-				if (Tab != null && TabsIds.indexOf(activeTab[0].id) != -1) {
-					SetActiveGroup(TargetNode.id.substr(1), false, false);
+				if (Tab != null && p.TabsIds.indexOf(activeTab[0].id) != -1) {
+					SetActiveGroup(p.TargetNode.id.substr(1), false, false);
 					SetActiveTab(activeTab[0].id, true);
 				}
 			});
 		}
 
-		if (DragNodeClass == "group") {
-			if (TargetNode.classList.contains("before")) {
-				InsterBeforeNode(document.querySelector(".dragged_group_button"), TargetNode);
+		if (p.Class == "group") {
+			if (p.TargetNode.classList.contains("before")) {
+				InsterBeforeNode(document.getElementById("_"+p.Group.id), p.TargetNode);
 			}
-			if (TargetNode.classList.contains("after")) {
-				InsterAfterNode(document.querySelector(".dragged_group_button"), TargetNode);
+			if (p.TargetNode.classList.contains("after")) {
+				InsterAfterNode(document.getElementById("_"+p.Group.id), p.TargetNode);
 			}
 			UpdateBgGroupsOrder();
 			RearrangeGroupsLists();
@@ -487,39 +501,97 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 			}		
 		}
 		
-		SetMultiTabsClass(TabsIds, pinTabs);
-		// SetMultiTabsClass(TabsIdsSelected, pinTabs);
+		if (FoldersSelectedAppendTarget) {
+			p.FoldersSelected.forEach(function(folderId){
+				AppendToNode(document.getElementById(folderId), FoldersSelectedAppendTarget);
+			});
+		}
 
+		if (SelectedTabsAppendTarget) {
+			p.TabsIdsSelected.forEach(function(tabId){
+				AppendToNode(document.getElementById(tabId), SelectedTabsAppendTarget);
+			});
+		}
+		
+		
 		// recheck new structure
-		if (TabsIds.length && pinTabs == false) {
-			for (var ind = 0; ind < TabsIds.length; ind++) {
-				if (TabsIdsSelected.indexOf(TabsIds[ind]) == -1) {
-					let Tab = document.getElementById(TabsIds[ind]);
-					let TabParent = document.getElementById(TabsIdsParents[ind]);
-					if (TabParent != null && TabParent.id != Tab.parentNode.id) {
-						TabParent.appendChild(Tab);
+		if (Object.keys(p.Folders).length > 0) {
+			for (var folderId in p.Folders) {
+				let Folder = document.getElementById(folderId);
+				// let FolderParent = document.getElementById("cf"+active_group);
+				
+					if (Folder != null && Folder.parentNode.id != "cf" + p.Folders[folderId].parent) {
+						let FolderParent = document.getElementById("cf" + p.Folders[folderId].parent);
+						if (FolderParent != null) {
+							FolderParent.appendChild(Folder);
+						}
+					}
+				// AddNewFolder(folder, Folders[folder].parent, Folders[folder].name, Folders[folder].index, Folders[folder].expand, (p.FoldersSelected.indexOf(folder) != -1 ? "selected_folder" : undefined), true);
+				// chrome.runtime.sendMessage({ command: "remove_folder", folderId: Folders[folder].id });
+			}
+		}
+
+
+
+
+		if (p.TabsIds.length) {
+			if (pinTabs) {
+				for (var ind = 0; ind < p.TabsIds.length; ind++) {
+					let Tab = document.getElementById(p.TabsIds[ind]);
+					if (Tab != null && Tab.parentNode.id != "pin_list") {
+						document.getElementById("pin_list").appendChild(Tab);
+					}
+				}
+			} else {
+				for (var ind = 0; ind < p.TabsIds.length; ind++) {
+					if (p.TabsIdsSelected.indexOf(p.TabsIds[ind]) == -1) {
+						let Tab = document.getElementById(p.TabsIds[ind]);
+						let TabParent = document.getElementById(p.TabsIdsParents[ind]);
+						if (TabParent != null && Tab != null && TabParent.id != Tab.parentNode.id) {
+							TabParent.appendChild(Tab);
+						}
 					}
 				}
 			}
 		}
+
 		
-		if (opt.syncro_tabbar_tabs_order && TabsIds[0] != undefined) {
+		
+		
+		SetMultiTabsClass(p.TabsIds, pinTabs);
+
+		p.TabsIdsSelected.forEach(function(selectedTabId) {
+			let selectedTab = document.getElementById(selectedTabId);
+			if (selectedTab != null) {
+				selectedTab.classList.add("selected_tab");
+			}
+		});
+
+		if (p.DraggedTabNode) {
+			let tabNode = document.getElementById(p.DraggedTabNode);
+			if (tabNode != null) {
+				tabNode.classList.add("selected_temporarly");
+			}
+		}
+		
+		if (opt.syncro_tabbar_tabs_order && p.TabsIds[0] != undefined) {
 			let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
 				return parseInt(s.id);
 			});
 			
 			if (opt.debug) {
-				log(  "f: DropToTarget, will Syncro tabbar tabs order, TabsIds array is:"+JSON.stringify(TabsIds)  );
+				log(  "f: DropToTarget, will Syncro tabbar tabs order, TabsIds array is:"+JSON.stringify(p.TabsIds)  );
 			}
 				
-			chrome.tabs.move(TabsIds, {index: tabIds.indexOf(TabsIds[0])});
+			chrome.tabs.move(p.TabsIds, {index: tabIds.indexOf(p.TabsIds[0])});
 			setTimeout(function() {
 				schedule_rearrange_tabs++;
 			}, 500);
 		}
 	}
+	
+	KeepOnlyOneActiveTabInGroup();
 
-	DragOverTimer = false;
 	setTimeout(function() {
 		RefreshExpandStates();
 		RefreshCounters();
@@ -530,13 +602,14 @@ function DropToTarget(TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Fold
 		if (opt.debug) {
 			log("DropToTarget END");
 		}
-	}, 300);
+	}, 500);
 
 	setTimeout(function() {
 		CleanUpDragClasses();
 		RemoveHighlight();
 	}, 100);
 }
+
 
 
 function FreezeSelected() {
@@ -584,9 +657,6 @@ function CleanUpDragClasses() {
 	document.querySelectorAll(".folder_header").forEach(function(s){
 		s.classList.remove("folder_header_hover");
 	});
-	document.querySelectorAll(".dragged_group_button").forEach(function(s){
-		s.classList.remove("dragged_group_button");
-	});
 	document.querySelectorAll(".dragged_tree").forEach(function(s){
 		s.classList.remove("dragged_tree");
 	});
@@ -594,9 +664,8 @@ function CleanUpDragClasses() {
 
 function EmptyDragAndDrop() {
 	if (opt.debug) {
-		log("f: EmptyDragAndDrop, reset DragOverTimer and removing DragNodeClass...");
+		log("f: EmptyDragAndDrop and removing DragNodeClass...");
 	}
-	DragOverTimer = false;
 	DragNodeClass = "";
 	DragTreeDepth = 0;
 }

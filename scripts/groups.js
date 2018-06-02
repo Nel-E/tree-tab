@@ -12,8 +12,6 @@ function AppendGroups(Groups) {
 	if (opt.debug) {
 		log("f: AppendGroups, Groups: "+JSON.stringify(Groups));
 	}
-	// let GroupList = document.getElementById("group_list");
-	// let scroll = GroupList.scrollTop;
 
 	AppendGroupToList("tab_list", caption_ungrouped_group, "", true);
 
@@ -111,6 +109,13 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 					this.classList.add("highlighted_drop_target");
 				}
 			}
+			grp.ondragenter = function(event) {
+				console.log("clearTimeout");
+				if (opt.open_tree_on_hover) {
+					clearTimeout(DragOverTimer);
+				}
+			}
+
 			// DOUBLE CLICK ACTION
 			grp.ondblclick = function(event) {
 				if (event.target.id == this.id) {
@@ -146,7 +151,6 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 			
 			// SHOW GROUP MENU
 			gbn.onmousedown = function(event) {
-				// event.stopImmediatePropagation();
 				if (event.which == 3) {
 					ShowFGroupMenu(document.getElementById(this.id.substr(1)), event);
 				}
@@ -161,31 +165,32 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 
 			// DRAGGING GROUPS
 			gbn.ondragstart = function(event) { // DRAG START
-				event.stopPropagation();
-				event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
-				event.dataTransfer.setData("text", "");
-				event.dataTransfer.setData("SourceWindowId", CurrentWindowId);
-				CleanUpDragClasses();
-				EmptyDragAndDrop();
-
-				DragNodeClass = "group";
-				
-				this.classList.add("dragged_group_button");
+				GroupStartDrag(this, event);
 			}
-
 			
 			gbn.ondragover = function(event) {
 				GroupButtonDragOver(this, event);
 			}
-			
-			// scroll groups
-			// $(document).on("mousedown", "#scroll_group_up, #scroll_group_down", function(event) {
-				// IOKeys.LMB = true;
-				// ScrollGroupList($(this).is("#scroll_group_up"));
-			// });
-			// $(document).on("mouseleave", "#scroll_group_up, #scroll_group_down", function(event) {
-				// IOKeys.LMB = false;
-			// });
+
+			gbn.ondragenter = function(event) {
+					// console.log("gbn.ondragenter");
+				if (opt.open_tree_on_hover) {
+					if (this.classList.contains("active") == false && 	DragNodeClass != "group") {
+						clearTimeout(DragOverTimer);
+						let This = this;
+						DragOverTimer = setTimeout(function() {
+							SetActiveGroup(This.id.substr(1), false, false);
+						}, 1500);	
+					}
+				}
+			}
+			// gbn.ondragleave = function(event) {
+				// console.log("gbn.ondragleave");
+				// if (opt.open_tree_on_hover) {
+					// clearTimeout(DragOverTimer);
+				// }
+			// }
+
 		}
 	}
 	RefreshGUI();
@@ -269,13 +274,17 @@ function GroupRemove(groupId, close_tabs) {
 	} else {
 		let TabListFolders = document.getElementById("cftab_list");
 		let GroupFolders = document.getElementById("cf"+groupId);
-		while (GroupFolders.firstChild) {
-			TabListFolders.appendChild(GroupFolders.firstChild);
+		if (GroupFolders != null) {
+			while (GroupFolders.firstChild) {
+				TabListFolders.appendChild(GroupFolders.firstChild);
+			}
 		}
 		let TabListTabs = document.getElementById("cttab_list");
 		let GroupTabs = document.getElementById("ct"+groupId);
-		while (GroupTabs.firstChild) {
-			TabListTabs.appendChild(GroupTabs.firstChild);
+		if (GroupTabs != null) {
+			while (GroupTabs.firstChild) {
+				TabListTabs.appendChild(GroupTabs.firstChild);
+			}
 		}
 		RefreshExpandStates();
 		RefreshCounters();
@@ -294,9 +303,13 @@ function GroupRemove(groupId, close_tabs) {
 			}
 		}
 		let group = document.getElementById(groupId);
-		group.parentNode.removeChild(group);	
+		if (group != null) {
+			group.parentNode.removeChild(group);
+		}
 		let groupButton = document.getElementById("_"+groupId);
-		groupButton.parentNode.removeChild(groupButton);	
+		if (groupButton != null) {
+			groupButton.parentNode.removeChild(groupButton);
+		}
 	}
 	SaveGroups();
 	schedule_update_data++;
@@ -309,6 +322,15 @@ function UpdateBgGroupsOrder() {
 		}
 	});
 	SaveGroups();
+}
+
+function KeepOnlyOneActiveTabInGroup() {
+	let active_tabs = document.querySelectorAll("#"+active_group+" .active_tab");
+	if (active_tabs.length > 1) {
+		chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
+			SetActiveTab(activeTab[0].id, false);
+		});
+	}
 }
 
 function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
@@ -336,6 +358,7 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 			if (scroll_to_active){
 				ScrollToTab(activeTab.id);
 			}
+			KeepOnlyOneActiveTabInGroup();
 		}
 		if (groupId == "tab_list") {
 			document.querySelectorAll("#button_remove_group, #button_edit_group").forEach(function(s){
@@ -361,8 +384,6 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 			browser.tabs.hide(HideTabIds);
 			browser.tabs.show(ShowTabIds);
 		}
-		
-		
 	}
 }
 
@@ -481,28 +502,30 @@ function ActionClickGroup(Node, bgOption) {
 // SET ACTIVE TAB FOR EACH GROUP
 function SetActiveTabInEachGroup() {
 	chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
-		SetActiveTab(tabs[0].id);
-		chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
-			if (response) {
-				SetActiveGroup(response, false, true);
-				for (var group in bggroups) {
-					let ActiveInGroup = document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']");
-					if (ActiveInGroup != null) {
-						ActiveInGroup.classList.add("active_tab");
+		if (tabs.length) {
+			SetActiveTab(tabs[0].id);
+			chrome.runtime.sendMessage({command: "get_active_group", windowId: CurrentWindowId}, function(response) {
+				if (response) {
+					SetActiveGroup(response, false, true);
+					for (var group in bggroups) {
+						let ActiveInGroup = document.querySelector("#"+group+" [id='"+bggroups[group].active_tab+"']");
+						if (ActiveInGroup != null) {
+							ActiveInGroup.classList.add("active_tab");
+						}
 					}
-				}
-				if (tabs[0].pinned) {
-					let ActiveTabinActiveGroup = document.querySelectorAll("#"+active_group+" .active_tab");
-					if (ActiveTabinActiveGroup != null) {
-						ActiveTabinActiveGroup.forEach(function(s){
-							s.classList.remove("active_tab");
-						});
+					if (tabs[0].pinned) {
+						let ActiveTabinActiveGroup = document.querySelectorAll("#"+active_group+" .active_tab");
+						if (ActiveTabinActiveGroup != null) {
+							ActiveTabinActiveGroup.forEach(function(s){
+								s.classList.remove("active_tab");
+							});
+						}
 					}
+				} else {
+					SetActiveGroup("tab_list", false, true);
 				}
-			} else {
-				SetActiveGroup("tab_list", false, true);
-			}
-		});
+			});
+		}
 	});
 }
 
@@ -532,52 +555,53 @@ function GroupButtonDragOver(Node, event) {
 	}
 }
 
+function GroupStartDrag(Node, event) {
+	if (opt.debug) {
+		log("f: GroupStartDrag, GroupId "+Node.id);
+	}
+	event.stopPropagation();
+	event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
+	event.dataTransfer.setData("text", "");
+	event.dataTransfer.setData("SourceWindowId", CurrentWindowId);
+	CleanUpDragClasses();
+	EmptyDragAndDrop();
 
+	DragNodeClass = "group";
+	
+	let Group = Object.assign({}, bggroups[Node.id.substr(1)]);
+	let TabsIds = [];
+	let TabsIdsParents = [];
+	let Folders = {};
 
-// function AppendTabsToGroup(p) {
-// }
+	
+	document.querySelectorAll("#"+Node.id.substr(1)+" .tab").forEach(function(s){
+		TabsIds.push(parseInt(s.id));
+		TabsIdsParents.push(s.parentNode.id);
+	});
 
-// direction == true goes up, false goes down
-// function ScrollGroupList(direction) {
-	// if (direction) {
-		// $("#group_list").scrollTop($("#group_list").scrollTop()-3);
-	// }
-	// if (!direction) {
-		// $("#group_list").scrollTop($("#group_list").scrollTop()+3);
-	// }
-	// if (IOKeys.LMB) {
-		// setTimeout(function() { ScrollGroupList(direction); },10);
-	// }
-// }
+	document.querySelectorAll("#"+Node.id.substr(1)+" .folder").forEach(function(s){
+		Folders[s.id] = Object.assign({}, bgfolders[s.id]);
+	});
 
-// function ScrollToGroup(groupId) {
-	// if ($("#"+groupId).offset().top-$("#group_list").offset().top < 1) {
-		// $("#group_list").scrollTop($("#group_list").scrollTop()+$("#"+groupId).offset().top-$("#group_list").offset().top-1);
-	// } else {
-		// if ($("#"+groupId).offset().top+$("#"+groupId).outerHeight()+1 > $("#group_list").offset().top+$("#group_list").innerHeight()) {
-			// $("#group_list").scrollTop($("#group_list").scrollTop()+$("#"+groupId).offset().top-$("#group_list").offset().top-$("#group_list").innerHeight()+$("#"+groupId).outerHeight()-1);
-		// }
-	// }
-// }
+	console.log(Group);
+	console.log(TabsIds);
+	console.log(TabsIdsParents);
+	console.log(Folders);
+	
+	// let Group = document.getElementById(Node.id.substr(1));
 
-// "Move to group" popup
-// function ShowMoveToGroupWindow(x, y) {
-	// $(".move_to_group_menu_entry").remove();
-	// bggroups.forEach(function(group) {
-		// if (vt.ActiveGroup != group.g) {
-			// var	li = document.createElement("li");
-				// li.id = "move_to_"+group.g;
-				// li.className = "menu_item move_to_group_menu_entry";
-				// li.innerHTML = group.n;
-			// $("#move_to_group_menu")[0].appendChild(li);
-		// }
-	// });
-	// if (x >= $(window).width()-$("#tabs_menu").outerWidth()) {
-		// x = $(window).width()-$("#tabs_menu").outerWidth();
-	// }
-	// if (y >= $(window).height()-$("#move_to_group_menu").outerHeight()-20) {
-		// y = $(window).height()-$("#move_to_group_menu").outerHeight();
-	// }
-	// $("#move_to_group_menu").css({"display": "block", "top": y-24, "left": x-20});
-// }
+	event.dataTransfer.setData("Class", "group");
 
+	event.dataTransfer.setData("Group", JSON.stringify(Group));
+	event.dataTransfer.setData("TabsIds", JSON.stringify(TabsIds));
+	event.dataTransfer.setData("TabsIdsParents", JSON.stringify(TabsIdsParents));
+
+	event.dataTransfer.setData("Folders", JSON.stringify(Folders));
+	
+	chrome.runtime.sendMessage({
+		command: "drag_drop",
+		DragNodeClass: "group",
+		DragTreeDepth: 0
+	});	
+	
+}

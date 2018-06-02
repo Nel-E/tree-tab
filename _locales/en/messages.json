@@ -253,6 +253,16 @@
 
 
 
+	"options_firefox": {
+		"message": " Firefox "
+	},
+	"options_firefox_open_test_popup": {
+		"message": "If you can't open session or group files from Tree Tabs sidebar, it means it gets blocked by Firefox. For some reason Firefox treats open file windows as pop-ups. \nPlease click Check button and unblock pop-up when Firefox asks for it. If all is ok, a pop-up and open file dialog will show up. You can just close both."
+	},
+	"options_open_test_popup": {
+		"message": "Check popup"
+	},
+	
 	"options_vivaldi": {
 		"message": " Vivaldi "
 	},

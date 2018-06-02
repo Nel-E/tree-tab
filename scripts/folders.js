@@ -146,18 +146,45 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalCla
 					this.classList.remove("close_show");
 				}
 			}
-			fh.ondragleave = function(event) {
-				RemoveHighlight();
-			}
+			// fh.ondragleave = function(event) {
+				// RemoveHighlight();
+				// console.log(event);
+				// if (opt.open_tree_on_hover) {
+					// clearTimeout(DragOverTimer);
+				// }
+
+				// if (opt.open_tree_on_hover) {
+					// DragOverId = "";	
+				// }
+			// }
+
 			fh.ondragover = function(event) {
 				FolderDragOver(this, event);
+				// if (opt.open_tree_on_hover) {
+					// DragOverId = this.id;
+				// }
 			}
 			
 			fh.ondragenter = function(event) {
-				DragOverTimer = false;
-				setTimeout(function() {
-					DragOverTimer = true;
-				}, 1000);
+				if (opt.open_tree_on_hover) {
+					if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
+
+						clearTimeout(DragOverTimer);
+						let This = this;
+						DragOverTimer = setTimeout(function() {
+							This.parentNode.classList.add("o");
+							This.parentNode.classList.remove("c");
+						}, 1500);	
+
+						// let This = this;
+						// setTimeout(function() {
+							// if (DragOverId == This.id) {
+								// This.parentNode.classList.add("o");
+								// This.parentNode.classList.remove("c");
+							// }
+						// }, 1500);	
+					}
+				}
 			}
 			
 			ex.onmousedown = function(event) {
@@ -284,15 +311,6 @@ function RemoveFolder(FolderId) {
 	}
 }
 
-// function SetActiveFolder(FolderId) {
-	// let folder = document.getElementById(FolderId);
-	// if (folder != null) {
-		// document.querySelectorAll(".selected_folder").forEach(function(s){
-			// s.classList.remove("selected_folder");
-		// });
-		// folder.classList.add("selected_folder");
-	// }
-// }
 
 function ShowRenameFolderDialog(FolderId) { // Rename folder popup
 	if (opt.debug) {
@@ -432,10 +450,12 @@ function FolderStartDrag(Node, event) {
 		});
 	});
 
+	event.dataTransfer.setData("Class", "folder");
+
 	event.dataTransfer.setData("TabsIds", JSON.stringify(TabsIds));
 	event.dataTransfer.setData("TabsIdsParents", JSON.stringify(TabsIdsParents));
 
-	event.dataTransfer.setData("Folders", JSON.stringify(TabsIds));
+	event.dataTransfer.setData("Folders", JSON.stringify(Folders));
 	event.dataTransfer.setData("FoldersSelected", JSON.stringify(FoldersSelected));
 	
 	chrome.runtime.sendMessage({

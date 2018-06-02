@@ -34,12 +34,12 @@ function Initialize() {
 				RestoreToolbarSearchFilter();
 			}
 			
-			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(response) {
-				let bgtabs = Object.assign({}, response);
-				chrome.runtime.sendMessage({command: "get_folders", windowId: CurrentWindowId}, function(response) {
-					bgfolders = Object.assign({}, response);
-					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(response) {
-						bggroups = Object.assign({}, response);
+			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(t) {
+				let bgtabs = Object.assign({}, t);
+				chrome.runtime.sendMessage({command: "get_folders", windowId: CurrentWindowId}, function(f) {
+					bgfolders = Object.assign({}, f);
+					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(g) {
+						bggroups = Object.assign({}, g);
 						// APPEND GROUPS
 						AppendGroups(bggroups);
 						// APPEND FOLDERS
@@ -48,7 +48,7 @@ function Initialize() {
 						let ti = 0;
 						let tc = tabs.length;
 						for (ti = 0; ti < tc; ti++) {
-							AppendTab(tabs[ti], false, false, false, true, false, true, false, true, false, false);
+							AppendTab({tab: tabs[ti], Append: true, SkipSetActive: true});
 						}
 						for (ti = 0; ti < tc; ti++) {
 							if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {

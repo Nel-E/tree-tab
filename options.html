@@ -31,15 +31,27 @@
 
 
 
-		<fieldset class="field" id="field_vivaldi">
+		<fieldset class="field" id="field_vivaldi" style="display:none;">
 			<legend class="label" id="options_vivaldi"></legend>
 			<table>
 				<tr>
 					<td class="label" id="opt_url_for_web_panel"></td>
-					<td><input style="position:relative;width:450px;left:8px;" type="text" id="url_for_web_panel" value="test"></input></td>
+					<td><input style="position:relative;width:450px;left:8px;" type="text" id="url_for_web_panel" value=""></input></td>
 					<td><div style="position:relative; width:20px; height: 20px; left:8px; background-size: 20px 20px; background-image: url(../options/options_copy_icon.png);" id="copy_vivaldi_url_for_web_panel" ></div></td>
 				</tr>
 			</table>
+		</fieldset>
+
+
+		<fieldset class="field" id="field_firefox" style="display:none;">
+			<legend class="label" id="options_firefox"></legend>
+			<table style="display:inline-block;">
+				<tr>
+					<td class="label" id="options_firefox_open_test_popup"></td>
+				</tr>
+			</table>
+			<button class="set_button" type="button" id="options_open_test_popup" style="position: relative; margin:10px;"></button>
+
 		</fieldset>
 
 
@@ -820,7 +832,6 @@
 		<script type="text/javascript" src="../scripts/groups.js"></script>
 		<script type="text/javascript" src="../scripts/folders.js"></script>
 		<script type="text/javascript" src="../scripts/theme.js"></script>
-		<script type="text/javascript" src="../options/refresh.js"></script>
 		<script type="text/javascript" src="../options/sample_tabs.js"></script>
 		<script type="text/javascript" src="../options/options.js"></script>
 

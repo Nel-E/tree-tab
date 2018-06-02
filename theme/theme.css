@@ -501,6 +501,7 @@ div {
 	font-weight: bold;
 	color: var(--group_list_default_font_color);
 	background: transparent;
+	pointer-events: none;
 }
 
 .group_button {
@@ -1212,11 +1213,10 @@ div {
 	display: block;
 	top: -1px;
 	left: 0px;
-	width: calc(100% - 2px);
+	width: 17px;
 	height: 100%;
 	border: 1px solid var(--drag_indicator);
 }
-
 .group_button.before.highlighted_drop_target>.drag_indicator {
 	display: block;
 	top: -1px;
@@ -1235,8 +1235,6 @@ div {
 	height: calc(100% + 2px);
 	border-bottom: 1px solid var(--drag_indicator);
 }
-
-
 
 
 

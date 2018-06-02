@@ -1,14 +1,8 @@
 FIXES:
-deny Drag&drop tab to root of folders
-"Never show close button" option was breaking theme preview/editor
-closing pinned tabs did not resize area of pinned tabs, leaving empty space below
-added "bookmark" menu for single tab
-clone pinned tab was added as not pinned (only in Firefox)
-Shortcut changed to Ctrl+F2
-export session file has now date as a name
+export group and export session had file extension in name
+pin tree had bug in setting class
 
-
-
+discard on import group and import session
 
 
 

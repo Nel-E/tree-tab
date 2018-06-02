@@ -19,8 +19,10 @@ var schedule_update_data = 0;
 var schedule_rearrange_tabs = 0;
 
 var DragNodeClass = "";
-var DragOverTimer = true;
 var DragTreeDepth = 0;
+
+var DragOverTimer;
+
 
 var menuItemNode;
 var CurrentWindowId = 0;
@@ -176,7 +178,7 @@ function SaveFile(filename, extension, data) {
 	savelink.style.display = "none";
 	savelink.type = "file";
 	savelink.download = filename+"."+extension;
-	body.appendChild(savelink);		
+	body.appendChild(savelink);
 	setTimeout(function() {
 		savelink.click();
 		setTimeout(function() {
