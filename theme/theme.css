@@ -40,6 +40,20 @@ div {
 }
 
 
+#busy_spinner {
+	opacity: 0;
+	display: none;
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	top: calc((100% / 2) - 20px);
+	left: calc((100% / 2) - 20px);
+	background-size: 40px 40px;
+	background-image: url(../theme/loading.svg);
+	z-index: 999999999;
+	pointer-events: none;
+	transition: opacity 300ms ease-in-out;
+}
 
 
 /* MAIN TOOLBAR BUTTONS */

@@ -22,7 +22,7 @@ function RestoreToolbarSearchFilter() {
 function RestoreToolbarShelf() {
 	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
 		let filterBox = document.getElementById("filter_box");
-		filterBox.setAttribute("placeholder", caption_searchbox);
+		filterBox.setAttribute("placeholder", labels.searchbox);
 		filterBox.style.opacity = "1";
 		
 		document.querySelectorAll(".on").forEach(function(s){
@@ -57,7 +57,7 @@ function RestoreToolbarShelf() {
 			document.getElementById("button_folders").classList.add("on");
 		}
 		
-		if (browserId != "F") {
+		if (global.browserId != "F") {
 			chrome.storage.local.get(null, function(storage) {
 				let bak1 = storage["windows_BAK1"] ? storage["windows_BAK1"] : [];
 				let bak2 = storage["windows_BAK2"] ? storage["windows_BAK2"] : [];
@@ -158,7 +158,7 @@ function RecreateToolbar(NewToolbar) {
 		SearchInput.classList = "text_input";
 		SearchInput.id = "filter_box";
 		SearchInput.type = "text";
-		SearchInput.placeholder = caption_searchbox;
+		SearchInput.placeholder = labels.searchbox;
 		SearchBox.appendChild(SearchInput);
 		
 		let ClearX = document.createElement("div");
@@ -369,7 +369,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			}
 
 			// MOVE TAB TO NEW WINDOW (DETACH)
-			if (s.id == "button_detach" || s.id == "button_move") {
+			if (s.id == "button_detach" || s.id == "button_move") { // move is legacy name of detach button
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
 						if (document.querySelectorAll("#"+active_group+" .selected_folder").length > 0){
@@ -635,7 +635,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			// }
 
 			
-			if (browserId != "F") {
+			if (global.browserId != "F") {
 				// BOOKMARKS
 				if (s.id == "button_bookmarks") {
 					s.onmousedown = function(event) {

@@ -251,17 +251,6 @@
 
 
 
-
-
-	"options_firefox": {
-		"message": " Firefox "
-	},
-	"options_firefox_open_test_popup": {
-		"message": "If you can't open session or group files from Tree Tabs sidebar, it means it gets blocked by Firefox. For some reason Firefox treats open file windows as pop-ups. \nPlease click Check button and unblock pop-up when Firefox asks for it. If all is ok, a pop-up and open file dialog will show up. You can just close both."
-	},
-	"options_open_test_popup": {
-		"message": "Check popup"
-	},
 	
 	"options_vivaldi": {
 		"message": " Vivaldi "
@@ -307,16 +296,16 @@
 		"message": "never"
 	},
 	"options_move_on_url_change_from_empty": {
-		"message": "when URL changes in Home tab (only Home tab created externally, for example, ctrl+t shortcut)"
+		"message": "when URL changes in Home tab (only Home tabs created by ctrl+t shortcut)"
 	},
 	"options_move_on_url_change_from_empty_b": {
-		"message": "when URL changes in Home tab"
+		"message": "when URL changes in any Home tab"
 	},
 	"options_move_on_url_change_all_new": {
 		"message": "when tab is created with a matching URL"
 	},
 	"options_move_on_url_change_always": {
-		"message": "always when URL changes to a matching pattern"
+		"message": "whenever URL changes to a matching pattern"
 	},
 
 	"options_always_show_close": {
@@ -402,16 +391,16 @@
 	
 	
 	"options_append_child_tab": {
-		"message": "Append children tabs at the"
+		"message": "Place children tabs"
 	},
 	"options_append_child_tab_top": {
-		"message": "top (reverse hierarchy)"
+		"message": "at the top (reverse hierarchy)"
 	},
 	"options_append_child_tab_bottom": {
-		"message": "bottom"
+		"message": " at the bottom"
 	},
-	"options_append_child_tab_after_active": {
-		"message": "after active"
+	"options_append_child_tab_after": {
+		"message": "after parent (no automatic tree)"
 	},
 
 	"options_append_orphan_tab": {
@@ -450,7 +439,7 @@
 	},
 
 	"options_append_child_tab_after_limit": {
-		"message": "Once reached tree depth, place tab on the same level, but"
+		"message": "Once reached maximum tree depth, place tab on the same level, but"
 	},
 	"options_append_child_tab_after_limit_top": {
 		"message": "at the top"

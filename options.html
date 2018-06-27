@@ -3,28 +3,28 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title></title>
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_0.css" id="sizes_preset_0" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_1.css" id="sizes_preset_1" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_2.css" id="sizes_preset_2" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_3.css" id="sizes_preset_3" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_size_preset_4.css" id="sizes_preset_4" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_size_preset_0.css" id="sizes_preset_0" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_size_preset_1.css" id="sizes_preset_1" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_size_preset_2.css" id="sizes_preset_2" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_size_preset_3.css" id="sizes_preset_3" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_size_preset_4.css" id="sizes_preset_4" />
 		
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_0.css" id="tabs_margin_0" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_1.css" id="tabs_margin_1" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_tabs_margin_2.css" id="tabs_margin_2" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_tabs_margin_0.css" id="tabs_margin_0" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_tabs_margin_1.css" id="tabs_margin_1" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_tabs_margin_2.css" id="tabs_margin_2" />
 
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme_colors.css" id="theme_colors" />
-		<link type="text/css" rel="stylesheet" media="all" href="../theme/theme.css" id="theme" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_colors.css" id="theme_colors" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme.css" id="theme" />
 
-		<link type="text/css" rel="stylesheet" media="all" href="../options/options.css" id="main_body_css" />
+		<link type="text/css" rel="stylesheet" media="all" href="options/options.css" id="main_body_css" />
 
 		<style rel="stylesheet">	#red_higlights_go_here { background-color: transparent; } </style>
 
-		<link type="text/css" rel="stylesheet" media="all" href="../options/options overwrite.css" id="overwrite" />
+		<link type="text/css" rel="stylesheet" media="all" href="options/options overwrite.css" id="overwrite" />
 
 
 	</head>
-	<body id="body">
+	<body id="body" class="options_body">
 	
 		<div style="width:850px; align:left;"><span style="width:100%; font-size:20px; display:inline-block; text-align:center; ">Tree Tabs</span></div>
 		<br>
@@ -37,21 +37,9 @@
 				<tr>
 					<td class="label" id="opt_url_for_web_panel"></td>
 					<td><input style="position:relative;width:450px;left:8px;" type="text" id="url_for_web_panel" value=""></input></td>
-					<td><div style="position:relative; width:20px; height: 20px; left:8px; background-size: 20px 20px; background-image: url(../options/options_copy_icon.png);" id="copy_vivaldi_url_for_web_panel" ></div></td>
+					<td><div style="position:relative; width:20px; height: 20px; left:8px; background-size: 20px 20px; background-image: url(options/options_copy_icon.png);" id="copy_vivaldi_url_for_web_panel" ></div></td>
 				</tr>
 			</table>
-		</fieldset>
-
-
-		<fieldset class="field" id="field_firefox" style="display:none;">
-			<legend class="label" id="options_firefox"></legend>
-			<table style="display:inline-block;">
-				<tr>
-					<td class="label" id="options_firefox_open_test_popup"></td>
-				</tr>
-			</table>
-			<button class="set_button" type="button" id="options_open_test_popup" style="position: relative; margin:10px;"></button>
-
 		</fieldset>
 
 
@@ -213,7 +201,15 @@
 					<select id="append_child_tab">
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_top" value="top"></option>
 						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_bottom" value="bottom"></option>
-						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_active" value="after_active"></option>
+						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after" value="after"></option>
+					</select>
+				</li>
+				<li id="append_child_tab_after_limit_dropdown">
+					<label class="label" id="options_append_child_tab_after_limit"></label>	
+					<select id="append_child_tab_after_limit">
+						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_top" value="top"></option>
+						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_after" value="after"></option>
+						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_bottom" value="bottom"></option>
 					</select>
 				</li>
 				<li>
@@ -233,14 +229,6 @@
 						<option class="bg_opt_drop_down_menu" id="options_after_closing_active_tab_go_up_seek_in_parent" value="above_seek_in_parent"></option>
 						<option class="bg_opt_drop_down_menu" id="options_after_closing_active_tab_go_down_seek_in_parent" value="below_seek_in_parent"></option>
 						<option class="bg_opt_drop_down_menu" id="options_after_closing_active_tab_go_browser" value="browser"></option>
-					</select>
-				</li>
-				<li>
-					<label class="label" id="options_append_child_tab_after_limit"></label>	
-					<select id="append_child_tab_after_limit">
-						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_top" value="top"></option>
-						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_after" value="after"></option>
-						<option class="bg_opt_drop_down_menu" id="options_append_child_tab_after_limit_bottom" value="bottom"></option>
 					</select>
 				</li>
 				<li>
@@ -825,15 +813,16 @@
 		<input type="color" id="color_picker" style="position:absolute; left:-1000px; top:-1000px; width:1px; height:1px; overflow:hidden;">
 		<div id="DragImage" style="display: none; width:0px; height:0px;"></div>
 
-		<script type="text/javascript" src="../scripts/global.js"></script>
-		<script type="text/javascript" src="../scripts/utils.js"></script>
-		<script type="text/javascript" src="../scripts/toolbar.js"></script>
-		<script type="text/javascript" src="../scripts/tabs.js"></script>
-		<script type="text/javascript" src="../scripts/groups.js"></script>
-		<script type="text/javascript" src="../scripts/folders.js"></script>
-		<script type="text/javascript" src="../scripts/theme.js"></script>
-		<script type="text/javascript" src="../options/sample_tabs.js"></script>
-		<script type="text/javascript" src="../options/options.js"></script>
+		<script type="text/javascript" src="scripts/common.js"></script>
+
+		<script type="text/javascript" src="scripts/utils.js"></script>
+		<script type="text/javascript" src="scripts/toolbar.js"></script>
+		<script type="text/javascript" src="scripts/tabs.js"></script>
+		<script type="text/javascript" src="scripts/groups.js"></script>
+		<script type="text/javascript" src="scripts/folders.js"></script>
+		<script type="text/javascript" src="scripts/theme.js"></script>
+		<script type="text/javascript" src="options/sample_tabs.js"></script>
+		<script type="text/javascript" src="options/options.js"></script>
 
 
 		<div id="donate"></div>

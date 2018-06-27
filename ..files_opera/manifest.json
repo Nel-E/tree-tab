@@ -3,7 +3,7 @@
 	"minimum_opera_version": "42",
 	"default_locale": "en",
 	"background": {
-		"page": "background.html",
+		"scripts": [ "listeners_bg.js", "scripts/common.js", "background.js" ],
 		"persistent": true
 	},
 	"name": "Tree Tabs",

@@ -445,6 +445,7 @@ function SetMenu() {
 						
 					schedule_update_data++;
 					HideMenus();
+					SaveFolders();
 				}
 			}				
 		}
@@ -459,6 +460,7 @@ function SetMenu() {
 					});
 					schedule_update_data++;
 					HideMenus();
+					SaveFolders();
 				}
 			}				
 		}
@@ -473,6 +475,7 @@ function SetMenu() {
 					});
 					schedule_update_data++;
 					HideMenus();
+					SaveFolders();
 				}
 			}				
 		}
@@ -487,6 +490,7 @@ function SetMenu() {
 					});
 					schedule_update_data++;
 					HideMenus();
+					SaveFolders();
 				}
 			}				
 		}

@@ -4,11 +4,11 @@
 
 function AddNewFolder(folderId, ParentId, Name, Index, ExpandState, AdditionalClass, SetEvents) {
 	var newId = folderId ? folderId : GenerateNewFolderID();
-	bgfolders[newId] = { id: newId, parent: (ParentId ? ParentId : ""), index: (Index ? Index : 0), name: (Name ? Name : caption_noname_group), expand: (ExpandState ? ExpandState : "") };
+	bgfolders[newId] = { id: newId, parent: (ParentId ? ParentId : ""), index: (Index ? Index : 0), name: (Name ? Name : labels.noname_group), expand: (ExpandState ? ExpandState : "") };
 	if (opt.debug) {
 		log("f: AddNewFolder, folder: "+JSON.stringify(bgfolders[newId]));
 	}
-	AppendFolder(newId, caption_noname_group, (ParentId ? ParentId : ""), undefined, SetEvents, AdditionalClass);
+	AppendFolder(newId, labels.noname_group, (ParentId ? ParentId : ""), undefined, SetEvents, AdditionalClass);
 	SaveFolders();
 	RefreshCounters();
 	RefreshExpandStates();
@@ -210,12 +210,14 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalCla
 }
 
 function GenerateNewFolderID() {
-	var newID = "f_"+GenerateRandomID();
-	if (document.getElementById(newID) == null) {
-		return newID;
-	} else {
-		GenerateNewFolderID();
+	let newID = "";
+	while (newID == "") {
+		newID = "f_"+GenerateRandomID();
+		if (document.getElementById(newID) != null) {
+			newID = "";
+		}
 	}
+	return newID;	
 }
 
 function AppendFolders(Folders) {
@@ -449,6 +451,11 @@ function FolderStartDrag(Node, event) {
 			TabsIdsParents.push(tc.parentNode.id);
 		});
 	});
+	
+	let DraggedFolderParents = GetParentsByClass(Node, "folder");
+	DraggedFolderParents.forEach(function(s){
+		s.classList.add("dragged_parents");
+	});
 
 	event.dataTransfer.setData("Class", "folder");
 
@@ -471,10 +478,11 @@ function FolderDragOver(Node, event) {
 	}
 	if (Node.parentNode.classList.contains("dragged_tree") == false) {
 
-		let P = (GetParentsByClass(Node, "folder")).length + DragTreeDepth;
-		let PGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
+		let PDepth = (GetParentsByClass(Node, "folder")).length + DragTreeDepth;
+		let PIsGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
+		let PIsDraggedParents = Node.parentNode.classList.contains("dragged_parents");
 	
-		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop_folders == false)) {
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop_folders == false)) {
 			RemoveHighlight();
 			Node.parentNode.classList.remove("inside");
 			Node.parentNode.classList.remove("after");
@@ -482,7 +490,7 @@ function FolderDragOver(Node, event) {
 			Node.parentNode.classList.add("highlighted_drop_target");
 		}
 		
-		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth || opt.max_tree_depth<0 || opt.max_tree_drag_drop_folders == false)) {
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth || opt.max_tree_depth < 0 || PIsDraggedParents || opt.max_tree_drag_drop_folders == false)) {
 			RemoveHighlight();
 			Node.parentNode.classList.remove("before");
 			Node.parentNode.classList.remove("after");
@@ -490,7 +498,7 @@ function FolderDragOver(Node, event) {
 			Node.parentNode.classList.add("highlighted_drop_target");
 		}
 		
-		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop_folders == false)) {
+		if (DragNodeClass == "folder" && Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop_folders == false)) {
 			RemoveHighlight();
 			Node.parentNode.classList.remove("inside");
 			Node.parentNode.classList.remove("before");
@@ -498,7 +506,7 @@ function FolderDragOver(Node, event) {
 			Node.parentNode.classList.add("highlighted_drop_target");
 		}
 		
-		if (DragNodeClass == "tab" && Node.parentNode.classList.contains("inside") == false && (P <= opt.max_tree_depth || opt.max_tree_depth<0 || opt.max_tree_drag_drop_folders == false)) {
+		if (DragNodeClass == "tab" && Node.parentNode.classList.contains("inside") == false && (PDepth <= opt.max_tree_depth || opt.max_tree_depth < 0 || PIsDraggedParents || opt.max_tree_drag_drop_folders == false)) {
 			RemoveHighlight();
 			Node.parentNode.classList.remove("before");
 			Node.parentNode.classList.remove("after");

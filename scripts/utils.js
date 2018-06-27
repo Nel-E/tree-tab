@@ -58,6 +58,45 @@ function RecheckFirefox() {
 	});
 }
 
+function SavePreferences() {
+	chrome.storage.local.set({preferences: opt});
+	chrome.runtime.sendMessage({command: "reload_options", opt: opt});
+}
+
+function LoadDefaultPreferences() {
+	opt = Object.assign({}, DefaultPreferences);
+}
+
+function ShowOpenFileDialog(extension) {
+	let body = document.getElementById("body");
+	let inp = document.createElement("input");
+	inp.id = "file_import";
+	inp.type = "file";
+	inp.accept = extension;
+	inp.style.display = "none";
+	body.appendChild(inp);
+	inp.click();
+	return inp;
+}
+
+function SaveFile(filename, extension, data) {
+	let file = new File([JSON.stringify(data)], filename+"."+extension, {type: "text/"+extension+";charset=utf-8"} );
+	let body = document.getElementById("body");
+	let savelink = document.createElement("a");
+	savelink.href = URL.createObjectURL(file);
+	savelink.fileSize = file.size;
+	savelink.target = "_blank";
+	savelink.style.display = "none";
+	savelink.type = "file";
+	savelink.download = filename+"."+extension;
+	body.appendChild(savelink);
+	setTimeout(function() {
+		savelink.click();
+		setTimeout(function() {
+			savelink.parentNode.removeChild(savelink);
+		}, 60000);
+	}, 10);
+}
 
 function AppendToNode(Node, AppendNode) {
 	if (Node != null && AppendNode != null) {
@@ -88,6 +127,7 @@ function HideRenameDialogs() {
 		s.style.left = "-500px";
 	});
 }
+
 function GetParentsByClass(Node, Class) {
 	let Parents = [];
 	let ParentNode = Node;
@@ -99,6 +139,7 @@ function GetParentsByClass(Node, Class) {
 	}
 	return Parents;
 }
+
 function GetParentsBy2Classes(Node, ClassA, ClassB) {
 	let Parents = [];
 	let ParentNode = Node;
@@ -178,7 +219,7 @@ function FindTab(input) { // find and select tabs
 		return;
 	} else {
 		ButtonFilterClear.style.opacity = "1";
-		ButtonFilterClear.title = caption_clear_filter;
+		ButtonFilterClear.title = labels.clear_filter;
 	}
 	SearchIndex = 0;
 	let FilterType = document.getElementById("button_filter_type");
@@ -203,7 +244,7 @@ function FindTab(input) { // find and select tabs
 }
 
 function Bookmark(rootNode) {
-	let ToolbarId = browserId == "F" ? "toolbar_____" : "1";
+	let ToolbarId = global.browserId == "F" ? "toolbar_____" : "1";
 	chrome.bookmarks.get(ToolbarId, function(list) {
 		chrome.bookmarks.search("TreeTabs", function(list) {
 			let TreeTabsId;
@@ -237,7 +278,7 @@ function Bookmark(rootNode) {
 				}
 				
 				if (rootNode.classList.contains("folder") || rootNode.classList.contains("group")) {
-					let rootName = caption_noname_group;
+					let rootName = labels.noname_group;
 					if (rootNode.classList.contains("folder") && bgfolders[rootNode.id]) {
 						rootName = bgfolders[rootNode.id].name;
 					}
@@ -305,4 +346,23 @@ function Bookmark(rootNode) {
 			}
 		});
 	});
+}
+
+function SetLoadingSpinner(show) {
+	let busy_spinner = document.getElementById("busy_spinner");
+	if (show) {
+		busy_spinner.style.display = "block";
+		busy_spinner.style.opacity = "1";
+	} else {
+		busy_spinner.style.opacity = "0";
+		setTimeout(function() {
+			busy_spinner.style.display = "none";
+		}, 330);
+	}
+}
+
+function log(log) {
+	if (opt.debug) {
+		chrome.runtime.sendMessage({command: "debug", log: log});
+	}
 }

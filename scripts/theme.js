@@ -66,7 +66,7 @@ function ApplySizeSet(size){
 			}
 		}
 	}
-	if (browserId == "F") {
+	if (global.browserId == "F") {
 		// for some reason top position for various things is different in firefox?????
 		if (size > 1) {
 			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
@@ -88,6 +88,28 @@ function ApplyTabsMargins(size){
 	}
 }
 
+function GetCurrentToolbar(storage) {
+	if (storage["toolbar"]) {
+		return storage["toolbar"];
+	} else {
+		return DefaultToolbar;
+	}
+}
+
+
+function GetCurrentTheme(storage) {
+	if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
+		let theme = storage["themes"][storage["current_theme"]];
+		let correctedTheme = CheckTheme(theme);
+			if (correctedTheme.theme_version < 4 && storage["preferences"].show_toolbar == undefined) {
+				opt.show_toolbar = correctedTheme.ToolbarShow;
+				SavePreferences();
+			}
+		return correctedTheme;
+	} else {
+		return DefaultTheme;
+	}
+}
 
 // OPTIONS PAGE
 function LoadTheme(ThemeId, reloadInSidebar) {

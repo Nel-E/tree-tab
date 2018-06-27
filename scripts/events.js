@@ -151,6 +151,7 @@ function SetEvents() {
 	document.getElementById("group_list").ondragleave = function(event) {
 		if (opt.open_tree_on_hover) {
 			clearTimeout(DragOverTimer);
+			DragOverId = "";
 		}
 	}
 	
@@ -225,7 +226,7 @@ function SetEvents() {
 		let Scroll = ActiveGroup.scrollTop;
 
 		clearTimeout(DragOverTimer);
-
+		DragOverId = "";
 		
 		event.preventDefault();
 
@@ -251,53 +252,16 @@ function SetEvents() {
 				}
 			}
 			
-			// let counter = 0;
-			// if (TabsIds.length == 0) {
-				// DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
-			// } else {
-					if (opt.debug) {
-						log("DragAndDrop: will now move tabs");
-					}
+			if (opt.debug) {
+				log("DragAndDrop: will now move tabs");
+			}
 
-					chrome.tabs.move(TabsIds, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-						setTimeout(function() {
-							DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
-							chrome.runtime.sendMessage({ command: "remove_group", groupId: Group.id });
-						}, 2000);
-					});
-				
-				// (TabsIds).forEach(function(TabId) {
-					// if (opt.debug) {
-						// log("DragAndDrop: will now move tab: "+TabId);
-					// }
-
-					// chrome.tabs.move(TabId, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
-						// if (browserId == "F") {																																// MOZILLA BUG 1398272
-							// let MovedTabId = MovedTab[0] != undefined ? MovedTab[0].id : (MovedTab.id != undefined ? MovedTab.id : TabId);		// MOZILLA BUG 1398272
-							// if ((TabsIdsParents).indexOf("ct"+TabsIds[counter]) != -1) {																		// MOZILLA BUG 1398272
-								// TabsIdsParents[(TabsIdsParents).indexOf("ct"+TabsIds[counter])] = "ct"+MovedTabId;										// MOZILLA BUG 1398272
-							// }																																						// MOZILLA BUG 1398272
-							// if ((TabsIdsSelected).indexOf(TabsIds[counter]) != -1) {																				// MOZILLA BUG 1398272
-								// TabsIdsSelected[(TabsIdsSelected).indexOf(TabsIds[counter])] = MovedTabId;													// MOZILLA BUG 1398272
-							// }																																						// MOZILLA BUG 1398272
-							// TabsIds[counter] = MovedTabId;																												// MOZILLA BUG 1398272
-						// }																																							// MOZILLA BUG 1398272				
-						// counter++;
-						// if (counter == TabsIds.length) {
-							// setTimeout(function() {
-								// (TabsIdsSelected).forEach(function(selectedTabId) {
-									// let selectedTab = document.getElementById(selectedTabId);
-									// if (selectedTab != null) {
-										// selectedTab.classList.add("selected_temporarly");
-										// selectedTab.classList.add("selected_tab");
-									// }
-								// });
-								// DropToTarget(Class, target, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected, Group, Scroll);
-							// }, 400);
-						// }
-					// });
-				// });
-			// }
+			chrome.tabs.move(TabsIds, { windowId: CurrentWindowId, index: -1 }, function(MovedTab) {
+				setTimeout(function() {
+					DropToTarget({Class: Class, DraggedTabNode: DraggedTabNode, TargetNode: target, TabsIds: TabsIds, TabsIdsSelected: TabsIdsSelected, TabsIdsParents: TabsIdsParents, Folders: Folders, FoldersSelected: FoldersSelected, Group: Group, Scroll: Scroll});
+					chrome.runtime.sendMessage({ command: "remove_group", groupId: Group.id });
+				}, 2000);
+			});
 		}
 	}
 
@@ -309,17 +273,19 @@ function SetEvents() {
 		RemoveHighlight();
 		if (opt.open_tree_on_hover) {
 			clearTimeout(DragOverTimer);
+			DragOverId = "";
 		}
 	}
 
 	document.ondragend = function(event) {
 		if (opt.open_tree_on_hover) {
 			clearTimeout(DragOverTimer);
+			DragOverId = "";
 		}
 		// log("document dragend");
 		// DETACHING TEMPORARILY DISABLED PLEASE USE MENU OR TOOLBAR!
 		// if (DragAndDrop.ComesFromWindowId == CurrentWindowId && DragAndDrop.DroppedToWindowId == 0) {
-			// if ((browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight)))||	(browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight))) {
+			// if ((global.browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight)))||	(global.browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight))) {
 				// log("dragged outside sidebar");
 				// if (DragNodeClass == "tab") {
 					// Detach(DragAndDrop.TabsIds, {});
@@ -517,17 +483,15 @@ function DropToTarget(p) {
 		// recheck new structure
 		if (Object.keys(p.Folders).length > 0) {
 			for (var folderId in p.Folders) {
-				let Folder = document.getElementById(folderId);
-				// let FolderParent = document.getElementById("cf"+active_group);
-				
+				if (p.FoldersSelected.indexOf(folderId) == -1) {
+					let Folder = document.getElementById(folderId);
 					if (Folder != null && Folder.parentNode.id != "cf" + p.Folders[folderId].parent) {
 						let FolderParent = document.getElementById("cf" + p.Folders[folderId].parent);
 						if (FolderParent != null) {
 							FolderParent.appendChild(Folder);
 						}
 					}
-				// AddNewFolder(folder, Folders[folder].parent, Folders[folder].name, Folders[folder].index, Folders[folder].expand, (p.FoldersSelected.indexOf(folder) != -1 ? "selected_folder" : undefined), true);
-				// chrome.runtime.sendMessage({ command: "remove_folder", folderId: Folders[folder].id });
+				}
 			}
 		}
 
@@ -659,6 +623,9 @@ function CleanUpDragClasses() {
 	});
 	document.querySelectorAll(".dragged_tree").forEach(function(s){
 		s.classList.remove("dragged_tree");
+	});
+	document.querySelectorAll(".dragged_parents").forEach(function(s){
+		s.classList.remove("dragged_parents");
 	});
 }
 

@@ -32,50 +32,56 @@ async function UpdateData() {
 	}, 1000);
 }
 
-function RearrangeBrowserTabs() {
-	if (opt.debug) {
-		log("f: RearrangeBrowserTabs");
-	}
+async function RearrangeBrowserTabs() {
 	setInterval(function() {
 		if (schedule_rearrange_tabs > 0) {
 			schedule_rearrange_tabs--;
-			let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
-				return parseInt(s.id);
+			if (opt.debug) {
+				log("f: RearrangeBrowserTabs");
+			}
+			chrome.tabs.query({currentWindow: true}, function(tabs) {
+				let ttTabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
+					return parseInt(s.id);
+				});
+				let tabIds = Array.prototype.map.call(tabs, function(t){
+					return t.id;
+				});
+				RearrangeBrowserTabsLoop(ttTabIds, tabIds, ttTabIds.length-1);
 			});
-			RearrangeBrowserTabsLoop(tabIds, tabIds.length-1);
 		}
 	}, 1000);
 }
 
-async function RearrangeBrowserTabsLoop(tabIds, tabIndex) {
+async function RearrangeBrowserTabsLoop(ttTabIds, tabIds, tabIndex) {
 	if (opt.debug) {
 		log("f: RearrangeBrowserTabsLoop");
 	}
 	if (tabIndex >= 0 && schedule_rearrange_tabs == 0){
-		chrome.tabs.get(tabIds[tabIndex], function(tab) {
-			if (tab && tabIndex != tab.index) {
-				chrome.tabs.move(tabIds[tabIndex], {index: tabIndex});
-			}
-			RearrangeBrowserTabsLoop( tabIds, (tabIndex-1) );
-		});
+		if (ttTabIds[tabIndex] != tabIds[tabIndex]) {
+			chrome.tabs.move(ttTabIds[tabIndex], {index: tabIndex});
+		}
+		setTimeout(function() {
+			RearrangeBrowserTabsLoop(ttTabIds, tabIds, (tabIndex-1));
+		}, 0);
 	}
 }
 
-function RearrangeTreeTabs(tabs, bgtabs, first_loop) {
-	tabs.forEach(function(Tab) {
-		let t = document.getElementById(Tab.id);
-		if (bgtabs[Tab.id] && t != null && t.parentNode.childNodes[bgtabs[Tab.id].index]) {
-			let tInd = Array.from(t.parentNode.children).indexOf(t);
-			if (tInd > bgtabs[Tab.id].index) {
-				InsterBeforeNode(t, t.parentNode.childNodes[bgtabs[Tab.id].index]);
-			} else {
-				InsterAfterNode(t, t.parentNode.childNodes[bgtabs[Tab.id].index]);
+function RearrangeTreeTabs(bgtabs) {
+	if (opt.debug) {
+		log("f: RearrangeTreeTabs");
+	}
+	document.querySelectorAll(".pin, .tab").forEach(function(tab){
+		if (bgtabs[tab.id]) {
+			let Sibling = tab.nextElementSibling;
+			while (Sibling) {
+				if (bgtabs[Sibling.id]) {
+					if (bgtabs[tab.id].index > bgtabs[Sibling.id].index   ) {
+						InsterAfterNode(tab, Sibling);
+					}
+				}
+				Sibling = Sibling.nextElementSibling ? Sibling.nextElementSibling : false;
 			}
-			let newtInd = Array.from(t.parentNode.children).indexOf(t);
-			if (bgtabs[Tab.id] && newtInd != bgtabs[Tab.id].index && first_loop) {
-				RearrangeTreeTabs(tabs, bgtabs, false);
-			}
-		}
+		}	
 	});
 }
 
@@ -175,7 +181,7 @@ function AppendTab(p) {
 		}
 		
 		th.onmousedown = function(event) {
-			if (browserId == "V") {
+			if (global.browserId == "V") {
 				chrome.windows.getCurrent({populate: false}, function(window) {
 					if (CurrentWindowId != window.id) {
 						location.reload();
@@ -214,27 +220,44 @@ function AppendTab(p) {
 			TabStartDrag(this.parentNode, event);
 		}
 
-		
 		th.ondragenter = function(event) {
 			this.classList.remove("tab_header_hover");
-			if (opt.open_tree_on_hover) {
-				if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
-					clearTimeout(DragOverTimer);
-					let This = this;
-					DragOverTimer = setTimeout(function() {
-						This.parentNode.classList.add("o");
-						This.parentNode.classList.remove("c");
-					}, 1500);	
-				}
-			}
+			// if (opt.open_tree_on_hover) {
+				// if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
+					// clearTimeout(DragOverTimer);
+					// let This = this;
+					// DragOverTimer = setTimeout(function() {
+						// This.parentNode.classList.add("o");
+						// This.parentNode.classList.remove("c");
+					// }, 1500);	
+				// }
+			// }
 		}
 
 		th.ondragleave = function(event) {
 			RemoveHighlight();
+			// console.log("clearTimeout");
+			// if (opt.open_tree_on_hover) {
+				// clearTimeout(DragOverTimer);
+			// }
 		}
 
 		th.ondragover = function(event) {
 			TabDragOver(this, event);
+			if (opt.open_tree_on_hover && DragOverId != this.id) {
+				if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
+					clearTimeout(DragOverTimer);
+					DragOverId = this.id;
+					let This = this;
+					DragOverTimer = setTimeout(function() {
+						if (DragOverId == This.id) {
+							This.parentNode.classList.add("o");
+							This.parentNode.classList.remove("c");
+							// DragOverId = "";
+						}
+					}, 1500);	
+				}
+			}
 		}
 
 		mi.onmousedown = function(event) {
@@ -303,6 +326,8 @@ function AppendTab(p) {
 	if (p.Scroll) {
 		ScrollToTab(p.tab.id);
 	}
+	
+	return tb;
 }
 
 
@@ -448,81 +473,28 @@ function Detach(tabsIds, Folders) {
 		let Indexes = [];
 		let Parents = [];
 		let Expands = [];
-		// let NewIds = [];																	// MOZILLA BUG 1398272
 		let NewTabs = [];
 		let Ind = 0;
 
 		tabsIds.forEach(function(tabId) {
 			let tab = document.getElementById(tabId);
-			// NewIds.push(tabId);															// MOZILLA BUG 1398272
 			Indexes.push(Array.from(tab.parentNode.children).indexOf(tab));
 			Parents.push(tab.parentNode.parentNode.id);
 			Expands.push( (tab.classList.contains("c") ? "c" : (tab.classList.contains("o") ? "o" : ""))  );
 		});
 
-		chrome.windows.create({state:window.state}, function(new_window) {
+		chrome.windows.create({tabId: tabsIds[0], state:window.state}, function(new_window) {
+
+			tabsIds.splice(0, 1);
 			chrome.tabs.move(tabsIds, {windowId: new_window.id, index:-1}, function(MovedTabs) {
-				
-				
-				
-			// tabsIds.forEach(function(tabId) {
-				// chrome.tabs.move(tabId, {windowId: new_window.id, index:-1}, function(MovedTab) {
-					// if (browserId == "F") {													// MOZILLA BUG 1398272
-						// if (Ind == 0) {														// MOZILLA BUG 1398272
-							// NewIds[Ind] = new_window.tabs[0].id;						// MOZILLA BUG 1398272
-						// } else {																	// MOZILLA BUG 1398272
-							// NewIds[Ind] = MovedTab[0].id;									// MOZILLA BUG 1398272
-						// }																			// MOZILLA BUG 1398272
-						// NewTabs.push({id: NewIds[Ind], index: Indexes[Ind], parent: ((tabsIds.indexOf(parseInt(Parents[Ind])) != -1) ? NewIds[tabsIds.indexOf(parseInt(Parents[Ind]))] : Parents[Ind]), expand: Expands[Ind]});	// MOZILLA BUG 1398272
-					// } else {																		// MOZILLA BUG 1398272
-						// NewTabs.push({id: tabsIds[Ind], index: Indexes[Ind], parent: Parents[Ind], expand: Expands[Ind]}); // PUSH TAB FROM INDEX
-					// }																				// MOZILLA BUG 1398272
-					// Ind++;
-					// if (Ind >= Parents.length-1) {
-						// chrome.tabs.remove(new_window.tabs[0].id, null);
-						// let Confirmations = 0;
-						// let GiveUpLimit = 600;
-						// if (opt.debug) {
-							// log("Detach - Remote Append and Update Loop, waiting for confirmations after attach tabs");
-						// }
-
-						// chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: Folders});
-
-						// for (let tInd = 0; tInd < NewTabs.length; tInd++) {
-							// chrome.runtime.sendMessage({command: "update_tab", tabId: NewTabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
-						// }	
 						
-						// var Append = setInterval(function() {
-							// chrome.windows.get(new_window.id, function(confirm_new_window) {
-								// chrome.runtime.sendMessage({command: "remote_update", groups: {}, folders: Folders, tabs: NewTabs, windowId: new_window.id}, function(response) {
-									// if (response) {
-										// Confirmations++;
-									// }
-								// });
-								// GiveUpLimit--;
-								// if (opt.debug) {
-									// log("Detach -> Attach in new window confirmed: "+Confirmations+" times. If sidebar is not open in new window this loop will give up in: "+GiveUpLimit+" seconds");
-								// }
-								// if (Confirmations > 2 || GiveUpLimit < 0 || confirm_new_window == undefined) {
-									// clearInterval(Append);
-								// }
-							// });
-						// }, 1000);
+				if (Folders && Object.keys(Folders).length > 0) {
+					for (var folder in Folders) {
+						RemoveFolder(Folders[folder].id);
+					}
+				}
 						
-						if (Folders && Object.keys(Folders).length > 0) {
-							for (var folder in Folders) {
-								RemoveFolder(Folders[folder].id);
-							}
-						}
-						
-						setTimeout(function() {
-							chrome.tabs.remove(new_window.tabs[0].id, null);
-						}, 500);
-				
-						
-					// }
-				});
-			// });
+			});
 		});
 	});
 }
@@ -792,7 +764,7 @@ function OpenNewTab(pin, parentId) {
 				AppendTab({tab: tab, ParentId: "pin_list", InsertAfterId: parentId, Append: true, Scroll: true});
 				schedule_update_data++;
 			}
-			newTabUrl = tab.url;
+			// newTabUrl = tab.url;
 		});
 	} else {
 		chrome.tabs.create({}, function(tab) {
@@ -800,7 +772,10 @@ function OpenNewTab(pin, parentId) {
 				AppendTab({tab: tab, ParentId: parentId, Append: (opt.append_orphan_tab == "top" ? false : true), Scroll: true});
 				schedule_update_data++;
 			}
-			newTabUrl = tab.url;
+			// newTabUrl = tab.url;
+			if (opt.move_tabs_on_url_change == "from_empty") {
+				chrome.runtime.sendMessage({command: "remove_tab_from_empty_tabs", tabId: tab.id});
+			}
 		});
 	}
 }
@@ -810,7 +785,7 @@ function DuplicateTab(SourceTabNode) {
 		let DupRetry = setInterval(function() {
 			let DupTab = document.getElementById(tab.id);
 			if (DupTab != null) {
-				if (browserId == "F" && tab.pinned) {
+				if (global.browserId == "F" && tab.pinned) {
 					DupTab.classList.remove("tab");
 					DupTab.classList.add("pin");
 				}
@@ -1018,6 +993,7 @@ function TabStartDrag(Node, event) {
 		s.classList.add("dragged_tree");
 	});
 
+	
 	if (opt.max_tree_drag_drop) {
 		document.querySelectorAll(".dragged_tree .tab").forEach(function(s){
 			let parents = GetParentsByClass(s.parentNode, "dragged_tree");
@@ -1035,6 +1011,16 @@ function TabStartDrag(Node, event) {
 		TabsIds.push(parseInt(s.id));
 		TabsIdsParents.push(s.parentNode.id);
 	});
+	
+	let DraggedFolderParents = GetParentsByClass(Node, "folder");
+	DraggedFolderParents.forEach(function(s){
+		s.classList.add("dragged_parents");
+	});
+	let DraggedParents = GetParentsByClass(Node, "tab");
+	DraggedParents.forEach(function(s){
+		s.classList.add("dragged_parents");
+	});
+	
 
 	DragAndDropData = {TabsIds: TabsIds, TabsIdsParents: TabsIdsParents, TabsIdsSelected: TabsIdsSelected};
 	
@@ -1075,10 +1061,11 @@ function TabDragOver(Node, event) {
 		}
 		
 		if (Node.parentNode.classList.contains("tab")) {
-			let P = (GetParentsByClass(Node, "tab")).length + DragTreeDepth;
-			let PGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
-			
-			if (Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop == false)) {
+			let PDepth = (GetParentsByClass(Node, "tab")).length + DragTreeDepth;
+			let PIsGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
+			let PIsDraggedParents = Node.parentNode.classList.contains("dragged_parents");
+
+			if (Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
 				RemoveHighlight();
 				Node.parentNode.classList.remove("inside");
 				Node.parentNode.classList.remove("after");
@@ -1087,7 +1074,7 @@ function TabDragOver(Node, event) {
 			}
 			
 			
-			if (Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth || opt.max_tree_depth<0 || opt.max_tree_drag_drop == false)) {
+			if (Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth || opt.max_tree_depth < 0 || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
 				RemoveHighlight();
 				Node.parentNode.classList.remove("before");
 				Node.parentNode.classList.remove("after");
@@ -1096,7 +1083,7 @@ function TabDragOver(Node, event) {
 			}
 			
 			
-			if (Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (P <= opt.max_tree_depth+1 || opt.max_tree_depth<0 || PGroup || opt.max_tree_drag_drop == false)) {
+			if (Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
 				RemoveHighlight();
 				Node.parentNode.classList.remove("inside");
 				Node.parentNode.classList.remove("before");

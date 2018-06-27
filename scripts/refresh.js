@@ -58,14 +58,14 @@ async function RefreshGUI() {
 		document.querySelectorAll(".group").forEach(function(s){
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
-				groupLabel.textContent = (bggroups[s.id] ? bggroups[s.id].name : caption_noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
+				groupLabel.textContent = (bggroups[s.id] ? bggroups[s.id].name : labels.noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
 			}
 		});
 	} else {
 		document.querySelectorAll(".group").forEach(function(s){
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
-				groupLabel.textContent = bggroups[s.id] ? bggroups[s.id].name : caption_noname_group;
+				groupLabel.textContent = bggroups[s.id] ? bggroups[s.id].name : labels.noname_group;
 			}
 		});
 	}
@@ -131,15 +131,15 @@ function RefreshMediaIcon(tabId) {
 	if (t != null) {
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab) {
-				if (tab.mutedInfo.muted) {
+				if (tab.mutedInfo.muted && !tab.discarded) {
 					t.classList.remove("audible");
 					t.classList.add("muted");
 				}
-				if (!tab.mutedInfo.muted && tab.audible) {
+				if (!tab.mutedInfo.muted && tab.audible && !tab.discarded) {
 					t.classList.remove("muted");
 					t.classList.add("audible");
 				}
-				if (!tab.mutedInfo.muted && !tab.audible) {
+				if ((!tab.mutedInfo.muted && !tab.audible) || tab.discarded) {
 					t.classList.remove("audible");
 					t.classList.remove("muted");
 				}
@@ -170,9 +170,34 @@ function VivaldiRefreshMediaIcons() {
 	}, 2000);
 }
 
+async function LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
+	if (TabHeaderNode){
+		Img.src = TryUrls[i];
+		Img.onload = function() {
+			TabHeaderNode.style.backgroundImage = "url(" + TryUrls[i] + ")";
+			if (global.browserId == "F") { // cache Firefox favicon - solution for bug with empty favicons in unloaded tabs
+				browser.sessions.setTabValue(tabId, "CachedFaviconUrl", TryUrls[i]);
+			}
+		};
+		Img.onerror = function() {
+			if (i < TryUrls.length) {
+				LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, (i+1));
+			}
+		}
+	}
+}
+
 async function GetFaviconAndTitle(tabId, addCounter) {
 	let t = document.getElementById(tabId);
 	if (t != null) {
+		
+		let CachedFavicon;
+		if (global.browserId == "F") {
+			let ttf = Promise.resolve(browser.sessions.getTabValue(tabId, "CachedFaviconUrl")).then(function(FaviconUrl) {
+				CachedFavicon = FaviconUrl;
+			});
+		}
+		
 		chrome.tabs.get(parseInt(tabId), function(tab) {
 			if (tab){
 				let title = tab.title ? tab.title : tab.url;
@@ -180,38 +205,27 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 				let tTitle = tHeader.childNodes[1];
 				if (tab.status == "complete" || tab.discarded) {
 					t.classList.remove("loading");
-					// change title
+
 					tTitle.textContent = title;
 					tHeader.title = title;
 					tHeader.setAttribute("tabTitle", title);
-					// compatibility with various Tab suspender extensions
-					if (tab.favIconUrl != undefined && tab.favIconUrl.match("data:image/png;base64") != null) {
-						tHeader.style.backgroundImage = "url(" + tab.favIconUrl + ")";
-					} else {
-						// case for internal pages, favicons don't have access, but can be loaded from url
-						if (tab.url.match("opera://|vivaldi://|browser://|chrome://|chrome-extension://") != null) {
-							tHeader.style.backgroundImage = "url(chrome://favicon/" + tab.url + ")";
-						} else {
-							// change favicon
-							let img = new Image();
-							img.src = tab.favIconUrl;
-							img.onload = function() {
-								tHeader.style.backgroundImage = "url(" + tab.favIconUrl + ")";
-							};
-							img.onerror = function() {
-								tHeader.style.backgroundImage = ((tab.url == "" || browserId == "F") ? "url(./theme/icon_empty.svg)" : ("url(chrome://favicon/" + tab.url + ")"));
-								// "url(" + tab.url + ")"
-							}
-						}
+	
+					let Img = new Image();
+
+					if (global.browserId != "F") {
+						CachedFavicon = "chrome://favicon/"+tab.url;
 					}
+					let TryCases = [tab.favIconUrl, CachedFavicon, , "./theme/icon_empty.svg"];
+					LoadFavicon(tabId, Img, TryCases, tHeader, 0);
+
 				}
 				if (tab.status == "loading" && tab.discarded == false) {
-					title = tab.title ? tab.title : caption_loading;
+					title = tab.title ? tab.title : labels.loading;
 					t.classList.add("loading");
 					tHeader.style.backgroundImage = "";
-					tHeader.title = caption_loading;
-					tHeader.setAttribute("tabTitle", caption_loading);
-					tTitle.textContent = caption_loading;
+					tHeader.title = labels.loading;
+					tHeader.setAttribute("tabTitle", labels.loading);
+					tTitle.textContent = labels.loading;
 					setTimeout(function() {
 						if (document.getElementById(tab.id) != null) GetFaviconAndTitle(tab.id, addCounter);
 					}, 1000);

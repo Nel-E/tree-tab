@@ -12,9 +12,7 @@ function AppendGroups(Groups) {
 	if (opt.debug) {
 		log("f: AppendGroups, Groups: "+JSON.stringify(Groups));
 	}
-
-	AppendGroupToList("tab_list", caption_ungrouped_group, "", true);
-
+	AppendGroupToList("tab_list", labels.ungrouped_group, "", true);
 	for (var group in Groups) {
 		AppendGroupToList(Groups[group].id, Groups[group].name, Groups[group].font, true);
 		if (document.querySelectorAll(".group").length == Object.keys(Groups).length) {
@@ -94,7 +92,7 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 					// SHOW MENU
 					ShowFGlobalMenu(event);
 				}
-				if (browserId == "V") {
+				if (global.browserId == "V") {
 					chrome.windows.getCurrent({populate: false}, function(window) {
 						if (CurrentWindowId != window.id) {
 							location.reload();
@@ -108,13 +106,14 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 					RemoveHighlight();
 					this.classList.add("highlighted_drop_target");
 				}
+				// DragOverId = this.id;
 			}
-			grp.ondragenter = function(event) {
-				console.log("clearTimeout");
-				if (opt.open_tree_on_hover) {
-					clearTimeout(DragOverTimer);
-				}
-			}
+			// grp.ondragenter = function(event) {
+				// console.log("clearTimeout");
+				// if (opt.open_tree_on_hover) {
+					// clearTimeout(DragOverTimer);
+				// }
+			// }
 
 			// DOUBLE CLICK ACTION
 			grp.ondblclick = function(event) {
@@ -197,17 +196,19 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 }
 
 function GenerateNewGroupID(){
-	let newID = "g_"+GenerateRandomID();
-	if (document.getElementById(newID) == null) {
-		return newID;
-	} else {
-		GenerateNewGroupID();
+	let newID = "";
+	while (newID == "") {
+		newID = "g_"+GenerateRandomID();
+		if (document.getElementById(newID) != null) {
+			newID = "";
+		}
 	}
+	return newID;	
 }
 
 function AddNewGroup(Name, FontColor) {
 	let newId = GenerateNewGroupID();
-	bggroups[newId] = { id: newId, index: 0, active_tab: 0, prev_active_tab: 0, active_tab_ttid: "", name: (Name ? Name : caption_noname_group), font:  (FontColor ? FontColor : "")  };
+	bggroups[newId] = { id: newId, index: 0, active_tab: 0, prev_active_tab: 0, active_tab_ttid: "", name: (Name ? Name : labels.noname_group), font:  (FontColor ? FontColor : "")  };
 	if (opt.debug) {
 		log("f: AddNewGroup, groupId: "+newId+", Name: "+Name+", FontColor: "+FontColor);
 	}
@@ -216,50 +217,50 @@ function AddNewGroup(Name, FontColor) {
 	return newId;
 }
 
-function FindGroupIdByName(name) {
-	if (opt.debug) {
-		log("f: FindGroupIdByName: "+name);
-	}
-	for (let key in bggroups) {
-		if (!bggroups.hasOwnProperty(key)) {
-			continue;
-		}
-		if (bggroups[key].name === name) {
-			return key;
-		}
-	}
-	return null;
-}
+// function FindGroupIdByName(name) {
+	// if (opt.debug) {
+		// log("f: FindGroupIdByName: "+name);
+	// }
+	// for (let key in bggroups) {
+		// if (!bggroups.hasOwnProperty(key)) {
+			// continue;
+		// }
+		// if (bggroups[key].name === name) {
+			// return key;
+		// }
+	// }
+	// return null;
+// }
 
-function AppendTabToGroupOnRegexMatch(tabId, url) {
-	if (opt.debug) {
-		log("f: AppendTabToGroupOnRegexMatch, tabId: "+tabId+", url: "+url);
-	}
-	let Tab = document.getElementById(tabId);
+// function AppendTabToGroupOnRegexMatch(tabId, url) {
+	// if (opt.debug) {
+		// log("f: AppendTabToGroupOnRegexMatch, tabId: "+tabId+", url: "+url);
+	// }
+	// let Tab = document.getElementById(tabId);
 
-	if (Tab != null && Tab.classList.contains("tab")) {
-		let TabGroup = GetParentsByClass(Tab, "group");
+	// if (Tab != null && Tab.classList.contains("tab")) {
+		// let TabGroup = GetParentsByClass(Tab, "group");
 
-		for (let i = 0; i < opt.tab_group_regexes.length; i++) {
-			let regexPair = opt.tab_group_regexes[i];
-			if (url.match(regexPair[0])) {
-				let groupId = FindGroupIdByName(regexPair[1]);
-				if (groupId === null) {
-					groupId = AddNewGroup(regexPair[1]);
-				}
-				if (TabGroup.length > 0 && TabGroup[0].id !== groupId) {
-					let newParent = document.getElementById("ct" + groupId);
-					newParent.appendChild(Tab);
-					SetActiveGroup(groupId, true, true);
-					SetActiveTabInGroup(groupId, Tab.id);
-					chrome.tabs.update(tabId, { active: true });
-				}
-				break;
-			}
-		}
-	}
+		// for (let i = 0; i < opt.tab_group_regexes.length; i++) {
+			// let regexPair = opt.tab_group_regexes[i];
+			// if (url.match(regexPair[0])) {
+				// let groupId = FindGroupIdByName(regexPair[1]);
+				// if (groupId === null) {
+					// groupId = AddNewGroup(regexPair[1]);
+				// }
+				// if (TabGroup.length > 0 && TabGroup[0].id !== groupId) {
+					// let newParent = document.getElementById("ct" + groupId);
+					// newParent.appendChild(Tab);
+					// SetActiveGroup(groupId, true, true);
+					// SetActiveTabInGroup(groupId, Tab.id);
+					// chrome.tabs.update(tabId, { active: true });
+				// }
+				// break;
+			// }
+		// }
+	// }
 
-}
+// }
 
 // remove group, delete tabs if close_tabs is true
 function GroupRemove(groupId, close_tabs) {
@@ -373,7 +374,7 @@ function SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
 		RefreshExpandStates();
 		RefreshCounters();
 		
-		if (browserId == "F" && opt.hide_other_groups_tabs_firefox) {
+		if (global.browserId == "F" && opt.hide_other_groups_tabs_firefox) {
 			let HideTabIds = Array.prototype.map.call(document.querySelectorAll(".group:not([id='"+groupId+"']) .tab"), function(s){
 				return parseInt(s.id);
 			});
@@ -583,10 +584,10 @@ function GroupStartDrag(Node, event) {
 		Folders[s.id] = Object.assign({}, bgfolders[s.id]);
 	});
 
-	console.log(Group);
-	console.log(TabsIds);
-	console.log(TabsIdsParents);
-	console.log(Folders);
+	// console.log(Group);
+	// console.log(TabsIds);
+	// console.log(TabsIdsParents);
+	// console.log(Folders);
 	
 	// let Group = document.getElementById(Node.id.substr(1));
 

@@ -2,26 +2,48 @@ FIXES:
 export group and export session had file extension in name
 pin tree had bug in setting class
 
+NEW:
+DRAG&DROP TO ANOTHER WINDOW OF THE ENTIRE GROUP
+
+
+
+
+
+
+
+
+
+FEATURES TO DO
 discard on import group and import session
 
+Shift + mouse scroll to switch between groups
+A keyboard shortcut (shift + alt + w) to close a tree of tabs
 
+unread tabs
 
 instruction to add popup
 line for children hierarchy (like at the beggining)
 "undo close" as a possible action with middle click on empty space
 
+return to the first tab with mousewheel when we are at the bottom list (loop) - "mousewheel scroll on the last tab allow to return to the first one"
 
-DRAG&DROP TO ANOTHER WINDOW OF THE ENTIRE GROUP
+mute icon config option (disable animation)
+
+FIREFOX CONTAINERS
+
 
 undo close to restore trees (will work ONLY in firefox)
 Close tab on Middle mouse click and not On Middle mouse down
 Split Pin size in theme
 
 
+unread state?
+Unread Tabs Color/Style
+automatic different color for each tree
+
 add groups scrolling arrows
 add textbox for ungrouped name in options
 option for scrollbar on the left
-unread state?
 
 menu: copy urls of the selected tabs
 menu: bookmark selected tabs/tree
@@ -38,16 +60,14 @@ maybe filter tabs on search
 
 
 font size
-hibernate group
 
 double click on tab actions selection like double click to be able to expand child tab.
- I want you to be able to display the tab number count on the right end
+I want you to be able to display the tab number count on the right end
 customizable menu
 
 import session to unload tabs immediately
 bind groups to FF containers
 
-Unread Tabs Color/Style
 Give back group color (like it was before)
 
 
@@ -57,8 +77,6 @@ folders collapsed by default or make this optional
 
 
 when actived tab located in folder, all tabs operation related with creating new tab (such as clone of tab in folder, new tab) must work only in current folder.
-
-New tab in selected folder!
 
 
 separate option for close folder (close or promote children)
@@ -75,7 +93,7 @@ Accept BCH (BitcoinCash) donations as the FEES make it FAR more palatable to don
 - Like many other commenters suggested, it would be wonderful to see some indication of the container a tab was opened in, if any. Getting an option to directly be able to chose to open a new tab in a container would also be very useful. 
 
 
-I don't understand those from comments
+I DON'T UNDERSTAND THOSE FROM COMMENTS
 - add possibility open all tabs in folder in new left tab group with deleting this folder;
 - for economy memory your tabs must to makings (html code) during activating left tab group or during unfold folders/trees;
 - real FF tabs must creating and linking only after activate your tabs;

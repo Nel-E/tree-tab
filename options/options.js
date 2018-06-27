@@ -9,8 +9,8 @@ var themes = [];
 var SelectedTheme = Object.assign({}, DefaultTheme);
 
 
-var dragged_button;
-active_group = "tab_list";
+var dragged_button = {id: ""};
+// var active_group = "tab_list";
 
 // options for all drop down menus
 let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab", "move_tabs_on_url_change"];
@@ -19,6 +19,10 @@ document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
 	chrome.storage.local.get(null, function(storage) {
 		
+		AppendGroupToList("tab_list", labels.ungrouped_group, "", false);
+		AppendGroupToList("tab_list2", labels.noname_group, "", false);
+		AppendSampleTabs();
+	
 		GetCurrentPreferences(storage);
 
 		if (storage["themes"]) {
@@ -45,9 +49,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		RefreshFields();
 		SetEvents();
 
-		AppendGroupToList("tab_list", caption_ungrouped_group, "", false);
-		AppendGroupToList("tab_list2", caption_noname_group, "", false);
-		AppendSampleTabs();
 	
 		setTimeout(function() {
 			document.querySelectorAll(".on").forEach(function(s){
@@ -142,6 +143,7 @@ function GetOptions(storage) {
 				break;
 			}
 		}
+		RefreshFields();
 	}
 	
 	for (let i = 0; i < opt.tab_group_regexes.length; i++) {
@@ -639,6 +641,7 @@ function SetEvents() {
 		document.getElementById(DropDownList[i]).onchange = function(event) {
 			opt[this.id] = this.value;
 			SavePreferences();
+			RefreshFields();
 			setTimeout(function() {
 				chrome.runtime.sendMessage({command: "reload_sidebar"});
 			}, 50);
@@ -892,7 +895,7 @@ function SetEvents() {
 // ----------------------EXPORT DEBUG LOG---------------------------------------------------------------------------------	
 	document.getElementById("options_export_debug").onclick = function(event) {if (event.which == 1) {
 		chrome.storage.local.get(null, function(storage) {
-			SaveFile("TreeTabs", "log", storage);
+			SaveFile("TreeTabs", "log", storage.debug_log);
 		});
 	}}
 
@@ -931,10 +934,6 @@ function SetEvents() {
 		}, 100);
 	}}
 
-	// ----------------------FIREFOX CHECK POPUP BUTTON-----------------------------------------------------------------------	
-	document.getElementById("options_open_test_popup").onclick = function(event) {if (event.which == 1) {
-		window.open("ff_check_popup.html","myPopup",'height=300,width=400');
-	}}
 }
 
 function RemoveToolbarEditEvents() {
@@ -1015,15 +1014,12 @@ function RefreshFields() {
 	} else {
 		document.getElementById("field_theme").style.height = "";
 	}
-	if (browserId == "F") {
+	if (global.browserId == "F") {
 		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s){
 			s.style.display = "none";
 		});
-		document.getElementById("field_firefox").style.display = "block";
-	} else {
-		document.getElementById("firefox_option_hide_other_groups_tabs_firefox").style.display = "none";
 	}
-	if (browserId == "V") {
+	if (global.browserId == "V") {
 		let WebPanelUrlBox = document.getElementById("url_for_web_panel");
 		WebPanelUrlBox.value = (chrome.runtime.getURL("sidebar.html"));
 		WebPanelUrlBox.setAttribute("readonly", true);
@@ -1041,6 +1037,11 @@ function RefreshFields() {
 		});
 		document.getElementById("options_toolbar_look").style.display = "none";
 		document.getElementById("field_show_toolbar").style.height = "6";
+	}
+	if (document.getElementById("append_child_tab").value == "after") {
+		document.getElementById("append_child_tab_after_limit_dropdown").style.display = "none";
+	} else {
+		document.getElementById("append_child_tab_after_limit_dropdown").style.display = "";
 	}
 }
 
