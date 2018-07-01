@@ -94,7 +94,7 @@ function AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 				}
 				if (browserId == "V") {
 					chrome.windows.getCurrent({populate: false}, function(window) {
-						if (tt.CurrentWindowId != window.id) {
+						if (tt.CurrentWindowId != window.id && window.focused) {
 							location.reload();
 						}
 					});

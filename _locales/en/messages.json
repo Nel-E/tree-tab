@@ -400,7 +400,7 @@
 		"message": " at the bottom"
 	},
 	"options_append_child_tab_after": {
-		"message": "after parent (no automatic tree, also option to treat orphan tab as active's tab child is ignored)"
+		"message": "after parent (no automatic tree)"
 	},
 
 	"options_append_orphan_tab": {

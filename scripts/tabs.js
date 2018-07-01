@@ -188,7 +188,7 @@ function AppendTab(p) {
 		tbh.onmousedown = function(event) {
 			if (browserId == "V") {
 				chrome.windows.getCurrent({populate: false}, function(window) {
-					if (tbt.CurrentWindowId != window.id) {
+					if (tt.CurrentWindowId != window.id && window.focused) {
 						location.reload();
 					}
 				});
