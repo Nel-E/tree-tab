@@ -9,7 +9,7 @@
 
 
 document.addEventListener("DOMContentLoaded", function() {
-	if (global.browserId == "F") {
+	if (browserId == "F") {
 		setTimeout(function() {
 			StartBackgroundListeners();
 			QuantumStart(0);
@@ -258,7 +258,6 @@ function QuantumLoadTabs(retry) {
 						b.windows[winId] = Object.assign({}, WindowData);
 					} else {
 						QuantumAppendWinTTId(winId);
-						// b.windows[winId] = {ttid: "", group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", prev_active_tab: 0, prev_active_tab_ttid: "", name: labels.ungrouped_group, font: ""}}, folders: {}};
 					}
 					for (let tIndex = 0; tIndex < tabsCount; tIndex++) {
 						let tab = w[winIndex].tabs[tIndex];

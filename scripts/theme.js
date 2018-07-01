@@ -33,9 +33,9 @@ function ApplyTheme(theme) {
 	ApplyTabsMargins(theme["TabsMargins"]);
 	RefreshGUI();
 	
-	for (var groupId in bggroups) {
+	for (var groupId in tt.groups) {
 		let groupTitle = document.getElementById("_gte"+groupId);
-		if (groupTitle != null && bggroups[groupId].font == "") {
+		if (groupTitle != null && tt.groups[groupId].font == "") {
 			groupTitle.style.color = "";
 		}
 	}
@@ -66,7 +66,7 @@ function ApplySizeSet(size){
 			}
 		}
 	}
-	if (global.browserId == "F") {
+	if (browserId == "F") {
 		// for some reason top position for various things is different in firefox?????
 		if (size > 1) {
 			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", Run(), false);
 
 
 function Run() {
+	ShowStatusBar({show: true, spinner: true, message: "Starting up"});
 	chrome.runtime.sendMessage({command: "is_bg_ready"}, function(response) {
 		if (response == true) {
 			Initialize();
@@ -19,7 +20,7 @@ function Run() {
 
 function Initialize() {
 	chrome.windows.getCurrent({populate: true}, function(window) {
-		CurrentWindowId = window.id;
+		tt.CurrentWindowId = window.id;
 		let tabs = window.tabs;
 		chrome.storage.local.get(null, function(storage) {
 			GetCurrentPreferences(storage);
@@ -34,23 +35,21 @@ function Initialize() {
 			}
 			
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(bgtabs) {
-				chrome.runtime.sendMessage({command: "get_folders", windowId: CurrentWindowId}, function(f) {
-					bgfolders = Object.assign({}, f);
-					chrome.runtime.sendMessage({command: "get_groups", windowId: CurrentWindowId}, function(g) {
-						bggroups = Object.assign({}, g);
+				chrome.runtime.sendMessage({command: "get_folders", windowId: tt.CurrentWindowId}, function(f) {
+					tt.folders = Object.assign({}, f);
+					chrome.runtime.sendMessage({command: "get_groups", windowId: tt.CurrentWindowId}, function(g) {
+						tt.groups = Object.assign({}, g);
 						// APPEND GROUPS
-						AppendGroups(bggroups);
+						AppendGroups(tt.groups);
 						// APPEND FOLDERS
-						AppendFolders(bgfolders);
+						AppendFolders(tt.folders);
 						// APPEND TABS
 						let ti = 0;
 						let tc = tabs.length;
 						let ttTabs = [];
-
-						SetLoadingSpinner(true);
-						
+					
 						for (ti = 0; ti < tc; ti++) {
-							ttTabs.push(AppendTab({  tab: tabs[ti], Index: bgtabs[tabs[ti].id].index, Append: true, SkipSetActive: true, AdditionalClass: (bgtabs[tabs[ti].id].expand != "" ? bgtabs[tabs[ti].id].expand : undefined)  }));
+							ttTabs.push(AppendTab({  tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: (bgtabs[tabs[ti].id].expand != "" ? bgtabs[tabs[ti].id].expand : undefined)  }));
 						}
 				
 						if (opt.skip_load == false) {
@@ -66,7 +65,7 @@ function Initialize() {
 						// SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
 						SetActiveTabInEachGroup();
 						RearrangeFolders(true);
-						RearrangeTreeTabs(bgtabs);
+						RearrangeTreeTabs(bgtabs, true);
 						StartSidebarListeners();
 	
 						SetMenu();
@@ -81,7 +80,7 @@ function Initialize() {
 						}
 						RestorePinListRowSettings();
 						StartAutoSaveSession();
-						if (global.browserId == "V") {
+						if (browserId == "V") {
 							VivaldiRefreshMediaIcons();
 						}
 						
@@ -89,10 +88,11 @@ function Initialize() {
 							RefreshExpandStates();
 							RefreshCounters();
 							SetActiveTabInEachGroup();
-							if (global.browserId == "F" && opt.skip_load == false && storage.emergency_reload == undefined) {
-								// RecheckFirefox();
+							if (browserId == "F" && opt.skip_load == false && storage.emergency_reload == undefined) {
+								RecheckFirefox();
 							}
 						}, 1000);
+						ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
 						setTimeout(function() {
 							UpdateData();
 							delete b;
@@ -103,12 +103,11 @@ function Initialize() {
 								chrome.storage.local.remove("emergency_reload");
 							}
 						}, 5000);
-						if (global.browserId != "F") {
+						if (browserId != "F") {
 							if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
 							if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
 							if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
 						}
-						SetLoadingSpinner(false);
 					});
 				});
 			});

@@ -2,25 +2,9 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-// BACKGROUND VARIABLES
-let b = {
-	// activeTabId = 0,
-	debug: [],
-	running: false,
-	schedule_save: -999,
-	windows: {},
-	tabs: {},
-	tt_ids: {},
-	EmptyTabs: []
-	// ,
-	// quantumWindow: {},
-	// quantumTab: {}
-};
-
 // GLOBAL VARIABLES
-let global = {
-	browserId: navigator.userAgent.match("Opera|OPR") !== null ? "O" : (navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" ))
-};
+let browserId = navigator.userAgent.match("Opera|OPR") !== null ? "O" : (navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" ))
+let opt = {};
 
 let labels = {
 	clear_filter: chrome.i18n.getMessage("caption_clear_filter"),
@@ -30,15 +14,25 @@ let labels = {
 	noname_group: chrome.i18n.getMessage("caption_noname_group")
 };
 
-let opt = {};
+// BACKGROUND VARIABLES
+let b = {
+	debug: [],
+	running: false,
+	schedule_save: -999,
+	windows: {},
+	tabs: {},
+	tt_ids: {},
+	EmptyTabs: [],
+	newTabUrl: browserId == "F" ? "about:newtab" : "chrome://startpage/"
+};
 
 // DEFAULTS NEEDED FOR START AND FOR OPTIONS PAGE
 const DefaultToolbar = {
 	toolbar_main: ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
 	toolbar_search: ["button_filter_type", "filter_search_go_prev", "filter_search_go_next"],
-	toolbar_shelf_tools: (global.browserId == "F" ? ["button_manager_window", "button_options", "button_unload", "button_detach", "button_reboot"] : ["button_manager_window", "button_options", "button_bookmarks", "button_downloads", "button_history", "button_settings", "button_extensions", "button_unload", "button_detach", "button_reboot"]),
+	toolbar_shelf_tools: (browserId == "F" ? ["button_manager_window", "button_options", "button_unload", "button_detach", "button_reboot"] : ["button_manager_window", "button_options", "button_bookmarks", "button_downloads", "button_history", "button_settings", "button_extensions", "button_unload", "button_detach", "button_reboot"]),
 	toolbar_shelf_groups: ["button_groups_toolbar_hide", "button_new_group", "button_remove_group", "button_edit_group", "button_import_group", "button_export_group"],
-	toolbar_shelf_backup: (global.browserId == "F" ? ["button_import_bak", "button_import_merge_bak", "button_export_bak"] : ["button_import_bak", "button_import_merge_bak", "button_export_bak", "button_load_bak1", "button_load_bak2", "button_load_bak3"]),
+	toolbar_shelf_backup: (browserId == "F" ? ["button_import_bak", "button_import_merge_bak", "button_export_bak"] : ["button_import_bak", "button_import_merge_bak", "button_export_bak", "button_load_bak1", "button_load_bak2", "button_load_bak3"]),
 	toolbar_shelf_folders: ["button_new_folder", "button_remove_folder", "button_edit_folder"]
 };
 
@@ -80,6 +74,7 @@ const DefaultPreferences = {
 	midclick_tab: "close_tab",
 	dbclick_tab: "new_tab",
 	dbclick_group: "new_tab",
+	// dbclick_group_bar: "new_group",
 	midclick_group: "nothing",
 	midclick_folder: "nothing",
 	dbclick_folder: "rename_folder",
@@ -92,24 +87,22 @@ const DefaultPreferences = {
 };
 
 // SIDEBAR VARIABLES
-let AutoSaveSession;
-let schedule_update_data = 0;
-let schedule_rearrange_tabs = 0;
-let DragNodeClass = "";
-let DragTreeDepth = 0;
-let DragOverId;
-let DragOverTimer;
-let menuItemNode;
-let CurrentWindowId = 0;
-let SearchIndex = 0;
-let active_group = "tab_list";
-let bggroups = {};
-let bgfolders = {};
-let newTabUrl = global.browserId == "F" ? "about:newtab" : "chrome://startpage/";
-let EmptyTabs = [];
+// let active_group = "tab_list";
 
 let tt = {
-	
+	CurrentWindowId: 0,
+	active_group: "tab_list",
+	groups: {},
+	folders: {},
+	schedule_update_data: 0,
+	schedule_rearrange_tabs: 0,
+	DragNodeClass: "",
+	DragTreeDepth: 0,
+	DragOverId: "",
+	menuItemNode: undefined,
+	SearchIndex: 0,
+	DragOverTimer: undefined,
+	AutoSaveSession: undefined
 };
 
 // GLOBAL FUNCTIONS

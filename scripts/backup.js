@@ -4,10 +4,10 @@
 
 
 function ExportGroup(groupId, filename, save_to_manager) {
-	let GroupToSave = { group: bggroups[groupId], folders: {}, tabs: [] };
+	let GroupToSave = { group: tt.groups[groupId], folders: {}, tabs: [] };
 	document.querySelectorAll("#" + groupId + " .folder").forEach(function(s) {
-		if (bgfolders[s.id]) {
-			GroupToSave.folders[s.id] = bgfolders[s.id];
+		if (tt.folders[s.id]) {
+			GroupToSave.folders[s.id] = tt.folders[s.id];
 		}
 	});
 	let Tabs = document.querySelectorAll("#" + groupId + " .tab");
@@ -128,7 +128,7 @@ function RecreateGroup(LoadedGroup) {
 					}
 				}, 1000);
 				
-				if (global.browserId != "O") {
+				if (browserId != "O") {
 					chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
 				}
 				
@@ -147,13 +147,13 @@ function RecreateGroup(LoadedGroup) {
 						}
 					});
 					setTimeout(function() {
-						RearrangeTreeStructure({}, NewFolders, NewTabs);
+						RcreateTreeStructure({}, NewFolders, NewTabs);
 					}, 1000);
 					setTimeout(function() {
-						RearrangeTreeStructure({}, NewFolders, NewTabs);
+						RcreateTreeStructure({}, NewFolders, NewTabs);
 					}, 2000);
 					setTimeout(function() {
-						RearrangeTreeStructure({}, NewFolders, NewTabs);
+						RcreateTreeStructure({}, NewFolders, NewTabs);
 					}, 5000);
 				}, 2000);
 			}
@@ -316,12 +316,12 @@ function RecreateSession(LoadedSession) {
 				}
 				chrome.runtime.sendMessage({command: "update_tab", tabId: new_window.tabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
 	
-				// if (global.browserId != "O") {
+				// if (browserId != "O") {
 					// chrome.runtime.sendMessage({command: "discard_tab", tabId: new_window.tabs[tInd].id});
 				// }
 			}
 			
-			if (global.browserId != "O") {
+			if (browserId != "O") {
 				setTimeout(function() {
 					chrome.runtime.sendMessage({command: "discard_window", windowId: new_window.id});
 				}, urls.length * 300);
@@ -331,24 +331,24 @@ function RecreateSession(LoadedSession) {
 	});
 }
 
-// groups and folders are in object, just like bggroups and bgfolders, but tabs are in array of bgtreetabs objects
-function RearrangeTreeStructure(groups, folders, tabs) {
+// groups and folders are in object, just like tt.groups and tt.folders, but tabs are in array of treetabs objects
+function RcreateTreeStructure(groups, folders, tabs) {
 	if (opt.debug) {
-		log("f: RearrangeTreeStructure");
+		log("f: RcreateTreeStructure");
 	}
 
-	SetLoadingSpinner(true);
+	ShowStatusBar({show: true, spinner: true, message: "Quick check and recreating structure..."});
 	if (groups && Object.keys(groups).length > 0) {
 		for (var group in groups) {
-			bggroups[groups[group].id] = Object.assign({}, groups[group]);
+			tt.groups[groups[group].id] = Object.assign({}, groups[group]);
 		}
-		AppendGroups(bggroups);
+		AppendGroups(tt.groups);
 	}
 	if (folders && Object.keys(folders).length > 0) {
 		for (var folder in folders) {
-			bgfolders[folders[folder].id] = Object.assign({}, folders[folder]);
+			tt.folders[folders[folder].id] = Object.assign({}, folders[folder]);
 		}
-		AppendFolders(bgfolders);
+		AppendFolders(tt.folders);
 	}
 	let bgtabs = {};
 	tabs.forEach(function(Tab) {
@@ -367,16 +367,17 @@ function RearrangeTreeStructure(groups, folders, tabs) {
 			bgtabs[Tab.id] = { index: Tab.index, parent: Tab.parent, expand: Tab.expand };
 		}
 	});
-	RearrangeTreeTabs(bgtabs);
+	RearrangeTreeTabs(bgtabs, false);
 	RearrangeFolders(true);
 	UpdateBgGroupsOrder();
 	setTimeout(function() {
 		RefreshExpandStates();
 		RefreshCounters();
-		schedule_update_data++;
+		tt.schedule_update_data++;
 		SaveFolders();
 	}, 3000);
-	SetLoadingSpinner(false);
+	// ShowStatusBar({show: true, spinner: true, message: "Sorting"});
+	// ShowStatusBar(false, "Wait just a little more...");
 }
 
 function ImportMergeTabs(LoadedSession) {
@@ -388,7 +389,7 @@ function ImportMergeTabs(LoadedSession) {
 	for (let LWI = 0; LWI < LoadedSession.length; LWI++) { // clear previous window ids
 		LoadedSession[LWI].id = "";
 	}
-	// SetLoadingSpinner(true);
+	ShowStatusBar({show: true, spinner: true, message: "Loaded Tree structure..."});
 	chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(cw) {
 		for (let CWI = 0; CWI < cw.length; CWI++) { // Current Windows
 		
@@ -499,8 +500,8 @@ function ImportMergeTabs(LoadedSession) {
 						chrome.runtime.sendMessage({command: "save_folders", windowId: w.id, folders: f});
 						chrome.runtime.sendMessage({ command: "remote_update", groups: w.groups, folders: w.folders, tabs: [], windowId: w.id });
 
-						if (w.id == CurrentWindowId) {
-							RearrangeTreeStructure(w.groups, w.folders, []);
+						if (w.id == tt.CurrentWindowId) {
+							RcreateTreeStructure(w.groups, w.folders, []);
 						}
 
 						(w.tabs).forEach(function(Tab) {
@@ -517,6 +518,7 @@ function ImportMergeTabs(LoadedSession) {
 						});
 
 						setTimeout(function() {
+							ShowStatusBar({show: true, spinner: true, message: "Finding reference tabs..."});
 							for (let tInd = 0; tInd < NewTabs.length; tInd++) {
 								if (RefsTabs[NewTabs[tInd].parent] != undefined) {
 									NewTabs[tInd].parent = RefsTabs[NewTabs[tInd].parent];
@@ -528,19 +530,21 @@ function ImportMergeTabs(LoadedSession) {
 							for (let tInd = 0; tInd < NewTabs.length; tInd++) {
 								chrome.runtime.sendMessage({command: "update_tab", tabId: NewTabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
 							}
-							let done = 5;
+							let done = 10;
 							var Append = setInterval(function() {
-								if (w.id == CurrentWindowId) {
-									RearrangeTreeStructure(w.groups, w.folders, NewTabs);
+								ShowStatusBar({show: true, spinner: true, message: "Finding other windows to add tabs..."});
+								
+								if (w.id == tt.CurrentWindowId) {
+									RcreateTreeStructure(w.groups, w.folders, NewTabs);
 								} else {
 									chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: NewTabs, windowId: w.id });
 								}
 								if (done < 0) {
+									ShowStatusBar({show: true, spinner: false, message: "All done.", hideTimeout: 2000});
 									clearInterval(Append);
-									// SetLoadingSpinner(false);
 								}
 								done--;
-							}, 2000);
+							}, 500);
 						}, 6000);
 
 					});
@@ -554,13 +558,16 @@ function ImportMergeTabs(LoadedSession) {
 
 function StartAutoSaveSession() {
 	if (opt.autosave_interval > 0 && opt.autosave_max_to_keep > 0) {
-		AutoSaveSession = setInterval(function() {
+		tt.AutoSaveSession = setInterval(function() {
 			if (opt.debug) {
 				log("f: AutoSaveSession, loop time is: "+opt.autosave_interval);
 			}
 
 			let d = new Date();
-			ExportSession((d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉")), false, false, true);
+			let newName = d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉");
+			ExportSession(newName, false, false, true);
+			
+			ShowStatusBar({show: true, spinner: false, message: "Autosave: "+newName, hideTimeout: 1000});
 
 			if (document.getElementById("manager_window").style.top != "-500px") {
 				chrome.storage.local.get(null, function(storage) {

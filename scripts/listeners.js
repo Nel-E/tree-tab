@@ -3,17 +3,37 @@
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
 function StartSidebarListeners() {
-	if (global.browserId == "F") {
+	if (browserId == "F") {
 		browser.browserAction.onClicked.addListener(function(tab) {
-			if (tab.windowId == CurrentWindowId) {
+			if (tab.windowId == tt.CurrentWindowId) {
 				browser.sidebarAction.close();
 			}
 		});
 	}
+	
+	chrome.commands.onCommand.addListener(function(command) {
+		chrome.windows.getCurrent({populate: false}, function(window) {
+			if (window.id == tt.CurrentWindowId && window.focused) {
+				chrome.tabs.query({windowId: tt.CurrentWindowId, active: true}, function(tabs) {
+					let tabsArr = [];
+					document.querySelectorAll("[id='"+tabs[0].id+"'] .tab, [id='"+tabs[0].id+"']").forEach(function(s){
+						tabsArr.push(parseInt(s.id));
+						if (s.childNodes[1].childNodes.length > 0) {
+							document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+								tabsArr.push(parseInt(t.id));
+							});
+						}
+					});
+					CloseTabs(tabsArr);
+				});
+			}
+		});
+	});
+
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		if (message.command == "backup_available") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			let BAKbutton = document.getElementById("button_load_bak"+message.bak);
 			if (BAKbutton != null) {
@@ -23,16 +43,16 @@ function StartSidebarListeners() {
 		}
 		if (message.command == "drag_drop") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			CleanUpDragClasses();
-			DragNodeClass = message.DragNodeClass;
-			DragTreeDepth = message.DragTreeDepth;
+			tt.DragNodeClass = message.DragNodeClass;
+			tt.DragTreeDepth = message.DragTreeDepth;
 			return;
 		}
 		if (message.command == "dragend") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			CleanUpDragClasses();
 			EmptyDragAndDrop();
@@ -40,14 +60,14 @@ function StartSidebarListeners() {
 		}
 		if (message.command == "remove_folder") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command+" folderId: "+message.folderId);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command+" folderId: "+message.folderId);
 			}
 			RemoveFolder(message.folderId);
 			return;
 		}
 		if (message.command == "remove_group") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command+" groupId: "+message.groupId);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command+" groupId: "+message.groupId);
 			}
 			setTimeout(function() {
 				GroupRemove(message.groupId, false);
@@ -56,14 +76,14 @@ function StartSidebarListeners() {
 		}
 		if (message.command == "reload_sidebar") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			window.location.reload();
 			return;
 		}
 		if (message.command == "reload_options") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			opt = Object.assign({}, message.opt);
 			setTimeout(function() {
@@ -73,7 +93,7 @@ function StartSidebarListeners() {
 		}
 		if (message.command == "reload_toolbar") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			opt = Object.assign({}, message.opt);
 
@@ -91,17 +111,17 @@ function StartSidebarListeners() {
 		}
 		if (message.command == "reload_theme") {
 			if (opt.debug) {
-				log("message to sidebar "+CurrentWindowId+": message: "+message.command);
+				log("message to sidebar "+tt.CurrentWindowId+": message: "+message.command);
 			}
 			RestorePinListRowSettings();
 			ApplyTheme(message.theme);
 			return;
 		}
-		if (message.windowId == CurrentWindowId) {
+		if (message.windowId == tt.CurrentWindowId) {
 			
 			if (message.command == "append_group") {
-				if (bggroups[message.groupId] == undefined) {
-					bggroups[message.groupId] = {id: message.groupId, index: Object.keys(bggroups).length, active_tab: 0, prev_active_tab: 0, active_tab_ttid: "", name: message.group_name, font: message.font_color};
+				if (tt.groups[message.groupId] == undefined) {
+					tt.groups[message.groupId] = {id: message.groupId, index: Object.keys(tt.groups).length, active_tab: 0, prev_active_tab: 0, active_tab_ttid: "", name: message.group_name, font: message.font_color};
 					AppendGroupToList(message.groupId, message.group_name, message.font_color, true);
 				}
 				return;
@@ -134,7 +154,7 @@ function StartSidebarListeners() {
 				}
 				
 				setTimeout(function() {
-					schedule_update_data++;
+					tt.schedule_update_data++;
 				}, 1000);
 				
 				return;
@@ -169,7 +189,7 @@ function StartSidebarListeners() {
 				}
 				RemoveTabFromList(message.tabId);
 				setTimeout(function() {
-					schedule_update_data++;
+					tt.schedule_update_data++;
 				}, 300);
 				RefreshGUI();
 				return;
@@ -179,9 +199,6 @@ function StartSidebarListeners() {
 					log("chrome event: "+message.command+ ", tabId: " + message.tabId);
 				}
 
-				if (EmptyTabs.indexOf(message.tabId) != -1) {
-					EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
-				}
 
 				let mTab = document.getElementById(message.tabId);
 				if (mTab != null) {
@@ -209,7 +226,7 @@ function StartSidebarListeners() {
 					RemoveTabFromList(message.tabId);
 					RefreshExpandStates();
 					setTimeout(function() {
-						schedule_update_data++;
+						tt.schedule_update_data++;
 					}, 300);
 					RefreshGUI();
 					RefreshCounters();
@@ -259,28 +276,15 @@ function StartSidebarListeners() {
 					if (updateTab != null) {
 						if (message.tab.pinned && updateTab.classList.contains("pin") == false) {
 							SetTabClass(message.tabId, true);
-							schedule_update_data++;
+							tt.schedule_update_data++;
 						}
 						if (!message.tab.pinned && updateTab.classList.contains("tab") == false) {
 							SetTabClass(message.tabId, false);
-							schedule_update_data++;
+							tt.schedule_update_data++;
 						}
 					}
 					RefreshExpandStates();
 				}
-				
-				// if set to append when url changes and matches pre-set group
-				// if (message.changeInfo.url != undefined && message.changeInfo.url != newTabUrl) {
-
-					// if (EmptyTabs.indexOf(message.tabId) != -1 || opt.move_tabs_on_url_change == "always") {
-						// AppendTabToGroupOnRegexMatch(message.tabId, message.changeInfo.url);
-					// }
-					// if (EmptyTabs.indexOf(message.tabId) != -1) {
-						// EmptyTabs.splice(EmptyTabs.indexOf(message.tabId), 1);
-					// }
-				// }
-
-
 				return;
 			}
 			// if (message.command == "set_active_group") {
@@ -292,9 +296,9 @@ function StartSidebarListeners() {
 					log("chrome event: "+message.command+ ", tabId: " + message.tabId);
 					log(message);
 				}
-				RearrangeTreeStructure(message.groups, message.folders, message.tabs);
+				RcreateTreeStructure(message.groups, message.folders, message.tabs);
 				sendResponse(true);
-				schedule_update_data++;
+				tt.schedule_update_data++;
 				return;
 			}
 		}

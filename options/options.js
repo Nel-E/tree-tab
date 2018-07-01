@@ -7,10 +7,7 @@
 var current_theme = "";
 var themes = [];
 var SelectedTheme = Object.assign({}, DefaultTheme);
-
-
 var dragged_button = {id: ""};
-// var active_group = "tab_list";
 
 // options for all drop down menus
 let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab", "move_tabs_on_url_change"];
@@ -94,7 +91,7 @@ function AddRegexPair() {
 	deleteButton.type = "button";
 	deleteButton.style.width = '75px';
 	deleteButton.className = "set_button theme_buttons";
-	deleteButton.value = "Remove";
+	deleteButton.value = chrome.i18n.getMessage("options_Remove_button");
 	deleteButton.onclick = function() { regexes.removeChild(outer); }
 	outer.appendChild(deleteButton);
 	
@@ -640,10 +637,10 @@ function SetEvents() {
 	for (let i = 0; i < DropDownList.length; i++) {
 		document.getElementById(DropDownList[i]).onchange = function(event) {
 			opt[this.id] = this.value;
-			SavePreferences();
 			RefreshFields();
 			setTimeout(function() {
-				chrome.runtime.sendMessage({command: "reload_sidebar"});
+				SavePreferences();
+				// chrome.runtime.sendMessage({command: "reload_sidebar"});
 			}, 50);
 		}
 	}
@@ -651,9 +648,8 @@ function SetEvents() {
 	// set tabs tree depth option
 	document.getElementById("max_tree_depth").oninput = function(event) {
 		opt.max_tree_depth = parseInt(this.value);
-		SavePreferences();
 		setTimeout(function() {
-			chrome.runtime.sendMessage({command: "reload_sidebar"});
+			SavePreferences();
 		}, 50);
 	}
 	
@@ -1014,12 +1010,12 @@ function RefreshFields() {
 	} else {
 		document.getElementById("field_theme").style.height = "";
 	}
-	if (global.browserId == "F") {
+	if (browserId == "F") {
 		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s){
 			s.style.display = "none";
 		});
 	}
-	if (global.browserId == "V") {
+	if (browserId == "V") {
 		let WebPanelUrlBox = document.getElementById("url_for_web_panel");
 		WebPanelUrlBox.value = (chrome.runtime.getURL("sidebar.html"));
 		WebPanelUrlBox.setAttribute("readonly", true);

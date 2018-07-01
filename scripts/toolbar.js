@@ -6,7 +6,7 @@
 
 // RESTORE LAST USED SEARCH TYPE (URL OR TITLE) IN TOOLBAR SEARCH
 function RestoreToolbarSearchFilter() {
-	chrome.runtime.sendMessage({command: "get_search_filter", windowId: CurrentWindowId}, function(response) {
+	chrome.runtime.sendMessage({command: "get_search_filter", windowId: tt.CurrentWindowId}, function(response) {
 		let ButtonFilter = document.getElementById("button_filter_type");
 		if (response == "url") {
 			ButtonFilter.classList.add("url");
@@ -20,7 +20,7 @@ function RestoreToolbarSearchFilter() {
 
 // RESTORE LAST ACTIVE SHELF (SEARCH, TOOLS, GROUPS, SESSION OR FOLDER) IN TOOLBAR
 function RestoreToolbarShelf() {
-	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: CurrentWindowId}, function(response) {
+	chrome.runtime.sendMessage({command: "get_active_shelf", windowId: tt.CurrentWindowId}, function(response) {
 		let filterBox = document.getElementById("filter_box");
 		filterBox.setAttribute("placeholder", labels.searchbox);
 		filterBox.style.opacity = "1";
@@ -57,7 +57,7 @@ function RestoreToolbarShelf() {
 			document.getElementById("button_folders").classList.add("on");
 		}
 		
-		if (global.browserId != "F") {
+		if (browserId != "F") {
 			chrome.storage.local.get(null, function(storage) {
 				let bak1 = storage["windows_BAK1"] ? storage["windows_BAK1"] : [];
 				let bak2 = storage["windows_BAK2"] ? storage["windows_BAK2"] : [];
@@ -103,7 +103,7 @@ function ShelfToggle(mousebutton, button, toolbarId, SendMessage) {
 				s.classList.add("hidden");
 			});
 			document.getElementById(toolbarId).classList.remove("hidden");
-			chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: SendMessage, windowId: CurrentWindowId});
+			chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: SendMessage, windowId: tt.CurrentWindowId});
 			document.querySelectorAll(".on:not(#"+button.id+")").forEach(function(s){
 				s.classList.remove("on");
 			});
@@ -308,14 +308,14 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new") {
 				s.onclick = function(event) {
 					if (event.which == 1) {
-						OpenNewTab(false, active_group);
+						OpenNewTab(false, tt.active_group);
 					}
 				}
 				s.onmousedown = function(event) {
 					// DUPLICATE TAB
 					if (event.which == 2) {
 						event.preventDefault();
-						let activeTab = document.querySelector("#"+active_group+" .active_tab") != null ? document.querySelector("#"+active_group+" .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
+						let activeTab = document.querySelector("#"+tt.active_group+" .active_tab") != null ? document.querySelector("#"+tt.active_group+" .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
 						if (activeTab != null) {
 							DuplicateTab(activeTab);
 						}
@@ -339,7 +339,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_pin") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected_tab, #"+active_group+" .active_tab, #"+active_group+" .selected_tab");
+						let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected_tab, #"+tt.active_group+" .active_tab, #"+tt.active_group+" .selected_tab");
 						Tabs.forEach(function(s){
 							chrome.tabs.update(parseInt(s.id), { pinned: Tabs[0].classList.contains("tab") });
 						})
@@ -372,12 +372,12 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_detach" || s.id == "button_move") { // move is legacy name of detach button
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll("#"+active_group+" .selected_folder").length > 0){
+						if (document.querySelectorAll("#"+tt.active_group+" .selected_folder").length > 0){
 							let detach = GetSelectedFolders();
 							Detach(detach.TabsIds, detach.Folders);
 						} else {
 							let tabsArr = [];
-							document.querySelectorAll(".pin.selected_tab, .pin.active_tab, #"+active_group+" .selected_tab, #"+active_group+" .active_tab").forEach(function(s){
+							document.querySelectorAll(".pin.selected_tab, .pin.active_tab, #"+tt.active_group+" .selected_tab, #"+tt.active_group+" .active_tab").forEach(function(s){
 								tabsArr.push(parseInt(s.id));
 								if (s.childNodes[1].childNodes.length > 0) {
 									document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
@@ -395,18 +395,18 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "filter_search_go_prev") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let filtered = document.querySelectorAll("#"+active_group+" .tab.filtered");
+						let filtered = document.querySelectorAll("#"+tt.active_group+" .tab.filtered");
 						if (filtered.length > 0) {
 							document.querySelectorAll(".highlighted_search").forEach(function(s){
 								s.classList.remove("highlighted_search");
 							});
-							if (SearchIndex == 0) {
-								SearchIndex = filtered.length-1;
+							if (tt.SearchIndex == 0) {
+								tt.SearchIndex = filtered.length-1;
 							} else {
-								SearchIndex--;
+								tt.SearchIndex--;
 							}
-							filtered[SearchIndex].classList.add("highlighted_search");
-							ScrollToTab(filtered[SearchIndex].id);
+							filtered[tt.SearchIndex].classList.add("highlighted_search");
+							ScrollToTab(filtered[tt.SearchIndex].id);
 						}
 					}
 				}
@@ -416,18 +416,18 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "filter_search_go_next") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let filtered = document.querySelectorAll("#"+active_group+" .tab.filtered");
+						let filtered = document.querySelectorAll("#"+tt.active_group+" .tab.filtered");
 						if (filtered.length > 0) {
 							document.querySelectorAll(".highlighted_search").forEach(function(s){
 								s.classList.remove("highlighted_search");
 							});
-							if (SearchIndex == filtered.length-1) {
-								SearchIndex = 0;
+							if (tt.SearchIndex == filtered.length-1) {
+								tt.SearchIndex = 0;
 							} else {
-								SearchIndex++;
+								tt.SearchIndex++;
 							}
-							filtered[SearchIndex].classList.add("highlighted_search");
-							ScrollToTab(filtered[SearchIndex].id);
+							filtered[tt.SearchIndex].classList.add("highlighted_search");
+							ScrollToTab(filtered[tt.SearchIndex].id);
 						}
 					}
 				}
@@ -465,8 +465,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_remove_group") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (active_group != "tab_list") {
-							GroupRemove(active_group, event.shiftKey);
+						if (tt.active_group != "tab_list") {
+							GroupRemove(tt.active_group, event.shiftKey);
 						}
 					}
 				}
@@ -478,8 +478,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_edit_group") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (active_group != "tab_list") {
-							ShowGroupEditWindow(active_group);
+						if (tt.active_group != "tab_list") {
+							ShowGroupEditWindow(tt.active_group);
 						}
 					}
 				}
@@ -489,7 +489,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_export_group") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						ExportGroup(active_group, bggroups[active_group].name, false);
+						ExportGroup(tt.active_group, tt.groups[tt.active_group].name, false);
 					}
 				}
 			}
@@ -519,8 +519,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_edit_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll("#"+active_group+" .selected_folder").length > 0) {
-							ShowRenameFolderDialog(document.querySelectorAll("#"+active_group+" .selected_folder")[0].id);
+						if (document.querySelectorAll("#"+tt.active_group+" .selected_folder").length > 0) {
+							ShowRenameFolderDialog(document.querySelectorAll("#"+tt.active_group+" .selected_folder")[0].id);
 						}
 					}
 				}
@@ -529,7 +529,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_remove_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
+						document.querySelectorAll("#"+tt.active_group+" .selected_folder").forEach(function(s){
 							RemoveFolder(s.id);
 						});
 					}
@@ -539,9 +539,9 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_unload" || s.id == "button_discard") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll(".pin.selected_tab:not(.active_tab), #"+active_group+" .selected_tab:not(.active_tab)").length > 0) {
+						if (document.querySelectorAll(".pin.selected_tab:not(.active_tab), #"+tt.active_group+" .selected_tab:not(.active_tab)").length > 0) {
 							DiscardTabs(
-								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #"+active_group+" .selected_tab:not(.active_tab)"), function(s){
+								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #"+tt.active_group+" .selected_tab:not(.active_tab)"), function(s){
 									return parseInt(s.id);
 								})
 							);
@@ -595,11 +595,11 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 						if (this.classList.contains("url")) {
 							this.classList.remove("url");
 							this.classList.add("title");
-							chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "title", windowId: CurrentWindowId});
+							chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "title", windowId: tt.CurrentWindowId});
 						} else {
 							this.classList.remove("title");
 							this.classList.add("url");
-							chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "url", windowId: CurrentWindowId});
+							chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "url", windowId: tt.CurrentWindowId});
 						}
 						FindTab(document.getElementById("filter_box").value);
 					}
@@ -635,7 +635,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			// }
 
 			
-			if (global.browserId != "F") {
+			if (browserId != "F") {
 				// BOOKMARKS
 				if (s.id == "button_bookmarks") {
 					s.onmousedown = function(event) {

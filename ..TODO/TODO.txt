@@ -1,27 +1,33 @@
-FIXES:
-export group and export session had file extension in name
-pin tree had bug in setting class
+CHANGES:
+Shortcut to open TreeTabs Sidebar is now F1
+log does not preserve urls for privacy reasons
 
 NEW:
 DRAG&DROP TO ANOTHER WINDOW OF THE ENTIRE GROUP
+Tree is tracked in background (but not closing tabs)
+Added alt+w shortcut to close a tree of tabs
 
-
-
-
+FIXES:
+import window was not showing up
+export group and export session had file extension in name
+pin tree had bug in setting class
 
 
 
 
 
 FEATURES TO DO
+
+opt.promote_children_in_first_child true, to work from background! also for message.command == "tab_detached"
+
+manager: add save/import/export window
+
 discard on import group and import session
 
 Shift + mouse scroll to switch between groups
-A keyboard shortcut (shift + alt + w) to close a tree of tabs
 
 unread tabs
 
-instruction to add popup
 line for children hierarchy (like at the beggining)
 "undo close" as a possible action with middle click on empty space
 

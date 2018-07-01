@@ -35,7 +35,7 @@ function StartBackgroundListeners() {
 			}
 			return;
 		}
-		if (message.command == "save_groups" && global.browserId == "F") {
+		if (message.command == "save_groups" && browserId == "F") {
 			if (b.windows[message.windowId]) {
 				b.windows[message.windowId].groups = Object.assign({}, message.groups);
 				for (let group in b.windows[message.windowId].groups) {
@@ -50,7 +50,7 @@ function StartBackgroundListeners() {
 			}
 			return;
 		}
-		if (message.command == "save_groups" && global.browserId != "F") {
+		if (message.command == "save_groups" && browserId != "F") {
 			if (b.windows[message.windowId]) {
 				b.windows[message.windowId].groups = Object.assign({}, message.groups);
 				b.schedule_save++;
@@ -117,7 +117,7 @@ function StartBackgroundListeners() {
 			sendResponse(b.running);
 			return;
 		}
-		if (message.command == "update_tab" && global.browserId == "F") {
+		if (message.command == "update_tab" && browserId == "F") {
 			if (b.tabs[message.tabId]) {
 				if (message.tab.index) {
 					b.tabs[message.tabId].index = message.tab.index;
@@ -140,7 +140,7 @@ function StartBackgroundListeners() {
 			}
 			return;
 		}
-		if (message.command == "update_tab" && global.browserId != "F") {
+		if (message.command == "update_tab" && browserId != "F") {
 			if (b.tabs[message.tabId]) {
 				if (message.tab.index) {
 					b.tabs[message.tabId].index = message.tab.index;
@@ -158,7 +158,7 @@ function StartBackgroundListeners() {
 			}
 			return;
 		}
-		if (message.command == "update_all_tabs" && global.browserId == "F") {
+		if (message.command == "update_all_tabs" && browserId == "F") {
 			for (let i = 0; i < message.pins.length; i++) {
 				if (b.tabs[message.pins[i].id]) {
 					b.tabs[message.pins[i].id].parent = "pin_list";
@@ -182,7 +182,7 @@ function StartBackgroundListeners() {
 			b.schedule_save++;
 			return;
 		}
-		if (message.command == "update_all_tabs" && global.browserId != "F") {
+		if (message.command == "update_all_tabs" && browserId != "F") {
 			for (let i = 0; i < message.pins.length; i++) {
 				if (b.tabs[message.pins[i].id]) {
 					b.tabs[message.pins[i].id].parent = "pin_list";
@@ -211,7 +211,6 @@ function StartBackgroundListeners() {
 		if (message.command == "remove_tab_from_empty_tabs") {
 			setTimeout(function() {
 				if (b.EmptyTabs.indexOf(message.tabId) != -1) {
-					console.log("remove_tab_from_empty_tabs, index: " + b.EmptyTabs.indexOf(message.tabId));
 					b.EmptyTabs.splice(b.EmptyTabs.indexOf(message.tabId), 1);
 				}
 			}, 100);
@@ -239,9 +238,6 @@ function QuantumStartListeners() {
 				QuantumAppendTabTTId(tab);
 				OnMessageTabCreated(tab.id);
 			}
-			setTimeout(function() {
-				b.schedule_save++;
-			}, 1000);
 		});
 	});
 	chrome.tabs.onAttached.addListener(function(tabId, attachInfo) {
@@ -258,6 +254,9 @@ function QuantumStartListeners() {
 	});
 	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+		if (b.EmptyTabs.indexOf(tabId) != -1) {
+			b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
+		}
 		setTimeout(function() {
 			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		}, 5);
@@ -285,8 +284,8 @@ function QuantumStartListeners() {
 			if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
 				AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
 			}
-			if (changeInfo.url != newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
-				EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
+			if (changeInfo.url != b.newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
+				b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
 			}
 		}		
 		if (changeInfo.title != undefined && !tab.active) {
@@ -318,8 +317,10 @@ function QuantumStartListeners() {
 	});
 	chrome.tabs.onActivated.addListener(function(activeInfo) {
 		if (b.windows[activeInfo.windowId]) {
-			b.windows[activeInfo.windowId].activeTabId[0] = b.windows[activeInfo.windowId].activeTabId[1];
-			b.windows[activeInfo.windowId].activeTabId[1] = activeInfo.tabId;
+			if (b.windows[activeInfo.windowId].activeTabId[1] != activeInfo.tabId) {
+				b.windows[activeInfo.windowId].activeTabId[0] = b.windows[activeInfo.windowId].activeTabId[1];
+				b.windows[activeInfo.windowId].activeTabId[1] = activeInfo.tabId;
+			}
 		}
 		chrome.runtime.sendMessage({command: "tab_activated", windowId: activeInfo.windowId, tabId: activeInfo.tabId});
 		b.schedule_save++;
@@ -363,9 +364,11 @@ function ChromiumStartListeners() { // start all listeners
 	chrome.tabs.onCreated.addListener(function(tab) {
 		ChromiumHashURL(tab);
 		OnMessageTabCreated(tab.id);
-		b.schedule_save++;
 	});
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+		if (b.EmptyTabs.indexOf(tabId) != -1) {
+			b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
+		}
 		setTimeout(function() { chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId}); },5);
 		delete b.tabs[tabId];
 		b.schedule_save++;
@@ -397,8 +400,8 @@ function ChromiumStartListeners() { // start all listeners
 			if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
 				AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
 			}
-			if (changeInfo.url != newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
-				EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
+			if (changeInfo.url != b.newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
+				b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
 			}
 		}		
 		if (changeInfo.title != undefined && !tab.active) {
@@ -429,8 +432,10 @@ function ChromiumStartListeners() { // start all listeners
 	});
 	chrome.tabs.onActivated.addListener(function(activeInfo) {
 		if (b.windows[activeInfo.windowId]) {
-			b.windows[activeInfo.windowId].activeTabId[0] = b.windows[activeInfo.windowId].activeTabId[1];
-			b.windows[activeInfo.windowId].activeTabId[1] = activeInfo.tabId;
+			if (b.windows[activeInfo.windowId].activeTabId[1] != activeInfo.tabId) {
+				b.windows[activeInfo.windowId].activeTabId[0] = b.windows[activeInfo.windowId].activeTabId[1];
+				b.windows[activeInfo.windowId].activeTabId[1] = activeInfo.tabId;
+			}
 		}
 		chrome.runtime.sendMessage({command: "tab_activated", windowId: activeInfo.windowId, tabId: activeInfo.tabId});
 		b.schedule_save++;
@@ -463,7 +468,7 @@ function OnMessageTabCreated(tabId) {
 			b.windows[NewTab.windowId].groups[b.windows[NewTab.windowId].active_group].active_tab = NewTab.id;
 		}
 
-		if (NewTab.url == newTabUrl) {
+		if (NewTab.url == b.newTabUrl) {
 			b.EmptyTabs.push(tabId);
 		}
 
@@ -473,11 +478,11 @@ function OnMessageTabCreated(tabId) {
 			let PinTabs = GetChildren("pin_list");
 			b.tabs[NewTab.id].parent = "pin_list";
 			b.tabs[NewTab.id].index = NewTab.index;
-			if (global.browserId == "F") {
+			if (browserId == "F") {
 				b.tabs[NewTab.id].parent_ttid = "";
 			}
 			for (let i = PinTabs.indexOf(NewTab.openerTabId)+1; i < PinTabs.length; i++) { // shift next siblings indexes
-				b.tabs[PinTabs[i]].index = b.tabs[PinTabs[i]].index+1;
+				b.tabs[PinTabs[i]].index += 1;
 			}
 	
 		} else {
@@ -493,12 +498,12 @@ function OnMessageTabCreated(tabId) {
 
 				if (opt.append_child_tab == "after") { // place tabs flat
 					b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-					if (global.browserId == "F") {
+					if (browserId == "F") {
 						b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
 					}
 					b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
 					for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-						b.tabs[OpenerSiblings[i]].index = b.tabs[OpenerSiblings[i]].index+1;
+						b.tabs[OpenerSiblings[i]].index += 1;
 					}
 					AfterId = NewTab.openerTabId;
 					
@@ -507,14 +512,14 @@ function OnMessageTabCreated(tabId) {
 					if (opt.max_tree_depth == 0) { // place tabs flat if limit is set to 0
 
 						b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-						if (global.browserId == "F"){
+						if (browserId == "F"){
 							b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
 						}
 
 						if (opt.append_child_tab_after_limit == "after") { // max tree depth, place tab after parent
 							b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
 							for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-								b.tabs[OpenerSiblings[i]].index = b.tabs[OpenerSiblings[i]].index+1;
+								b.tabs[OpenerSiblings[i]].index += 1;
 							}
 							AfterId = NewTab.openerTabId;
 						}
@@ -522,7 +527,7 @@ function OnMessageTabCreated(tabId) {
 						if (opt.append_child_tab_after_limit == "top" && opt.append_child_tab != "after") { // max tree depth, place tab on top (above parent)
 							b.tabs[NewTab.id].index = 0;
 							for (let i = 0; i < OpenerSiblings.length; i++) { // shift all siblings indexes
-								b.tabs[OpenerSiblings[i]].index = b.tabs[OpenerSiblings[i]].index+1;
+								b.tabs[OpenerSiblings[i]].index += 1;
 							}
 							ParentId = b.tabs[NewTab.id].parent;
 						}
@@ -545,14 +550,14 @@ function OnMessageTabCreated(tabId) {
 						if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree on top and bottom
 
 							b.tabs[NewTab.id].parent = NewTab.openerTabId;
-							if (global.browserId == "F"){
+							if (browserId == "F"){
 								b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].ttid;
 							}
 							
 							if (opt.append_child_tab == "top") { // place child tab at the top (reverse hierarchy)
 								b.tabs[NewTab.id].index = 0;
 								for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
-									b.tabs[OpenerChildren[i]].index = b.tabs[OpenerChildren[i]].index+1;
+									b.tabs[OpenerChildren[i]].index += 1;
 								}
 								ParentId = b.tabs[NewTab.id].parent;
 							}
@@ -572,14 +577,14 @@ function OnMessageTabCreated(tabId) {
 							if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
 								
 								b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-								if (global.browserId == "F"){
+								if (browserId == "F"){
 									b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
 								}
 
 								if (opt.append_child_tab_after_limit == "after") {  // tab will append after opener
 									b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
 									for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-										b.tabs[OpenerSiblings[i]].index = b.tabs[OpenerSiblings[i]].index+1;
+										b.tabs[OpenerSiblings[i]].index += 1;
 									}
 									AfterId = NewTab.openerTabId;
 								}
@@ -587,7 +592,7 @@ function OnMessageTabCreated(tabId) {
 								if (opt.append_child_tab_after_limit == "top") { // tab will append on top
 									b.tabs[NewTab.id].index = 0;
 									for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
-										b.tabs[OpenerChildren[i]].index = b.tabs[OpenerChildren[i]].index+1;
+										b.tabs[OpenerChildren[i]].index += 1;
 									}
 									ParentId = b.tabs[NewTab.id].parent;
 								}
@@ -617,22 +622,27 @@ function OnMessageTabCreated(tabId) {
 				} else {
 					
 					if (opt.append_orphan_tab == "after_active") {
-						let activeTabId = b.windows[NewTab.windowId].activeTabId[NewTab.active ? 0 : 1];
+						
+						let activeTabId = b.windows[NewTab.windowId].activeTabId[1] != NewTab.id ? b.windows[NewTab.windowId].activeTabId[1] : b.windows[NewTab.windowId].activeTabId[0];
+						
+						// console.log(b.tabs[activeTabId].index);
 						if (b.tabs[activeTabId]) {
 							let ActiveSiblings = GetChildren(b.tabs[activeTabId].parent);
 							b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
-							b.tabs[NewTab.id].index = b.tabs[activeTabId].index +1;
+							b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
 							for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
-								b.tabs[ActiveSiblings[i]].index = b.tabs[ActiveSiblings[i]].index+1;
+								// let prev = b.tabs[ActiveSiblings[i]].index;
+								b.tabs[ActiveSiblings[i]].index += 1;
+								// console.log(prev + "   " +  b.tabs[ActiveSiblings[i]].index );
 							}
-							if (global.browserId == "F"){
+							if (browserId == "F"){
 								b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
 							}
 							AfterId = activeTabId;							
 						} else { // FAIL, no active tab!
 							let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
 							b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-							if (global.browserId == "F"){
+							if (browserId == "F"){
 								b.tabs[NewTab.id].parent_ttid = "";
 							}
 							if (GroupTabs.length > 0) {
@@ -642,17 +652,18 @@ function OnMessageTabCreated(tabId) {
 							}
 							ParentId = b.windows[NewTab.windowId].active_group;
 						}
+						// console.log(b.tabs[NewTab.id].index);
 					}
 
 					if (opt.append_orphan_tab == "top") {
 						let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
 						b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-						if (global.browserId == "F"){
+						if (browserId == "F"){
 							b.tabs[NewTab.id].parent_ttid = "";
 						}
 						b.tabs[NewTab.id].index = 0;
 						for (let i = 0; i < GroupTabs.length; i++) { // shift all tabs indexes in group
-							b.tabs[GroupTabs[i]].index = b.tabs[GroupTabs[i]].index+1;
+							b.tabs[GroupTabs[i]].index += 1;
 						}
 						ParentId = b.windows[NewTab.windowId].active_group;
 					}
@@ -660,7 +671,7 @@ function OnMessageTabCreated(tabId) {
 					if (opt.append_orphan_tab == "bottom") {
 						let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
 						b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-						if (global.browserId == "F"){
+						if (browserId == "F"){
 							b.tabs[NewTab.id].parent_ttid = "";
 						}
 						if (GroupTabs.length > 0) {
@@ -684,8 +695,9 @@ function OnMessageTabCreated(tabId) {
 				}, 100);
 			}
 		}
-
+		setTimeout(function() {
+			b.schedule_save++;
+		}, 500);
 		chrome.runtime.sendMessage({command: "tab_created", windowId: NewTab.windowId, tabId: NewTab.id, tab: NewTab, ParentId: ParentId, InsertAfterId: AfterId, Append: append});
-
 	});
 }

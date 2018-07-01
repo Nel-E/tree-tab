@@ -172,12 +172,12 @@ function GetSelectedFolders() {
 	}
 	
 	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
-	document.querySelectorAll("#"+active_group+" .selected_folder").forEach(function(s){
+	document.querySelectorAll("#"+tt.active_group+" .selected_folder").forEach(function(s){
 		res.FoldersSelected.push(s.id);
-		res.Folders[s.id] = Object.assign({}, bgfolders[s.id]);
+		res.Folders[s.id] = Object.assign({}, tt.folders[s.id]);
 		let Fchildren = document.querySelectorAll("#cf"+s.id+" .folder");
 		Fchildren.forEach(function(fc){
-			res.Folders[fc.id] = Object.assign({}, bgfolders[fc.id]);
+			res.Folders[fc.id] = Object.assign({}, tt.folders[fc.id]);
 		});
 		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
 		Tchildren.forEach(function(tc){
@@ -190,7 +190,7 @@ function GetSelectedFolders() {
 
 function GetSelectedTabs() {
 	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
-	document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+	document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
 		res.TabsIds.push(parseInt(s.id));
 		res.TabsIdsParents.push(s.parentNode.id);
 		res.TabsIdsSelected.push(parseInt(s.id));
@@ -221,11 +221,11 @@ function FindTab(input) { // find and select tabs
 		ButtonFilterClear.style.opacity = "1";
 		ButtonFilterClear.title = labels.clear_filter;
 	}
-	SearchIndex = 0;
+	tt.SearchIndex = 0;
 	let FilterType = document.getElementById("button_filter_type");
 	let searchUrl = FilterType.classList.contains("url");
 	let searchTitle = FilterType.classList.contains("title");
-	chrome.tabs.query({windowId: CurrentWindowId, pinned: false}, function(tabs) {
+	chrome.tabs.query({windowId: tt.CurrentWindowId, pinned: false}, function(tabs) {
 		tabs.forEach(function(Tab) {
 			if (searchUrl) {
 				if (Tab.url.toLowerCase().match(input.toLowerCase())) {
@@ -244,7 +244,7 @@ function FindTab(input) { // find and select tabs
 }
 
 function Bookmark(rootNode) {
-	let ToolbarId = global.browserId == "F" ? "toolbar_____" : "1";
+	let ToolbarId = browserId == "F" ? "toolbar_____" : "1";
 	chrome.bookmarks.get(ToolbarId, function(list) {
 		chrome.bookmarks.search("TreeTabs", function(list) {
 			let TreeTabsId;
@@ -279,11 +279,11 @@ function Bookmark(rootNode) {
 				
 				if (rootNode.classList.contains("folder") || rootNode.classList.contains("group")) {
 					let rootName = labels.noname_group;
-					if (rootNode.classList.contains("folder") && bgfolders[rootNode.id]) {
-						rootName = bgfolders[rootNode.id].name;
+					if (rootNode.classList.contains("folder") && tt.folders[rootNode.id]) {
+						rootName = tt.folders[rootNode.id].name;
 					}
-					if (rootNode.classList.contains("group") && bggroups[rootNode.id]) {
-						rootName = bggroups[rootNode.id].name;
+					if (rootNode.classList.contains("group") && tt.groups[rootNode.id]) {
+						rootName = tt.groups[rootNode.id].name;
 					}
 
 					chrome.bookmarks.create({parentId: TreeTabsId, title: rootName}, function(root) {
@@ -291,10 +291,10 @@ function Bookmark(rootNode) {
 						
 						let folders = document.querySelectorAll("#cf"+rootNode.id+" .folder");
 						folders.forEach(function(s){
-							if (bgfolders[s.id]) {
+							if (tt.folders[s.id]) {
 								let ttId = s.id;
-								chrome.bookmarks.create({parentId: root.id, title: bgfolders[ttId].name}, function(Bkfolder) {
-									foldersRefs[ttId] = {ttid: ttId, id: Bkfolder.id, ttparent: bgfolders[ttId].parent, parent: root.id};
+								chrome.bookmarks.create({parentId: root.id, title: tt.folders[ttId].name}, function(Bkfolder) {
+									foldersRefs[ttId] = {ttid: ttId, id: Bkfolder.id, ttparent: tt.folders[ttId].parent, parent: root.id};
 									
 									let elemInd = 0;
 									if (ttId == folders[folders.length-1].id) {
@@ -347,17 +347,30 @@ function Bookmark(rootNode) {
 		});
 	});
 }
-
-function SetLoadingSpinner(show) {
+// show, spinner, message
+function ShowStatusBar(p) {
+	let status_bar = document.getElementById("status_bar");
 	let busy_spinner = document.getElementById("busy_spinner");
-	if (show) {
-		busy_spinner.style.display = "block";
-		busy_spinner.style.opacity = "1";
+	let status_message = document.getElementById("status_message");
+	if (p.show) {
+		status_bar.style.display = "block";
+		status_message.textContent = p.message;
+		if (p.spinner) {
+			busy_spinner.style.opacity = "1";
+		} else {
+			busy_spinner.style.opacity = "0";
+		}
 	} else {
 		busy_spinner.style.opacity = "0";
+		status_message.textContent = "";
+		status_bar.style.display = "none";
+	}
+	if (p.hideTimeout) {
 		setTimeout(function() {
-			busy_spinner.style.display = "none";
-		}, 330);
+			busy_spinner.style.opacity = "0";
+			status_message.textContent = "";
+			status_bar.style.display = "none";
+		}, p.hideTimeout);
 	}
 }
 

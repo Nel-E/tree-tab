@@ -58,14 +58,14 @@ async function RefreshGUI() {
 		document.querySelectorAll(".group").forEach(function(s){
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
-				groupLabel.textContent = (bggroups[s.id] ? bggroups[s.id].name : labels.noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
+				groupLabel.textContent = (tt.groups[s.id] ? tt.groups[s.id].name : labels.noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
 			}
 		});
 	} else {
 		document.querySelectorAll(".group").forEach(function(s){
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
-				groupLabel.textContent = bggroups[s.id] ? bggroups[s.id].name : labels.noname_group;
+				groupLabel.textContent = tt.groups[s.id] ? tt.groups[s.id].name : labels.noname_group;
 			}
 		});
 	}
@@ -74,12 +74,18 @@ async function RefreshGUI() {
 	});
 	let groups = document.getElementById("groups");
 	let groupsHeight = document.body.clientHeight - toolbarHeight - pin_listHeight;
+	let groupsWidth =  document.body.clientWidth - toolbar_groupsWidth - 1;
 
 	groups.style.top = toolbarHeight + pin_listHeight + "px";
 	groups.style.left = toolbar_groupsWidth + "px";
 	groups.style.height = groupsHeight + "px";
-	groups.style.width = (document.body.clientWidth - toolbar_groupsWidth - 1) + "px";
+	groups.style.width = groupsWidth + "px";
 
+	// let bottom_floating_buttons = document.getElementById("status_bar");
+	// let active_group_tabs = document.getElementById("ct"+tt.active_group);
+	// bottom_floating_buttons.style.left = toolbar_groupsWidth + "px";
+	// bottom_floating_buttons.style.width = toolbar_groupsWidth + active_group_tabs.clientWidth + "px";
+	
 	
 	let PanelList = document.querySelector(".mw_pan_on>.manager_window_list");
 	let PanelListHeight = 3 + PanelList.children.length * 18;
@@ -175,7 +181,7 @@ async function LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
 		Img.src = TryUrls[i];
 		Img.onload = function() {
 			TabHeaderNode.style.backgroundImage = "url(" + TryUrls[i] + ")";
-			if (global.browserId == "F") { // cache Firefox favicon - solution for bug with empty favicons in unloaded tabs
+			if (browserId == "F") { // cache Firefox favicon - solution for bug with empty favicons in unloaded tabs
 				browser.sessions.setTabValue(tabId, "CachedFaviconUrl", TryUrls[i]);
 			}
 		};
@@ -192,7 +198,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 	if (t != null) {
 		
 		let CachedFavicon;
-		if (global.browserId == "F") {
+		if (browserId == "F") {
 			let ttf = Promise.resolve(browser.sessions.getTabValue(tabId, "CachedFaviconUrl")).then(function(FaviconUrl) {
 				CachedFavicon = FaviconUrl;
 			});
@@ -212,7 +218,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 	
 					let Img = new Image();
 
-					if (global.browserId != "F") {
+					if (browserId != "F") {
 						CachedFavicon = "chrome://favicon/"+tab.url;
 					}
 					let TryCases = [tab.favIconUrl, CachedFavicon, , "./theme/icon_empty.svg"];
@@ -240,7 +246,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 
 // refresh open closed trees states
 async function RefreshExpandStates() {
-	document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
+	document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s){
 		if (s.childNodes[1].children.length == 0 && s.childNodes[2].children.length == 0) {
 			s.classList.remove("o");
 			s.classList.remove("c");
@@ -250,7 +256,7 @@ async function RefreshExpandStates() {
 			}
 		}
 	});
-	document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
+	document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
 		if (s.childNodes[1].children.length == 0) {
 			s.classList.remove("o");
 			s.classList.remove("c");
@@ -264,14 +270,14 @@ async function RefreshExpandStates() {
 
 async function RefreshCounters() {
 	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-		document.querySelectorAll("#"+active_group+" .tab").forEach(function(s){
+		document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
 			let title = s.childNodes[0].getAttribute("tabTitle");
 			if (title != null) {
 				s.childNodes[0].title = title;
 				s.childNodes[0].childNodes[1].textContent =title;
 			}
 		});
-		document.querySelectorAll("#"+active_group+" .o.tab, #"+active_group+" .c.tab").forEach(function(s){
+		document.querySelectorAll("#"+tt.active_group+" .o.tab, #"+tt.active_group+" .c.tab").forEach(function(s){
 			let title = s.childNodes[0].getAttribute("tabTitle");
 			if (opt.show_counter_tabs && title != null) {
 				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
@@ -282,12 +288,12 @@ async function RefreshCounters() {
 		});
 		
 		
-		document.querySelectorAll("#"+active_group+" .folder").forEach(function(s){
-			if (opt.show_counter_tabs && bgfolders[s.id]) {
-				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
+		document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s){
+			if (opt.show_counter_tabs && tt.folders[s.id]) {
+				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + tt.folders[s.id].name;
 			}
-			if (opt.show_counter_tabs_hints && bgfolders[s.id]) {
-				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + bgfolders[s.id].name;
+			if (opt.show_counter_tabs_hints && tt.folders[s.id]) {
+				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + tt.folders[s.id].name;
 			}
 		});
 	}

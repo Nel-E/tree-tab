@@ -326,9 +326,9 @@ function SetManagerEvents() {
 	}
 	document.getElementById("manager_window_button_hibernate_group").onmousedown = function(event) {
 		if (event.which == 1) {
-			ExportGroup(active_group, false, true);
+			ExportGroup(tt.active_group, false, true);
 			setTimeout(function() {
-				GroupRemove(active_group, true);
+				GroupRemove(tt.active_group, true);
 			}, 100);
 			setTimeout(function() {
 				OpenManagerWindow();
@@ -366,7 +366,7 @@ function SetManagerEvents() {
 	autosessions_save_timer.oninput = function(event) {
 		opt.autosave_interval = parseInt(this.value);
 		SavePreferences();
-		clearInterval(AutoSaveSession);
+		clearInterval(tt.AutoSaveSession);
 		StartAutoSaveSession();
 	}
 

@@ -11,10 +11,10 @@ async function UpdateData() {
 	}
 	
 	setInterval(function() {
-		if (schedule_update_data > 1) {
-			schedule_update_data = 1;
+		if (tt.schedule_update_data > 1) {
+			tt.schedule_update_data = 1;
 		}
-		if (schedule_update_data > 0) {
+		if (tt.schedule_update_data > 0) {
 			let PinInd = 0;
 			let pins_data = [];
 			document.querySelectorAll(".pin").forEach(function(pin){
@@ -27,15 +27,15 @@ async function UpdateData() {
 				tabs_data.push({id: tab.id, parent: tab.parentNode.parentNode.id, index: Array.from(tab.parentNode.children).indexOf(tab), expand: (tab.classList.contains("c") ? "c" : (tab.classList.contains("o") ? "o" : ""))});
 			});
 			chrome.runtime.sendMessage({command: "update_all_tabs", pins: pins_data, tabs: tabs_data});
-			schedule_update_data--;
+			tt.schedule_update_data--;
 		}
 	}, 1000);
 }
 
 async function RearrangeBrowserTabs() {
 	setInterval(function() {
-		if (schedule_rearrange_tabs > 0) {
-			schedule_rearrange_tabs--;
+		if (tt.schedule_rearrange_tabs > 0) {
+			tt.schedule_rearrange_tabs--;
 			if (opt.debug) {
 				log("f: RearrangeBrowserTabs");
 			}
@@ -56,7 +56,7 @@ async function RearrangeBrowserTabsLoop(ttTabIds, tabIds, tabIndex) {
 	if (opt.debug) {
 		log("f: RearrangeBrowserTabsLoop");
 	}
-	if (tabIndex >= 0 && schedule_rearrange_tabs == 0){
+	if (tabIndex >= 0 && tt.schedule_rearrange_tabs == 0){
 		if (ttTabIds[tabIndex] != tabIds[tabIndex]) {
 			chrome.tabs.move(ttTabIds[tabIndex], {index: tabIndex});
 		}
@@ -66,10 +66,11 @@ async function RearrangeBrowserTabsLoop(ttTabIds, tabIds, tabIndex) {
 	}
 }
 
-function RearrangeTreeTabs(bgtabs) {
+function RearrangeTreeTabs(bgtabs, show_finish_in_status) {
 	if (opt.debug) {
 		log("f: RearrangeTreeTabs");
 	}
+	ShowStatusBar({show: true, spinner: true, message: "Rearranging tabs and folders"});
 	document.querySelectorAll(".pin, .tab").forEach(function(tab){
 		if (bgtabs[tab.id]) {
 			let Sibling = tab.nextElementSibling;
@@ -81,34 +82,38 @@ function RearrangeTreeTabs(bgtabs) {
 				}
 				Sibling = Sibling.nextElementSibling ? Sibling.nextElementSibling : false;
 			}
-		}	
+		}
+		if (show_finish_in_status){
+			ShowStatusBar({show: true, spinner: false, message: "Rearranging: done.", hideTimeout: 1000});
+		}
 	});
 }
 
-// AppendTab({tab, ParentId, InsertBeforeId, InsertAfterId, Append, Index, SkipSetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter, SkipMediaIcon})
+// AppendTab({tab, ParentId, InsertBeforeId, InsertAfterId, Append, SkipSetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter, SkipMediaIcon})
 function AppendTab(p) {
 	if (document.getElementById(p.tab.id) != null) {
 		GetFaviconAndTitle(p.tab.id, p.addCounter);
 		return;
 	}	
-	var ClassList = p.tab.pinned ? "pin" : "tab";
+	let ClassList = p.tab.pinned ? "pin" : "tab";
 	if (p.tab.discarded) {
 		ClassList = ClassList + " discarded";
 	}
 	if (p.AdditionalClass) {
 		ClassList = ClassList +" "+ p.AdditionalClass;
 	}
-	var tb = document.createElement("div"); tb.className =  ClassList; tb.id = p.tab.id; // TAB
-	var th = document.createElement("div"); th.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; th.id = "tab_header"+p.tab.id; if (!p.SkipSetEvents) {th.draggable = true;} tb.appendChild(th); // HEADER
-	var ex = document.createElement("div"); ex.className = "expand"; ex.id = "exp"+p.tab.id; th.appendChild(ex); // EXPAND ARROW
-	var tt = document.createElement("div"); tt.className = "tab_title"; tt.id = "tab_title"+p.tab.id; th.appendChild(tt); // TITLE
+	let tb = document.createElement("div"); tb.className =  ClassList; tb.id = p.tab.id; // TAB
+	let tbh = document.createElement("div"); tbh.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; tbh.id = "tab_header"+p.tab.id; if (!p.SkipSetEvents) {tbh.draggable = true;} tb.appendChild(tbh); // HEADER
+	let tbe = document.createElement("div"); tbe.className = "expand"; tbe.id = "exp"+p.tab.id; tbh.appendChild(tbe); // EXPAND ARROW
+	let tbt = document.createElement("div"); tbt.className = "tab_title"; tbt.id = "tab_title"+p.tab.id; tbh.appendChild(tbt); // TITLE
+	let cl = undefined;
 	if (!opt.never_show_close) {
-		var cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+p.tab.id; th.appendChild(cl); // CLOSE BUTTON
-		var ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+p.tab.id; cl.appendChild(ci);
+		cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+p.tab.id; tbh.appendChild(cl); // CLOSE BUTTON
+		let ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+p.tab.id; cl.appendChild(ci);
 	}
-	var mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+p.tab.id; th.appendChild(mi);
-	var ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+p.tab.id; tb.appendChild(ct);
-	var di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+p.tab.id; tb.appendChild(di); // DROP TARGET INDICATOR
+	let mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+p.tab.id; tbh.appendChild(mi);
+	let ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+p.tab.id; tb.appendChild(ct);
+	let di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+p.tab.id; tb.appendChild(di); // DROP TARGET INDICATOR
 	
 	if (!p.SkipSetEvents) {
 		ct.onclick = function(event) {
@@ -133,7 +138,7 @@ function AppendTab(p) {
 				ActionClickGroup(this.parentNode, opt.dbclick_group);
 			}
 		}
-		ex.onmousedown = function(event) {
+		tbe.onmousedown = function(event) {
 			if (document.getElementById("main_menu").style.top != "-1000px") {
 				HideMenus();
 			}
@@ -141,14 +146,14 @@ function AppendTab(p) {
 				EventExpandBox(this.parentNode.parentNode);
 			}
 		}
-		ex.onmouseenter = function(event) {
+		tbe.onmouseenter = function(event) {
 			this.classList.add("hover");
 		}
-		ex.onmouseleave = function(event) {
+		tbe.onmouseleave = function(event) {
 			this.classList.remove("hover");
 		}
 		
-		if (!opt.never_show_close) {
+		if (!opt.never_show_close && cl) {
 			cl.onmousedown = function(event) {
 				event.stopImmediatePropagation();
 				if (event.which != 3) {
@@ -163,7 +168,7 @@ function AppendTab(p) {
 			}
 		}
 
-		th.onclick = function(event) {
+		tbh.onclick = function(event) {
 			event.stopImmediatePropagation();
 			if (document.getElementById("main_menu").style.top != "-1000px") {
 				HideMenus();
@@ -174,16 +179,16 @@ function AppendTab(p) {
 				}
 			}
 		}
-		th.ondblclick = function(event) {
+		tbh.ondblclick = function(event) {
 			if (event.target.classList && event.target.classList.contains("tab_header")) {
 				ActionClickTab(this.parentNode, opt.dbclick_tab);
 			}
 		}
 		
-		th.onmousedown = function(event) {
-			if (global.browserId == "V") {
+		tbh.onmousedown = function(event) {
+			if (browserId == "V") {
 				chrome.windows.getCurrent({populate: false}, function(window) {
-					if (CurrentWindowId != window.id) {
+					if (tbt.CurrentWindowId != window.id) {
 						location.reload();
 					}
 				});
@@ -201,13 +206,13 @@ function AppendTab(p) {
 			}
 		}
 
-		th.onmouseover = function(event) {
+		tbh.onmouseover = function(event) {
 			this.classList.add("tab_header_hover");
 			if (opt.never_show_close == false && opt.always_show_close == false) {
 				this.classList.add("close_show");
 			}
 		}
-		th.onmouseleave = function(event) {
+		tbh.onmouseleave = function(event) {
 			this.classList.remove("tab_header_hover");
 			if (opt.never_show_close == false && opt.always_show_close == false) {
 				this.classList.remove("close_show");
@@ -216,44 +221,29 @@ function AppendTab(p) {
 
 
 		
-		th.ondragstart = function(event) { // DRAG START
+		tbh.ondragstart = function(event) { // DRAG START
 			TabStartDrag(this.parentNode, event);
 		}
 
-		th.ondragenter = function(event) {
+		tbh.ondragenter = function(event) {
 			this.classList.remove("tab_header_hover");
-			// if (opt.open_tree_on_hover) {
-				// if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
-					// clearTimeout(DragOverTimer);
-					// let This = this;
-					// DragOverTimer = setTimeout(function() {
-						// This.parentNode.classList.add("o");
-						// This.parentNode.classList.remove("c");
-					// }, 1500);	
-				// }
-			// }
 		}
 
-		th.ondragleave = function(event) {
+		tbh.ondragleave = function(event) {
 			RemoveHighlight();
-			// console.log("clearTimeout");
-			// if (opt.open_tree_on_hover) {
-				// clearTimeout(DragOverTimer);
-			// }
 		}
 
-		th.ondragover = function(event) {
+		tbh.ondragover = function(event) {
 			TabDragOver(this, event);
-			if (opt.open_tree_on_hover && DragOverId != this.id) {
+			if (opt.open_tree_on_hover && tt.DragOverId != this.id) {
 				if (this.parentNode.classList.contains("c") && this.parentNode.classList.contains("dragged_tree") == false) {
-					clearTimeout(DragOverTimer);
-					DragOverId = this.id;
+					clearTimeout(tt.DragOverTimer);
+					tt.DragOverId = this.id;
 					let This = this;
-					DragOverTimer = setTimeout(function() {
-						if (DragOverId == This.id) {
+					tt.DragOverTimer = setTimeout(function() {
+						if (tt.DragOverId == This.id) {
 							This.parentNode.classList.add("o");
 							This.parentNode.classList.remove("c");
-							// DragOverId = "";
 						}
 					}, 1500);	
 				}
@@ -277,7 +267,7 @@ function AppendTab(p) {
 		parent = document.getElementById("pin_list");
 	} else {
 		if (p.ParentId == false || p.ParentId == undefined || document.getElementById(p.ParentId) == null || document.querySelector(".pin[id='"+p.ParentId+"']") != null || p.ParentId == "pin_list") {
-			parent = document.getElementById("ct"+active_group);
+			parent = document.getElementById("ct"+tt.active_group);
 		} else {
 			parent = document.getElementById("ct"+p.ParentId);
 			if (parent.children.length == 0) {
@@ -309,13 +299,6 @@ function AppendTab(p) {
 			}
 		}
 	}
-	if (p.Index) {
-		if (tb.parentNode.childNodes.length >= p.Index) {
-			tb.parentNode.insertBefore(tb, tb.parentNode.childNodes[p.Index]);
-		} else {
-			tb.parentNode.appendChild(tb);
-		}
-	}
 	GetFaviconAndTitle(p.tab.id, p.addCounter);
 	if (!p.SkipMediaIcon) {
 		RefreshMediaIcon(p.tab.id);
@@ -343,7 +326,7 @@ function RemoveTabFromList(tabId) {
 
 function SetTabClass(tabId, pin) {
 	let PinList = document.getElementById("pin_list");
-	let GroupList = document.getElementById("ct"+active_group);
+	let GroupList = document.getElementById("ct"+tt.active_group);
 	let Tab = document.getElementById(tabId);
 	if (Tab != null) {
 		if (pin) {
@@ -408,8 +391,8 @@ function SetActiveTab(tabId, switchToGroup) {
 		document.querySelectorAll(".selected_folder").forEach(function(s){
 			s.classList.remove("selected_folder");
 		});
-		// document.querySelectorAll(".pin, #"+active_group+" .tab"+(TabGroup.length ? ", #"+TabGroup[0].id+" .tab" : "")).forEach(function(s){
-		document.querySelectorAll(".pin, #"+active_group+" .tab").forEach(function(s){
+		// document.querySelectorAll(".pin, #"+tt.active_group+" .tab"+(TabGroup.length ? ", #"+TabGroup[0].id+" .tab" : "")).forEach(function(s){
+		document.querySelectorAll(".pin, #"+tt.active_group+" .tab").forEach(function(s){
 			s.classList.remove("active_tab");
 			s.classList.remove("selected_tab");
 			s.classList.remove("selected_last");
@@ -431,12 +414,12 @@ function ScrollToTab(tabId) {
 			if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left < 0) {
 				document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - 2;
 			} else {
-				if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left > document.getElementById(active_group).getBoundingClientRect().width - document.querySelector(".tab_header").getBoundingClientRect().width) {
+				if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left > document.getElementById(tt.active_group).getBoundingClientRect().width - document.querySelector(".tab_header").getBoundingClientRect().width) {
 					document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().width + document.querySelector(".tab_header").getBoundingClientRect().width + 2;
 				}
 			}
 		}
-		if (Tab.classList.contains("tab") && document.querySelector("#"+active_group+" [id='"+tabId+"']") != null) {
+		if (Tab.classList.contains("tab") && document.querySelector("#"+tt.active_group+" [id='"+tabId+"']") != null) {
 			let Parents = GetParentsByClass(Tab, "c");
 			if (Parents.length > 0) {
 				Parents.forEach(function(s){
@@ -444,11 +427,11 @@ function ScrollToTab(tabId) {
 					s.classList.add("o");
 				});
 			}
-			if (Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top < 0) {
-				document.getElementById(active_group).scrollTop = document.getElementById(active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top - 2;
+			if (Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top < 0) {
+				document.getElementById(tt.active_group).scrollTop = document.getElementById(tt.active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top - 2;
 			} else {
-				if (Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top > document.getElementById(active_group).getBoundingClientRect().height - document.querySelector(".tab_header").getBoundingClientRect().height) {
-					document.getElementById(active_group).scrollTop = document.getElementById(active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().top - document.getElementById(active_group).getBoundingClientRect().height + document.querySelector(".tab_header").getBoundingClientRect().height + 10;
+				if (Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top > document.getElementById(tt.active_group).getBoundingClientRect().height - document.querySelector(".tab_header").getBoundingClientRect().height) {
+					document.getElementById(tt.active_group).scrollTop = document.getElementById(tt.active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().height + document.querySelector(".tab_header").getBoundingClientRect().height + 10;
 				}
 			}
 		}
@@ -459,7 +442,7 @@ function Detach(tabsIds, Folders) {
 	if (opt.debug) {
 		log("f: Detach");
 	}
-	chrome.windows.get(CurrentWindowId, {populate : true}, function(window) {
+	chrome.windows.get(tt.CurrentWindowId, {populate : true}, function(window) {
 		if (window.tabs.length == 1 || tabsIds.length == 0) {
 			return;
 		}
@@ -489,7 +472,7 @@ function Detach(tabsIds, Folders) {
 			chrome.tabs.move(tabsIds, {windowId: new_window.id, index:-1}, function(MovedTabs) {
 						
 				if (Folders && Object.keys(Folders).length > 0) {
-					for (var folder in Folders) {
+					for (let folder in Folders) {
 						RemoveFolder(Folders[folder].id);
 					}
 				}
@@ -509,9 +492,9 @@ function CloseTabs(tabsIds) {
 			Tab.classList.add("will_be_closed");
 		}
 	});
-	let activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
+	let activeTab = document.querySelector(".pin.active_tab, #"+tt.active_group+" .tab.active_tab");
 	if (activeTab != null && tabsIds.indexOf(parseInt(activeTab.id)) != -1) {
-		SwitchActiveTabBeforeClose(active_group);
+		SwitchActiveTabBeforeClose(tt.active_group);
 	}
 	tabsIds.forEach(function(tabId) {
 		let tab = document.getElementById(tabId);
@@ -529,7 +512,7 @@ function CloseTabs(tabsIds) {
 }
 
 function DiscardTabs(tabsIds) {
-	var delay = 100;
+	let delay = 100;
 	let tabNode = document.getElementById(tabsIds[0]);
 	if (tabNode == null || tabNode.classList.contains("discarded") || tabNode.classList.contains("active_tab")) {
 		delay = 5;
@@ -619,10 +602,10 @@ function ActivateNextTabBeforeClose() {
 		}
 	}
 	
-	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
-	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+active_group+" .tab.active_tab");
+	let will_be_closed = document.querySelectorAll("#"+tt.active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+tt.active_group+" .tab.active_tab");
 	
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab:not(.will_be_closed)").length > 1) {
+	if (activeTab != null && document.querySelectorAll("#"+tt.active_group+" .tab:not(.will_be_closed)").length > 1) {
 		if (opt.promote_children && activeTab.childNodes[1].firstChild != null) {
 			chrome.tabs.update(parseInt(activeTab.childNodes[1].firstChild.id), { active: true });
 		} else {
@@ -655,10 +638,10 @@ function ActivatePrevTabBeforeClose() {
 		}
 	}
 
-	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
-	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+active_group+" .tab.active_tab");
+	let will_be_closed = document.querySelectorAll("#"+tt.active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+tt.active_group+" .tab.active_tab");
 
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab:not(.will_be_closed)").length > 1) {
+	if (activeTab != null && document.querySelectorAll("#"+tt.active_group+" .tab:not(.will_be_closed)").length > 1) {
 		if (opt.promote_children && activeTab.childNodes[1].firstChild != null) {
 			chrome.tabs.update(parseInt(activeTab.childNodes[1].firstChild.id), { active: true });
 		} else {
@@ -691,10 +674,10 @@ function ActivateNextTab(allow_reverse) {
 		}
 	}
 
-	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
-	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+active_group+" .tab.active_tab");
+	let will_be_closed = document.querySelectorAll("#"+tt.active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[will_be_closed.length-1] : document.querySelector("#"+tt.active_group+" .tab.active_tab");
 
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+	if (activeTab != null && document.querySelectorAll("#"+tt.active_group+" .tab").length > 1) {
 		let FirstChild = activeTab.childNodes[1].firstChild;
 		if (FirstChild != null) {
 			chrome.tabs.update(parseInt(FirstChild.id), { active: true });
@@ -733,10 +716,10 @@ function ActivatePrevTab(allow_reverse) {
 		}
 	}
 
-	let will_be_closed = document.querySelectorAll("#"+active_group+" .will_be_closed");
-	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+active_group+" .tab.active_tab");
+	let will_be_closed = document.querySelectorAll("#"+tt.active_group+" .will_be_closed");
+	let activeTab = will_be_closed.length > 0 ? will_be_closed[0] : document.querySelector("#"+tt.active_group+" .tab.active_tab");
 
-	if (activeTab != null && document.querySelectorAll("#"+active_group+" .tab").length > 1) {
+	if (activeTab != null && document.querySelectorAll("#"+tt.active_group+" .tab").length > 1) {
 		let pSchildren = activeTab.previousSibling != null ? document.querySelectorAll("#ct"+activeTab.previousSibling.id+" .tab") : null;
 		if (activeTab.previousSibling != null && pSchildren.length > 0) {
 			chrome.tabs.update(parseInt(pSchildren[pSchildren.length-1].id), { active: true });
@@ -762,17 +745,15 @@ function OpenNewTab(pin, parentId) {
 		chrome.tabs.create({pinned: true}, function(tab) {
 			if (parentId) {
 				AppendTab({tab: tab, ParentId: "pin_list", InsertAfterId: parentId, Append: true, Scroll: true});
-				schedule_update_data++;
+				tt.schedule_update_data++;
 			}
-			// newTabUrl = tab.url;
 		});
 	} else {
 		chrome.tabs.create({}, function(tab) {
 			if (parentId) {
 				AppendTab({tab: tab, ParentId: parentId, Append: (opt.append_orphan_tab == "top" ? false : true), Scroll: true});
-				schedule_update_data++;
+				tt.schedule_update_data++;
 			}
-			// newTabUrl = tab.url;
 			if (opt.move_tabs_on_url_change == "from_empty") {
 				chrome.runtime.sendMessage({command: "remove_tab_from_empty_tabs", tabId: tab.id});
 			}
@@ -785,13 +766,13 @@ function DuplicateTab(SourceTabNode) {
 		let DupRetry = setInterval(function() {
 			let DupTab = document.getElementById(tab.id);
 			if (DupTab != null) {
-				if (global.browserId == "F" && tab.pinned) {
+				if (browserId == "F" && tab.pinned) {
 					DupTab.classList.remove("tab");
 					DupTab.classList.add("pin");
 				}
 				InsterAfterNode(DupTab, SourceTabNode);
 				RefreshExpandStates();
-				schedule_update_data++;
+				tt.schedule_update_data++;
 				RefreshCounters();
 				clearInterval(DupRetry);
 			}
@@ -806,7 +787,7 @@ function DuplicateTab(SourceTabNode) {
 }
 
 function DeselectTabs() {
-	document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+	document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
 		s.classList.remove("selected_tab");
 		s.classList.remove("selected_last");
 	});
@@ -833,13 +814,13 @@ function EventExpandBox(Node) {
 			if (opt.collapse_other_trees) {
 				let thisTreeTabs = GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
 				let thisTreeFolders = GetParentsByClass(Node.childNodes[0], "folder"); 
-				document.querySelectorAll("#"+active_group+" .o.tab").forEach(function(s){
+				document.querySelectorAll("#"+tt.active_group+" .o.tab").forEach(function(s){
 					s.classList.remove("o");
 					s.classList.add("c");
 					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
 				});
 				
-				document.querySelectorAll("#"+active_group+" .o.folder").forEach(function(s){
+				document.querySelectorAll("#"+tt.active_group+" .o.folder").forEach(function(s){
 					s.classList.remove("o");
 					s.classList.add("c");
 				});
@@ -876,14 +857,14 @@ function EventExpandBox(Node) {
 function EventSelectTab(event, TabNode) {
 	DeselectFolders();
 	if (event.shiftKey) { // SET SELECTION WITH SHIFT
-		let activeTab = document.querySelector("#"+active_group+" .selected_tab.selected_last");
+		let activeTab = document.querySelector("#"+tt.active_group+" .selected_tab.selected_last");
 		if (activeTab == null) {
-			activeTab = document.querySelector(".pin.active_tab, #"+active_group+" .tab.active_tab");
+			activeTab = document.querySelector(".pin.active_tab, #"+tt.active_group+" .tab.active_tab");
 		}
 		if (activeTab != null && TabNode.parentNode.id == activeTab.parentNode.id) {
 
 			if (!event.ctrlKey) {
-				document.querySelectorAll(".pin.selected_tab, #"+active_group+" .selected_tab").forEach(function(s){
+				document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
 					s.classList.remove("selected_frozen");
 					s.classList.remove("selected_temporarly");
 					s.classList.remove("selected_tab");
@@ -940,7 +921,7 @@ function ActionClickTab(TabNode, bgOption) {
 	}
 	if (bgOption == "unload_tab") {
 		if (TabNode.classList.contains("active_tab")) {
-			SwitchActiveTabBeforeClose(active_group);
+			SwitchActiveTabBeforeClose(tt.active_group);
 			setTimeout(function() {
 				DiscardTabs([parseInt(TabNode.id)]);
 			}, 500);
@@ -949,7 +930,7 @@ function ActionClickTab(TabNode, bgOption) {
 		}
 	}
 	if (bgOption == "activate_previous_active" && TabNode.classList.contains("active_tab")) {
-		chrome.tabs.update(parseInt(bggroups[active_group].prev_active_tab), {active: true});
+		chrome.tabs.update(parseInt(tt.groups[tt.active_group].prev_active_tab), {active: true});
 	}
 }
 
@@ -961,24 +942,24 @@ function TabStartDrag(Node, event) {
 	event.stopPropagation();
 	event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
 	event.dataTransfer.setData("text", "");
-	event.dataTransfer.setData("SourceWindowId", CurrentWindowId);
+	event.dataTransfer.setData("SourceWindowId", tt.CurrentWindowId);
 
 	CleanUpDragClasses();
 	EmptyDragAndDrop();
 
-	DragNodeClass = "tab";
+	tt.DragNodeClass = "tab";
 	
 	let TabsIds = [];
 	let TabsIdsParents = [];
 	let TabsIdsSelected = [];
 	
 	if (Node.classList.contains("selected_tab")) {
-		document.querySelectorAll(".group:not(#"+active_group+") .selected_tab").forEach(function(s){
+		document.querySelectorAll(".group:not(#"+tt.active_group+") .selected_tab").forEach(function(s){
 			s.classList.add("selected_frozen");
 			s.classList.remove("selected_tab");
 			s.classList.remove("selected_last");
 		});
-		document.querySelectorAll("#pin_list .selected_tab, .group#"+active_group+" .selected_tab").forEach(function(s){
+		document.querySelectorAll("#pin_list .selected_tab, .group#"+tt.active_group+" .selected_tab").forEach(function(s){
 			TabsIdsSelected.push(parseInt(s.id));
 		});
 	} else {
@@ -994,15 +975,15 @@ function TabStartDrag(Node, event) {
 	});
 
 	
-	if (opt.max_tree_drag_drop) {
+	if (opt.max_tree_drag_drop || opt.max_tree_depth >= 0) {
 		document.querySelectorAll(".dragged_tree .tab").forEach(function(s){
 			let parents = GetParentsByClass(s.parentNode, "dragged_tree");
-			if (parents.length > DragTreeDepth) {
-				DragTreeDepth = parents.length;
+			if (parents.length > tt.DragTreeDepth) {
+				tt.DragTreeDepth = parents.length;
 			}
 		});
 	} else {
-		DragTreeDepth = -1;
+		tt.DragTreeDepth = -1;
 	}
 	
 	// REST OF SELECTED TABS THAT WILL BE DRAGGED
@@ -1033,7 +1014,7 @@ function TabStartDrag(Node, event) {
 	chrome.runtime.sendMessage({
 		command: "drag_drop",
 		DragNodeClass: "tab",
-		DragTreeDepth: DragTreeDepth
+		DragTreeDepth: tt.DragTreeDepth
 	});
 	
 	if (opt.debug) {
@@ -1043,7 +1024,7 @@ function TabStartDrag(Node, event) {
 }
 
 function TabDragOver(Node, event) {
-	if (DragNodeClass == "tab" && Node.parentNode.classList.contains("dragged_tree") == false) {
+	if (tt.DragNodeClass == "tab" && Node.parentNode.classList.contains("dragged_tree") == false) {
 
 		if (Node.parentNode.classList.contains("pin")) {
 			if (Node.parentNode.classList.contains("before") == false && event.layerX < Node.clientWidth/2) {
@@ -1061,7 +1042,7 @@ function TabDragOver(Node, event) {
 		}
 		
 		if (Node.parentNode.classList.contains("tab")) {
-			let PDepth = (GetParentsByClass(Node, "tab")).length + DragTreeDepth;
+			let PDepth = (GetParentsByClass(Node, "tab")).length + tt.DragTreeDepth;
 			let PIsGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
 			let PIsDraggedParents = Node.parentNode.classList.contains("dragged_parents");
 

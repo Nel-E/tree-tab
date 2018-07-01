@@ -25,5 +25,11 @@
 		"default_title": "Tree Tabs"
 	},
 	"options_page": "options.html",
+	"commands": {
+		"close_tree": {
+			"suggested_key": { "default": "Alt+W" },
+			"description": "close tree"
+		}
+	},
 	"version": "1.6.1"
 }

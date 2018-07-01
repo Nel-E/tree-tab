@@ -400,7 +400,7 @@
 		"message": " at the bottom"
 	},
 	"options_append_child_tab_after": {
-		"message": "after parent (no automatic tree)"
+		"message": "after parent (no automatic tree, also option to treat orphan tab as active's tab child is ignored)"
 	},
 
 	"options_append_orphan_tab": {
@@ -1124,7 +1124,275 @@
 	
 	"manager_window_load_icon": {
 		"message": "Load"
+	},
+
+	"options_Remove_button": {
+		"message": "Remove"
+	},
+
+	"add_tab_group_regex": {
+		"message": "Add"
+	},
+	
+	
+	"tab_title_font_color": {
+		"message": ""
+	},
+	"tab_background": {
+		"message": ""
+	},
+	"tab_border": {
+		"message": ""
+	},
+	"tab_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_hover_background": {
+		"message": ""
+	},
+	"tab_hover_border": {
+		"message": ""
+	},
+	"tab_selected_title_font_color": {
+		"message": ""
+	},
+	"tab_selected_background": {
+		"message": ""
+	},
+	"tab_selected_border": {
+		"message": ""
+	},
+	"tab_selected_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_selected_hover_background": {
+		"message": ""
+	},
+	"tab_selected_hover_border": {
+		"message": ""
+	},
+	"tab_active_title_font_color": {
+		"message": ""
+	},
+	"tab_active_background": {
+		"message": ""
+	},
+	"tab_active_border": {
+		"message": ""
+	},
+	"tab_active_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_active_hover_background": {
+		"message": ""
+	},
+	"tab_active_hover_border": {
+		"message": ""
+	},
+	"tab_active_selected_title_font_color": {
+		"message": ""
+	},
+	"tab_active_selected_background": {
+		"message": ""
+	},
+	"tab_active_selected_border": {
+		"message": ""
+	},
+	"tab_selected_active_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_selected_active_hover_background": {
+		"message": ""
+	},
+	"tab_selected_active_hover_border": {
+		"message": ""
+	},
+	"tab_discarded_title_font_color": {
+		"message": ""
+	},
+	"tab_discarded_background": {
+		"message": ""
+	},
+	"tab_discarded_border": {
+		"message": ""
+	},
+	"tab_discarded_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_discarded_hover_background": {
+		"message": ""
+	},
+	"tab_discarded_hover_border": {
+		"message": ""
+	},
+	"tab_selected_discarded_title_font_color": {
+		"message": ""
+	},
+	"tab_selected_discarded_background": {
+		"message": ""
+	},
+	"tab_selected_discarded_border": {
+		"message": ""
+	},
+	"tab_selected_discarded_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_selected_discarded_hover_background": {
+		"message": ""
+	},
+	"tab_selected_discarded_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_background": {
+		"message": ""
+	},
+	"tab_filtered_border": {
+		"message": ""
+	},
+	"tab_filtered_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_active_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_active_background": {
+		"message": ""
+	},
+	"tab_filtered_active_border": {
+		"message": ""
+	},
+	"tab_filtered_active_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_active_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_active_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_background": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_border": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_highlighted_search_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_background": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_border": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_active_highlighted_search_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_highlighted_search_hover_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_border": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_hover_title_font_color": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_hover_background": {
+		"message": ""
+	},
+	"tab_filtered_selected_active_highlighted_search_hover_border": {
+		"message": ""
 	}
+	
+	
+	
+	
+	
+	
 	
 
 	
