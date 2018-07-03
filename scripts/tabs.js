@@ -89,8 +89,7 @@ function RearrangeTreeTabs(bgtabs, show_finish_in_status) {
 	});
 }
 
-// AppendTab({tab, ParentId, InsertBeforeId, InsertAfterId, Append, SkipSetEvents, AdditionalClass, SkipSetActive, Scroll, addCounter, SkipMediaIcon})
-function AppendTab(p) {
+function AppendTab(p) { // tab: chrome tab object, ParentId: int or string, InsertBeforeId: int or string, InsertAfterId: int or string, Append: bool, SkipSetEvents: bool, AdditionalClass: string, SkipSetActive: bool, Scroll: bool, addCounter: bool, SkipMediaIcon: bool
 	if (document.getElementById(p.tab.id) != null) {
 		GetFaviconAndTitle(p.tab.id, p.addCounter);
 		return;

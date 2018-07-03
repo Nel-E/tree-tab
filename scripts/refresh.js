@@ -117,6 +117,8 @@ function RefreshDiscarded(tabId) {
 					t.classList.add("discarded");
 				} else {
 					t.classList.remove("discarded");
+					t.classList.remove("audible");
+					t.classList.remove("muted");
 				}
 			}
 		});

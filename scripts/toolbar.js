@@ -510,7 +510,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						AddNewFolder(undefined, undefined, undefined, undefined, undefined, undefined, true);
+						let FolderId = AddNewFolder({SetEvents: true});
+						ShowRenameFolderDialog(FolderId);
 					}
 				}
 			}

@@ -269,7 +269,7 @@ function StartSidebarListeners() {
 				}
 				if (message.changeInfo.discarded != undefined) {
 					RefreshDiscarded(message.tabId);
-					RefreshMediaIcon(message.tabId);
+					// RefreshMediaIcon(message.tabId);
 				}
 				if (message.changeInfo.pinned != undefined) {
 					let updateTab = document.getElementById(message.tabId);

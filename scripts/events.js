@@ -49,7 +49,6 @@ function SetEvents() {
 		if (event.which == 1) {
 			RemoveHeadersHoverClass();
 		}
-	
 	}
 
 	// CONFIRM EDIT FOLDER
@@ -195,6 +194,12 @@ function SetEvents() {
 		if (event.altKey && event.which == 71) {
 			GroupsToolbarToggle();
 		}
+
+		// new folder
+		// if (event.which == 91 && event.which == 71) {
+			// let FolderId = AddNewFolder({SetEvents: true});
+			// ShowRenameFolderDialog(FolderId);
+		// }
 		RefreshGUI();
 	}
 
@@ -247,7 +252,7 @@ function SetEvents() {
 
 			if (Object.keys(Folders).length > 0) {
 				for (var folderId in Folders) {
-					AddNewFolder(folderId, Folders[folderId].parent, Folders[folderId].name, Folders[folderId].index, Folders[folderId].expand, (FoldersSelected.indexOf(folderId) != -1 ? "selected_folder" : undefined), true);
+					AddNewFolder({folderId: folderId, ParentId: Folders[folderId].parent, Name: Folders[folderId].name, Index: Folders[folderId].index, ExpandState: Folders[folderId].expand, AdditionalClass: (FoldersSelected.indexOf(folderId) != -1 ? "selected_folder" : undefined), SetEvents: true});
 					chrome.runtime.sendMessage({ command: "remove_folder", folderId: folderId });
 				}
 			}
@@ -346,8 +351,7 @@ function RemoveHeadersHoverClass() {
 
 
 
-// DropToTarget({Class, DraggedTabNode, TargetNode, TabsIdsSelected, TabsIds, TabsIdsParents, Folders, FoldersSelected, Group, Scroll})
-function DropToTarget(p) {
+function DropToTarget(p) { // Class: ("group", "tab", "folder"), DraggedTabNode: TabId, TargetNode: query node, TabsIdsSelected: arr of selected tabIds, TabsIds: arr of tabIds, TabsIdsParents: arr of parent tabIds, Folders: object with folders objects, FoldersSelected: arr of selected folders ids, Group: groupId, Scroll: bool
 	if (p.TargetNode != null) {
 		if (opt.debug) {
 			log("f: DropToTarget, DragNodeClass: "+p.Class+", TargetNode: "+p.TargetNode.id+", TabsIdsSelected: "+JSON.stringify(p.TabsIdsSelected)+", TabsIds: "+JSON.stringify(p.TabsIds)+", TabsIdsParents: "+JSON.stringify(p.TabsIdsParents)+", Folders: "+JSON.stringify(p.Folders)+", FoldersSelected: "+JSON.stringify(p.FoldersSelected)  );

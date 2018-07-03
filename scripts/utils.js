@@ -225,18 +225,38 @@ function FindTab(input) { // find and select tabs
 	let FilterType = document.getElementById("button_filter_type");
 	let searchUrl = FilterType.classList.contains("url");
 	let searchTitle = FilterType.classList.contains("title");
-	chrome.tabs.query({windowId: tt.CurrentWindowId, pinned: false}, function(tabs) {
+	
+	let query = {windowId: tt.CurrentWindowId, pinned: false};
+	if (input == "*audible") {
+		query = {windowId: tt.CurrentWindowId, discarded: false, audible: true,  muted: false, pinned: false};
+	}
+	if (input == "*muted") {
+		query = {windowId: tt.CurrentWindowId, discarded: false, muted: true, pinned: false};
+	}
+	if (input == "*unloaded") {
+		query = {windowId: tt.CurrentWindowId, discarded: true, pinned: false};
+	}
+	if (input == "*loaded") {
+		query = {windowId: tt.CurrentWindowId, discarded: false, pinned: false};
+	}
+		
+	chrome.tabs.query(query, function(tabs) {
 		tabs.forEach(function(Tab) {
-			if (searchUrl) {
-				if (Tab.url.toLowerCase().match(input.toLowerCase())) {
-					document.getElementById(Tab.id).classList.add("filtered");
-					document.getElementById(Tab.id).classList.add("selected_tab");
+			if (input == "*audible" || input == "*muted" || input == "*unloaded" || input == "*loaded") {
+				document.getElementById(Tab.id).classList.add("filtered");
+				document.getElementById(Tab.id).classList.add("selected_tab");
+			} else {
+				if (searchUrl) {
+					if (Tab.url.toLowerCase().match(input.toLowerCase())) {
+						document.getElementById(Tab.id).classList.add("filtered");
+						document.getElementById(Tab.id).classList.add("selected_tab");
+					}
 				}
-			}
-			if (searchTitle) {
-				if (Tab.title.toLowerCase().match(input.toLowerCase())) {
-					document.getElementById(Tab.id).classList.add("filtered");
-					document.getElementById(Tab.id).classList.add("selected_tab");
+				if (searchTitle) {
+					if (Tab.title.toLowerCase().match(input.toLowerCase())) {
+						document.getElementById(Tab.id).classList.add("filtered");
+						document.getElementById(Tab.id).classList.add("selected_tab");
+					}
 				}
 			}
 		});
@@ -347,8 +367,8 @@ function Bookmark(rootNode) {
 		});
 	});
 }
-// show, spinner, message
-function ShowStatusBar(p) {
+
+function ShowStatusBar(p) { // show, spinner, message
 	let status_bar = document.getElementById("status_bar");
 	let busy_spinner = document.getElementById("busy_spinner");
 	let status_message = document.getElementById("status_message");

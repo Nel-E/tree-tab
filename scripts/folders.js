@@ -2,13 +2,13 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-function AddNewFolder(folderId, ParentId, Name, Index, ExpandState, AdditionalClass, SetEvents) {
-	let newId = folderId ? folderId : GenerateNewFolderID();
-	tt.folders[newId] = { id: newId, parent: (ParentId ? ParentId : ""), index: (Index ? Index : 0), name: (Name ? Name : labels.noname_group), expand: (ExpandState ? ExpandState : "") };
+function AddNewFolder(p) { // folderId: string, ParentId: string, Name: string, Index: int, ExpandState: ("o","c"), AdditionalClass: string, SetEvents: bool
+	let newId = p.folderId ? p.folderId : GenerateNewFolderID();
+	tt.folders[newId] = { id: newId, parent: (p.ParentId ? p.ParentId : ""), index: (p.Index ? p.Index : 0), name: (p.Name ? p.Name : labels.noname_group), expand: (p.ExpandState ? p.ExpandState : "") };
 	if (opt.debug) {
 		log("f: AddNewFolder, folder: "+JSON.stringify(tt.folders[newId]));
 	}
-	AppendFolder(newId, labels.noname_group, (ParentId ? ParentId : ""), undefined, SetEvents, AdditionalClass);
+	AppendFolder(newId, labels.noname_group, (p.ParentId ? p.ParentId : ""), undefined, p.SetEvents, p.AdditionalClass);
 	SaveFolders();
 	RefreshCounters();
 	RefreshExpandStates();
@@ -347,7 +347,8 @@ function ActionClickFolder(FolderNode, bgOption) {
 		ShowRenameFolderDialog(FolderNode.id);
 	}
 	if (bgOption == "new_folder") {
-		AddNewFolder(undefined, FolderNode.id, undefined, undefined, undefined, undefined, true);
+		let FolderId = AddNewFolder({ParentId: FolderNode.id, SetEvents: true});
+		ShowRenameFolderDialog(FolderId);
 	}
 	if (bgOption == "new_tab") {
 		OpenNewTab(false, FolderNode.id);

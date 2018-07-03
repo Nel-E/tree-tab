@@ -32,7 +32,7 @@
 		"_execute_browser_action": {
 			"suggested_key": { "default": "F1" },
 			"description": "toggle Tree Tabs"
-		}
+		},
 		"close_tree": {
 			"suggested_key": { "default": "Alt+W" },
 			"description": "close tree"

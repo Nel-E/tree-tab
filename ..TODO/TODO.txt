@@ -1,16 +1,19 @@
 CHANGES:
-Shortcut to open TreeTabs Sidebar is now F1
-log does not preserve urls for privacy reasons
+1. shortcut to open TreeTabs Sidebar is now F1
+2. log does not preserve any personal data (urls) for GDPR law
 
 NEW:
-DRAG&DROP TO ANOTHER WINDOW OF THE ENTIRE GROUP
-Tree is tracked in background (but not closing tabs)
-Added alt+w shortcut to close a tree of tabs
+1. you can now drag&drop entire group to another window
+2. tree structure is tracked in background (excluded closing tabs)
+3. added alt+w shortcut to close a tree of tabs
+4. creating folder will now prompt for a new name
+5. search for *audible, *muted, *unloaded, *loaded tabs! Just write *audible in search box!
+
 
 FIXES:
-import window was not showing up
-export group and export session had file extension in name
-pin tree had bug in setting class
+1. import window was not showing up
+2. export group and export session had file extension in name
+3. pin tree had bug in setting class
 
 
 

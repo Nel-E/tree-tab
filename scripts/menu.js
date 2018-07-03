@@ -415,17 +415,23 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					if (tt.menuItemNode.classList.contains("folder")) {
-						AddNewFolder(undefined, tt.menuItemNode.id, undefined, undefined, undefined, undefined, true);
+						let FolderId = AddNewFolder({ParentId: tt.menuItemNode.id, SetEvents: true});
+						tt.menuItemNode.classList.remove("c");
+						tt.menuItemNode.classList.add("o");
+						ShowRenameFolderDialog(FolderId);
 					} else {
 						if (tt.menuItemNode.classList.contains("tab")) {
 							let folders = GetParentsByClass(tt.menuItemNode, "folder");
 							if (folders.length > 0) {
-								AddNewFolder(undefined, folders[0].id, undefined, undefined, undefined, undefined, true);
+								let FolderId = AddNewFolder({ParentId: folders[0].id, SetEvents: true});
+								ShowRenameFolderDialog(FolderId);
 							} else {
-								AddNewFolder(undefined, undefined, undefined, undefined, undefined, undefined, true);
+								let FolderId = AddNewFolder({SetEvents: true});
+								ShowRenameFolderDialog(FolderId);
 							}
 						} else {
-							AddNewFolder(undefined, undefined, undefined, undefined, undefined, undefined, true);
+							let FolderId = AddNewFolder({SetEvents: true});
+							ShowRenameFolderDialog(FolderId);
 						}
 					}
 					HideMenus();
