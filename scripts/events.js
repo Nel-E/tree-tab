@@ -29,6 +29,7 @@ function SetEvents() {
 	document.oncontextmenu = function(event){
 		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
 			event.preventDefault();
+			return false;
 		}
 	}	
 	document.body.onresize = function(event) {

@@ -259,6 +259,12 @@ function QuantumLoadTabs(retry) {
 					} else {
 						QuantumAppendWinTTId(winId);
 					}
+					
+					if (b.windows[winId].activeTabId == undefined) { // legacy
+						b.windows[winId].activeTabId = [0,0]; // legacy
+					} // legacy
+					
+					
 					for (let tIndex = 0; tIndex < tabsCount; tIndex++) {
 						let tab = w[winIndex].tabs[tIndex];
 						let tabIndex = tIndex;

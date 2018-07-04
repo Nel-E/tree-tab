@@ -488,6 +488,7 @@ function OnMessageTabCreated(tabId) {
 		} else {
 			
 			if (opt.append_orphan_tab == "as_child" && opt.orphaned_tabs_to_ungrouped == false) {
+				
 				// let atb = NewTab.active ? 0 : 1;
 				NewTab.openerTabId = b.windows[NewTab.windowId].activeTabId[NewTab.active ? 0 : 1];
 			}					
@@ -623,34 +624,43 @@ function OnMessageTabCreated(tabId) {
 					
 					if (opt.append_orphan_tab == "after_active") {
 						
-						let activeTabId = b.windows[NewTab.windowId].activeTabId[1] != NewTab.id ? b.windows[NewTab.windowId].activeTabId[1] : b.windows[NewTab.windowId].activeTabId[0];
-						
-						// console.log(b.tabs[activeTabId].index);
-						if (b.tabs[activeTabId]) {
-							let ActiveSiblings = GetChildren(b.tabs[activeTabId].parent);
-							b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
-							b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
-							for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
-								// let prev = b.tabs[ActiveSiblings[i]].index;
-								b.tabs[ActiveSiblings[i]].index += 1;
-								// console.log(prev + "   " +  b.tabs[ActiveSiblings[i]].index );
+						if (b.windows[NewTab.windowId] && b.windows[NewTab.windowId].activeTabId) {
+							let activeTabId = b.windows[NewTab.windowId].activeTabId[1] != NewTab.id ? b.windows[NewTab.windowId].activeTabId[1] : b.windows[NewTab.windowId].activeTabId[0];
+							
+							// console.log(b.tabs[activeTabId].index);
+							if (b.tabs[activeTabId]) {
+								let ActiveSiblings = GetChildren(b.tabs[activeTabId].parent);
+								b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
+								b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
+								for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
+									// let prev = b.tabs[ActiveSiblings[i]].index;
+									b.tabs[ActiveSiblings[i]].index += 1;
+									// console.log(prev + "   " +  b.tabs[ActiveSiblings[i]].index );
+								}
+								if (browserId == "F"){
+									b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
+								}
+								AfterId = activeTabId;							
+							} else { // FAIL, no active tab!
+								let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
+								b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
+								if (browserId == "F"){
+									b.tabs[NewTab.id].parent_ttid = "";
+								}
+								if (GroupTabs.length > 0) {
+									b.tabs[NewTab.id].index = b.tabs[GroupTabs[GroupTabs.length-1]].index+1;
+								} else {
+									b.tabs[NewTab.id].index = 0;
+								}
+								ParentId = b.windows[NewTab.windowId].active_group;
 							}
-							if (browserId == "F"){
-								b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
-							}
-							AfterId = activeTabId;							
-						} else { // FAIL, no active tab!
-							let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
-							b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
+						} else {
+							b.tabs[NewTab.id].parent = "tab_list";
 							if (browserId == "F"){
 								b.tabs[NewTab.id].parent_ttid = "";
 							}
-							if (GroupTabs.length > 0) {
-								b.tabs[NewTab.id].index = b.tabs[GroupTabs[GroupTabs.length-1]].index+1;
-							} else {
-								b.tabs[NewTab.id].index = 0;
-							}
-							ParentId = b.windows[NewTab.windowId].active_group;
+							b.tabs[NewTab.id].index = NewTab.index;
+							ParentId = "tab_list";
 						}
 						// console.log(b.tabs[NewTab.id].index);
 					}
