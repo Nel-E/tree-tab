@@ -222,6 +222,13 @@
 					</select>
 				</li>
 				<li>
+					<label class="label" id="options_toolbar_new_tab"></label>	
+					<select id="append_tab_from_toolbar">
+						<option class="bg_opt_drop_down_menu" id="options_toolbar_new_tab_as_regular_orphan" value="as_regular_orphan"></option>
+						<option class="bg_opt_drop_down_menu" id="options_toolbar_new_tab_root_of_group" value="group_root"></option>
+					</select>
+				</li>
+				<li>
 					<label class="label" id="options_after_closing_active_tab"></label>	
 					<select id="after_closing_active_tab">
 						<option class="bg_opt_drop_down_menu" id="options_after_closing_active_tab_go_up" value="above"></option>
@@ -269,6 +276,21 @@
 					<td class="label" id="options_max_tree_drag_drop"></td>
 				</tr>
 			</table>
+			
+			<br>
+			<p style="font-size:11px; color: red;" class="hint_explanation" id="hint_orphan_tab"></p>
+			<ul style="list-style-type:disc; font-size:11px;">
+				<li class="hint_explanation" id="hint_ctrl_t"></li>
+				<li class="hint_explanation" id="hint_from_pin"></li>
+				<li class="hint_explanation" id="hint_from_bookmark"></li>
+				<li class="hint_explanation" id="hint_from_external_link"></li>
+				<li class="hint_explanation" id="hint_from_popup"></li>
+			</ul>
+			<span style="display:block; font-size:11px; color: red;" class="hint_explanation" id="hint_explained_new_tab_settings"></span>
+			<span style="display:block; font-size:11px; color: red;" class="hint_explanation" id="hint_explained_orphan_after_active_settings"></span>
+			<br>
+			
+			
 			
 		</fieldset>
 		

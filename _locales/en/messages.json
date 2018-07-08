@@ -245,6 +245,9 @@
 	"menu_groups_hibernate": {
 		"message": "Hibernate"
 	},
+	"menu_group_tabs_close": {
+		"message": "Close tabs"
+	},
 
 
 
@@ -400,24 +403,36 @@
 		"message": " at the bottom"
 	},
 	"options_append_child_tab_after": {
-		"message": "after parent (no automatic tree)"
+		"message": "after parent tab (no automatic tree)"
 	},
 
 	"options_append_orphan_tab": {
-		"message": "Append orphan tabs (new tabs, tabs opened from shortcuts or from bookmarks)"
+		"message": "Append orphan tabs"
 	},
 	"options_append_orphan_tab_top": {
-		"message": "at the top"
+		"message": "at the top of the group"
 	},
 	"options_append_orphan_tab_after_active": {
-		"message": "after active"
+		"message": "after active tab"
 	},
 	"options_append_orphan_tab_bottom": {
-		"message": "at the bottom"
+		"message": "at the bottom of the group"
 	},
 	"options_append_orphan_tab_as_child": {
 		"message": "treat as active's tab child"
 	},
+	
+	"options_toolbar_new_tab": {
+		"message": "Toolbar + (new tab button) should append tab"
+	},
+	"options_toolbar_new_tab_as_regular_orphan": {
+		"message": "as a regular orphan tab (option above)"
+	},
+	"options_toolbar_new_tab_root_of_group": {
+		"message": "at the bottom of the group"
+	},
+	
+	
 	
 	"options_after_closing_active_tab": {
 		"message": "After closing active tab,"
@@ -590,12 +605,34 @@
 	},
 
 
-
-
-
-
 	"options_toolbar_look": {
 		"message": " Toolbar's look "
+	},
+
+	
+	"hint_orphan_tab": {
+		"message": "Orphan tab is a tab opened from an external source, which can be:"
+	},
+	"hint_ctrl_t": {
+		"message": "ctrl+t shortcut"
+	},
+	"hint_from_pin": {
+		"message": "link that opens new tab from pinned tab"
+	},
+	"hint_from_bookmark": {
+		"message": "bookmark"
+	},
+	"hint_from_external_link": {
+		"message": "external link"
+	},
+	"hint_from_popup": {
+		"message": "popup opened as a tab (settings in browser, popup blocker or similar)"
+	},
+	"hint_explained_new_tab_settings": {
+		"message": "+ button in Tree Tabs toolbar, places new tabs in the root of the active group, unless set differently."
+	},
+	"hint_explained_orphan_after_active_settings": {
+		"message": "If 'Append orphan tabs' is set to 'after active' and active tab is not in active group, tab will append to the root of the active group instead. But only if sidebar is open."
 	},
 
 	

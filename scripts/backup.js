@@ -567,7 +567,7 @@ function StartAutoSaveSession() {
 			let newName = d.toLocaleString().replace("/", ".").replace("/", ".").replace(":", "꞉").replace(":", "꞉");
 			ExportSession(newName, false, false, true);
 			
-			ShowStatusBar({show: true, spinner: false, message: "Autosave: "+newName, hideTimeout: 1000});
+			ShowStatusBar({show: true, spinner: false, message: "Autosave: "+newName, hideTimeout: 1500});
 
 			if (document.getElementById("manager_window").style.top != "-500px") {
 				chrome.storage.local.get(null, function(storage) {

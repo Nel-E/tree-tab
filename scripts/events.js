@@ -26,12 +26,24 @@ function SetEvents() {
 			}
 		}
 	}
-	document.oncontextmenu = function(event){
+
+	document.oncontextmenu = function (event) {
 		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
 			event.preventDefault();
+			event.stopPropagation();
 			return false;
 		}
-	}	
+	};
+
+	window.addEventListener('contextmenu', function (event) {
+		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
+			event.preventDefault();
+			event.stopPropagation();
+			return false;
+		}
+	}, false);
+
+	
 	document.body.onresize = function(event) {
 		RefreshGUI();
 	}
@@ -197,10 +209,10 @@ function SetEvents() {
 		}
 
 		// new folder
-		// if (event.which == 91 && event.which == 71) {
-			// let FolderId = AddNewFolder({SetEvents: true});
-			// ShowRenameFolderDialog(FolderId);
-		// }
+		if (event.which == 192 && event.which == 70 && event.which == 69) {
+			let FolderId = AddNewFolder({SetEvents: true});
+			ShowRenameFolderDialog(FolderId);
+		}
 		RefreshGUI();
 	}
 

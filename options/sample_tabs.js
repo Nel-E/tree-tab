@@ -5,9 +5,9 @@
 function AppendSampleTabs() {
 
 	// folders
-	AddNewFolder("f_folder1", "cftab_list", labels.noname_group, 0, "o", "o", false);
-	AddNewFolder("f_folder2", "f_folder1", labels.noname_group, 0, "c", "c", false);
-	AddNewFolder("f_folder3", "f_folder1", labels.noname_group, 0, "c", "c", false);
+	AddNewFolder({folderId: "f_folder1", ParentId: "cftab_list", Name: labels.noname_group, Index: 0, ExpandState: "o", AdditionalClass: "o"});
+	AddNewFolder({folderId: "f_folder2", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", AdditionalClass: "c"});
+	AddNewFolder({folderId: "f_folder3", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", AdditionalClass: "c"});
 
 
 	// pins

@@ -1410,10 +1410,77 @@ div {
 
 .dragged_tree>.folder_header,
 .dragged_tree>.tab_header {
-	border:1px solid var(--tab_selected_border);
-	background-color:var(--tab_selected_background);
+	border: 1px solid var(--tab_selected_border);
+	background-color: var(--tab_selected_background);
 	
 }
+
+
+
+
+/* TITLE COUNTER */
+
+.folder_counter,
+.tab_counter {
+	display: none;
+	pointer-events: none;
+	width: 0px;
+	height: 0px;
+}
+
+.o>.folder_header>.folder_counter,
+.o>.tab_header>.tab_counter,
+.c>.folder_header>.folder_counter,
+.c>.tab_header>.tab_counter {
+	opacity: 0.3;
+	display: block;
+	position: absolute;
+	vertical-align: bottom;
+	z-index: 999;
+	right: calc(100% - var(--counter_left));
+	top: var(--counter_top);
+	text-overflow: ellipsis;
+	width: auto;
+	height: var(--counter_height);
+	overflow: hidden;
+	border: 1px solid #e7e7e7;
+	border-radius: 6px;
+	background-color: #e7e7e7;
+	line-height: 10px;
+}
+
+.o>.folder_header:hover>.folder_counter,
+.o>.tab_header:hover>.tab_counter,
+.c>.folder_header:hover>.folder_counter,
+.c>.tab_header:hover>.tab_counter {
+	opacity: 0.9;
+	height: calc(var(--counter_height) + 1px);
+}
+
+
+.o>.tab_header:hover>.tab_counter>.counter_number,
+.c>.tab_header:hover>.tab_counter>.counter_number,
+.o>.folder_header:hover>.folder_counter>.counter_number,
+.c>.folder_header:hover>.folder_counter>.counter_number {
+	top: calc(var(--counter_number_top) + 1px);
+	font-size: calc(var(--counter_font_size) + 1px);
+}
+
+.folder_counter>.counter_number,
+.tab_counter>.counter_number {
+	position: relative;
+	top: var(--counter_number_top);
+	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
+	white-space: nowrap;
+	font-size: var(--counter_font_size);
+	/* color: #303030; */
+	color: #000000;
+	padding-left: 1px;
+	padding-right: 1px;
+}
+
+
+	
 
 
 /* MENU */

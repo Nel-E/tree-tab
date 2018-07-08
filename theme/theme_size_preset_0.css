@@ -7,7 +7,7 @@ body {
 	--pin_height: 22px;
 
 	--tab_height: 16px;
-	--tab_height_line: 17px;
+	--tab_height_line: 16px;
 
 	--title_font_size: 10.5px;
 
@@ -35,4 +35,10 @@ body {
 	
 	--tab_mediaicon_height: 8px;
 	--tab_mediaicon_width: 8px;
+	
+	--counter_height: 5px;
+	--counter_left: 19px;
+	--counter_top: 0px;
+	--counter_font_size: 7px;
+	--counter_number_top: -3px;
 }

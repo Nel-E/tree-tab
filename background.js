@@ -260,9 +260,7 @@ function QuantumLoadTabs(retry) {
 						QuantumAppendWinTTId(winId);
 					}
 					
-					if (b.windows[winId].activeTabId == undefined) { // legacy
-						b.windows[winId].activeTabId = [0,0]; // legacy
-					} // legacy
+					b.windows[winId].activeTabId = 0; // legacy
 					
 					
 					for (let tIndex = 0; tIndex < tabsCount; tIndex++) {
@@ -272,8 +270,7 @@ function QuantumLoadTabs(retry) {
 						let tabPinned = w[winIndex].tabs[tabIndex].pinned;
 
 						if (tab.active) {
-							b.windows[winId].activeTabId[0] = tabId;
-							b.windows[winId].activeTabId[1] = tabId;
+							b.windows[winId].activeTabId = tabId;
 						}
 
 						// LOAD TTID FROM FIREFOX GET TAB VALUE
@@ -404,7 +401,7 @@ function QuantumAppendWinTTId(windowId) {
 	if (b.windows[windowId] != undefined) {
 		b.windows[windowId].ttid = NewTTWindowId;
 	} else {
-		b.windows[windowId] = {activeTabId: [0,0], ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", prev_active_tab: 0, prev_active_tab_ttid: "", name: labels.ungrouped_group, font: ""}}, folders: {}};
+		b.windows[windowId] = {activeTabId: 0, ttid: NewTTWindowId, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, active_tab_ttid: "", prev_active_tab: 0, prev_active_tab_ttid: "", name: labels.ungrouped_group, font: ""}}, folders: {}};
 	}
 	// if (b.schedule_save > 0) browser.sessions.setWindowValue( windowId, "TTdata", b.windows[windowId] );
 }
@@ -493,8 +490,7 @@ function ChromiumLoadTabs(retry) {
 					ChromiumHashURL(w[wIndex].tabs[tabIndex]);
 					
 					if (w[wIndex].tabs[tabIndex].active) {
-						b.windows[w[wIndex].id].activeTabId[0] = w[wIndex].tabs[tabIndex].id;
-						b.windows[w[wIndex].id].activeTabId[1] = w[wIndex].tabs[tabIndex].id;
+						b.windows[w[wIndex].id].activeTabId = w[wIndex].tabs[tabIndex].id;
 					}
 
 				}
@@ -607,7 +603,7 @@ async function ChromiumAutoSaveData(BAK, LoopTimer) {
 }
 
 function ChromiumAddWindowData(winId) {
-	b.windows[winId] = {activeTabId: [0,0], group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: labels.ungrouped_group, font: ""}}, folders: {}};
+	b.windows[winId] = {activeTabId: 0, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: {tab_list: {id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: labels.ungrouped_group, font: ""}}, folders: {}};
 }
 
 function ChromiumHashURL(tab) {

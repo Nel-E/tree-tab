@@ -10,7 +10,7 @@ var SelectedTheme = Object.assign({}, DefaultTheme);
 var dragged_button = {id: ""};
 
 // options for all drop down menus
-let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "after_closing_active_tab", "move_tabs_on_url_change"];
+let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "append_tab_from_toolbar", "after_closing_active_tab", "move_tabs_on_url_change"];
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
@@ -102,7 +102,7 @@ function AddRegexPair() {
 // document events
 function GetOptions(storage) {
 	// get language labels
-	document.querySelectorAll(".label, .set_button, .bg_opt_drop_down_menu").forEach(function(s){
+	document.querySelectorAll(".label, .set_button, .bg_opt_drop_down_menu, .hint_explanation").forEach(function(s){
 		s.textContent = chrome.i18n.getMessage(s.id);
 	});	
 

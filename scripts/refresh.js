@@ -210,13 +210,15 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 			if (tab){
 				let title = tab.title ? tab.title : tab.url;
 				let tHeader = t.childNodes[0];
-				let tTitle = tHeader.childNodes[1];
+				let tTitle = t.childNodes[0].childNodes[2];
 				if (tab.status == "complete" || tab.discarded) {
 					t.classList.remove("loading");
 
 					tTitle.textContent = title;
 					tHeader.title = title;
-					tHeader.setAttribute("tabTitle", title);
+					if (opt.show_counter_tabs_hints) {
+						tHeader.setAttribute("tabTitle", title);
+					}
 	
 					let Img = new Image();
 
@@ -232,7 +234,9 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 					t.classList.add("loading");
 					tHeader.style.backgroundImage = "";
 					tHeader.title = labels.loading;
-					tHeader.setAttribute("tabTitle", labels.loading);
+					if (opt.show_counter_tabs_hints) {
+						tHeader.setAttribute("tabTitle", labels.loading);
+					}
 					tTitle.textContent = labels.loading;
 					setTimeout(function() {
 						if (document.getElementById(tab.id) != null) GetFaviconAndTitle(tab.id, addCounter);
@@ -272,30 +276,32 @@ async function RefreshExpandStates() {
 
 async function RefreshCounters() {
 	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-		document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
-			let title = s.childNodes[0].getAttribute("tabTitle");
-			if (title != null) {
-				s.childNodes[0].title = title;
-				s.childNodes[0].childNodes[1].textContent =title;
-			}
-		});
+		// if (opt.show_counter_tabs_hints) {
+			// document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
+				// let title = s.childNodes[0].getAttribute("tabTitle");
+				// if (title != null) {
+					// s.childNodes[0].title = title;
+					// s.childNodes[0].childNodes[1].textContent = title;
+				// }
+			// });
+		// }
+		
 		document.querySelectorAll("#"+tt.active_group+" .o.tab, #"+tt.active_group+" .c.tab").forEach(function(s){
-			let title = s.childNodes[0].getAttribute("tabTitle");
-			if (opt.show_counter_tabs && title != null) {
-				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
+			if (opt.show_counter_tabs) {
+				s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
 			}
 			if (opt.show_counter_tabs_hints) {
-				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + title;
+				let title = s.childNodes[0].getAttribute("tabTitle");
+				s.childNodes[0].title = (document.querySelectorAll("[id='" + s.id + "'] .tab").length +" • ") + title;
 			}
 		});
-		
-		
+		// ·
 		document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s){
 			if (opt.show_counter_tabs && tt.folders[s.id]) {
-				s.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + tt.folders[s.id].name;
+				s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
 			}
 			if (opt.show_counter_tabs_hints && tt.folders[s.id]) {
-				s.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + s.id + "'] .tab").length +") ") + tt.folders[s.id].name;
+				s.childNodes[0].title = (document.querySelectorAll("[id='" + s.id + "'] .tab").length +" • ") + tt.folders[s.id].name;
 			}
 		});
 	}
@@ -308,14 +314,13 @@ async function RefreshTabCounter(tabId) {
 		if (t != null && title != null) {
 			if (t.classList.contains("o") || t.classList.contains("c")) {
 				if (opt.show_counter_tabs) {
-					t.childNodes[0].childNodes[1].textContent = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
+					t.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + t.id + "'] .tab").length;
 				}
 				if (opt.show_counter_tabs_hints) {
-					t.childNodes[0].title = ("("+ document.querySelectorAll("[id='" + t.id + "'] .tab").length +") ") + title;
+					t.childNodes[0].title = (document.querySelectorAll("[id='" + t.id + "'] .tab").length +" • ") + title;
 				}
 			} else {
-					t.childNodes[0].title = title;
-					t.childNodes[0].childNodes[1].textContent = title;
+				t.childNodes[0].title = title;
 			}
 		}
 	}

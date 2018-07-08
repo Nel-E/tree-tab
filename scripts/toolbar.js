@@ -308,7 +308,12 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new") {
 				s.onclick = function(event) {
 					if (event.which == 1) {
-						OpenNewTab(false, tt.active_group);
+						if (opt.append_tab_from_toolbar == "group_root") {
+							OpenNewTab(false, tt.active_group);
+						}
+						if (opt.append_tab_from_toolbar == "as_regular_orphan") {
+							OpenNewTab(false, (document.querySelectorAll("#"+tt.active_group+" .tab").length == 0 ? tt.active_group : undefined));
+						}
 					}
 				}
 				s.onmousedown = function(event) {

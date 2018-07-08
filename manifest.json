@@ -14,7 +14,8 @@
 		"19": "icons/16.png",
 		"16": "icons/16.png"
 	},
-	"permissions": [ "tabs", "sessions", "storage", "unlimitedStorage", "bookmarks", "tabHide" ],
+	"permissions": [ "<all_urls>", "tabs", "sessions", "storage", "unlimitedStorage", "bookmarks", "tabHide" ],
+
 	"sidebar_action": {
 		"default_icon": {
 			"16": "icons/16.png",
@@ -28,16 +29,6 @@
 	"browser_action": {
 		"default_icon": "icons/24.png"
 	},
-	"commands": {
-		"_execute_browser_action": {
-			"suggested_key": { "default": "F1" },
-			"description": "toggle Tree Tabs"
-		},
-		"close_tree": {
-			"suggested_key": { "default": "Alt+W" },
-			"description": "close tree"
-		}
-	},
 	"applications": {
 		"gecko": {
 			"id": "TreeTabs@jagiello.it",
@@ -48,5 +39,11 @@
 		"page": "options.html",
 		"open_in_tab": true
 	},
-	"version": "1.7.1"
+	"commands": {
+		"close_tree": {
+			"suggested_key": { "default": "Alt+W" },
+			"description": "close tree"
+		}
+	},
+	"version": "100"
 }

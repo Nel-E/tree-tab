@@ -104,16 +104,26 @@ function AppendTab(p) { // tab: chrome tab object, ParentId: int or string, Inse
 	let tb = document.createElement("div"); tb.className =  ClassList; tb.id = p.tab.id; // TAB
 	let tbh = document.createElement("div"); tbh.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; tbh.id = "tab_header"+p.tab.id; if (!p.SkipSetEvents) {tbh.draggable = true;} tb.appendChild(tbh); // HEADER
 	let tbe = document.createElement("div"); tbe.className = "expand"; tbe.id = "exp"+p.tab.id; tbh.appendChild(tbe); // EXPAND ARROW
+	
+	
+	let tbc = document.createElement("div"); tbc.className = "tab_counter"; tbc.id = "tab_counter"+p.tab.id; tbh.appendChild(tbc); // TABS COUNTER
+	let tbcn = document.createElement("div"); tbcn.className = "counter_number"; tbcn.id = "counter_number"+p.tab.id; tbc.appendChild(tbcn); // TABS COUNTER NUMBER
+	
+	
 	let tbt = document.createElement("div"); tbt.className = "tab_title"; tbt.id = "tab_title"+p.tab.id; tbh.appendChild(tbt); // TITLE
+
 	let cl = undefined;
 	if (!opt.never_show_close) {
 		cl = document.createElement("div"); cl.className = "close"; cl.id = "close"+p.tab.id; tbh.appendChild(cl); // CLOSE BUTTON
 		let ci = document.createElement("div"); ci.className = "close_img"; ci.id = "close_img"+p.tab.id; cl.appendChild(ci);
 	}
 	let mi = document.createElement("div"); mi.className = "tab_mediaicon"; mi.id = "tab_mediaicon"+p.tab.id; tbh.appendChild(mi);
+	
+	
+	
 	let ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+p.tab.id; tb.appendChild(ct);
 	let di = document.createElement("div"); di.className = "drag_indicator"; di.id = "di"+p.tab.id; tb.appendChild(di); // DROP TARGET INDICATOR
-	
+
 	if (!p.SkipSetEvents) {
 		ct.onclick = function(event) {
 			if (event.target == this && event.which == 1) {
@@ -495,19 +505,21 @@ function CloseTabs(tabsIds) {
 	if (activeTab != null && tabsIds.indexOf(parseInt(activeTab.id)) != -1) {
 		SwitchActiveTabBeforeClose(tt.active_group);
 	}
-	tabsIds.forEach(function(tabId) {
-		let tab = document.getElementById(tabId);
-		if (tab.classList.contains("pin") && opt.allow_pin_close) {
-			tab.parentNode.removeChild(tab);
-			chrome.tabs.update(tabId, {pinned: false});
-			RefreshGUI();
-		}
-		if (tabId == tabsIds[tabsIds.length-1]) {
-			setTimeout(function() {
-				chrome.tabs.remove(tabsIds, null);
-			}, 10);
-		}
-	});
+	setTimeout(function() {
+		tabsIds.forEach(function(tabId) {
+			let tab = document.getElementById(tabId);
+			if (tab.classList.contains("pin") && opt.allow_pin_close) {
+				tab.parentNode.removeChild(tab);
+				chrome.tabs.update(tabId, {pinned: false});
+				// RefreshGUI();
+			}
+			if (tabId == tabsIds[tabsIds.length-1]) {
+				setTimeout(function() {
+					chrome.tabs.remove(tabsIds, null);
+				}, 10);
+			}
+		});
+	}, 200);
 }
 
 function DiscardTabs(tabsIds) {
@@ -532,7 +544,7 @@ function SwitchActiveTabBeforeClose(ActiveGroupId) {
 	}
 	let activeGroup = document.getElementById(ActiveGroupId);
 	
-	if (document.querySelectorAll("#"+ActiveGroupId+" .tab").length <= 1 && document.querySelector(".pin.active_tab") == null) { // CHECK IF CLOSING LAST TAB IN ACTIVE GROUP
+	if (document.querySelectorAll("#"+ActiveGroupId+" .tab").length < 2 && document.querySelector(".pin.active_tab") == null) { // CHECK IF CLOSING LAST TAB IN ACTIVE GROUP
 		
 		let pins = document.querySelectorAll(".pin");
 		
@@ -574,18 +586,18 @@ function SwitchActiveTabBeforeClose(ActiveGroupId) {
 			log("available tabs in current group, switching option is: "+opt.after_closing_active_tab);
 		}
 		
-		if (opt.after_closing_active_tab == "above") {
+		if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
 			ActivatePrevTab(true);
 		}
-		if (opt.after_closing_active_tab == "below") {
+		if (opt.after_closing_active_tab == "below" || opt.after_closing_active_tab == "below_seek_in_parent") {
 			ActivateNextTab(true);
 		}
-		if (opt.after_closing_active_tab == "above_seek_in_parent") {
-			ActivatePrevTabBeforeClose();
-		}
-		if (opt.after_closing_active_tab == "below_seek_in_parent") {
-			ActivateNextTabBeforeClose();
-		}
+		// if (opt.after_closing_active_tab == "above_seek_in_parent") {
+			// ActivatePrevTabBeforeClose();
+		// }
+		// if (opt.after_closing_active_tab == "below_seek_in_parent") {
+			// ActivateNextTabBeforeClose();
+		// }
 	}
 }
 

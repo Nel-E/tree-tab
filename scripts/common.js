@@ -22,6 +22,7 @@ let b = {
 	windows: {},
 	tabs: {},
 	tt_ids: {},
+	NewTabsQueue: [],
 	EmptyTabs: [],
 	newTabUrl: browserId == "F" ? "about:newtab" : "chrome://startpage/"
 };
@@ -57,6 +58,7 @@ const DefaultPreferences = {
 	append_child_tab_after_limit: "after",
 	append_orphan_tab: "bottom",
 	after_closing_active_tab: "below_seek_in_parent",
+	append_tab_from_toolbar: "group_root",
 	collapse_other_trees: false,
 	open_tree_on_hover: true,
 	promote_children: true,

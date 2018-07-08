@@ -108,7 +108,7 @@ function ShowFGroupMenu(GroupNode, event) {
 	HideMenus();
 	tt.menuItemNode = GroupNode;
 	
-	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_groups_hibernate, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #separator_gtbcl, #menu_group_tabs_close, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_groups_hibernate, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
 		s.style.display = "";
 	});
 	if (tt.menuItemNode.id == "tab_list") {
@@ -630,6 +630,20 @@ function SetMenu() {
 						tabsArr.push(parseInt(s.id));
 					});
 					DiscardTabs(tabsArr);					
+					HideMenus();
+				}
+			}				
+		}
+		
+		if (m.id == "menu_group_tabs_close") {
+			m.onmousedown = function(event) {
+				if (event.which == 1) {
+					event.stopPropagation();
+					let tabsArr = [];
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s){
+						tabsArr.push(parseInt(s.id));
+					});
+					CloseTabs(tabsArr);					
 					HideMenus();
 				}
 			}				

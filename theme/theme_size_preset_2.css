@@ -35,4 +35,11 @@ body {
 	
 	--tab_mediaicon_height: 10px;
 	--tab_mediaicon_width: 10px;
+
+	--counter_height: 6px;
+	--counter_left: 24px;
+	/* --counter_left: 1px; */
+	--counter_top: 1px;
+	--counter_font_size: 8px;
+	--counter_number_top: -2px;
 }

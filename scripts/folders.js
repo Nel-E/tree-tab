@@ -27,6 +27,10 @@ function AppendFolder(folderId, Name, ParentId, Expand, SetEvents, AdditionalCla
 		let fd = document.createElement("div"); fd.className = ClassList;  if (Expand) { fd.className += Expand }  fd.id = folderId; // FOLDER
 		let fh = document.createElement("div"); fh.className = (opt.always_show_close && !opt.never_show_close) ? "folder_header close_show" : "folder_header"; fh.id = "folder_header"+folderId; if (SetEvents) {fh.draggable = true;} fd.appendChild(fh); // HEADER
 		let ex = document.createElement("div"); ex.className = "folder_icon"; ex.id = "fop"+folderId; fh.appendChild(ex);
+		let ftbc = document.createElement("div"); ftbc.className = "folder_counter"; ftbc.id = "folder_counter"+folderId; fh.appendChild(ftbc); // TABS COUNTER
+		let fbcn = document.createElement("div"); fbcn.className = "counter_number"; fbcn.id = "counter_number"+folderId; ftbc.appendChild(fbcn); // TABS COUNTER NUMBER
+
+
 		let ft = document.createElement("div"); ft.className = "folder_title"; ft.id = "folder_title"+folderId; ft.textContent = Name; fh.appendChild(ft); // TITLE
 		let cf = document.createElement("div"); cf.className = "children_folders"; cf.id = "cf"+folderId; fd.appendChild(cf);
 		let ct = document.createElement("div"); ct.className = "children_tabs"; ct.id = "ct"+folderId; fd.appendChild(ct);

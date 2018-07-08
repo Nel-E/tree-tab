@@ -138,6 +138,13 @@ function StartSidebarListeners() {
 			}	
 		
 			if (message.command == "tab_created") {
+				
+				if (message.InsertAfterId && document.querySelectorAll("#"+tt.active_group+" .tab").length == 0) {
+					message.InsertAfterId = undefined;
+					message.ParentId = tt.active_group;
+				}
+				
+				
 				AppendTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
 				
 				RefreshExpandStates();
