@@ -104,7 +104,8 @@ let tt = {
 	menuItemNode: undefined,
 	SearchIndex: 0,
 	DragOverTimer: undefined,
-	AutoSaveSession: undefined
+	AutoSaveSession: undefined,
+	pressed_keys: []
 };
 
 // GLOBAL FUNCTIONS

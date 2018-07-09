@@ -421,6 +421,12 @@
 	"options_append_orphan_tab_as_child": {
 		"message": "treat as active's tab child"
 	},
+	"options_append_orphan_tab_active_parent_top": {
+		"message": "at the same level as active tab, but on top"
+	},
+	"options_append_orphan_tab_active_parent_bottom": {
+		"message": "at the same level as active tab, but on bottom"
+	},
 	
 	"options_toolbar_new_tab": {
 		"message": "Toolbar + (new tab button) should append tab"

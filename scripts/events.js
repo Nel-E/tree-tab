@@ -27,23 +27,34 @@ function SetEvents() {
 		}
 	}
 
-	document.oncontextmenu = function (event) {
-		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
-			event.preventDefault();
-			event.stopPropagation();
-			return false;
-		}
-	};
-
-	window.addEventListener('contextmenu', function (event) {
-		if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
-			event.preventDefault();
-			event.stopPropagation();
-			return false;
-		}
-	}, false);
-
+	// document.oncontextmenu = function (event) {
+		// if (!event.ctrlKey && event.target.classList.contains("text_input") == false) {
+			// event.preventDefault();
+			// event.stopPropagation();
+			// return false;
+		// }
+	// };
+	if (opt.debug == false) {
+		window.addEventListener('contextmenu', function (event) {
+			if (event.target.classList.contains("text_input") == false) {
+				event.preventDefault();
+				event.stopPropagation();
+				event.stopImmediatePropagation();
+				return false;
+			}
+		}, false);
+		
+		document.getElementById("body").addEventListener('contextmenu', function (event) {
+			if (event.target.classList.contains("text_input") == false) {
+				event.preventDefault();
+				event.stopPropagation();
+				event.stopImmediatePropagation();
+				return false;
+			}
+		}, false);
+	}
 	
+
 	document.body.onresize = function(event) {
 		RefreshGUI();
 	}
@@ -209,11 +220,24 @@ function SetEvents() {
 		}
 
 		// new folder
-		if (event.which == 192 && event.which == 70 && event.which == 69) {
-			let FolderId = AddNewFolder({SetEvents: true});
-			ShowRenameFolderDialog(FolderId);
+		if (event.which == 192 || event.which == 69 || event.which == 70) {
+			if (tt.pressed_keys.indexOf(event.which) == -1) {
+				tt.pressed_keys.push(event.which);
+			}
+			
+			if (tt.pressed_keys.indexOf(192) != -1 && tt.pressed_keys.indexOf(69) != -1 && tt.pressed_keys.indexOf(70) != -1) {
+				let FolderId = AddNewFolder({SetEvents: true});
+				ShowRenameFolderDialog(FolderId);
+			}
 		}
+
 		RefreshGUI();
+	}
+	
+	document.body.onkeyup = function(event) {
+		if (tt.pressed_keys.indexOf(event.which) != -1) {
+			tt.pressed_keys.splice(tt.pressed_keys.indexOf(event.which), 1);
+		}
 	}
 
 	

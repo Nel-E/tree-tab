@@ -586,18 +586,18 @@ function SwitchActiveTabBeforeClose(ActiveGroupId) {
 			log("available tabs in current group, switching option is: "+opt.after_closing_active_tab);
 		}
 		
-		if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
+		if (opt.after_closing_active_tab == "above") {
 			ActivatePrevTab(true);
 		}
-		if (opt.after_closing_active_tab == "below" || opt.after_closing_active_tab == "below_seek_in_parent") {
+		if (opt.after_closing_active_tab == "below") {
 			ActivateNextTab(true);
 		}
-		// if (opt.after_closing_active_tab == "above_seek_in_parent") {
-			// ActivatePrevTabBeforeClose();
-		// }
-		// if (opt.after_closing_active_tab == "below_seek_in_parent") {
-			// ActivateNextTabBeforeClose();
-		// }
+		if (opt.after_closing_active_tab == "above_seek_in_parent") {
+			ActivatePrevTabBeforeClose();
+		}
+		if (opt.after_closing_active_tab == "below_seek_in_parent") {
+			ActivateNextTabBeforeClose();
+		}
 	}
 }
 

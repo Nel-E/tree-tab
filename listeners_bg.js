@@ -616,22 +616,38 @@ function OnMessageTabCreated(tabId, activeTabId) {
 						append = true;
 					} else {
 						
-						if (opt.append_orphan_tab == "after_active") {
+						if (opt.append_orphan_tab == "after_active" || opt.append_orphan_tab == "active_parent_top" || opt.append_orphan_tab == "active_parent_bottom") {
 							
 							if (b.windows[NewTab.windowId] && b.windows[NewTab.windowId].activeTabId) {
 								if (b.tabs[activeTabId]) {
 									
 									let ActiveSiblings = GetChildren(b.tabs[activeTabId].parent);
 									b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
-									for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
-										b.tabs[ActiveSiblings[i]].index += 1;
+									
+									if (opt.append_orphan_tab == "after_active") {
+										for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
+											b.tabs[ActiveSiblings[i]].index += 1;
+										}
+										b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
+										AfterId = activeTabId;	
 									}
-									b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
+									if (opt.append_orphan_tab == "active_parent_top") {
+										for (let i = 0; i < ActiveSiblings.length; i++) { // shift next siblings indexes
+											b.tabs[ActiveSiblings[i]].index += 1;
+										}
+										b.tabs[NewTab.id].index = 0;
+										ParentId = b.tabs[NewTab.id].parent;
+									}
+									if (opt.append_orphan_tab == "active_parent_bottom") {
+										b.tabs[NewTab.id].index = b.tabs[ActiveSiblings[ActiveSiblings.length-1]].index+1;
+										ParentId = b.tabs[NewTab.id].parent;
+										append = true;
+									}
+									
 									if (browserId == "F"){
 										b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
 									}
 									
-									AfterId = activeTabId;	
 									
 								} else { // FAIL, no active tab!
 									let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
@@ -707,7 +723,6 @@ function OnMessageTabCreated(tabId, activeTabId) {
 		});
 
 	} else {
-		console.log("tab_created in queue");
 		setTimeout(function() {
 			OnMessageTabCreated(tabId, activeTabId);
 		}, 100);
