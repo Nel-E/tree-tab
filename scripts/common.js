@@ -2,130 +2,277 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-// GLOBAL VARIABLES
-let browserId = navigator.userAgent.match("Opera|OPR") !== null ? "O" : (navigator.userAgent.match("Vivaldi") !== null ? "V" : (navigator.userAgent.match("Firefox") !== null ? "F" : "C" ))
-let opt = {};
-
-let labels = {
-	clear_filter: chrome.i18n.getMessage("caption_clear_filter"),
-	loading: chrome.i18n.getMessage("caption_loading"),
-	searchbox: chrome.i18n.getMessage("caption_searchbox"),
-	ungrouped_group: chrome.i18n.getMessage("caption_ungrouped_group"),
-	noname_group: chrome.i18n.getMessage("caption_noname_group")
-};
-
-// BACKGROUND VARIABLES
-let b = {
-	debug: [],
-	running: false,
-	schedule_save: -999,
-	windows: {},
-	tabs: {},
-	tt_ids: {},
-	NewTabsQueue: [],
-	EmptyTabs: [],
-	newTabUrl: browserId == "F" ? "about:newtab" : "chrome://startpage/"
-};
-
-// DEFAULTS NEEDED FOR START AND FOR OPTIONS PAGE
-const DefaultToolbar = {
-	toolbar_main: ["button_new", "button_pin", "button_undo", "button_search", "button_tools", "button_groups", "button_backup", "button_folders"],
-	toolbar_search: ["button_filter_type", "filter_search_go_prev", "filter_search_go_next"],
-	toolbar_shelf_tools: (browserId == "F" ? ["button_manager_window", "button_options", "button_unload", "button_detach", "button_reboot"] : ["button_manager_window", "button_options", "button_bookmarks", "button_downloads", "button_history", "button_settings", "button_extensions", "button_unload", "button_detach", "button_reboot"]),
-	toolbar_shelf_groups: ["button_groups_toolbar_hide", "button_new_group", "button_remove_group", "button_edit_group", "button_import_group", "button_export_group"],
-	toolbar_shelf_backup: (browserId == "F" ? ["button_import_bak", "button_import_merge_bak", "button_export_bak"] : ["button_import_bak", "button_import_merge_bak", "button_export_bak", "button_load_bak1", "button_load_bak2", "button_load_bak3"]),
-	toolbar_shelf_folders: ["button_new_folder", "button_remove_folder", "button_edit_folder"]
-};
-
-const DefaultTheme = {
-	ToolbarShow: true,
-	ColorsSet: {},
-	TabsSizeSetNumber: 2,
-	TabsMargins: "2",
-	theme_name: "untitled",
-	theme_version: 4
-};
-
-const DefaultPreferences = {
-	hide_other_groups_tabs_firefox: false,
-	show_toolbar: true,
-	skip_load: false,
-	pin_list_multi_row: true,
-	always_show_close: false,
-	never_show_close: false,
-	allow_pin_close: false,
-	append_child_tab: "bottom",
-	append_child_tab_after_limit: "after",
-	append_orphan_tab: "bottom",
-	after_closing_active_tab: "below_seek_in_parent",
-	append_tab_from_toolbar: "group_root",
-	collapse_other_trees: false,
-	open_tree_on_hover: true,
-	promote_children: true,
-	promote_children_in_first_child: true,
-	max_tree_depth: -1,
-	max_tree_drag_drop: true,
-	max_tree_drag_drop_folders: false,
-	switch_with_scroll: false,
-	syncro_tabbar_tabs_order: true,
-	show_counter_groups: true,
-	show_counter_tabs: true,
-	show_counter_tabs_hints: true,
-	groups_toolbar_default: true,
-	syncro_tabbar_groups_tabs_order: true,
-	midclick_tab: "close_tab",
-	dbclick_tab: "new_tab",
-	dbclick_group: "new_tab",
-	// dbclick_group_bar: "new_group",
-	midclick_group: "nothing",
-	midclick_folder: "nothing",
-	dbclick_folder: "rename_folder",
-	debug: false,
-	orphaned_tabs_to_ungrouped: false,
-	tab_group_regexes: [],
-	move_tabs_on_url_change: "never",
-	autosave_max_to_keep: 5,
-	autosave_interval: 15
-};
-
-// SIDEBAR VARIABLES
-// let active_group = "tab_list";
-
-let tt = {
-	CurrentWindowId: 0,
-	active_group: "tab_list",
-	groups: {},
-	folders: {},
-	schedule_update_data: 0,
-	schedule_rearrange_tabs: 0,
-	DragNodeClass: "",
-	DragTreeDepth: 0,
-	DragOverId: "",
-	menuItemNode: undefined,
-	SearchIndex: 0,
-	DragOverTimer: undefined,
-	AutoSaveSession: undefined,
-	pressed_keys: []
-};
-
-// GLOBAL FUNCTIONS
-function GenerateRandomID(){
-	let letters = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","K","L","M","N","O","P","R","S","T","Q","U","V","W","Y","Z","a","b","c","d","e","f","g","h","i","k","l","m","n","o","p","r","s","t","q","u","v","w","y","z"];
-	let random = ""; for (let letter = 0; letter < 6; letter++ ) {random += letters[Math.floor(Math.random() * letters.length)];} return random;
+function HideRenameDialogs() {
+	document.querySelectorAll(".edit_dialog").forEach(function(s) {
+		s.style.display = "none";
+		s.style.top = "-500px";
+		s.style.left = "-500px";
+	});
 }
 
-function GetCurrentPreferences(storage) {
-	opt = Object.assign({}, DefaultPreferences);
-	if (storage["preferences"]) {
-		for (let parameter in storage["preferences"]) {
-			if (opt[parameter] != undefined) {
-				opt[parameter] = storage["preferences"][parameter];
+function EventExpandBox(Node) {
+	if (Node.classList.contains("o")) {
+		Node.classList.remove("o");
+		Node.classList.add("c");
+		
+		if (Node.classList.contains("tab")) {
+			chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "c" } });
+		}
+		
+		if (Node.classList.contains("folder")) {
+			SaveFolders();
+		}
+		
+	} else {
+		if (Node.classList.contains("c")) {
+			if (opt.collapse_other_trees) {
+				let thisTreeTabs = GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
+				let thisTreeFolders = GetParentsByClass(Node.childNodes[0], "folder"); 
+				document.querySelectorAll("#"+tt.active_group+" .o.tab").forEach(function(s) {
+					s.classList.remove("o");
+					s.classList.add("c");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "c" } });
+				});
 				
-				// legacy, changed from "after_active" to "after", because it is a parent tab, not necessarily an active tab
-				if (parameter == "append_child_tab" && storage["preferences"][parameter] == "after_active") {
-					opt[parameter] = "after";
+				document.querySelectorAll("#"+tt.active_group+" .o.folder").forEach(function(s) {
+					s.classList.remove("o");
+					s.classList.add("c");
+				});
+				thisTreeTabs.forEach(function(s) {
+					s.classList.remove("c");
+					s.classList.add("o");
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(s.id), tab: { expand: "o" } });
+				});
+				thisTreeFolders.forEach(function(s) {
+					s.classList.remove("c");
+					s.classList.add("o");
+				});
+				SaveFolders();
+				if (Node.classList.contains("tab")) {
+					ScrollToTab(Node.id);
 				}
+			} else {
+				Node.classList.remove("c");
+				Node.classList.add("o");
+				
+				if (Node.classList.contains("tab")) {
+					chrome.runtime.sendMessage({ command: "update_tab", tabId: parseInt(Node.id), tab: { expand: "o" } });
+				}
+				
+				if (Node.classList.contains("folder")) {
+					SaveFolders();
+				}
+				
 			}
 		}
 	}
 }
+
+function GetSelectedFolders() {
+	
+	if (opt.debug) {
+		log("f: GetSelectedFolders");
+	}
+	
+	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
+	document.querySelectorAll("#"+tt.active_group+" .selected").forEach(function(s) {
+		res.FoldersSelected.push(s.id);
+		res.Folders[s.id] = Object.assign({}, tt.folders[s.id]);
+		let Fchildren = document.querySelectorAll("#cf"+s.id+" .folder");
+		Fchildren.forEach(function(fc) {
+			res.Folders[fc.id] = Object.assign({}, tt.folders[fc.id]);
+		});
+		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
+		Tchildren.forEach(function(tc) {
+			res.TabsIds.push(parseInt(tc.id));
+			res.TabsIdsParents.push(tc.parentNode.id);
+		});
+	});
+	return res;
+}
+
+function GetSelectedTabs() {
+	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
+	document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
+		res.TabsIds.push(parseInt(s.id));
+		res.TabsIdsParents.push(s.parentNode.id);
+		res.TabsIdsSelected.push(parseInt(s.id));
+		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
+		Tchildren.forEach(function(tc) {
+			res.TabsIds.push(parseInt(tc.id));
+			res.TabsIdsParents.push(tc.parentNode.id);
+		});
+	});
+	return res;
+}
+
+function Select(event, TabNode) {
+	if (event.shiftKey) { // SET SELECTION WITH SHIFT
+		let LastSelected = document.querySelector("#"+tt.active_group+" .selected.selected_last");
+		if (LastSelected == null) {
+			LastSelected = document.querySelector(".pin.active_tab, #"+tt.active_group+" .tab.active_tab");
+		}
+		if (LastSelected != null && TabNode.parentNode.id == LastSelected.parentNode.id) {
+
+			if (!event.ctrlKey) {
+				document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
+					s.classList.remove("selected_frozen");
+					s.classList.remove("selected_temporarly");
+					s.classList.remove("selected");
+					s.classList.remove("selected_last");
+				});
+			}
+			let ChildrenArray = Array.from(TabNode.parentNode.children);
+			let activeTabIndex = ChildrenArray.indexOf(LastSelected);
+			let thisTabIndex = ChildrenArray.indexOf(TabNode);
+			let fromIndex = thisTabIndex >= activeTabIndex ? activeTabIndex : thisTabIndex;
+			let toIndex = thisTabIndex >= activeTabIndex ? thisTabIndex : activeTabIndex;
+			for (let i = fromIndex; i <= toIndex; i++) {
+				LastSelected.parentNode.childNodes[i].classList.add("selected");
+				if (i == toIndex && event.ctrlKey) {
+					LastSelected.parentNode.childNodes[i].classList.add("selected_last");
+				}
+			}
+		}
+	}
+	if (event.ctrlKey && !event.shiftKey) { // TOGGLE SELECTION WITH CTRL
+		TabNode.classList.toggle("selected");
+		if (TabNode.classList.contains("selected")) {
+			document.querySelectorAll(".selected_last").forEach(function(s) {
+				s.classList.remove("selected_last");
+			});
+			TabNode.classList.add("selected_last");
+		} else {
+			TabNode.classList.remove("selected_last");
+		}
+	}
+}
+
+function Deselect() {
+	document.querySelectorAll("#"+tt.active_group+" .selected").forEach(function(s) {
+		s.classList.remove("selected");
+	});
+}
+
+function FreezeSelection(all) {
+	if (all) {
+		document.querySelectorAll(".selected").forEach(function(s) {
+			s.classList.add("selected_frozen");
+			s.classList.remove("selected");
+			s.classList.remove("selected_last");
+		});
+	} else {
+		document.querySelectorAll(".group:not(#"+tt.active_group+") .selected").forEach(function(s) {
+			s.classList.add("selected_frozen");
+			s.classList.remove("selected");
+			s.classList.remove("selected_last");
+		});
+	}
+}
+
+function CleanUpDragClasses() {
+	if (opt.debug) {
+		log("f: CleanUpDragClasses, unfreezing and removing temporary classes...");
+	}
+	document.querySelectorAll(".selected_frozen").forEach(function(s) {
+		s.classList.add("selected");
+		s.classList.remove("selected_frozen");
+	});
+	document.querySelectorAll(".selected_temporarly").forEach(function(s) {
+		s.classList.remove("selected");
+		s.classList.remove("selected_temporarly");
+	});
+	document.querySelectorAll(".tab_header_hover").forEach(function(s) {
+		s.classList.remove("tab_header_hover");
+	});
+	document.querySelectorAll(".folder_header_hover").forEach(function(s) {
+		s.classList.remove("folder_header_hover");
+	});
+	document.querySelectorAll(".dragged_tree").forEach(function(s) {
+		s.classList.remove("dragged_tree");
+	});
+	// document.querySelectorAll(".dragged_parents").forEach(function(s) {
+		// s.classList.remove("dragged_parents");
+	// });
+}
+
+function RemoveHighlight() {
+	document.querySelectorAll(".highlighted_drop_target").forEach(function(s) {
+		s.classList.remove("before");
+		s.classList.remove("after");
+		s.classList.remove("inside");
+		s.classList.remove("highlighted_drop_target");
+	});
+}
+
+function RemoveHeadersHoverClass() {
+	document.querySelectorAll(".folder_header_hover, .tab_header_hover").forEach(function(s) {
+		s.classList.remove("folder_header_hover");
+		s.classList.remove("tab_header_hover");
+	});
+}
+
+function EmptyDragAndDrop() {
+	if (opt.debug) {
+		log("f: EmptyDragAndDrop and removing DragNodeClass...");
+	}
+	tt.DragNodeClass = "";
+	tt.DragTreeDepth = 0;
+	
+	tt.DraggingTab = false;
+	tt.DraggingFolder = false;
+	tt.DraggingPin = false;
+	
+}
+
+function DragOverTreeNodeBAAAAAAAAAAAAAAAK(Node, NodeClass, event) {
+	if (tt.DragNodeClass == "tree" && Node.parentNode.classList.contains("dragged_tree") == false) {
+		if (Node.parentNode.classList.contains("pin")) {
+			if (Node.parentNode.classList.contains("before") == false && event.layerX < Node.clientWidth/2) {
+				RemoveHighlight();
+				Node.parentNode.classList.remove("after");
+				Node.parentNode.classList.add("before");
+				Node.parentNode.classList.add("highlighted_drop_target");
+			}
+			if (Node.parentNode.classList.contains("after") == false && event.layerX >= Node.clientWidth/2) {
+				RemoveHighlight();
+				Node.parentNode.classList.remove("before");
+				Node.parentNode.classList.add("after");
+				Node.parentNode.classList.add("highlighted_drop_target");
+			}
+		} else {
+			let PDepth = (GetParentsByClass(Node, NodeClass)).length + tt.DragTreeDepth;
+			let PIsGroup = Node.parentNode.parentNode.parentNode.classList.contains("group");
+			let PIsDraggedParents = Node.parentNode.classList.contains("dragged_parents");
+			if (Node.parentNode.classList.contains("before") == false && event.layerY < Node.clientHeight/3 && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
+				RemoveHighlight();
+				Node.parentNode.classList.remove("inside");
+				Node.parentNode.classList.remove("after");
+				Node.parentNode.classList.add("before");
+				Node.parentNode.classList.add("highlighted_drop_target");
+			}
+			
+			
+			if (Node.parentNode.classList.contains("inside") == false && event.layerY > Node.clientHeight/3 && event.layerY <= 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth || opt.max_tree_depth < 0 || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
+				RemoveHighlight();
+				Node.parentNode.classList.remove("before");
+				Node.parentNode.classList.remove("after");
+				Node.parentNode.classList.add("inside");
+				Node.parentNode.classList.add("highlighted_drop_target");
+			}
+			
+			
+			if (Node.parentNode.classList.contains("after") == false && Node.parentNode.classList.contains("o") == false && event.layerY > 2*(Node.clientHeight/3) && (PDepth <= opt.max_tree_depth+1 || opt.max_tree_depth < 0 || PIsGroup || PIsDraggedParents || opt.max_tree_drag_drop == false)) {
+				RemoveHighlight();
+				Node.parentNode.classList.remove("inside");
+				Node.parentNode.classList.remove("before");
+				Node.parentNode.classList.add("after");
+				Node.parentNode.classList.add("highlighted_drop_target");
+			}
+			
+			
+			
+		}
+	}
+}
+

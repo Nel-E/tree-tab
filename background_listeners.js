@@ -229,16 +229,39 @@ function QuantumStartListeners() {
 		browser.sidebarAction.open();
 	});
 	chrome.tabs.onCreated.addListener(function(tab) {
+		if (b.windows[tab.windowId] == undefined) {
+			QuantumAppendWinTTId(tab.windowId);
+		}
 		let prevActiveTabId = b.windows[tab.windowId].activeTabId;
-		b.NewTabsQueue.push(tab.id);
 		let t = Promise.resolve(browser.sessions.getTabValue(tab.id, "TTdata")).then(function(TabData) {
 			if (TabData != undefined) {
 				b.tabs[tab.id] = Object.assign({}, TabData);
-				let originalParent = TabData.parent_ttid == "" ? undefined : (b.tt_ids[TabData.parent_ttid] ? b.tt_ids[TabData.parent_ttid] : TabData.parent_ttid);
-				chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tabId: tab.id, tab: tab, ParentId: originalParent, InsertAfterId: undefined, Append: undefined});
+				let originalParent = TabData.parent_ttid == "" ? (isNaN(TabData.parent) ? TabData.parent : undefined) : GetTabIdFromTTid(TabData.parent_ttid);
+				let AfterId = undefined;
+				let append = undefined;
+				if (originalParent) {
+					let originalParentChildren = GetChildren(b.tabs, originalParent);
+					if (TabData.index > 0 && TabData.index < originalParentChildren.length) {
+						for (let i = TabData.index+1; i < originalParentChildren.length; i++) { // shift next siblings indexes
+							b.tabs[originalParentChildren[i]].index += 1;
+						}
+						AfterId = originalParentChildren[TabData.index];	
+					}
+					if (TabData.index == 0) {
+						append = false;
+					}
+					if (TabData.index > originalParentChildren.length) {
+						append = true;
+					}
+				}
+				chrome.runtime.sendMessage({command: "tab_created", windowId: tab.windowId, tabId: tab.id, tab: tab, ParentId: originalParent, InsertAfterId: AfterId, Append: append});
 			} else {
 				QuantumAppendTabTTId(tab);
-				OnMessageTabCreated(tab.id, prevActiveTabId);
+				chrome.tabs.get(tab.id, function(NewTab) { // get tab again as reported tab's url is empty! Also for some reason firefox sends tab with "active == false" even if tab is active (THIS IS POSSIBLY A NEW BUG IN FF 60!)
+					if (NewTab) {
+						OnMessageTabCreated(NewTab, prevActiveTabId);
+					}
+				});
 			}
 		});
 	});
@@ -256,15 +279,16 @@ function QuantumStartListeners() {
 	});
 	
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+		let SiblingTabs = GetChildren(b.tabs, b.tabs[tabId].parent);
+		let SiblingFolders = GetChildren(b.windows[removeInfo.windowId].folders, b.tabs[tabId].parent);
+		UnshiftChildrenIndexes(SiblingTabs, b.tabs[tabId].index, SiblingFolders, removeInfo.windowId);
 		if (b.EmptyTabs.indexOf(tabId) != -1) {
 			b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
 		}
 		setTimeout(function() {
 			chrome.runtime.sendMessage({command: "tab_removed", windowId: removeInfo.windowId, tabId: tabId});
 		}, 5);
-		// setTimeout(function() {
-			// delete b.tabs[tabId];
-		// },60000);
+		delete b.tabs[tabId];
 		b.schedule_save++;
 	});
 	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -283,8 +307,10 @@ function QuantumStartListeners() {
 			}
 		}
 		if (changeInfo.url != undefined) { // if set to append when url changes and matches pre-set group
-			if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
-				AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
+			if (tab.pinned == false) {
+				if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
+					AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
+				}
 			}
 			if (changeInfo.url != b.newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
 				b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
@@ -335,7 +361,7 @@ function QuantumStartListeners() {
 		});
 	});
 	chrome.windows.onRemoved.addListener(function(windowId) {
-		// delete b.windows[windowId];
+		delete b.windows[windowId];
 		b.schedule_save++;
 	});
 	// chrome.sessions.onChanged.addListener(function(session) {
@@ -361,11 +387,17 @@ function QuantumStartListeners() {
 
 function ChromiumStartListeners() { // start all listeners
 	chrome.tabs.onCreated.addListener(function(tab) {
-		b.NewTabsQueue.push(tab.id);
+		if (b.windows[tab.windowId] == undefined) {
+			ChromiumAddWindowData(tab.windowId);
+		}
+		let prevActiveTabId = b.windows[tab.windowId].activeTabId;
 		ChromiumHashURL(tab);
-		OnMessageTabCreated(tab.id, b.windows[tab.windowId].activeTabId);
+		OnMessageTabCreated(tab, prevActiveTabId);
 	});
 	chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+		let SiblingTabs = GetChildren(b.tabs, b.tabs[tabId].parent);
+		let SiblingFolders = GetChildren(b.windows[removeInfo.windowId].folders, b.tabs[tabId].parent);
+		UnshiftChildrenIndexes(SiblingTabs, b.tabs[tabId].index, SiblingFolders, removeInfo.windowId);
 		if (b.EmptyTabs.indexOf(tabId) != -1) {
 			b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
 		}
@@ -397,8 +429,10 @@ function ChromiumStartListeners() { // start all listeners
 			b.schedule_save++;
 		}
 		if (changeInfo.url != undefined) { // if set to append when url changes and matches pre-set group
-			if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
-				AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
+			if (tab.pinned == false) {
+				if (opt.move_tabs_on_url_change == "always" || ((opt.move_tabs_on_url_change == "from_empty" || opt.move_tabs_on_url_change == "from_empty_b") && b.EmptyTabs.indexOf(tabId) != -1)) {
+					AppendTabToGroupOnRegexMatch(tabId, tab.windowId, changeInfo.url);
+				}
 			}
 			if (changeInfo.url != b.newTabUrl && b.EmptyTabs.indexOf(tabId) != -1) {
 				b.EmptyTabs.splice(b.EmptyTabs.indexOf(tabId), 1);
@@ -449,246 +483,283 @@ function ChromiumStartListeners() { // start all listeners
 	chrome.runtime.onSuspend.addListener(function() {
 		b.running = false;
 	});
-}	
+}
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////    NEW TAB    //////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
-function OnMessageTabCreated(tabId, activeTabId) {
-	if (b.NewTabsQueue.length > 0 && b.NewTabsQueue[0] == tabId) {
-		chrome.tabs.get(tabId, function(NewTab) { // get tab again as reported tab's url is empty! Also for some reason firefox sends tab with "active == false" even if tab is active (THIS IS POSSIBLY A NEW BUG IN FF 60!)
 
-			let ParentId;
-			let AfterId;
-			let append;
-			
-			if (b.windows[NewTab.windowId] && NewTab.active) {
-				b.windows[NewTab.windowId].groups[b.windows[NewTab.windowId].active_group].active_tab = NewTab.id;
-			}
 
-			if (NewTab.url == b.newTabUrl) {
-				b.EmptyTabs.push(tabId);
-			}
+// async function OnMessageTabCreated(NewTab, activeTabId) {
+function OnMessageTabCreated(NewTab, activeTabId) {
+	let ParentId;
+	let AfterId;
+	let append;
+	
+	if (b.windows[NewTab.windowId] && NewTab.active) {
+		b.windows[NewTab.windowId].groups[b.windows[NewTab.windowId].active_group].active_tab = NewTab.id;
+	}
 
-			if (NewTab.pinned) {
-				let PinTabs = GetChildren("pin_list");
-				b.tabs[NewTab.id].parent = "pin_list";
-				if (browserId == "F") {
-					b.tabs[NewTab.id].parent_ttid = "";
-				}
-				for (let i = PinTabs.indexOf(NewTab.openerTabId)+1; i < PinTabs.length; i++) { // shift next siblings indexes
-					b.tabs[PinTabs[i]].index += 1;
-				}
+	if (NewTab.url == b.newTabUrl) {
+		b.EmptyTabs.push(NewTab.id);
+	}
+
+	if (NewTab.pinned) {
+		let PinTabs = GetChildren(b.tabs, "pin_list");
+		b.tabs[NewTab.id].parent = "pin_list";
+		if (browserId == "F") {
+			b.tabs[NewTab.id].parent_ttid = "";
+		}
+		if (opt.append_pinned_tab == "after") {
+			if (NewTab.openerTabId && b.tabs[NewTab.openerTabId]) { // has opener tab case
+				ShiftChildrenIndexes(PinTabs, b.tabs[NewTab.openerTabId].index, [], NewTab.windowId);
 				b.tabs[NewTab.id].index = NewTab.index;
+				AfterId = NewTab.openerTabId;
+			} else {
+				if (b.tabs[activeTabId]) { // after active case
+					ShiftChildrenIndexes(PinTabs, b.tabs[activeTabId].index, [], NewTab.windowId);
+					AfterId = activeTabId;
+				}
+			}
+		}
+		if (opt.append_pinned_tab == "first") { // as first
+			ShiftChildrenIndexes(PinTabs, -1, [], NewTab.windowId);
+			b.tabs[NewTab.id].index = 0;
+			append = false;
+		}
+		if (opt.append_pinned_tab == "last") { // as last
+			b.tabs[NewTab.id].index = PinTabs.length;
+			append = true;
+		}
+	} else {
 		
+		if (opt.append_orphan_tab == "as_child" && opt.orphaned_tabs_to_ungrouped == false) {
+			NewTab.openerTabId = activeTabId;
+		}					
+		
+		if (NewTab.openerTabId) { // child case
+		
+				// console.log(b.windows[NewTab.windowId].folders);
+		
+			let OpenerSiblingTabs = GetChildren(b.tabs, b.tabs[NewTab.openerTabId].parent);
+			let OpenerSiblingFolders = GetChildren(b.windows[NewTab.windowId].folders, b.tabs[NewTab.openerTabId].parent);
+			
+				// console.log("OpenerSiblingTabs");
+				// console.log(OpenerSiblingTabs);
+				// console.log("OpenerSiblingFolders");
+				// console.log(OpenerSiblingFolders);
+
+			if (opt.append_child_tab == "after") { // place tabs flat without automatic tree
+				b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
+				if (browserId == "F") {
+					b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
+				}
+				
+				
+				ShiftChildrenIndexes(OpenerSiblingTabs, b.tabs[NewTab.openerTabId].index, OpenerSiblingFolders, NewTab.windowId);
+				
+				// for (let i = OpenerSiblingTabs.indexOf(NewTab.openerTabId)+1; i < OpenerSiblingTabs.length; i++) { // shift next siblings indexes
+				// for (let i = 0; i < OpenerSiblingTabs.length; i++) { // shift next siblings indexes
+					// if (  b.tabs[OpenerSiblingTabs[i]].index              >      OpenerSiblingTabs ) {
+						// b.tabs[OpenerSiblingTabs[i]].index += 1;
+					// }
+				// }
+				
+						// console.log("JUST after");
+				
+				
+				b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
+				AfterId = NewTab.openerTabId;
+				
 			} else {
 				
-				if (opt.append_orphan_tab == "as_child" && opt.orphaned_tabs_to_ungrouped == false) {
-					NewTab.openerTabId = activeTabId;
-				}					
-				
-				if (NewTab.openerTabId) { // child case
-				
-					let OpenerSiblings = GetChildren(b.tabs[NewTab.openerTabId].parent);
+				if (opt.max_tree_depth == 0) { // place tabs flat if limit is set to 0
 
-					if (opt.append_child_tab == "after") { // place tabs flat
-						b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-						if (browserId == "F") {
-							b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
-						}
-						for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-							b.tabs[OpenerSiblings[i]].index += 1;
-						}
+					b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
+					if (browserId == "F") {
+						b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
+					}
+
+					if (opt.append_child_tab_after_limit == "after") { // max tree depth, place tab after parent
+					
+						// for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
+							// b.tabs[OpenerSiblings[i]].index += 1;
+						// }
+						
+						ShiftChildrenIndexes(OpenerSiblingTabs, b.tabs[NewTab.openerTabId].index, OpenerSiblingFolders, NewTab.windowId);
+					// console.log("0 and append_child_tab_after_limit is after");
 						b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
 						AfterId = NewTab.openerTabId;
+					}
+					
+					if (opt.append_child_tab_after_limit == "top" && opt.append_child_tab != "after") { // max tree depth, place tab on top (above parent)
+						ShiftChildrenIndexes(OpenerSiblingTabs, -1, OpenerSiblingFolders, NewTab.windowId);
+					
+						// for (let i = 0; i < OpenerSiblings.length; i++) { // shift all siblings indexes
+							// b.tabs[OpenerSiblings[i]].index += 1;
+						// }
 						
-					} else {
-						
-						if (opt.max_tree_depth == 0) { // place tabs flat if limit is set to 0
+						b.tabs[NewTab.id].index = 0;
+						ParentId = b.tabs[NewTab.id].parent;
+						append = false;
+					}
+					
+					if (opt.append_child_tab_after_limit == "bottom" && opt.append_child_tab != "after") { // max tree depth, place tab on bottom (below parent)
+						// if (OpenerSiblings.length > 0) {
+							// b.tabs[NewTab.id].index = b.tabs[OpenerSiblings[OpenerSiblings.length-1]].index+1;
+						// } else {
+							// b.tabs[NewTab.id].index = 1;
+						// }
+						// console.log(OpenerSiblingTabs.length);
+						b.tabs[NewTab.id].index = OpenerSiblingTabs.length + OpenerSiblingFolders.length;
+						ParentId = b.tabs[NewTab.id].parent;
+						append = true;
+					}
+					
+				} else {
 
+					let Parents = GetTabParents(NewTab.openerTabId, NewTab.windowId);
+					let OpenerChildren = GetChildren(b.tabs, NewTab.openerTabId);
+				
+					if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree on top and bottom
+
+						b.tabs[NewTab.id].parent = NewTab.openerTabId;
+						if (browserId == "F") {
+							b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].ttid;
+						}
+						
+						if (opt.append_child_tab == "top") { // place child tab at the top (reverse hierarchy)
+							
+							ShiftChildrenIndexes(OpenerSiblingTabs, -1, OpenerSiblingFolders, NewTab.windowId);
+							
+							// for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
+								// b.tabs[OpenerChildren[i]].index += 1;
+							// }
+							
+							
+							b.tabs[NewTab.id].index = 0;
+							ParentId = b.tabs[NewTab.id].parent;
+						}
+
+						if (opt.append_child_tab == "bottom") { // place child tab at the bottom
+							// if (OpenerChildren.length > 0) {
+								// b.tabs[NewTab.id].index = b.tabs[OpenerChildren[OpenerChildren.length-1]].index+1;
+							// } else {
+								// b.tabs[NewTab.id].index = 0;
+							// }
+
+							b.tabs[NewTab.id].index = OpenerSiblingTabs.length + OpenerSiblingFolders.length;
+							
+
+							ParentId = b.tabs[NewTab.id].parent;
+							append = true;
+						}
+
+					} else {
+
+						if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
+							
 							b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-							if (browserId == "F"){
+							if (browserId == "F") {
 								b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
 							}
 
-							if (opt.append_child_tab_after_limit == "after") { // max tree depth, place tab after parent
-								for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-									b.tabs[OpenerSiblings[i]].index += 1;
-								}
+							if (opt.append_child_tab_after_limit == "after") {  // tab will append after opener
+								ShiftChildrenIndexes(OpenerSiblingTabs, b.tabs[NewTab.openerTabId].index, OpenerSiblingFolders, NewTab.windowId);
+								// for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
+									// b.tabs[OpenerSiblings[i]].index += 1;
+								// }
 								b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
 								AfterId = NewTab.openerTabId;
 							}
-							
-							if (opt.append_child_tab_after_limit == "top" && opt.append_child_tab != "after") { // max tree depth, place tab on top (above parent)
-								for (let i = 0; i < OpenerSiblings.length; i++) { // shift all siblings indexes
-									b.tabs[OpenerSiblings[i]].index += 1;
-								}
+
+							if (opt.append_child_tab_after_limit == "top") { // tab will append on top
+								ShiftChildrenIndexes(OpenerSiblingTabs, -1, OpenerSiblingFolders, NewTab.windowId);
+								// for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
+									// b.tabs[OpenerChildren[i]].index += 1;
+								// }
 								b.tabs[NewTab.id].index = 0;
 								ParentId = b.tabs[NewTab.id].parent;
 							}
-							
-							if (opt.append_child_tab_after_limit == "bottom" && opt.append_child_tab != "after") { // max tree depth, place tab on bottom (below parent)
-								if (OpenerSiblings.length > 0) {
-									b.tabs[NewTab.id].index = b.tabs[OpenerSiblings[OpenerSiblings.length-1]].index+1;
-								} else {
-									b.tabs[NewTab.id].index = 1;
-								}
+
+							if (opt.append_child_tab_after_limit == "bottom") { // tab will append on bottom
+								// if (OpenerSiblings.length > 0) {
+									// b.tabs[NewTab.id].index = b.tabs[OpenerSiblings[OpenerSiblings.length-1]].index+1;
+								// } else {
+									// b.tabs[NewTab.id].index = 1;
+								// }
+								b.tabs[NewTab.id].index = OpenerSiblingTabs.length + OpenerSiblingFolders.length;
 								ParentId = b.tabs[NewTab.id].parent;
 								append = true;
 							}
 							
-						} else {
-
-							let Parents = GetTabParents(NewTab.openerTabId);
-							let OpenerChildren = GetChildren(NewTab.openerTabId);
-						
-							if (opt.max_tree_depth < 0 || (opt.max_tree_depth > 0 && Parents.length < opt.max_tree_depth)) { // append to tree on top and bottom
-
-								b.tabs[NewTab.id].parent = NewTab.openerTabId;
-								if (browserId == "F"){
-									b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].ttid;
-								}
-								
-								if (opt.append_child_tab == "top") { // place child tab at the top (reverse hierarchy)
-									for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
-										b.tabs[OpenerChildren[i]].index += 1;
-									}
-									b.tabs[NewTab.id].index = 0;
-									ParentId = b.tabs[NewTab.id].parent;
-								}
-
-								if (opt.append_child_tab == "bottom") { // place child tab at the bottom
-									if (OpenerChildren.length > 0) {
-										b.tabs[NewTab.id].index = b.tabs[OpenerChildren[OpenerChildren.length-1]].index+1;
-									} else {
-										b.tabs[NewTab.id].index = 0;
-									}
-									ParentId = b.tabs[NewTab.id].parent;
-									append = true;
-								}
-
-							} else {
-
-								if (opt.max_tree_depth > 0 && Parents.length >= opt.max_tree_depth) { // if reached depth limit of the tree
-									
-									b.tabs[NewTab.id].parent = b.tabs[NewTab.openerTabId].parent;
-									if (browserId == "F"){
-										b.tabs[NewTab.id].parent_ttid = b.tabs[NewTab.openerTabId].parent_ttid;
-									}
-
-									if (opt.append_child_tab_after_limit == "after") {  // tab will append after opener
-										for (let i = OpenerSiblings.indexOf(NewTab.openerTabId)+1; i < OpenerSiblings.length; i++) { // shift next siblings indexes
-											b.tabs[OpenerSiblings[i]].index += 1;
-										}
-										b.tabs[NewTab.id].index = b.tabs[NewTab.openerTabId].index+1;
-										AfterId = NewTab.openerTabId;
-									}
-
-									if (opt.append_child_tab_after_limit == "top") { // tab will append on top
-										for (let i = 0; i < OpenerChildren.length; i++) { // shift all siblings indexes
-											b.tabs[OpenerChildren[i]].index += 1;
-										}
-										b.tabs[NewTab.id].index = 0;
-										ParentId = b.tabs[NewTab.id].parent;
-									}
-
-									if (opt.append_child_tab_after_limit == "bottom") { // tab will append on bottom
-										if (OpenerSiblings.length > 0) {
-											b.tabs[NewTab.id].index = b.tabs[OpenerSiblings[OpenerSiblings.length-1]].index+1;
-										} else {
-											b.tabs[NewTab.id].index = 1;
-										}
-										ParentId = b.tabs[NewTab.id].parent;
-										append = true;
-									}
-									
-								}
-							}
-						}									
+						}
 					}
+				}									
+			}
 
-				} else { // orphan tab
+		} else { // orphan tab
+			
+			if (opt.orphaned_tabs_to_ungrouped == true) { // if set to append orphan tabs to ungrouped group
+				let TabListTabs = GetChildren(b.tabs, "tab_list");
+				// b.tabs[NewTab.id].index = b.tabs[TabListTabs[TabListTabs.length-1]].index+1;
+				b.tabs[NewTab.id].index = TabListTabs.length;
+				ParentId = "tab_list";
+				append = true;
+			} else {
+				
+				if (opt.append_orphan_tab == "after_active" || opt.append_orphan_tab == "active_parent_top" || opt.append_orphan_tab == "active_parent_bottom") {
 					
-					if (opt.orphaned_tabs_to_ungrouped == true) { // if set to append orphan tabs to ungrouped group
-						let TabListTabs = GetChildren("tab_list");
-						b.tabs[NewTab.id].index = b.tabs[TabListTabs[TabListTabs.length-1]].index+1;
-						ParentId = "tab_list";
-						append = true;
-					} else {
-						
-						if (opt.append_orphan_tab == "after_active" || opt.append_orphan_tab == "active_parent_top" || opt.append_orphan_tab == "active_parent_bottom") {
+					if (b.windows[NewTab.windowId] && b.windows[NewTab.windowId].activeTabId) {
+						if (b.tabs[activeTabId]) {
 							
-							if (b.windows[NewTab.windowId] && b.windows[NewTab.windowId].activeTabId) {
-								if (b.tabs[activeTabId]) {
-									
-									let ActiveSiblings = GetChildren(b.tabs[activeTabId].parent);
-									b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
-									
-									if (opt.append_orphan_tab == "after_active") {
-										for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
-											b.tabs[ActiveSiblings[i]].index += 1;
-										}
-										b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
-										AfterId = activeTabId;	
-									}
-									if (opt.append_orphan_tab == "active_parent_top") {
-										for (let i = 0; i < ActiveSiblings.length; i++) { // shift next siblings indexes
-											b.tabs[ActiveSiblings[i]].index += 1;
-										}
-										b.tabs[NewTab.id].index = 0;
-										ParentId = b.tabs[NewTab.id].parent;
-									}
-									if (opt.append_orphan_tab == "active_parent_bottom") {
-										b.tabs[NewTab.id].index = b.tabs[ActiveSiblings[ActiveSiblings.length-1]].index+1;
-										ParentId = b.tabs[NewTab.id].parent;
-										append = true;
-									}
-									
-									if (browserId == "F"){
-										b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
-									}
-									
-									
-								} else { // FAIL, no active tab!
-									let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
-									b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-									if (browserId == "F"){
-										b.tabs[NewTab.id].parent_ttid = "";
-									}
-									if (GroupTabs.length > 0) {
-										b.tabs[NewTab.id].index = b.tabs[GroupTabs[GroupTabs.length-1]].index+1;
-									} else {
-										b.tabs[NewTab.id].index = 0;
-									}
-									ParentId = b.windows[NewTab.windowId].active_group;
-								}
-							} else {
-								b.tabs[NewTab.id].parent = "tab_list";
-								if (browserId == "F"){
-									b.tabs[NewTab.id].parent_ttid = "";
-								}
-								b.tabs[NewTab.id].index = NewTab.index;
-								ParentId = "tab_list";
+							let OpenerSiblingTabs = GetChildren(b.tabs, b.tabs[activeTabId].parent);
+							let OpenerSiblingFolders = GetChildren(b.windows[NewTab.windowId].folders, b.tabs[activeTabId].parent);
+			
+							let ActiveSiblings = GetChildren(b.tabs, b.tabs[activeTabId].parent);
+							b.tabs[NewTab.id].parent = b.tabs[activeTabId].parent;
+							
+							if (opt.append_orphan_tab == "after_active") {
+								// for (let i = ActiveSiblings.indexOf(activeTabId)+1; i < ActiveSiblings.length; i++) { // shift next siblings indexes
+									// b.tabs[ActiveSiblings[i]].index += 1;
+								// }
+								
+								
+								ShiftChildrenIndexes(OpenerSiblingTabs, b.tabs[activeTabId].index, OpenerSiblingFolders, NewTab.windowId);
+								
+								b.tabs[NewTab.id].index = b.tabs[activeTabId].index+1;
+								AfterId = activeTabId;	
 							}
-						}
+							if (opt.append_orphan_tab == "active_parent_top") {
+								
+								ShiftChildrenIndexes(OpenerSiblingTabs, -1, OpenerSiblingFolders, NewTab.windowId);
 
-						if (opt.append_orphan_tab == "top") {
-							let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
-							b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-							if (browserId == "F"){
-								b.tabs[NewTab.id].parent_ttid = "";
+								
+								// for (let i = 0; i < ActiveSiblings.length; i++) { // shift next siblings indexes
+									// b.tabs[ActiveSiblings[i]].index += 1;
+								// }
+								b.tabs[NewTab.id].index = 0;
+								ParentId = b.tabs[NewTab.id].parent;
 							}
-							for (let i = 0; i < GroupTabs.length; i++) { // shift all tabs indexes in group
-								b.tabs[GroupTabs[i]].index += 1;
+							if (opt.append_orphan_tab == "active_parent_bottom") {
+								// b.tabs[NewTab.id].index = b.tabs[ActiveSiblings[ActiveSiblings.length-1]].index+1;
+								b.tabs[NewTab.id].index = OpenerSiblingTabs.length + OpenerSiblingFolders.length;
+								ParentId = b.tabs[NewTab.id].parent;
+								append = true;
 							}
-							b.tabs[NewTab.id].index = 0;
-							ParentId = b.windows[NewTab.windowId].active_group;
-						}
-
-						if (opt.append_orphan_tab == "bottom") {
-							let GroupTabs = GetChildren(b.windows[NewTab.windowId].active_group);
+							
+							if (browserId == "F") {
+								b.tabs[NewTab.id].parent_ttid = b.tabs[activeTabId].parent_ttid;
+							}
+							
+							
+						} else { // FAIL, no active tab!
+							let GroupTabs = GetChildren(b.tabs, b.windows[NewTab.windowId].active_group);
 							b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
-							if (browserId == "F"){
+							if (browserId == "F") {
 								b.tabs[NewTab.id].parent_ttid = "";
 							}
 							if (GroupTabs.length > 0) {
@@ -697,35 +768,58 @@ function OnMessageTabCreated(tabId, activeTabId) {
 								b.tabs[NewTab.id].index = 0;
 							}
 							ParentId = b.windows[NewTab.windowId].active_group;
-							append = true;
 						}
+					} else {
+						b.tabs[NewTab.id].parent = "tab_list";
+						if (browserId == "F") {
+							b.tabs[NewTab.id].parent_ttid = "";
+						}
+						b.tabs[NewTab.id].index = NewTab.index;
+						ParentId = "tab_list";
 					}
 				}
-				
-				if (opt.move_tabs_on_url_change === "all_new") {
-					setTimeout(function() {
-						chrome.tabs.get(NewTab.id, function(CheckTabsUrl) {
-							AppendTabToGroupOnRegexMatch(CheckTabsUrl.id, CheckTabsUrl.windowId, CheckTabsUrl.url);
-						});
-					}, 100);
+
+				if (opt.append_orphan_tab == "top") {
+					let GroupTabs = GetChildren(b.tabs, b.windows[NewTab.windowId].active_group);
+					b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
+					if (browserId == "F") {
+						b.tabs[NewTab.id].parent_ttid = "";
+					}
+					for (let i = 0; i < GroupTabs.length; i++) { // shift all tabs indexes in group
+						b.tabs[GroupTabs[i]].index += 1;
+					}
+					b.tabs[NewTab.id].index = 0;
+					ParentId = b.windows[NewTab.windowId].active_group;
+				}
+
+				if (opt.append_orphan_tab == "bottom") {
+					let GroupTabs = GetChildren(b.tabs, b.windows[NewTab.windowId].active_group);
+					b.tabs[NewTab.id].parent = b.windows[NewTab.windowId].active_group;
+					if (browserId == "F") {
+						b.tabs[NewTab.id].parent_ttid = "";
+					}
+					if (GroupTabs.length > 0) {
+						b.tabs[NewTab.id].index = b.tabs[GroupTabs[GroupTabs.length-1]].index+1;
+					} else {
+						b.tabs[NewTab.id].index = 0;
+					}
+					ParentId = b.windows[NewTab.windowId].active_group;
+					append = true;
 				}
 			}
-			setTimeout(function() {
-				b.schedule_save++;
-			}, 500);
-
-			chrome.runtime.sendMessage({command: "tab_created", windowId: NewTab.windowId, tabId: NewTab.id, tab: NewTab, ParentId: ParentId, InsertAfterId: AfterId, Append: append});
-
-			if (b.NewTabsQueue.indexOf(NewTab.id) != -1) {
-				b.NewTabsQueue.splice(b.NewTabsQueue.indexOf(NewTab.id), 1);
-			}
-			
-		});
-
-	} else {
-		setTimeout(function() {
-			OnMessageTabCreated(tabId, activeTabId);
-		}, 100);
+		}
 		
+		if (opt.move_tabs_on_url_change === "all_new" && NewTab.pinned == false) {
+			setTimeout(function() {
+				chrome.tabs.get(NewTab.id, function(CheckTabsUrl) {
+					AppendTabToGroupOnRegexMatch(CheckTabsUrl.id, CheckTabsUrl.windowId, CheckTabsUrl.url);
+				});
+			}, 100);
+		}
 	}
+	setTimeout(function() {
+		b.schedule_save++;
+	}, 500);
+
+	chrome.runtime.sendMessage({command: "tab_created", windowId: NewTab.windowId, tabId: NewTab.id, tab: NewTab, ParentId: ParentId, InsertAfterId: AfterId, Append: append});
 }

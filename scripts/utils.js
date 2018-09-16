@@ -2,7 +2,6 @@
 // Use of this source code is governed by a Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0) license
 // that can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/
 
-
 function RecheckFirefox() {
 	chrome.tabs.query({pinned: false, currentWindow: true}, function(tabs) {
 		if (tabs.length > 1) {
@@ -120,17 +119,30 @@ function InsterAfterNode(Node, AfterNode) {
 	}
 }
 
-function HideRenameDialogs() {
-	document.querySelectorAll(".edit_dialog").forEach(function(s){
-		s.style.display = "none";
-		s.style.top = "-500px";
-		s.style.left = "-500px";
-	});
+function PromoteChildrenToFirstChild(Node) {
+	let NewParent = Node.childNodes[1].firstChild.childNodes[1];
+	Node.childNodes[1].parentNode.parentNode.insertBefore(Node.childNodes[1].firstChild, Node.childNodes[1].parentNode);
+	while (Node.childNodes[1].firstChild) {
+		NewParent.appendChild(Node.childNodes[1].firstChild);
+	}
+}
+
+function GetAllParents(Node) {
+	let Parents = [];
+	let ParentNode = Node.parentNode;
+	while (ParentNode.parentNode != null) {
+		Parents.push(ParentNode.parentNode);
+		ParentNode = ParentNode.parentNode;
+	}
+	return Parents;
 }
 
 function GetParentsByClass(Node, Class) {
 	let Parents = [];
 	let ParentNode = Node;
+	if (ParentNode == null) {
+		return Parents;
+	}
 	while (ParentNode.parentNode != null) {
 		if (ParentNode.parentNode.classList != undefined && ParentNode.parentNode.classList.contains(Class)) {
 			Parents.push(ParentNode.parentNode);
@@ -153,11 +165,11 @@ function GetParentsBy2Classes(Node, ClassA, ClassB) {
 }
 
 // color in format "rgb(r,g,b)" or simply "r,g,b" (can have spaces, but must contain "," between values)
-function RGBtoHex(color){
-	color = color.replace(/[rgb(]|\)|\s/g, ""); color = color.split(","); return color.map(function(v){ return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
+function RGBtoHex(color) {
+	color = color.replace(/[rgb(]|\)|\s/g, ""); color = color.split(","); return color.map(function(v) { return ("0"+Math.min(Math.max(parseInt(v), 0), 255).toString(16)).slice(-2); }).join("");
 }
 
-function HexToRGB(hex, alpha){
+function HexToRGB(hex, alpha) {
 	hex = hex.replace('#', '');
 	let r = parseInt(hex.length == 3 ? hex.slice(0, 1).repeat(2) : hex.slice(0, 2), 16);
 	let g = parseInt(hex.length == 3 ? hex.slice(1, 2).repeat(2) : hex.slice(2, 4), 16);
@@ -165,50 +177,11 @@ function HexToRGB(hex, alpha){
 	if (alpha) { return 'rgba('+r+', '+g+', '+b+', '+alpha+')'; } else { return 'rgb('+r+', '+g+', '+b+')'; }
 }
 
-function GetSelectedFolders() {
-	
-	if (opt.debug) {
-		log("f: GetSelectedFolders");
-	}
-	
-	let res = {Folders: {}, FoldersSelected: [], TabsIds: [], TabsIdsParents: []};
-	document.querySelectorAll("#"+tt.active_group+" .selected_folder").forEach(function(s){
-		res.FoldersSelected.push(s.id);
-		res.Folders[s.id] = Object.assign({}, tt.folders[s.id]);
-		let Fchildren = document.querySelectorAll("#cf"+s.id+" .folder");
-		Fchildren.forEach(function(fc){
-			res.Folders[fc.id] = Object.assign({}, tt.folders[fc.id]);
-		});
-		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
-		Tchildren.forEach(function(tc){
-			res.TabsIds.push(parseInt(tc.id));
-			res.TabsIdsParents.push(tc.parentNode.id);
-		});
-	});
-	return res;
-}
-
-function GetSelectedTabs() {
-	let res = {TabsIds: [], TabsIdsParents: [], TabsIdsSelected: []};
-	document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
-		res.TabsIds.push(parseInt(s.id));
-		res.TabsIdsParents.push(s.parentNode.id);
-		res.TabsIdsSelected.push(parseInt(s.id));
-		let Tchildren = document.querySelectorAll("#ct"+s.id+" .tab");
-		Tchildren.forEach(function(tc){
-			res.TabsIds.push(parseInt(tc.id));
-			res.TabsIdsParents.push(tc.parentNode.id);
-		});
-	});
-	return res;
-}
-
-
 function FindTab(input) { // find and select tabs
 	let ButtonFilterClear = document.getElementById("button_filter_clear");
-	document.querySelectorAll(".filtered, .highlighted_search").forEach(function(s){
+	document.querySelectorAll(".filtered, .highlighted_search").forEach(function(s) {
 		s.classList.remove("filtered");
-		s.classList.remove("selected_tab");
+		s.classList.remove("selected");
 		s.classList.remove("selected_last");
 		s.classList.remove("highlighted_search");
 	})
@@ -244,18 +217,18 @@ function FindTab(input) { // find and select tabs
 		tabs.forEach(function(Tab) {
 			if (input == "*audible" || input == "*muted" || input == "*unloaded" || input == "*loaded") {
 				document.getElementById(Tab.id).classList.add("filtered");
-				document.getElementById(Tab.id).classList.add("selected_tab");
+				document.getElementById(Tab.id).classList.add("selected");
 			} else {
 				if (searchUrl) {
 					if (Tab.url.toLowerCase().match(input.toLowerCase())) {
 						document.getElementById(Tab.id).classList.add("filtered");
-						document.getElementById(Tab.id).classList.add("selected_tab");
+						document.getElementById(Tab.id).classList.add("selected");
 					}
 				}
 				if (searchTitle) {
 					if (Tab.title.toLowerCase().match(input.toLowerCase())) {
 						document.getElementById(Tab.id).classList.add("filtered");
-						document.getElementById(Tab.id).classList.add("selected_tab");
+						document.getElementById(Tab.id).classList.add("selected");
 					}
 				}
 			}
@@ -285,8 +258,8 @@ function Bookmark(rootNode) {
 					chrome.tabs.get(parseInt(rootNode.id), function(tab) {
 						if (tab) {
 							chrome.bookmarks.create({parentId: TreeTabsId, title: tab.title}, function(root) {
-								document.querySelectorAll("[id='"+rootNode.id+"'], [id='"+rootNode.id+"'] .tab").forEach(function(s){
-									chrome.tabs.get(parseInt(s.id), function(tab){
+								document.querySelectorAll("[id='"+rootNode.id+"'], [id='"+rootNode.id+"'] .tab").forEach(function(s) {
+									chrome.tabs.get(parseInt(s.id), function(tab) {
 										if (tab) {
 											chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
 										}
@@ -310,7 +283,7 @@ function Bookmark(rootNode) {
 						let foldersRefs = {};
 						
 						let folders = document.querySelectorAll("#cf"+rootNode.id+" .folder");
-						folders.forEach(function(s){
+						folders.forEach(function(s) {
 							if (tt.folders[s.id]) {
 								let ttId = s.id;
 								chrome.bookmarks.create({parentId: root.id, title: tt.folders[ttId].name}, function(Bkfolder) {
@@ -334,8 +307,8 @@ function Bookmark(rootNode) {
 													let BookmarkFolderId = foldersRefs[elem].id;
 													let BookmarkFolderParentId = foldersRefs[elem].parent;
 													chrome.bookmarks.move(BookmarkFolderId, {parentId: BookmarkFolderParentId}, function(BkFinalfolder) {
-														document.querySelectorAll("#ct"+foldersRefs[elem].ttid+" .tab").forEach(function(s){
-															chrome.tabs.get(parseInt(s.id), function(tab){
+														document.querySelectorAll("#ct"+foldersRefs[elem].ttid+" .tab").forEach(function(s) {
+															chrome.tabs.get(parseInt(s.id), function(tab) {
 																if (tab) {
 																	chrome.bookmarks.create({parentId: BkFinalfolder.id, title: tab.title, url: tab.url });
 																}
@@ -353,8 +326,8 @@ function Bookmark(rootNode) {
 							}
 						});
 						
-						document.querySelectorAll("#ct"+rootNode.id+" .tab").forEach(function(s){
-							chrome.tabs.get(parseInt(s.id), function(tab){
+						document.querySelectorAll("#ct"+rootNode.id+" .tab").forEach(function(s) {
+							chrome.tabs.get(parseInt(s.id), function(tab) {
 								if (tab) {
 									chrome.bookmarks.create({parentId: root.id, title: tab.title, url: tab.url });
 								}

@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
 ///////////////////////////    BACKGROUND FUNCTIONS    /////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 
-
 function pushlog(log) {
 	b.debug.push(log);
 	if (b.debug.length > 100) {
@@ -33,7 +32,6 @@ function pushlog(log) {
 	console.log(log);
 	b.schedule_save++;
 }
-
 
 function ReplaceParents(oldTabId, newTabId) {
 	for (let tabId in b.tabs) {
@@ -112,7 +110,7 @@ function GetTabGroupId(tabId, windowId) {
 	return groupId;
 }
 
-function GetTabParents(tabId) {
+function GetTabParents(tabId, windowId) {
 	let Parents = [];
 	if (tabId == undefined) {
 		return Parents;
@@ -120,34 +118,68 @@ function GetTabParents(tabId) {
 	if (b.tabs[tabId] == undefined) {
 		return Parents;
 	}
-	while (b.tabs[tabId].parent != "" && b.tabs[b.tabs[tabId].parent] != undefined) {
-		if (b.tabs[b.tabs[tabId].parent]) {
-			Parents.push(b.tabs[tabId].parent);
+	let parent = b.tabs[tabId].parent;
+	let escape = 9999;
+	while (escape > 0 && (b.tabs[parent] != undefined || b.windows[windowId].folders[parent])) {
+		if (b.tabs[parent]) {
+			Parents.push(parent);
+			parent = b.tabs[parent].parent;
+		} else {
+			if (b.windows[windowId].folders[parent]) {
+				Parents.push(parent);
+				parent = b.windows[windowId].folders[parent].parent;
+			}
 		}
-		tabId = b.tabs[tabId].parent;
+		escape--;
 	}
 	return Parents;
 }
 
-function GetChildren(parentId) {
+function GetChildren(TTObj, parentId) { // TTObj is b.tabs or b.windows[winId].folders
 	let Children = [];
-	for (let tId in b.tabs) {
-		if (b.tabs[tId].parent == parentId) {
-			Children.push(parseInt(tId));
+	for (let Id in TTObj) {
+		if (TTObj[Id].parent == parentId) {
+			// Children.push(parseInt(Id));
+			Children.push(Id);
 		}
 	}
-	for (let i = 0; i < Children.length-1; i++) {
-		for (let j = i+1; j < Children.length; j++) {
-			if (b.tabs[Children[i]].index > b.tabs[Children[j]].index) {
-				let swap = Children[i];
-				Children[i] = Children[j];
-				Children[j] = swap;
-			}
-		}
-	}
+	// for (let i = 0; i < Children.length-1; i++) {
+		// for (let j = i+1; j < Children.length; j++) {
+			// if (TTObj[Children[i]].index > TTObj[Children[j]].index) {
+				// let swap = Children[i];
+				// Children[i] = Children[j];
+				// Children[j] = swap;
+			// }
+		// }
+	// }
 	return Children;
 }
 
+function ShiftChildrenIndexes(TabsIdsArray, OpenerIndex, folderIdsArray, windowId) {
+	for (let i = 0; i < TabsIdsArray.length; i++) { // shift indexes of siblings tabs
+		if (b.tabs[TabsIdsArray[i]].index > OpenerIndex) {
+			b.tabs[TabsIdsArray[i]].index += 1;
+		}
+	}
+	for (let i = 0; i < folderIdsArray.length; i++) { // shift indexes of siblings folders
+		if (b.windows[windowId].folders[folderIdsArray[i]].index > OpenerIndex) {
+			b.windows[windowId].folders[folderIdsArray[i]].index += 1;
+		}
+	}
+}
+
+function UnshiftChildrenIndexes(TabsIdsArray, ClosedIndex, folderIdsArray, windowId) {
+	for (let i = 0; i < TabsIdsArray.length; i++) { // shift indexes of siblings tabs
+		if (b.tabs[TabsIdsArray[i]].index > ClosedIndex) {
+			b.tabs[TabsIdsArray[i]].index -= 1;
+		}
+	}
+	for (let i = 0; i < folderIdsArray.length; i++) { // shift indexes of siblings folders
+		if (b.windows[windowId].folders[folderIdsArray[i]].index > ClosedIndex) {
+			b.windows[windowId].folders[folderIdsArray[i]].index -= 1;
+		}
+	}
+}
 
 function AppendTabToGroupOnRegexMatch(tabId, windowId, url) {
 	let TabGroupId = GetTabGroupId(tabId, windowId);
@@ -162,10 +194,8 @@ function AppendTabToGroupOnRegexMatch(tabId, windowId, url) {
 					newGroupID = "g_"+GenerateRandomID();
 					for (let wId in b.windows) {
 						for (let gId in b.windows[wId].groups) {
-							console.log("check if group id exists");
 							if (gId == newGroupID) {
 								newGroupID = "";
-								console.log("yup, redo");
 							}
 						}
 					}
@@ -304,7 +334,7 @@ function QuantumLoadTabs(retry) {
 									}
 								}
 
-								if (opt.debug){ pushlog("QuantumLoadTabs, retry: "+retry); pushlog("Current windows count is: "+w.length); pushlog("Current tabs count is: "+tabs_count); pushlog("Matching tabs: "+tabs_matched); pushlog("Current windows:"); pushlog(w); }
+								if (opt.debug) { pushlog("QuantumLoadTabs, retry: "+retry); pushlog("Current windows count is: "+w.length); pushlog("Current tabs count is: "+tabs_count); pushlog("Matching tabs: "+tabs_matched); pushlog("Current windows:"); pushlog(w); }
 
 								// will try to find tabs for 3 times
 								if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count*0.5)) {
@@ -313,7 +343,7 @@ function QuantumLoadTabs(retry) {
 									QuantumStartListeners();
 									delete DefaultToolbar; delete DefaultTheme; delete DefaultPreferences;
 								} else {
-									if (opt.debug){
+									if (opt.debug) {
 										pushlog("Attempt "+retry+" failed, matched tabs was below 50%");
 									}
 									setTimeout(function() {
@@ -405,6 +435,15 @@ function QuantumAppendWinTTId(windowId) {
 	}
 	// if (b.schedule_save > 0) browser.sessions.setWindowValue( windowId, "TTdata", b.windows[windowId] );
 }
+
+function GetTabIdFromTTid(ttid) {
+	for (let tabId in b.tabs) {
+		if (b.tabs[tabId].ttid == ttid) {
+			return tabId;
+		}
+	}
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -534,7 +573,7 @@ function ChromiumLoadTabs(retry) {
 				}
 			}
 
-			if (opt.debug){
+			if (opt.debug) {
 				pushlog("ChromiumLoadTabs, retry: "+retry); pushlog("Current windows count is: "+w.length); pushlog("Saved windows count is: "+LoadedWindows.length); pushlog("Current tabs count is: "+CurrentTabsCount);
 				pushlog("Loaded tabs count is: "+LoadedTabsCount); pushlog("Matching tabs: "+tabs_matched); pushlog("Current windows:"); pushlog(w);
 			}
@@ -547,7 +586,7 @@ function ChromiumLoadTabs(retry) {
 				delete DefaultToolbar; delete DefaultTheme; delete DefaultPreferences;
 				b.schedule_save = -1; // 2 operations must be made to start saving data
 			} else {
-				if (opt.debug){
+				if (opt.debug) {
 					pushlog("Attempt "+retry+" failed, matched tabs was below 50%");
 				}
 				setTimeout(function() {

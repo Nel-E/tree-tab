@@ -1,19 +1,56 @@
+
+FINISH BACKGROUND LISTENERS (ORPHAN CASE)
+
+FINISH EVENTS - DROP
+
+FINISH BACKUP MERGE and recreate group and session
+
+REDO START DRAG OF GROUP AND FOLDER
+
+REDO DRAG OVER PIN_LIST AND GROUP
+
+REDO GO TO NEXT /PREV FUNCTIONS
+
+REVAMP MENU
+
+REVAMP TOOLBAR FUNCTIONS
+
+FIX Bookmark
+
+
+FIX ADD NEW FOLDER (from toolbar)
+
+
+
+CHECK IF KEEP GetSelectedFolders AND GetSelectedTabs
+
+REDO PROMOTE TABS IN LISTENERS IN: tab_removed AND tab_detached
+REDO DETACH TAB!!!
+
+
+REDO CloseTabs (should be fine)
+RECHECK SetTabClass (should be fine)
+
+
+
+
+
+
+
+
+
+
+
+
 CHANGES:
-1. shortcut to open TreeTabs Sidebar is now F1
-2. log does not preserve any personal data (urls) for GDPR law
-
-NEW:
-1. you can now drag&drop entire group to another window
-2. tree structure is tracked in background (excluded closing tabs)
-3. added alt+w shortcut to close a tree of tabs
-4. creating folder will now prompt for a new name
-5. search for *audible, *muted, *unloaded, *loaded tabs! Just write *audible in search box!
+1. mute icon config option (disable animation)
+2. "TURN OFF DIMMING" OF AUDIO AND FOR ATTENTION
 
 
-FIXES:
-1. import window was not showing up
-2. export group and export session had file extension in name
-3. pin tree had bug in setting class
+
+
+FIXED:
+"Close other" doesn't respect pinned tabs.
 
 
 
@@ -36,7 +73,6 @@ line for children hierarchy (like at the beggining)
 
 return to the first tab with mousewheel when we are at the bottom list (loop) - "mousewheel scroll on the last tab allow to return to the first one"
 
-mute icon config option (disable animation)
 
 FIREFOX CONTAINERS
 
@@ -102,7 +138,40 @@ Accept BCH (BitcoinCash) donations as the FEES make it FAR more palatable to don
 - Like many other commenters suggested, it would be wonderful to see some indication of the container a tab was opened in, if any. Getting an option to directly be able to chose to open a new tab in a container would also be very useful. 
 
 
+
+Option to change the color of the icon indicating that a tab is a source of audio. (separated for playing and muted)
+
+
+
+
+
+
 I DON'T UNDERSTAND THOSE FROM COMMENTS
 - add possibility open all tabs in folder in new left tab group with deleting this folder;
 - for economy memory your tabs must to makings (html code) during activating left tab group or during unfold folders/trees;
 - real FF tabs must creating and linking only after activate your tabs;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

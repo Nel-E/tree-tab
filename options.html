@@ -16,11 +16,13 @@
 		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_colors.css" id="theme_colors" />
 		<link type="text/css" rel="stylesheet" media="all" href="theme/theme.css" id="theme" />
 
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_blinking_attention.css" id="blinking_pins" />
+		<link type="text/css" rel="stylesheet" media="all" href="theme/theme_blinking_audio.css" id="blinking_audio" />
 		<link type="text/css" rel="stylesheet" media="all" href="options/options.css" id="main_body_css" />
 
 		<style rel="stylesheet">	#red_higlights_go_here { background-color: transparent; } </style>
 
-		<link type="text/css" rel="stylesheet" media="all" href="options/options overwrite.css" id="overwrite" />
+		<link type="text/css" rel="stylesheet" media="all" href="options/options_overwrite.css" id="overwrite" />
 
 
 	</head>
@@ -56,6 +58,11 @@
 					<td><input type="checkbox" class="opt_checkbox bg_opt" id="allow_pin_close"></input></td>
 					<td style="position:relative;left:2px;width:3px;">-</td>
 					<td class="label" id="option_allow_pin_close"></td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" class="opt_checkbox bg_opt" id="pin_attention_blinking"></input></td>
+					<td style="position:relative;left:2px;width:3px;">-</td>
+					<td class="label" id="option_pin_attention_blinking"></td>
 				</tr>
 			</table>
 		</fieldset>
@@ -138,6 +145,7 @@
 					</select>
 				</li>
 			</ul>
+<!--
 			<table style="display:vinline-block;">
 				<tr>
 					<td><input type="checkbox" class="opt_checkbox bg_opt" id="max_tree_drag_drop_folders"></input></td>
@@ -145,6 +153,7 @@
 					<td class="label" id="options_max_tree_drag_drop_folders"></td>
 				</tr>
 			</table>
+-->
 		</fieldset>
 
 
@@ -196,6 +205,14 @@
 				</tr>
 			</table>
 			<ul>
+				<li>
+					<label class="label" id="options_append_pinned_tab"></label>
+					<select id="append_pinned_tab">
+						<option class="bg_opt_drop_down_menu" id="options_append_pinned_tab_first" value="first"></option>
+						<option class="bg_opt_drop_down_menu" id="options_append_pinned_tab_after" value="after"></option>
+						<option class="bg_opt_drop_down_menu" id="options_append_pinned_tab_last" value="last"></option>
+					</select>
+				</li>
 				<li>
 					<label class="label" id="options_append_child_tab"></label>
 					<select id="append_child_tab">
@@ -281,7 +298,7 @@
 			
 			<br>
 			<p style="font-size:11px; color: red;" class="hint_explanation" id="hint_orphan_tab"></p>
-			<ul style="list-style-type:disc; font-size:11px;">
+			<ul style="list-style-type:disc; font-size:11px; color: red;">
 				<li class="hint_explanation" id="hint_ctrl_t"></li>
 				<li class="hint_explanation" id="hint_from_pin"></li>
 				<li class="hint_explanation" id="hint_from_bookmark"></li>
@@ -303,6 +320,11 @@
 		<fieldset class="field" id="field_global">
 			<legend class="label" id="options_global"></legend>
 			<table style="display:vinline-block;">
+				<tr>
+					<td><input type="checkbox" class="opt_checkbox bg_opt" id="audio_blinking"></input></td>
+					<td style="position:relative;left:2px;width:3px;">-</td>
+					<td class="label" id="option_audio_blinking"></td>
+				</tr>
 				<tr>
 					<td><input type="checkbox" class="opt_checkbox bg_opt" id="always_show_close"></input></td>
 					<td style="position:relative;left:2px;width:3px;">-</td>
@@ -736,8 +758,7 @@
 				<div class="pin_list" id="pin_list"></div>
 				<div id="groups">
 					<div class="group" id="tab_list">
-						<div class="children_folders" id="cftab_list"></div>
-						<div class="children_tabs" id="cttab_list"></div>
+						<div class="children" id="°tab_list"></div>
 					</div>
 				</div>
 				<div id="pin_list_scrollbar"><div id="pin_list_scrollbar_thumb"></div></div>
@@ -837,6 +858,7 @@
 		<input type="color" id="color_picker" style="position:absolute; left:-1000px; top:-1000px; width:1px; height:1px; overflow:hidden;">
 		<div id="DragImage" style="display: none; width:0px; height:0px;"></div>
 
+		<script type="text/javascript" src="scripts/variables.js"></script>
 		<script type="text/javascript" src="scripts/common.js"></script>
 
 		<script type="text/javascript" src="scripts/utils.js"></script>

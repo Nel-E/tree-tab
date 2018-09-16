@@ -41,9 +41,11 @@ function Initialize() {
 						tt.groups = Object.assign({}, g);
 						// APPEND GROUPS
 						AppendGroups(tt.groups);
-						// APPEND FOLDERS
-						AppendFolders(tt.folders);
-						// APPEND TABS
+						
+						// APPEND FOLDERS TO TABLIST
+						PreAppendFolders(tt.folders);					
+						
+						// APPEND TABS TO TABLIST
 						let ti = 0;
 						let tc = tabs.length;
 						let ttTabs = [];
@@ -51,12 +53,15 @@ function Initialize() {
 						for (ti = 0; ti < tc; ti++) {
 							ttTabs.push(AppendTab({  tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: (bgtabs[tabs[ti].id].expand != "" ? bgtabs[tabs[ti].id].expand : undefined)  }));
 						}
+						
+						// APPEND FOLDERS TO CORRECT PARENTS
+						AppendFolders(tt.folders);
 				
 						if (opt.skip_load == false) {
 							for (ti = 0; ti < tc; ti++) {
 								if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-									let TabParent = document.getElementById("ct"+bgtabs[tabs[ti].id].parent);
-									if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #ct"+bgtabs[tabs[ti].id].parent) == null) {
+									let TabParent = document.getElementById("°"+bgtabs[tabs[ti].id].parent);
+									if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #°"+bgtabs[tabs[ti].id].parent) == null) {
 										TabParent.appendChild(ttTabs[ti]);
 									}
 								}
@@ -64,23 +69,26 @@ function Initialize() {
 						}
 						// SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
 						SetActiveTabInEachGroup();
-						RearrangeFolders(true);
-						RearrangeTreeTabs(bgtabs, true);
+						RearrangeTree(bgtabs, tt.folders, true);
+						
 						StartSidebarListeners();
 	
 						SetMenu();
 						SetEvents();
 						SetManagerEvents();
 						HideMenus();
+						
 						if (opt.switch_with_scroll) {
 							BindTabsSwitchingToMouseWheel("pin_list");
 						}
 						if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
 							RearrangeBrowserTabs();
 						}
+						
 						RestorePinListRowSettings();
 						StartAutoSaveSession();
-						if (browserId == "V") {
+						
+						if (browserId == "V" || browserId == "O") {
 							VivaldiRefreshMediaIcons();
 						}
 						
@@ -92,7 +100,9 @@ function Initialize() {
 								RecheckFirefox();
 							}
 						}, 1000);
+						
 						ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
+						
 						setTimeout(function() {
 							UpdateData();
 							delete b;
@@ -103,11 +113,13 @@ function Initialize() {
 								chrome.storage.local.remove("emergency_reload");
 							}
 						}, 5000);
+						
 						if (browserId != "F") {
 							if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
 							if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
 							if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
 						}
+						
 					});
 				});
 			});

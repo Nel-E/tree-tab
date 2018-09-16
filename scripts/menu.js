@@ -5,8 +5,8 @@
 // **********			 MENU		 ***************
 
 function HideMenus() {
-	document.querySelectorAll(".separator, .menu_item").forEach(function(s){s.style.display = "none";});
-	document.querySelectorAll(".menu").forEach(function(s){
+	document.querySelectorAll(".separator, .menu_item").forEach(function(s) {s.style.display = "none";});
+	document.querySelectorAll(".menu").forEach(function(s) {
 		s.style.top = "-1000px";
 		s.style.left = "-1000px";
 		s.style.display = "none";
@@ -44,14 +44,14 @@ function ShowTabMenu(TabNode, event) {
 			document.getElementById("menu_close").style.display = "";
 		}
 
-		document.querySelectorAll("#menu_new_pin, #separator_unpt, #menu_unpin_tab, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close_other, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+		document.querySelectorAll("#menu_new_pin, #separator_unpt, #menu_unpin_tab, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close_other, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s) {
 			s.style.display = "";
 		});
 	}
 	
 	if (TabNode.classList.contains("tab")) {
 
-		document.querySelectorAll("#menu_bookmark_tree, #menu_new_tab, #separator_pit, #menu_pin_tab, #separator_newf, #menu_new_folder, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close, #menu_close_other, #separator_mut, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+		document.querySelectorAll("#menu_bookmark_tree, #menu_new_tab, #separator_pit, #menu_pin_tab, #separator_newf, #menu_new_folder, #separator_dupt, #menu_duplicate_tab, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_deta, #menu_detach_tab, #menu_reload_tab, #separator_clo, #menu_close, #menu_close_other, #separator_mut, #separator_mutot, #menu_mute_other, #menu_unmute_other, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s) {
 			s.style.display = "";
 		});
 
@@ -79,7 +79,7 @@ function ShowFolderMenu(FolderNode, event) {
 	HideMenus();
 	tt.menuItemNode = FolderNode;
 	
-	document.querySelectorAll("#menu_mute_tab, #menu_unmute_tab, #separator_unlo, #menu_unload, #menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_mute_tab, #menu_unmute_tab, #separator_unlo, #menu_unload, #menu_new_tab, #menu_new_folder, #separator_renf, #menu_rename_folder, #menu_delete_folder, #separator_bkt, #menu_bookmark_tree, #separator_expaa, #menu_expand_all, #menu_collapse_all, #menu_new_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s) {
 		s.style.display = "";
 	});
 
@@ -98,7 +98,7 @@ function ShowFGlobalMenu(event) {
 	HideMenus();
 
 
-	document.querySelectorAll("#menu_new_pin, #menu_new_tab, #menu_new_folder, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_newg, #menu_new_group, #separator_gbk, #menu_bookmark_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_new_pin, #menu_new_tab, #menu_new_folder, #separator_undclo, #menu_undo_close_tab, #separator_expaa, #menu_expand_all, #menu_collapse_all, #separator_newg, #menu_new_group, #separator_gbk, #menu_bookmark_group, #separator_tts, #menu_manager_window, #menu_treetabs_settings").forEach(function(s) {
 		s.style.display = "";
 	});
 	ShowMenu(document.getElementById("main_menu"), event);
@@ -108,11 +108,11 @@ function ShowFGroupMenu(GroupNode, event) {
 	HideMenus();
 	tt.menuItemNode = GroupNode;
 	
-	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #separator_gtbcl, #menu_group_tabs_close, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_groups_hibernate, #menu_manager_window, #menu_treetabs_settings").forEach(function(s){
+	document.querySelectorAll("#menu_new_group, #menu_rename_group, #menu_delete_group, #separator_gtbcl, #menu_group_tabs_close, #menu_delete_group_tabs_close, #separator_gunlo, #menu_groups_unload, #separator_gbk, #separator_tts, #menu_bookmark_group, #separator_tts, #menu_groups_hibernate, #menu_manager_window, #menu_treetabs_settings").forEach(function(s) {
 		s.style.display = "";
 	});
 	if (tt.menuItemNode.id == "tab_list") {
-		document.querySelectorAll("#menu_groups_hibernate, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close").forEach(function(s){
+		document.querySelectorAll("#menu_groups_hibernate, #menu_rename_group, #menu_delete_group, #menu_delete_group_tabs_close").forEach(function(s) {
 			s.style.display = "none";
 		});
 	}
@@ -120,7 +120,7 @@ function ShowFGroupMenu(GroupNode, event) {
 }
 
 function SetMenu() {
-	document.querySelectorAll(".menu_item").forEach(function(m){
+	document.querySelectorAll(".menu_item").forEach(function(m) {
 		if (m.id == "menu_new_pin") {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
@@ -160,8 +160,8 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				event.stopPropagation();
 				if (event.which == 1) {
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { pinned: (tt.menuItemNode.classList.contains("tab")) });
 						});
 					} else {
@@ -176,8 +176,8 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				event.stopPropagation();
 				if (event.which == 1) {
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 							DuplicateTab(s);
 						});
 					} else {
@@ -193,12 +193,12 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
+					if (tt.menuItemNode.classList.contains("selected")) {
 						let tabsArr = [];
-						document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+						document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 							tabsArr.push(parseInt(s.id));
-							if (s.childNodes[1].childNodes.length > 0) {
-								document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+							if (s.childNodes[2].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
 									tabsArr.push(parseInt(t.id));
 								});
 							}
@@ -216,8 +216,8 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 							chrome.tabs.reload(parseInt(s.id));
 						});
 					} else {
@@ -233,12 +233,12 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
-						if (tt.menuItemNode.classList.contains("selected_tab")) {
+						if (tt.menuItemNode.classList.contains("selected")) {
 							let tabsArr = [];
-							document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+							document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 								tabsArr.push(parseInt(s.id));
-								if (s.childNodes[1].childNodes.length > 0) {
-									document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+								if (s.childNodes[2].childNodes.length > 0) {
+									document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
 										tabsArr.push(parseInt(t.id));
 									});
 								}
@@ -250,7 +250,7 @@ function SetMenu() {
 					}
 					if (tt.menuItemNode.classList.contains("folder")) {
 						let tabsArr = [];
-						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s){
+						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s) {
 							tabsArr.push(parseInt(s.id));
 						});
 						DiscardTabs(tabsArr);
@@ -264,12 +264,12 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
+					if (tt.menuItemNode.classList.contains("selected")) {
 						let tabsArr = [];
-						document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+						document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 							tabsArr.push(parseInt(s.id));
-							if (s.childNodes[1].childNodes.length > 0) {
-								document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+							if (s.childNodes[2].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
 									tabsArr.push(parseInt(t.id));
 								});
 							}
@@ -288,8 +288,8 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
-						if (tt.menuItemNode.classList.contains("selected_tab")) {
-							document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+						if (tt.menuItemNode.classList.contains("selected")) {
+							document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 								chrome.tabs.update(parseInt(s.id), { muted: true });
 							});
 						} else {
@@ -297,7 +297,7 @@ function SetMenu() {
 						}
 					}
 					if (tt.menuItemNode.classList.contains("folder")) {
-						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s){
+						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: true });
 						});
 					}
@@ -310,7 +310,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s) {
 						chrome.tabs.update(parseInt(s.id), { muted: true });
 					});
 					HideMenus();
@@ -323,8 +323,8 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
-						if (tt.menuItemNode.classList.contains("selected_tab")) {
-							document.querySelectorAll(".pin.selected_tab, #"+tt.active_group+" .selected_tab").forEach(function(s){
+						if (tt.menuItemNode.classList.contains("selected")) {
+							document.querySelectorAll(".pin.selected, #"+tt.active_group+" .selected").forEach(function(s) {
 								chrome.tabs.update(parseInt(s.id), { muted: false });
 							});
 						} else {
@@ -332,7 +332,7 @@ function SetMenu() {
 						}
 					}
 					if (tt.menuItemNode.classList.contains("folder")) {
-						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s){
+						document.querySelectorAll("#"+tt.menuItemNode.id+" .tab").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: false });
 						});
 					}
@@ -345,7 +345,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s) {
 						chrome.tabs.update(parseInt(s.id), { muted: false });
 					});
 					HideMenus();
@@ -358,12 +358,12 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin:not(.selected_tab), #"+tt.active_group+" .tab:not(.selected_tab)").forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll(".pin:not(.selected), #"+tt.active_group+" .tab:not(.selected)").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: true });
 						});
 					} else {
-						document.querySelectorAll(".pin:not([id='"+tt.menuItemNode.id+"']), #"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])").forEach(function(s){
+						document.querySelectorAll(".pin:not([id='"+tt.menuItemNode.id+"']), #"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: true });
 						});
 					}
@@ -378,12 +378,12 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin:not(.selected_tab), #"+tt.active_group+" .tab:not(.selected_tab)").forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll(".pin:not(.selected), #"+tt.active_group+" .tab:not(.selected)").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: false });
 						});
 					} else {
-						document.querySelectorAll(".pin:not([id='"+tt.menuItemNode.id+"']), #"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])").forEach(function(s){
+						document.querySelectorAll(".pin:not([id='"+tt.menuItemNode.id+"']), #"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])").forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { muted: false });
 						});
 					}
@@ -414,25 +414,12 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("folder")) {
-						let FolderId = AddNewFolder({ParentId: tt.menuItemNode.id, SetEvents: true});
-						tt.menuItemNode.classList.remove("c");
-						tt.menuItemNode.classList.add("o");
+					if (tt.menuItemNode.classList.contains("tab") || tt.menuItemNode.classList.contains("folder")) {
+						let FolderId = AddNewFolder({ParentId: tt.menuItemNode.id});
 						ShowRenameFolderDialog(FolderId);
 					} else {
-						if (tt.menuItemNode.classList.contains("tab")) {
-							let folders = GetParentsByClass(tt.menuItemNode, "folder");
-							if (folders.length > 0) {
-								let FolderId = AddNewFolder({ParentId: folders[0].id, SetEvents: true});
-								ShowRenameFolderDialog(FolderId);
-							} else {
-								let FolderId = AddNewFolder({SetEvents: true});
-								ShowRenameFolderDialog(FolderId);
-							}
-						} else {
-							let FolderId = AddNewFolder({SetEvents: true});
-							ShowRenameFolderDialog(FolderId);
-						}
+						let FolderId = AddNewFolder({});
+						ShowRenameFolderDialog(FolderId);
 					}
 					HideMenus();
 				}
@@ -444,7 +431,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .folder.c, [id='"+tt.menuItemNode.id+"'] .tab.c").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .folder.c, [id='"+tt.menuItemNode.id+"'] .tab.c").forEach(function(s) {
 						s.classList.add("o");
 						s.classList.remove("c");
 					});
@@ -460,7 +447,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .folder.c, [id='"+tt.menuItemNode.id+"'] .tab.c").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'], [id='"+tt.menuItemNode.id+"'] .folder.c, [id='"+tt.menuItemNode.id+"'] .tab.c").forEach(function(s) {
 						s.classList.add("c");
 						s.classList.remove("o");
 					});
@@ -475,7 +462,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("#"+tt.active_group+" .folder.c, #"+tt.active_group+" .tab.c").forEach(function(s){
+					document.querySelectorAll("#"+tt.active_group+" .folder.c, #"+tt.active_group+" .tab.c").forEach(function(s) {
 						s.classList.add("o");
 						s.classList.remove("c");
 					});
@@ -490,7 +477,7 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					document.querySelectorAll("#"+tt.active_group+" .folder.o, #"+tt.active_group+" .tab.o").forEach(function(s){
+					document.querySelectorAll("#"+tt.active_group+" .folder.o, #"+tt.active_group+" .tab.o").forEach(function(s) {
 						s.classList.add("c");
 						s.classList.remove("o");
 					});
@@ -509,10 +496,10 @@ function SetMenu() {
 					event.stopPropagation();
 
 					let tabsArr = [];
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab, [id='"+tt.menuItemNode.id+"']").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab, [id='"+tt.menuItemNode.id+"']").forEach(function(s) {
 						tabsArr.push(parseInt(s.id));
-						if (s.childNodes[1].childNodes.length > 0) {
-							document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+						if (s.childNodes[2].childNodes.length > 0) {
+							document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
 								tabsArr.push(parseInt(t.id));
 							});
 						}
@@ -538,8 +525,8 @@ function SetMenu() {
 			m.onmousedown = function(event) {
 				if (event.which == 1) {
 					event.stopPropagation();
-					if (tt.menuItemNode.classList.contains("selected_folder")) {
-						document.querySelectorAll("#"+tt.menuItemNode.id+"  .selected_folder, #"+tt.menuItemNode.id).forEach(function(s){
+					if (tt.menuItemNode.classList.contains("selected")) {
+						document.querySelectorAll("#"+tt.menuItemNode.id+"  .selected, #"+tt.menuItemNode.id).forEach(function(s) {
 							RemoveFolder(s.id);
 						});
 					} else {
@@ -555,19 +542,31 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					let tabsArr = [];
-					if (tt.menuItemNode.classList.contains("selected_tab")) {
-						document.querySelectorAll(".pin:not(.selected_tab), #"+tt.active_group+" .tab:not(.selected_tab)").forEach(function(s){
-							let children = document.querySelectorAll("[id='"+s.id+"'] .selected_tab");
+					let query = "";
+					if (tt.menuItemNode.classList.contains("selected")) {
+						if (tt.menuItemNode.classList.contains("pin")) {
+							query = ".pin:not(.selected)";
+						}
+						if (tt.menuItemNode.classList.contains("tab")) {
+							query = "#"+tt.active_group+" .tab:not(.selected)";
+						}
+						// document.querySelectorAll(".pin:not(.selected), #"+tt.active_group+" .tab:not(.selected)").forEach(function(s) {
+						document.querySelectorAll(query).forEach(function(s) {
+							let children = document.querySelectorAll("[id='"+s.id+"'] .selected");
 							if (children.length == 0 || opt.promote_children) {
 								tabsArr.push(parseInt(s.id));
 							}
 						});
 						CloseTabs(tabsArr);
 					} else {
+						if (tt.menuItemNode.classList.contains("pin")) {
+							query = ".pin:not([id='"+tt.menuItemNode.id+"'])";
+						}
 						if (tt.menuItemNode.classList.contains("tab")) {
+							query = "#"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])";
 							document.getElementById(tt.active_group).appendChild(tt.menuItemNode);
 						}
-						document.querySelectorAll(".pin:not([id='"+tt.menuItemNode.id+"']), #"+tt.active_group+" .tab:not([id='"+tt.menuItemNode.id+"'])").forEach(function(s){
+						document.querySelectorAll(query).forEach(function(s) {
 							tabsArr.push(parseInt(s.id));
 						});
 			
@@ -626,7 +625,7 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					let tabsArr = [];
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s) {
 						tabsArr.push(parseInt(s.id));
 					});
 					DiscardTabs(tabsArr);					
@@ -640,7 +639,7 @@ function SetMenu() {
 				if (event.which == 1) {
 					event.stopPropagation();
 					let tabsArr = [];
-					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s){
+					document.querySelectorAll("[id='"+tt.menuItemNode.id+"'] .tab").forEach(function(s) {
 						tabsArr.push(parseInt(s.id));
 					});
 					CloseTabs(tabsArr);					

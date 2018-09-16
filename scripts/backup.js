@@ -4,7 +4,7 @@
 
 
 function ExportGroup(groupId, filename, save_to_manager) {
-	let GroupToSave = { group: tt.groups[groupId], folders: {}, tabs: [] };
+	let GroupToSave = { group: tt.groups[groupId], folders: {}, tabs: [], favicons: [] };
 	document.querySelectorAll("#" + groupId + " .folder").forEach(function(s) {
 		if (tt.folders[s.id]) {
 			GroupToSave.folders[s.id] = tt.folders[s.id];
@@ -13,16 +13,34 @@ function ExportGroup(groupId, filename, save_to_manager) {
 	let Tabs = document.querySelectorAll("#" + groupId + " .tab");
 	if (Tabs.length > 0) {
 		let lastId = parseInt(Tabs[Tabs.length - 1].id);
+		
+		
 		Tabs.forEach(function(s) {
-			chrome.tabs.get(parseInt(s.id), function(tab) {
-				if ((tab.url).startsWith("www") || (tab.url).startsWith("http") || (tab.url).startsWith("ftp")) {
+			chrome.tabs.get(parseInt(s.id), async function(tab) {
+				if ((tab.url).startsWith("www") || (tab.url).startsWith("http") || (tab.url).startsWith("ftp") || (tab.url).startsWith("file")) {
+					// console.log((tab.url).startsWith("about") == false && (tab.url).startsWith("moz-extension") == false);
+				// if ((tab.url).startsWith("about") == false && (tab.url).startsWith("moz-extension") == false) {
+					
+					let favicon = (browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : tab.favIconUrl);
+					let favicon_index = GroupToSave.favicons.indexOf(favicon);
+					if (favicon_index == -1) {
+						GroupToSave.favicons.push(favicon);
+						favicon_index = GroupToSave.favicons.length;
+					}
+					
 					(GroupToSave.tabs).push({
 						id: tab.id,
 						parent: s.parentNode.parentNode.id,
 						index: Array.from(s.parentNode.children).indexOf(s),
 						expand: (s.classList.contains("c") ? "c" : (s.classList.contains("o") ? "o" : "")),
-						url: tab.url
+						url: tab.url,
+						title: tab.title,
+						// favicon: (browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : tab.favIconUrl)
+						favicon: favicon_index
 					});
+					
+					
+					
 				}
 				if (tab.id == lastId) {
 					if (filename) {
@@ -38,6 +56,8 @@ function ExportGroup(groupId, filename, save_to_manager) {
 				}
 			});
 		});
+		
+		
 	} else {
 		if (filename) {
 			SaveFile(filename, "tt_group", GroupToSave);
@@ -100,14 +120,25 @@ function AddGroupToStorage(group, add_to_manager) {
 
 
 function RecreateGroup(LoadedGroup) {
+	if (opt.debug) {
+		log("f: RecreateGroup");
+	}
 	let NewFolders = {};
 	let RefsTabs = {};
 	let NewTabs = [];
 	let NewGroupId = AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
+	
 	SetActiveGroup(NewGroupId, false, false);
+	
 	for (var folder in LoadedGroup.folders) {
 		let newId = GenerateNewFolderID();
-		NewFolders[folder] = { id: newId, parent: NewGroupId, index: (LoadedGroup.folders[folder].index), name: (LoadedGroup.folders[folder].name), expand: (LoadedGroup.folders[folder].expand) };
+		NewFolders[folder] = {
+			id: newId,
+			parent: NewGroupId,
+			index: LoadedGroup.folders[folder].index,
+			name: LoadedGroup.folders[folder].name,
+			expand: LoadedGroup.folders[folder].expand
+		};
 	}
 	for (var folder in NewFolders) {
 		if (NewFolders[LoadedGroup.folders[folder].parent]) {
@@ -115,24 +146,44 @@ function RecreateGroup(LoadedGroup) {
 		}
 	}
 	(LoadedGroup.tabs).forEach(function(Tab) {
-		chrome.tabs.create({ url: Tab.url, active: false }, function(new_tab) {
-			if (new_tab) {
-				RefsTabs[Tab.id] = new_tab.id;
-				Tab.id = new_tab.id;
-				NewTabs.push(Tab);
-				setTimeout(function() {
-					let nt = document.getElementById(new_tab.id);
-					let NewGroupTabs = document.getElementById("ct" + NewGroupId);
-					if (nt != null && NewGroupTabs != null) {
-						NewGroupTabs.appendChild(nt);
-					}
-				}, 1000);
-				
-				if (browserId != "O") {
-					chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
-				}
-				
+		let params;
+		if (browserId == "F") {
+			params = {
+				active: false,
+				windowId: tt.CurrentWindowId,
+				url: Tab.url,
+				discarded: true,
+				title: Tab.title
+			};
+		} else {
+			params = {
+				active: false,
+				windowId: CurrentWindowId,
+				url: Tab.url
+			};
+		}
+		chrome.tabs.create(params, function(new_tab) {
+			
+			if (browserId == "F") {
+				browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", Tab.favicon);
 			}
+			
+			RefsTabs[Tab.id] = new_tab.id;
+			Tab.id = new_tab.id;
+			NewTabs.push(Tab);
+			setTimeout(function() {
+				let nt = document.getElementById(new_tab.id);
+				let NewGroupTabs = document.getElementById("°" + NewGroupId);
+				if (nt != null && NewGroupTabs != null) {
+					NewGroupTabs.appendChild(nt);
+				}
+			}, 1000);
+			
+			if (browserId != "O" && browserId != "F") {
+				chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
+			}
+			
+			
 			if (NewTabs.length == LoadedGroup.tabs.length - 1) {
 				setTimeout(function() {
 					NewTabs.forEach(function(LTab) {
@@ -147,23 +198,18 @@ function RecreateGroup(LoadedGroup) {
 						}
 					});
 					setTimeout(function() {
-						RcreateTreeStructure({}, NewFolders, NewTabs);
+						RecreateTreeStructure({}, NewFolders, NewTabs);
 					}, 1000);
 					setTimeout(function() {
-						RcreateTreeStructure({}, NewFolders, NewTabs);
+						RecreateTreeStructure({}, NewFolders, NewTabs);
 					}, 2000);
 					setTimeout(function() {
-						RcreateTreeStructure({}, NewFolders, NewTabs);
+						RecreateTreeStructure({}, NewFolders, NewTabs);
 					}, 5000);
 				}, 2000);
 			}
 		});
 	});
-	
-	if (opt.debug) {
-		log("f: RecreateGroup");
-	}
-	
 }
 
 
@@ -173,20 +219,52 @@ function ExportSession(name, save_to_file, save_to_manager, save_to_autosave_man
 				let tabs = Object.assign({}, t);
 				chrome.runtime.sendMessage({ command: "get_windows" }, function(w) {
 					let windows = Object.assign({}, w);
-					let warn = true;
 					let ExportWindows = [];
 					win.forEach(function(CWin) {
 						 if (CWin.tabs.length > 0) {
+							 
+							 
+							 
 								windows[CWin.id]["id"] = CWin.id;
 								windows[CWin.id]["tabs"] = [];
-								CWin.tabs.forEach(function(CTab) {
+								windows[CWin.id]["favicons"] = [];
+
+
+
+								
+								CWin.tabs.forEach(async function(CTab) {
+										// console.log((CTab.url).startsWith("about") == false && (CTab.url).startsWith("moz-extension") == false);
+									// if ((CTab.url).startsWith("about") == false && (CTab.url).startsWith("moz-extension") == false) {
 									if ((CTab.url).startsWith("www") || (CTab.url).startsWith("http") || (CTab.url).startsWith("ftp")) {
-										windows[CWin.id]["tabs"].push({ id: CTab.id, url: CTab.url, parent: tabs[CTab.id].parent, index: tabs[CTab.id].index, expand: tabs[CTab.id].expand });
+										
+										
+										let favicon = (browserId == "F" ? await browser.sessions.getTabValue(CTab.id, "CachedFaviconUrl") : CTab.favIconUrl);
+										let favicon_index = windows[CWin.id].favicons.indexOf(favicon);
+										
+										if (favicon_index == -1) {
+											windows[CWin.id].favicons.push(favicon);
+											favicon_index = windows[CWin.id].favicons.length;
+										}
+										
+										
+										
+										windows[CWin.id]["tabs"].push({
+											id: CTab.id,
+											url: CTab.url,
+											parent: tabs[CTab.id].parent,
+											index: tabs[CTab.id].index,
+											expand: tabs[CTab.id].expand,
+											title: CTab.title,
+											// favicon: (browserId == "F" ? await browser.sessions.getTabValue(CTab.id, "CachedFaviconUrl") : CTab.favIconUrl)
+											favicon: favicon_index
+										});
 									}
 								});
 								ExportWindows.push(windows[CWin.id]);
 						}
 					});
+					
+					console.log(ExportWindows);
 					if (save_to_file) {
 						SaveFile(name, "tt_session", ExportWindows);
 					}
@@ -195,10 +273,6 @@ function ExportSession(name, save_to_file, save_to_manager, save_to_autosave_man
 					}
 					if (save_to_autosave_manager) {
 						AddAutosaveSessionToStorage(ExportWindows, name)
-					}
-
-					if (opt.debug) {
-						log("f: ExportSession, name: "+name+", save_to_file: "+save_to_file+", save_to_manager: "+save_to_manager+", save_to_autosave_manager: "+save_to_autosave_manager);
 					}
 
 				});
@@ -217,11 +291,6 @@ function ImportSession(recreate_session, save_to_manager, merge_session) {
 		file.parentNode.removeChild(file);
 
 		let LoadedSession = JSON.parse(data);
-
-		if (opt.debug) {
-			log("f: ImportSession, recreate_session: "+recreate_session+", merge_session: "+merge_session);
-		}
-
 		if (recreate_session) {
 			RecreateSession(LoadedSession);
 		}
@@ -281,14 +350,12 @@ function AddAutosaveSessionToStorage(session, name) {
 	});
 }
 
-
 function RecreateSession(LoadedSession) {
-	let RefsTabs = {};
-
 	if (opt.debug) {
 		log("f: RecreateSession");
 	}
 
+	let RefsTabs = {};
 	LoadedSession.forEach(function(LWin) {
 		let NewTabs = [];
 		let urls = [];
@@ -296,45 +363,84 @@ function RecreateSession(LoadedSession) {
 			urls.push(Tab.url);
 			NewTabs.push(Tab);
 		});
-
-		chrome.windows.create({ url: urls   /* , discarded: true */ }, function(new_window) {
+		
+		chrome.windows.create({url: urls[0]}, function(new_window) {
+			
 			chrome.runtime.sendMessage({command: "save_groups", windowId: new_window.id, groups: LWin.groups});
 			chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: LWin.folders});
 			
-			for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
-				RefsTabs[NewTabs[tInd].id] = new_window.tabs[tInd].id;
-				NewTabs[tInd].id = new_window.tabs[tInd].id;
-			}
-			for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
-				if (RefsTabs[NewTabs[tInd].parent] != undefined) {
-					NewTabs[tInd].parent = RefsTabs[NewTabs[tInd].parent];
-				}
-			}
-			for (let tInd = 0; tInd < new_window.tabs.length; tInd++) {
-				if (NewTabs[tInd].parent == "pin_list") {
-					chrome.tabs.update(new_window.tabs[tInd].id, { pinned: true });
-				}
-				chrome.runtime.sendMessage({command: "update_tab", tabId: new_window.tabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
-	
-				// if (browserId != "O") {
-					// chrome.runtime.sendMessage({command: "discard_tab", tabId: new_window.tabs[tInd].id});
-				// }
-			}
 			
-			if (browserId != "O") {
-				setTimeout(function() {
-					chrome.runtime.sendMessage({command: "discard_window", windowId: new_window.id});
-				}, urls.length * 300);
-			}
-
+			(LWin.tabs).forEach(function(Tab) {
+			
+				if (Tab.id != LWin.tabs[0].id) { // skip first tab
+			
+					let params;
+					if (browserId == "F") {
+						params = {
+							active: false,
+							windowId: new_window.id,
+							url: Tab.url,
+							discarded: true,
+							title: Tab.title
+						};
+					} else {
+						params = {
+							active: false,
+							windowId: new_window.id,
+							url: Tab.url
+						};
+					}
+					
+					chrome.tabs.create(params, function(new_tab) {
+						
+						if (browserId == "F") {
+							// browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", Tab.favicon);
+							browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LWin.favicons[Tab.favicon]);
+						}
+						
+						if (Tab.id == LWin.tabs[LWin.tabs.length-1].id) { // last tab
+						
+							chrome.windows.get(new_window.id, {populate: true}, function(new_window_with_new_tabs) {
+						
+								for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
+									RefsTabs[NewTabs[tInd].id] = new_window_with_new_tabs.tabs[tInd].id;
+									NewTabs[tInd].id = new_window_with_new_tabs.tabs[tInd].id;
+								}
+								for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
+									if (RefsTabs[NewTabs[tInd].parent] != undefined) {
+										NewTabs[tInd].parent = RefsTabs[NewTabs[tInd].parent];
+									}
+								}
+								for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
+									if (NewTabs[tInd].parent == "pin_list") {
+										chrome.tabs.update(new_window_with_new_tabs.tabs[tInd].id, { pinned: true });
+									}
+									chrome.runtime.sendMessage({command: "update_tab", tabId: new_window_with_new_tabs.tabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
+						
+									if (browserId != "O" && browserId != "F" ) {
+										chrome.runtime.sendMessage({command: "discard_tab", tabId: new_window_with_new_tabs.tabs[tInd].id});
+									}
+								}
+								// if (browserId != "O") {
+									// setTimeout(function() {
+										// chrome.runtime.sendMessage({command: "discard_window", windowId: new_window_with_new_tabs.id});
+									// }, urls.length * 300);
+								// }
+								
+							});
+							
+						}
+					});
+				}
+			});
 		});
 	});
 }
 
 // groups and folders are in object, just like tt.groups and tt.folders, but tabs are in array of treetabs objects
-function RcreateTreeStructure(groups, folders, tabs) {
+function RecreateTreeStructure(groups, folders, tabs) {
 	if (opt.debug) {
-		log("f: RcreateTreeStructure");
+		log("f: RecreateTreeStructure");
 	}
 
 	ShowStatusBar({show: true, spinner: true, message: "Quick check and recreating structure..."});
@@ -348,6 +454,7 @@ function RcreateTreeStructure(groups, folders, tabs) {
 		for (var folder in folders) {
 			tt.folders[folders[folder].id] = Object.assign({}, folders[folder]);
 		}
+		PreAppendFolders(tt.folders);
 		AppendFolders(tt.folders);
 	}
 	let bgtabs = {};
@@ -357,7 +464,7 @@ function RcreateTreeStructure(groups, folders, tabs) {
 		}
 		if (Tab.parent != "") {
 			let tb = document.getElementById(Tab.id);
-			let tbp = document.getElementById("ct" + Tab.parent);
+			let tbp = document.getElementById("°" + Tab.parent);
 			if (tb && tbp) {
 				tbp.appendChild(tb);
 				if (Tab.expand != "") {
@@ -367,8 +474,7 @@ function RcreateTreeStructure(groups, folders, tabs) {
 			bgtabs[Tab.id] = { index: Tab.index, parent: Tab.parent, expand: Tab.expand };
 		}
 	});
-	RearrangeTreeTabs(bgtabs, false);
-	RearrangeFolders(true);
+	RearrangeTree(bgtabs, folders, false);
 	UpdateBgGroupsOrder();
 	setTimeout(function() {
 		RefreshExpandStates();
@@ -376,8 +482,6 @@ function RcreateTreeStructure(groups, folders, tabs) {
 		tt.schedule_update_data++;
 		SaveFolders();
 	}, 3000);
-	// ShowStatusBar({show: true, spinner: true, message: "Sorting"});
-	// ShowStatusBar(false, "Wait just a little more...");
 }
 
 function ImportMergeTabs(LoadedSession) {
@@ -501,7 +605,7 @@ function ImportMergeTabs(LoadedSession) {
 						chrome.runtime.sendMessage({ command: "remote_update", groups: w.groups, folders: w.folders, tabs: [], windowId: w.id });
 
 						if (w.id == tt.CurrentWindowId) {
-							RcreateTreeStructure(w.groups, w.folders, []);
+							RecreateTreeStructure(w.groups, w.folders, []);
 						}
 
 						(w.tabs).forEach(function(Tab) {
@@ -535,7 +639,7 @@ function ImportMergeTabs(LoadedSession) {
 								ShowStatusBar({show: true, spinner: true, message: "Finding other windows to add tabs..."});
 								
 								if (w.id == tt.CurrentWindowId) {
-									RcreateTreeStructure(w.groups, w.folders, NewTabs);
+									RecreateTreeStructure(w.groups, w.folders, NewTabs);
 								} else {
 									chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: NewTabs, windowId: w.id });
 								}

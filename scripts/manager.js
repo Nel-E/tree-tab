@@ -30,12 +30,12 @@ function OpenManagerWindow() {
 
 		
 		if (storage.hibernated_groups != undefined) {
-			storage.hibernated_groups.forEach(function(hibernated_group){
+			storage.hibernated_groups.forEach(function(hibernated_group) {
 				AddGroupToManagerList(hibernated_group);
 			});
 		}
 		if (storage.saved_sessions != undefined) {
-			(storage.saved_sessions).forEach(function(saved_session){
+			(storage.saved_sessions).forEach(function(saved_session) {
 				AddSessionToManagerList(saved_session);
 			});
 		}
@@ -232,7 +232,7 @@ function ReAddSessionAutomaticToManagerList(storage) {
 		SessionsAutomaticList.removeChild(SessionsAutomaticList.firstChild);
 	}
 	if (storage.saved_sessions_automatic != undefined) {
-		(storage.saved_sessions_automatic).forEach(function(saved_sessions_automatic){
+		(storage.saved_sessions_automatic).forEach(function(saved_sessions_automatic) {
 			AddSessionAutomaticToManagerList(saved_sessions_automatic);
 		});
 	}
@@ -298,15 +298,15 @@ function SetManagerEvents() {
 		}
 	}
 
-	document.querySelectorAll(".manager_window_toolbar_button").forEach(function(s){
+	document.querySelectorAll(".manager_window_toolbar_button").forEach(function(s) {
 		s.onmousedown = function(event) {
 			if (event.which == 1) {
-				document.querySelectorAll(".manager_window_panel").forEach(function(s){
+				document.querySelectorAll(".manager_window_panel").forEach(function(s) {
 					s.classList.remove("mw_pan_on");
 				});
 				document.getElementById((this.id).replace("button", "panel")).classList.add("mw_pan_on");
 
-				document.querySelectorAll(".mw_on").forEach(function(s){
+				document.querySelectorAll(".mw_on").forEach(function(s) {
 					s.classList.remove("mw_on");
 				});
 				this.classList.add("mw_on");

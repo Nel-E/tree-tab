@@ -25,10 +25,10 @@ function RestoreToolbarShelf() {
 		filterBox.setAttribute("placeholder", labels.searchbox);
 		filterBox.style.opacity = "1";
 		
-		document.querySelectorAll(".on").forEach(function(s){
+		document.querySelectorAll(".on").forEach(function(s) {
 			s.classList.remove("on");
 		});
-		document.querySelectorAll(".toolbar_shelf").forEach(function(s){
+		document.querySelectorAll(".toolbar_shelf").forEach(function(s) {
 			s.classList.add("hidden");
 		});
 
@@ -92,19 +92,19 @@ function RestoreToolbarShelf() {
 function ShelfToggle(mousebutton, button, toolbarId, SendMessage) {
 	if (mousebutton == 1) {
 		if (button.classList.contains("on")) {
-			document.querySelectorAll(".on").forEach(function(s){
+			document.querySelectorAll(".on").forEach(function(s) {
 				s.classList.remove("on");
 			});
-			document.querySelectorAll(".toolbar_shelf").forEach(function(s){
+			document.querySelectorAll(".toolbar_shelf").forEach(function(s) {
 				s.classList.add("hidden");
 			});
 		} else {
-			document.querySelectorAll(".toolbar_shelf:not(#"+toolbarId+")").forEach(function(s){
+			document.querySelectorAll(".toolbar_shelf:not(#"+toolbarId+")").forEach(function(s) {
 				s.classList.add("hidden");
 			});
 			document.getElementById(toolbarId).classList.remove("hidden");
 			chrome.runtime.sendMessage({command: "set_active_shelf", active_shelf: SendMessage, windowId: tt.CurrentWindowId});
-			document.querySelectorAll(".on:not(#"+button.id+")").forEach(function(s){
+			document.querySelectorAll(".on:not(#"+button.id+")").forEach(function(s) {
 				s.classList.remove("on");
 			});
 			button.classList.add("on");
@@ -129,7 +129,7 @@ function RecreateToolbar(NewToolbar) {
 		NewShelf.classList = "toolbar_shelf";
 		toolbar.appendChild(NewShelf);
 		
-		NewToolbar[shelf].forEach(function(button){
+		NewToolbar[shelf].forEach(function(button) {
 			let Newbutton = document.createElement("div");
 			Newbutton.id = button;
 			Newbutton.classList = "button";
@@ -189,7 +189,7 @@ function RecreateToolbar(NewToolbar) {
 function RecreateToolbarUnusedButtons(buttonsIds) {
 	let unused_buttons = document.getElementById("toolbar_unused_buttons");
 
-	buttonsIds.forEach(function(button){
+	buttonsIds.forEach(function(button) {
 		let Newbutton = document.createElement("div");
 		Newbutton.id = button;
 		Newbutton.classList = "button";
@@ -208,14 +208,14 @@ function SaveToolbar() {
 	let toolbar = {};
 	
 	let u = document.querySelectorAll("#toolbar_unused_buttons .button");
-	u.forEach(function(b){
+	u.forEach(function(b) {
 		unused_buttons.push(b.id);
 	});
 
 	let t = document.getElementById("toolbar");
-	t.childNodes.forEach(function(s){
+	t.childNodes.forEach(function(s) {
 		toolbar[s.id] = [];
-		let t = document.querySelectorAll("#"+s.id+" .button").forEach(function(b){
+		let t = document.querySelectorAll("#"+s.id+" .button").forEach(function(b) {
 			toolbar[s.id].push(b.id);
 		});
 	});
@@ -237,8 +237,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 	
 	if (ClearSearch != null && FilterBox != null) {
 		if (CleanPreviousBindings) {
-			FilterBox.removeEventListener("oninput", function(){});
-			ClearSearch.removeEventListener("onmousedown", function(){});
+			FilterBox.removeEventListener("oninput", function() {});
+			ClearSearch.removeEventListener("onmousedown", function() {});
 		}	
 		if (Buttons) {
 			// FILTER ON INPUT
@@ -257,12 +257,12 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 		}
 	}
 
-	document.querySelectorAll(".button").forEach(function(s){
+	document.querySelectorAll(".button").forEach(function(s) {
 		
 		if (CleanPreviousBindings) {
-			s.removeEventListener("onmousedown", function(){});
-			s.removeEventListener("onclick", function(){});
-			s.removeEventListener("click", function(){});
+			s.removeEventListener("onmousedown", function() {});
+			s.removeEventListener("onclick", function() {});
+			s.removeEventListener("click", function() {});
 		}	
 			
 		if (ToolbarShelfToggle) {
@@ -344,8 +344,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_pin") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected_tab, #"+tt.active_group+" .active_tab, #"+tt.active_group+" .selected_tab");
-						Tabs.forEach(function(s){
+						let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected, #"+tt.active_group+" .active_tab, #"+tt.active_group+" .selected");
+						Tabs.forEach(function(s) {
 							chrome.tabs.update(parseInt(s.id), { pinned: Tabs[0].classList.contains("tab") });
 						})
 					}
@@ -377,15 +377,15 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_detach" || s.id == "button_move") { // move is legacy name of detach button
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll("#"+tt.active_group+" .selected_folder").length > 0){
+						if (document.querySelectorAll("#"+tt.active_group+" .selected").length > 0) {
 							let detach = GetSelectedFolders();
 							Detach(detach.TabsIds, detach.Folders);
 						} else {
 							let tabsArr = [];
-							document.querySelectorAll(".pin.selected_tab, .pin.active_tab, #"+tt.active_group+" .selected_tab, #"+tt.active_group+" .active_tab").forEach(function(s){
+							document.querySelectorAll(".pin.selected, .pin.active_tab, #"+tt.active_group+" .selected, #"+tt.active_group+" .active_tab").forEach(function(s) {
 								tabsArr.push(parseInt(s.id));
-								if (s.childNodes[1].childNodes.length > 0) {
-									document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
+								if (s.childNodes[2].childNodes.length > 0) {
+									document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
 										tabsArr.push(parseInt(t.id));
 									});
 								}
@@ -402,7 +402,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 					if (event.which == 1) {
 						let filtered = document.querySelectorAll("#"+tt.active_group+" .tab.filtered");
 						if (filtered.length > 0) {
-							document.querySelectorAll(".highlighted_search").forEach(function(s){
+							document.querySelectorAll(".highlighted_search").forEach(function(s) {
 								s.classList.remove("highlighted_search");
 							});
 							if (tt.SearchIndex == 0) {
@@ -423,7 +423,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 					if (event.which == 1) {
 						let filtered = document.querySelectorAll("#"+tt.active_group+" .tab.filtered");
 						if (filtered.length > 0) {
-							document.querySelectorAll(".highlighted_search").forEach(function(s){
+							document.querySelectorAll(".highlighted_search").forEach(function(s) {
 								s.classList.remove("highlighted_search");
 							});
 							if (tt.SearchIndex == filtered.length-1) {
@@ -515,7 +515,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_new_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						let FolderId = AddNewFolder({SetEvents: true});
+						let FolderId = AddNewFolder({});
 						ShowRenameFolderDialog(FolderId);
 					}
 				}
@@ -525,8 +525,8 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_edit_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll("#"+tt.active_group+" .selected_folder").length > 0) {
-							ShowRenameFolderDialog(document.querySelectorAll("#"+tt.active_group+" .selected_folder")[0].id);
+						if (document.querySelectorAll("#"+tt.active_group+" .selected").length > 0) {
+							ShowRenameFolderDialog(document.querySelectorAll("#"+tt.active_group+" .selected")[0].id);
 						}
 					}
 				}
@@ -535,7 +535,7 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_remove_folder") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						document.querySelectorAll("#"+tt.active_group+" .selected_folder").forEach(function(s){
+						document.querySelectorAll("#"+tt.active_group+" .selected").forEach(function(s) {
 							RemoveFolder(s.id);
 						});
 					}
@@ -545,15 +545,15 @@ function SetToolbarEvents(CleanPreviousBindings, Buttons, ToolbarShelfToggle, To
 			if (s.id == "button_unload" || s.id == "button_discard") {
 				s.onmousedown = function(event) {
 					if (event.which == 1) {
-						if (document.querySelectorAll(".pin.selected_tab:not(.active_tab), #"+tt.active_group+" .selected_tab:not(.active_tab)").length > 0) {
+						if (document.querySelectorAll(".pin.selected:not(.active_tab), #"+tt.active_group+" .selected:not(.active_tab)").length > 0) {
 							DiscardTabs(
-								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #"+tt.active_group+" .selected_tab:not(.active_tab)"), function(s){
+								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #"+tt.active_group+" .selected:not(.active_tab)"), function(s) {
 									return parseInt(s.id);
 								})
 							);
 						} else {
 							DiscardTabs(
-								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), .tab:not(.active_tab)"), function(s){
+								Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), .tab:not(.active_tab)"), function(s) {
 									return parseInt(s.id);
 								})
 							);

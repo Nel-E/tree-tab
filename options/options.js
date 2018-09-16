@@ -10,7 +10,7 @@ var SelectedTheme = Object.assign({}, DefaultTheme);
 var dragged_button = {id: ""};
 
 // options for all drop down menus
-let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "append_tab_from_toolbar", "after_closing_active_tab", "move_tabs_on_url_change"];
+let DropDownList = ["dbclick_folder", "midclick_folder", "midclick_tab", "dbclick_group", "midclick_group", "dbclick_tab", "append_pinned_tab", "append_child_tab", "append_child_tab_after_limit", "append_orphan_tab", "append_tab_from_toolbar", "after_closing_active_tab", "move_tabs_on_url_change"];
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.title = "Tree Tabs";
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	
 		setTimeout(function() {
-			document.querySelectorAll(".on").forEach(function(s){
+			document.querySelectorAll(".on").forEach(function(s) {
 				s.classList.remove("on");
 			});
 			RefreshGUI();
@@ -102,17 +102,17 @@ function AddRegexPair() {
 // document events
 function GetOptions(storage) {
 	// get language labels
-	document.querySelectorAll(".label, .set_button, .bg_opt_drop_down_menu, .hint_explanation").forEach(function(s){
+	document.querySelectorAll(".label, .set_button, .bg_opt_drop_down_menu, .hint_explanation").forEach(function(s) {
 		s.textContent = chrome.i18n.getMessage(s.id);
 	});	
 
 	// get language for menu labels
-	document.querySelectorAll(".menu_item").forEach(function(s){
+	document.querySelectorAll(".menu_item").forEach(function(s) {
 		s.textContent = chrome.i18n.getMessage("options_example_menu_item");
 	});	
 	
 	// get checkboxes from saved states
-	document.querySelectorAll(".opt_checkbox").forEach(function(s){
+	document.querySelectorAll(".opt_checkbox").forEach(function(s) {
 		s.checked = opt[s.id];
 		if (s.checked) {
 			if (s.id == "never_show_close") {
@@ -126,7 +126,7 @@ function GetOptions(storage) {
 	});	
 	
 	// get language labels
-	document.querySelectorAll(".pick_col, #close_x, #close_hover_x, .options_button_minus, .options_button_plus, .tabs_margin_spacing").forEach(function(s){
+	document.querySelectorAll(".pick_col, #close_x, #close_hover_x, .options_button_minus, .options_button_plus, .tabs_margin_spacing").forEach(function(s) {
 		s.title = chrome.i18n.getMessage(s.id);
 	});
 	
@@ -172,9 +172,9 @@ function GetOptions(storage) {
 }
 
 function RemovePreview() {
-	document.querySelectorAll(".hover_blinking").forEach(function(s){s.classList.remove("hover_blinking");});
-	document.querySelectorAll(".hover_border_blinking").forEach(function(s){s.classList.remove("hover_border_blinking");});
-	document.querySelectorAll(".red_preview").forEach(function(s){
+	document.querySelectorAll(".hover_blinking").forEach(function(s) {s.classList.remove("hover_blinking");});
+	document.querySelectorAll(".hover_border_blinking").forEach(function(s) {s.classList.remove("hover_border_blinking");});
+	document.querySelectorAll(".red_preview").forEach(function(s) {
 		s.style.backgroundColor = "";
 		s.style.border = "";
 		s.style.borderBottom = "";
@@ -242,7 +242,7 @@ function SetEvents() {
 	// }
 	
 	
-	document.querySelectorAll("#scrollbar_thumb_hover, #options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down, #options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down, .pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font").forEach(function(s){s.onmouseleave = function(event) {
+	document.querySelectorAll("#scrollbar_thumb_hover, #options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down, #options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down, .pick_col, .font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic, #filter_box_font").forEach(function(s) {s.onmouseleave = function(event) {
 		RemovePreview();
 	}});
 
@@ -351,41 +351,41 @@ function SetEvents() {
 	
 	
 	// tab row font_color
-	document.querySelectorAll(".tab_col.font_color").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.font_color").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
 	}});
 
 	// tab row font not bold
-	document.querySelectorAll(".tab_col.font_weight_normal").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.font_weight_normal").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontWeight", "normal", false);
 	}});
 
 	// tab row font bold
-	document.querySelectorAll(".tab_col.font_weight_bold").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.font_weight_bold").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontWeight", "bold", false);
 	}});
 
 	// tab row font style normal
-	document.querySelectorAll(".tab_col.font_style_normal").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.font_style_normal").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontStyle", "normal", false);
 	}});
 	// tab row font style italic
-	document.querySelectorAll(".tab_col.font_style_italic").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.font_style_italic").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "color", "red", true);
 		AddRedStylePreview("tab_title" + this.parentNode.id.substr(1), "fontStyle", "italic", false);
 	}});
 	
 	
 	// tab border
-	document.querySelectorAll(".tab_col.color_border").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.color_border").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_header" + this.parentNode.id.substr(1), "border", "1px solid red", true);
 	}});
 	
 	// tab background
-	document.querySelectorAll(".tab_col.color_bucket").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll(".tab_col.color_bucket").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("tab_header" + this.parentNode.id.substr(1), "backgroundColor", "red", true);
 	}});
 	
@@ -410,13 +410,13 @@ function SetEvents() {
 	
 
 	// tab_list scrollbars
-	document.querySelectorAll("#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll("#options_tab_list_scrollbar_width_up, #options_tab_list_scrollbar_width_down").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("group_scrollbar", "backgroundColor", "red", true);
 		AddRedStylePreview("group_scrollbar_thumb", "backgroundColor", "red");
 	}});
 	
 	// pin_list scrollbars
-	document.querySelectorAll("#options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down").forEach(function(s){s.onmouseenter = function(event) {
+	document.querySelectorAll("#options_tab_list_scrollbar_height_up, #options_tab_list_scrollbar_height_down").forEach(function(s) {s.onmouseenter = function(event) {
 		AddRedStylePreview("pin_list_scrollbar", "backgroundColor", "red", true);
 		AddRedStylePreview("pin_list_scrollbar_thumb", "backgroundColor", "red");
 	}});
@@ -546,7 +546,7 @@ function SetEvents() {
 // --------------------------------------COLOR PICKER---------------------------------------------------------------------	
 	
 	// change fonts weight && style
-	document.querySelectorAll(".font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic").forEach(function(s){s.onmousedown = function(event) {
+	document.querySelectorAll(".font_weight_normal, .font_weight_bold, .font_style_normal, .font_style_italic").forEach(function(s) {s.onmousedown = function(event) {
 		event.stopPropagation();
 		// if this.classList.contains("font_weight_normal") || this.classList.contains("font_style_normal")
 		let FontStyle = "normal";
@@ -562,7 +562,7 @@ function SetEvents() {
 	}});
 
 	// show color picker
-	document.querySelectorAll(".pick_col").forEach(function(s){s.onclick = function(event) {if (event.which == 1) {
+	document.querySelectorAll(".pick_col").forEach(function(s) {s.onclick = function(event) {if (event.which == 1) {
 		RemovePreview();
 		event.stopPropagation();
 		let bod = document.getElementById("body");
@@ -587,7 +587,7 @@ function SetEvents() {
 // ----------------------------------EVENTS FOR CHECKBOXES AND DROPDOWN MENUS---------------------------------------------	
 
 	// set checkbox options on/off and save
-	document.querySelectorAll(".bg_opt").forEach(function(s){s.onclick = function(event) {if (event.which == 1) {
+	document.querySelectorAll(".bg_opt").forEach(function(s) {s.onclick = function(event) {if (event.which == 1) {
 		opt[this.id] = this.checked ? true : false;
 		if (this.checked) {
 			if (this.id == "never_show_close") {
@@ -907,10 +907,10 @@ function SetEvents() {
 				let data = fr.result;
 				file.parentNode.removeChild(file);
 				let LoadedData = JSON.parse(data);
-				// LoadedData.forEach(function(d){
+				// LoadedData.forEach(function(d) {
 					// console.log(d);
 				// });
-				// LoadedData.forEach(function(d){
+				// LoadedData.forEach(function(d) {
 					console.log(LoadedData);
 				// });
 			}
@@ -933,21 +933,21 @@ function SetEvents() {
 }
 
 function RemoveToolbarEditEvents() {
-	document.querySelectorAll("#button_filter_clear").forEach(function(s){
+	document.querySelectorAll("#button_filter_clear").forEach(function(s) {
 		s.style.opacity = "0";
 	});
-	document.querySelectorAll(".button").forEach(function(s){
+	document.querySelectorAll(".button").forEach(function(s) {
 		s.removeAttribute("draggable");
 	});
 }
 
 // ----------------------EDIT TOOLBAR-------------------------------------------------------------------------------------	
 function AddEditToolbarEditEvents() {
-	document.querySelectorAll("#button_filter_clear").forEach(function(s){
+	document.querySelectorAll("#button_filter_clear").forEach(function(s) {
 		s.style.opacity = "1";
 	});
 
-	document.querySelectorAll("#toolbar_main .button_img, #toolbar_shelf_tools .button_img, #toolbar_shelf_groups .button_img, #toolbar_shelf_backup .button_img, #toolbar_shelf_folders .button_img").forEach(function(s){
+	document.querySelectorAll("#toolbar_main .button_img, #toolbar_shelf_tools .button_img, #toolbar_shelf_groups .button_img, #toolbar_shelf_backup .button_img, #toolbar_shelf_folders .button_img").forEach(function(s) {
 		s.setAttribute("draggable", true);
 		s.onmousedown = function(event) {
 			if (event.which == 1) {
@@ -981,7 +981,7 @@ function AddEditToolbarEditEvents() {
 	});
 	
 	
-	document.querySelectorAll("#toolbar_main, .toolbar_shelf:not(#toolbar_search), #toolbar_unused_buttons").forEach(function(s){s.ondragenter = function(event) {
+	document.querySelectorAll("#toolbar_main, .toolbar_shelf:not(#toolbar_search), #toolbar_unused_buttons").forEach(function(s) {s.ondragenter = function(event) {
 		if ((dragged_button.id == "button_tools" || dragged_button.id == "button_search" || dragged_button.id == "button_groups" || dragged_button.id == "button_backup" || dragged_button.id == "button_folders") && this.classList.contains("toolbar_shelf")) {
 			return;
 		}
@@ -993,7 +993,7 @@ function AddEditToolbarEditEvents() {
 }
 
 function copyStringToClipboard(string) {
-	function handler (event){
+	function handler (event) {
 		event.clipboardData.setData('text/plain', string);
 		event.preventDefault();
 		document.removeEventListener('copy', handler, true);
@@ -1011,11 +1011,11 @@ function RefreshFields() {
 		document.getElementById("field_theme").style.height = "";
 	}
 	if (browserId == "F") {
-		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s){
+		document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s) {
 			s.style.display = "none";
 		});
 	} else {
-		document.querySelectorAll("#firefox_option_hide_other_groups_tabs_firefox").forEach(function(s){
+		document.querySelectorAll("#firefox_option_hide_other_groups_tabs_firefox").forEach(function(s) {
 			s.style.display = "none";
 		});
 	}
@@ -1026,13 +1026,13 @@ function RefreshFields() {
 		document.getElementById("field_vivaldi").style.display = "block";
 	}
 	if (document.getElementById("show_toolbar").checked) {
-		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
+		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s) {
 			s.style.display = "";
 		});
 		document.getElementById("options_toolbar_look").style.display = "";
 		document.getElementById("field_show_toolbar").style.height = "";
 	} else{
-		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s){
+		document.querySelectorAll("#options_available_buttons, #sample_toolbar_block, #options_reset_toolbar_button").forEach(function(s) {
 			s.style.display = "none";
 		});
 		document.getElementById("options_toolbar_look").style.display = "none";

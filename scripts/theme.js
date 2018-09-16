@@ -5,11 +5,11 @@
 
 function Loadi18n() {
 	// toolbar labels
-	document.querySelectorAll(".button, .manager_window_toolbar_button").forEach(function(s){
+	document.querySelectorAll(".button, .manager_window_toolbar_button").forEach(function(s) {
 		s.title = chrome.i18n.getMessage(s.id);
 	});
 	// menu labels and edit group dialog labels
-	document.querySelectorAll(".menu_item, .edit_dialog_button, #manager_window_header_title, .manager_window_label").forEach(function(s){
+	document.querySelectorAll(".menu_item, .edit_dialog_button, #manager_window_header_title, .manager_window_label").forEach(function(s) {
 		s.textContent = chrome.i18n.getMessage(s.id);
 	});
 }
@@ -31,6 +31,7 @@ function ApplyTheme(theme) {
 	ApplySizeSet(theme["TabsSizeSetNumber"]);
 	ApplyColorsSet(theme["ColorsSet"]);
 	ApplyTabsMargins(theme["TabsMargins"]);
+	ApplyBlinking();
 	RefreshGUI();
 	
 	for (var groupId in tt.groups) {
@@ -43,7 +44,7 @@ function ApplyTheme(theme) {
 }
 
 // theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"}
-function ApplyColorsSet(ThemeColors){
+function ApplyColorsSet(ThemeColors) {
 	let css_variables = "";
 	for (let css_variable in ThemeColors) {
 		css_variables = css_variables + "--" + css_variable + ":" + ThemeColors[css_variable] + ";";
@@ -56,7 +57,7 @@ function ApplyColorsSet(ThemeColors){
 	}
 }
 
-function ApplySizeSet(size){
+function ApplySizeSet(size) {
 	for (let si = 0; si < document.styleSheets.length; si++) {
 		if ((document.styleSheets[si].ownerNode.id).match("sizes_preset") != null) {
 			if (document.styleSheets[si].ownerNode.id == "sizes_preset_"+size) {
@@ -66,20 +67,38 @@ function ApplySizeSet(size){
 			}
 		}
 	}
-	if (browserId == "F") {
+	// if (browserId == "F") {
 		// for some reason top position for various things is different in firefox?????
-		if (size > 1) {
-			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-		} else {
-			document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: 0px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-		}
-	}
+		// if (size > 1) {
+			// document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+		// } else {
+			// document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: 0px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+		// }
+	// }
 }
 
-function ApplyTabsMargins(size){
+function ApplyTabsMargins(size) {
 	for (let si = 0; si < document.styleSheets.length; si++) {
 		if ((document.styleSheets[si].ownerNode.id).match("tabs_margin") != null) {
 			if (document.styleSheets[si].ownerNode.id == "tabs_margin_"+size) {
+				document.styleSheets.item(si).disabled = false;
+			} else {
+				document.styleSheets.item(si).disabled = true;
+			}
+		}
+	}
+}
+function ApplyBlinking() {
+	for (let si = 0; si < document.styleSheets.length; si++) {
+		if ((document.styleSheets[si].ownerNode.id).match("blinking_pins") != null) {
+			if (opt.pin_attention_blinking) {
+				document.styleSheets.item(si).disabled = false;
+			} else {
+				document.styleSheets.item(si).disabled = true;
+			}
+		}
+		if ((document.styleSheets[si].ownerNode.id).match("blinking_audio") != null) {
+			if (opt.audio_blinking) {
 				document.styleSheets.item(si).disabled = false;
 			} else {
 				document.styleSheets.item(si).disabled = true;
@@ -114,7 +133,7 @@ function GetCurrentTheme(storage) {
 // OPTIONS PAGE
 function LoadTheme(ThemeId, reloadInSidebar) {
 	
-	document.querySelectorAll(".theme_buttons").forEach(function(s){
+	document.querySelectorAll(".theme_buttons").forEach(function(s) {
 		s.disabled = true;
 	});
 	
@@ -143,7 +162,7 @@ function LoadTheme(ThemeId, reloadInSidebar) {
 						chrome.runtime.sendMessage({command: "reload_theme", ThemeId: ThemeId, theme: SelectedTheme});
 					}
 					
-					document.querySelectorAll(".theme_buttons").forEach(function(s){
+					document.querySelectorAll(".theme_buttons").forEach(function(s) {
 						s.disabled = false;
 					});
 
@@ -259,7 +278,7 @@ function RenameSelectedTheme() {
 	let ThemeNameBox = document.getElementById("new_theme_name");
 
 	// for (let i = 0; i < ThemeList.options.length; i++) {
-		// if (ThemeNameBox.value == ThemeList.options[i].text){
+		// if (ThemeNameBox.value == ThemeList.options[i].text) {
 			// alert(chrome.i18n.getMessage("options_there_is_a_theme_with_this_name"));
 			// return;
 		// }

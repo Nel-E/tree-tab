@@ -270,6 +270,12 @@
 	"option_allow_pin_close": {
 		"message": "Allow to close pinned tabs"
 	},
+	"option_pin_attention_blinking": {
+		"message": "Blink pinned tabs that ask for attention"
+	},
+	"option_audio_blinking": {
+		"message": "Blink audio indicator"
+	},
 	"options_tabs": {
 		"message": " Tabs "
 	},
@@ -393,6 +399,20 @@
 	
 	
 	
+	"options_append_pinned_tab": {
+		"message": "Place pinned tabs"
+	},
+	"options_append_pinned_tab_first": {
+		"message": "as first"
+	},
+	"options_append_pinned_tab_after": {
+		"message": "after opener, or active"
+	},
+	"options_append_pinned_tab_last": {
+		"message": "as last"
+	},
+	
+	
 	"options_append_child_tab": {
 		"message": "Place children tabs"
 	},
@@ -483,9 +503,6 @@
 	},
 	"options_max_tree_drag_drop": {
 		"message": "Limit Drag&Drop to tree's maximum depth, so you can't drop tabs beyond maximum depth"
-	},
-	"options_max_tree_drag_drop_folders": {
-		"message": "Limit Drag&Drop to tree's maximum depth, so you can't drop folders beyond maximum depth"
 	},
 
 

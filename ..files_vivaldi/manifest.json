@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"default_locale": "en",
 	"background": {
-		"scripts": [ "listeners_bg.js", "scripts/common.js", "background.js" ],
+		"scripts": [ "background_listeners.js", "scripts/variables.js", "background.js" ],
 		"persistent": true
 	},
 	"name": "Tree Tabs",
@@ -25,5 +25,5 @@
 			"description": "close tree"
 		}
 	},
-	"version": "1.7.3"
+	"version": "1.7.7"
 }

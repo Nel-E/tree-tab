@@ -55,21 +55,21 @@ async function RefreshGUI() {
 	let toolbar_groupsWidth = toolbar_groups.getBoundingClientRect().width;
 
 	if (opt.show_counter_groups) {
-		document.querySelectorAll(".group").forEach(function(s){
+		document.querySelectorAll(".group").forEach(function(s) {
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
 				groupLabel.textContent = (tt.groups[s.id] ? tt.groups[s.id].name : labels.noname_group) + " (" + document.querySelectorAll("#"+s.id+" .tab").length + ")";
 			}
 		});
 	} else {
-		document.querySelectorAll(".group").forEach(function(s){
+		document.querySelectorAll(".group").forEach(function(s) {
 			let groupLabel = document.getElementById("_gte"+s.id);
 			if (groupLabel) {
 				groupLabel.textContent = tt.groups[s.id] ? tt.groups[s.id].name : labels.noname_group;
 			}
 		});
 	}
-	document.querySelectorAll(".group_button").forEach(function(s){
+	document.querySelectorAll(".group_button").forEach(function(s) {
 		s.style.height = s.firstChild.getBoundingClientRect().height + "px";
 	});
 	let groups = document.getElementById("groups");
@@ -81,11 +81,6 @@ async function RefreshGUI() {
 	groups.style.height = groupsHeight + "px";
 	groups.style.width = groupsWidth + "px";
 
-	// let bottom_floating_buttons = document.getElementById("status_bar");
-	// let active_group_tabs = document.getElementById("ct"+tt.active_group);
-	// bottom_floating_buttons.style.left = toolbar_groupsWidth + "px";
-	// bottom_floating_buttons.style.width = toolbar_groupsWidth + active_group_tabs.clientWidth + "px";
-	
 	
 	let PanelList = document.querySelector(".mw_pan_on>.manager_window_list");
 	let PanelListHeight = 3 + PanelList.children.length * 18;
@@ -115,10 +110,10 @@ function RefreshDiscarded(tabId) {
 			if (tab) {
 				if (tab.discarded) {
 					t.classList.add("discarded");
-				} else {
-					t.classList.remove("discarded");
 					t.classList.remove("audible");
 					t.classList.remove("muted");
+				} else {
+					t.classList.remove("discarded");
 				}
 			}
 		});
@@ -160,8 +155,8 @@ function RefreshMediaIcon(tabId) {
 // Vivaldi does not have changeInfo.audible listener, this is my own implementation, hopefully this will not affect performance too much
 function VivaldiRefreshMediaIcons() {
 	setInterval(function() {
-		chrome.tabs.query({currentWindow: true, audible: true}, function(tabs) {
-			document.querySelectorAll(".audible, .muted").forEach(function(s){
+		chrome.tabs.query({currentWindow: true, audible: true, discarded: false}, function(tabs) {
+			document.querySelectorAll(".audible, .muted").forEach(function(s) {
 				s.classList.remove("audible");
 				s.classList.remove("muted");
 			});
@@ -179,12 +174,14 @@ function VivaldiRefreshMediaIcons() {
 }
 
 async function LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
-	if (TabHeaderNode){
+	if (TabHeaderNode) {
 		Img.src = TryUrls[i];
 		Img.onload = function() {
 			TabHeaderNode.style.backgroundImage = "url(" + TryUrls[i] + ")";
 			if (browserId == "F") { // cache Firefox favicon - solution for bug with empty favicons in unloaded tabs
-				browser.sessions.setTabValue(tabId, "CachedFaviconUrl", TryUrls[i]);
+				// if (TryUrls[i].startsWith("data") == false) {
+					browser.sessions.setTabValue(tabId, "CachedFaviconUrl", TryUrls[i]);
+				// }
 			}
 		};
 		Img.onerror = function() {
@@ -198,16 +195,8 @@ async function LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
 async function GetFaviconAndTitle(tabId, addCounter) {
 	let t = document.getElementById(tabId);
 	if (t != null) {
-		
-		let CachedFavicon;
-		if (browserId == "F") {
-			let ttf = Promise.resolve(browser.sessions.getTabValue(tabId, "CachedFaviconUrl")).then(function(FaviconUrl) {
-				CachedFavicon = FaviconUrl;
-			});
-		}
-		
-		chrome.tabs.get(parseInt(tabId), function(tab) {
-			if (tab){
+		chrome.tabs.get(parseInt(tabId), async function(tab) {
+			if (tab) {
 				let title = tab.title ? tab.title : tab.url;
 				let tHeader = t.childNodes[0];
 				let tTitle = t.childNodes[0].childNodes[2];
@@ -221,13 +210,9 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 					}
 	
 					let Img = new Image();
-
-					if (browserId != "F") {
-						CachedFavicon = "chrome://favicon/"+tab.url;
-					}
-					let TryCases = [tab.favIconUrl, CachedFavicon, , "./theme/icon_empty.svg"];
+					let CachedFavicon = browserId == "F" ? await browser.sessions.getTabValue(tabId, "CachedFaviconUrl") : "chrome://favicon/"+tab.url;
+					let TryCases = [tab.favIconUrl, CachedFavicon, "./theme/icon_empty.svg"];
 					LoadFavicon(tabId, Img, TryCases, tHeader, 0);
-
 				}
 				if (tab.status == "loading" && tab.discarded == false) {
 					title = tab.title ? tab.title : labels.loading;
@@ -239,7 +224,9 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 					}
 					tTitle.textContent = labels.loading;
 					setTimeout(function() {
-						if (document.getElementById(tab.id) != null) GetFaviconAndTitle(tab.id, addCounter);
+						if (document.getElementById(tab.id) != null) {
+							GetFaviconAndTitle(tab.id, addCounter);
+						}
 					}, 1000);
 				}
 				if (addCounter && (opt.show_counter_tabs || opt.show_counter_tabs_hints)) {
@@ -252,17 +239,7 @@ async function GetFaviconAndTitle(tabId, addCounter) {
 
 // refresh open closed trees states
 async function RefreshExpandStates() {
-	document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s){
-		if (s.childNodes[1].children.length == 0 && s.childNodes[2].children.length == 0) {
-			s.classList.remove("o");
-			s.classList.remove("c");
-		} else {
-			if (s.classList.contains("o") == false && s.classList.contains("c") == false) {
-				s.classList.add("o");
-			}
-		}
-	});
-	document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
+	document.querySelectorAll("#"+tt.active_group+" .folder, #"+tt.active_group+" .tab").forEach(function(s) {
 		if (s.childNodes[1].children.length == 0) {
 			s.classList.remove("o");
 			s.classList.remove("c");
@@ -272,21 +249,15 @@ async function RefreshExpandStates() {
 			}
 		}
 	});
+	document.querySelectorAll(".pin").forEach(function(s) {
+		s.classList.remove("o");
+		s.classList.remove("c");
+	});
 }
 
 async function RefreshCounters() {
 	if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-		// if (opt.show_counter_tabs_hints) {
-			// document.querySelectorAll("#"+tt.active_group+" .tab").forEach(function(s){
-				// let title = s.childNodes[0].getAttribute("tabTitle");
-				// if (title != null) {
-					// s.childNodes[0].title = title;
-					// s.childNodes[0].childNodes[1].textContent = title;
-				// }
-			// });
-		// }
-		
-		document.querySelectorAll("#"+tt.active_group+" .o.tab, #"+tt.active_group+" .c.tab").forEach(function(s){
+		document.querySelectorAll("#"+tt.active_group+" .o.tab, #"+tt.active_group+" .c.tab").forEach(function(s) {
 			if (opt.show_counter_tabs) {
 				s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
 			}
@@ -296,7 +267,7 @@ async function RefreshCounters() {
 			}
 		});
 		// ·
-		document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s){
+		document.querySelectorAll("#"+tt.active_group+" .folder").forEach(function(s) {
 			if (opt.show_counter_tabs && tt.folders[s.id]) {
 				s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
 			}

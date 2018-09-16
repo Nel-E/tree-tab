@@ -12,22 +12,24 @@ function StartSidebarListeners() {
 	}
 	
 	chrome.commands.onCommand.addListener(function(command) {
-		chrome.windows.getCurrent({populate: false}, function(window) {
-			if (window.id == tt.CurrentWindowId && window.focused) {
-				chrome.tabs.query({windowId: tt.CurrentWindowId, active: true}, function(tabs) {
-					let tabsArr = [];
-					document.querySelectorAll("[id='"+tabs[0].id+"'] .tab, [id='"+tabs[0].id+"']").forEach(function(s){
-						tabsArr.push(parseInt(s.id));
-						if (s.childNodes[1].childNodes.length > 0) {
-							document.querySelectorAll("#"+s.childNodes[1].id+" .tab").forEach(function(t){
-								tabsArr.push(parseInt(t.id));
-							});
-						}
+		if (command == "close_tree") {
+			chrome.windows.getCurrent({populate: false}, function(window) {
+				if (window.id == tt.CurrentWindowId && window.focused) {
+					chrome.tabs.query({windowId: tt.CurrentWindowId, active: true}, function(tabs) {
+						let tabsArr = [];
+						document.querySelectorAll("[id='"+tabs[0].id+"'] .tab, [id='"+tabs[0].id+"']").forEach(function(s) {
+							tabsArr.push(parseInt(s.id));
+							if (s.childNodes[2].childNodes.length > 0) {
+								document.querySelectorAll("#"+s.childNodes[2].id+" .tab").forEach(function(t) {
+									tabsArr.push(parseInt(t.id));
+								});
+							}
+						});
+						CloseTabs(tabsArr);
 					});
-					CloseTabs(tabsArr);
-				});
-			}
-		});
+				}
+			});
+		}
 	});
 
 	chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
@@ -143,10 +145,7 @@ function StartSidebarListeners() {
 					message.InsertAfterId = undefined;
 					message.ParentId = tt.active_group;
 				}
-				
-				
 				AppendTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
-				
 				RefreshExpandStates();
 				setTimeout(function() {
 					RefreshCounters();
@@ -154,7 +153,7 @@ function StartSidebarListeners() {
 				},50);
 				
 				if (opt.syncro_tabbar_tabs_order) {
-					let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s){
+					let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s) {
 						return parseInt(s.id);
 					});
 					chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
@@ -171,7 +170,7 @@ function StartSidebarListeners() {
 					log("chrome event: "+message.command+", tabId: "+message.tabId+", tab is pinned: "+message.tab.pinned+", ParentId: "+message.ParentId);
 				}
 
-				AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: true, SkipMediaIcon: true});
+				AppendTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: false, SkipMediaIcon: false});
 				RefreshGUI();
 				return;
 			}
@@ -182,12 +181,8 @@ function StartSidebarListeners() {
 				let Tab = document.getElementById(message.tabId);
 				if (Tab != null) {
 					let ctDetachedParent = Tab.childNodes[1];
-					if (opt.promote_children_in_first_child == true && ctDetachedParent.childNodes.length > 1) {
-						let ctNewParent = document.getElementById(ctDetachedParent.firstChild.id).childNodes[1];
-						ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
-						while (ctDetachedParent.firstChild) {
-							ctNewParent.appendChild(ctDetachedParent.firstChild);
-						}
+					if (opt.promote_children_in_first_child == true && Tab.childNodes[1].childNodes.length > 1) {
+						PromoteChildrenToFirstChild(Tab);
 					} else {
 						while (ctDetachedParent.firstChild) {
 							ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
@@ -214,12 +209,8 @@ function StartSidebarListeners() {
 						log("tab_removed, promote children: " +opt.promote_children);
 					}
 					if (opt.promote_children == true) {
-						if (opt.promote_children_in_first_child == true && ctParent.childNodes.length > 1) {
-							let ctNewParent = document.getElementById(ctParent.firstChild.id).childNodes[1];
-							ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
-							while (ctParent.firstChild) {
-								ctNewParent.appendChild(ctParent.firstChild);
-							}
+						if (opt.promote_children_in_first_child == true && mTab.childNodes[1].childNodes.length > 1) {
+							PromoteChildrenToFirstChild(mTab);
 						} else {
 							while (ctParent.firstChild) {
 								ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
@@ -228,6 +219,9 @@ function StartSidebarListeners() {
 					} else {
 						document.querySelectorAll("[id='"+message.tabId+"'] .tab").forEach(function(s) {
 							chrome.tabs.remove(parseInt(s.id));
+						});
+						document.querySelectorAll("[id='"+message.tabId+"'] .folder").forEach(function(s) {
+							RemoveFolder(s.id);
 						});
 					}
 					RemoveTabFromList(message.tabId);
@@ -262,6 +256,9 @@ function StartSidebarListeners() {
 				}
 				
 				if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
+					if (browserId == "F") {
+						browser.sessions.setTabValue(message.tabId, "CachedFaviconUrl", "");
+					}
 					setTimeout(function() {
 						GetFaviconAndTitle(message.tabId, true);
 					}, 100);
@@ -276,7 +273,6 @@ function StartSidebarListeners() {
 				}
 				if (message.changeInfo.discarded != undefined) {
 					RefreshDiscarded(message.tabId);
-					// RefreshMediaIcon(message.tabId);
 				}
 				if (message.changeInfo.pinned != undefined) {
 					let updateTab = document.getElementById(message.tabId);
@@ -303,7 +299,7 @@ function StartSidebarListeners() {
 					log("chrome event: "+message.command+ ", tabId: " + message.tabId);
 					log(message);
 				}
-				RcreateTreeStructure(message.groups, message.folders, message.tabs);
+				RecreateTreeStructure(message.groups, message.folders, message.tabs);
 				sendResponse(true);
 				tt.schedule_update_data++;
 				return;
