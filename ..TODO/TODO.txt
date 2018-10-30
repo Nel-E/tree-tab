@@ -1,39 +1,33 @@
+WITH NEW API:
+REDO SIDEBAR INITIALIZE ok!
 
-FINISH BACKGROUND LISTENERS (ORPHAN CASE)
 
-FINISH EVENTS - DROP
 
-FINISH BACKUP MERGE and recreate group and session
 
-REDO START DRAG OF GROUP AND FOLDER
+RECHECK CLOSE TABS - activeTab query (works)
 
-REDO DRAG OVER PIN_LIST AND GROUP
+FINISH BACKGROUND LISTENERS (ORPHAN CASE) YAYYYYYY PROBABLY DONE!
+FINISH EVENTS - DROP (MAYBE DONE?)
+REDO START DRAG OF GROUP TAB AND FOLDER (MAYBE there)
+REDO DRAG OVER PIN_LIST AND GROUP (DONE!)
+REDO CloseTabs (looks fine, more testing needed)
+RECHECK SetTabClass (looks fine, more testing needed)
+FINISH BACKUP MERGE and recreate group and session, REDO load group, coooooz' not work (done, testing needed)
+REDO DETACH TAB!!! (maybe done)
 
-REDO GO TO NEXT /PREV FUNCTIONS
+
+
 
 REVAMP MENU
-
 REVAMP TOOLBAR FUNCTIONS
+FIX ADD NEW FOLDER (from toolbar and from menu - add insertAfterID to new folder function)
 
-FIX Bookmark
-
-
-FIX ADD NEW FOLDER (from toolbar)
-
-
-
-CHECK IF KEEP GetSelectedFolders AND GetSelectedTabs
 
 REDO PROMOTE TABS IN LISTENERS IN: tab_removed AND tab_detached
-REDO DETACH TAB!!!
 
 
-REDO CloseTabs (should be fine)
-RECHECK SetTabClass (should be fine)
-
-
-
-
+ADD LINKS TO OPTIONS PAGE AND ADD RED COMMENTS
+ADD PRESETS FOR OPTIONS
 
 
 
@@ -45,7 +39,7 @@ RECHECK SetTabClass (should be fine)
 CHANGES:
 1. mute icon config option (disable animation)
 2. "TURN OFF DIMMING" OF AUDIO AND FOR ATTENTION
-
+3. you can now drop folders between tabs, but only if root is folder or group
 
 
 
