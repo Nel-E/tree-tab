@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"default_locale": "en",
 	"background": {
-		"scripts": [ "background_listeners.js", "scripts/variables.js", "background.js" ],
+		"scripts": [ "global.js", "background.js" ],
 		"persistent": true
 	},
 	"name": "Tree Tabs",
@@ -36,7 +36,7 @@
 		}
 	},
 	"options_ui": {
-		"page": "options.html",
+		"page": "options/options.html",
 		"open_in_tab": true
 	},
 	"commands": {

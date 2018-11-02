@@ -580,7 +580,6 @@ div {
 
 
 /* TABS */
-
 /* regular tab title */
 .tab_title {
 	z-index: 5;
@@ -593,7 +592,7 @@ div {
 	padding-left: var(--tab_title_text_padding_left);
 	font-size: var(--title_font_size);
 	pointer-events: none;
-	margin-top: calc(  (var(--tab_height) - var(--title_font_size) - 2px) /2 );
+	line-height: var(--tab_height);
 }
 
 .tab {
@@ -691,7 +690,6 @@ div {
 }
 
 /* FOLDERS */
-
 .folder_title {
 	z-index: 5;
 	font-family: Arial, Helvetica, "Nimbus Sans L", "Liberation Sans", FreeSans, Sans-serif;
@@ -702,11 +700,12 @@ div {
 	padding-right: 3px;
 	padding-left: var(--tab_title_text_padding_left);
 	font-size: var(--title_font_size);
+	pointer-events: none;
+	line-height: var(--tab_height);
+	/* colors and styles */
 	color:var(--tab_title_font_color);
 	font-style:var(--tab_title_font_style);
 	font-weight:var(--tab_title_font_weight);
-	pointer-events: none;
-	margin-top: calc(  (var(--tab_height) - var(--title_font_size) - 2px) /2 );
 }
 
 .folder {
@@ -958,8 +957,9 @@ div {
 	border:1px solid var(--tab_hover_border);
 	background-color:var(--tab_hover_background);
 }
+.folder>.folder_header_hover>.folder_title,
 .tab>.tab_header_hover>.tab_title {
-	color:var(--tab_hover_title_font_color);
+		color:var(--tab_hover_title_font_color);
 	font-style:var(--tab_hover_title_font_style);
 	font-weight:var(--tab_hover_title_font_weight);
 }

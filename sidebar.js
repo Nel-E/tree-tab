@@ -8,7 +8,7 @@
 
 let tt = {
     CurrentWindowId: 0,
-    active_group: "tab_list",
+    active_group: null,
     tabs: {},
     groups: {},
     folders: {},
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", Run(), false);
 
 
 function Run() {
-	TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: "Starting up"});
+	TT.Manager.ShowStatusBar({show: true, spinner: true, message: "Starting up"});
 	chrome.runtime.sendMessage({command: "is_bg_ready"}, function(response) {
 		if (response == true) {
 			Initialize();
@@ -56,14 +56,14 @@ function Initialize() {
 		chrome.storage.local.get(null, function(storage) {
 			GetCurrentPreferences(storage);
 
-			TreeTabs.Menu.CreateMenu();
-			TreeTabs.Theme.ApplyTheme(TreeTabs.Theme.GetCurrentTheme(storage));
+			TT.Menu.CreateMenu();
+			TT.Theme.ApplyTheme(TT.Theme.GetCurrentTheme(storage));
 
 			if (opt.show_toolbar) {
-				TreeTabs.Toolbar.RecreateToolbar(TreeTabs.Theme.GetCurrentToolbar(storage));
-				TreeTabs.Toolbar.SetToolbarEvents(false, true, true, "mousedown", true, false);
-				TreeTabs.Toolbar.RestoreToolbarShelf();
-				TreeTabs.Toolbar.RestoreToolbarSearchFilter();
+				TT.Toolbar.RecreateToolbar(TT.Theme.GetCurrentToolbar(storage));
+				TT.Toolbar.SetToolbarEvents(false, true, true, "mousedown", true, false);
+				TT.Toolbar.RestoreToolbarShelf();
+				TT.Toolbar.RestoreToolbarSearchFilter();
 			}
 			
 			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(bgtabs) {
@@ -72,10 +72,10 @@ function Initialize() {
 					chrome.runtime.sendMessage({command: "get_groups", windowId: tt.CurrentWindowId}, function(g) {
 						tt.groups = Object.assign({}, g);
 						// APPEND GROUPS
-						TreeTabs.Groups.AppendGroups(tt.groups);
+						TT.Groups.AppendGroups(tt.groups);
 
 						// APPEND FOLDERS TO TABLIST
-						TreeTabs.Folders.PreAppendFolders(tt.folders);					
+						TT.Folders.PreAppendFolders(tt.folders);					
 						
 						// APPEND TABS TO TABLIST
 						// let ta = [];
@@ -89,14 +89,14 @@ function Initialize() {
 
 						for (ti = 0; ti < tc; ti++) {
 							// if (bgtabs[tabs[ti].id]){
-								tt.tabs[tabs[ti].id] = new TreeTabs.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tabs[ti].id] && bgtabs[tabs[ti].id].expand != "") ? bgtabs[tabs[ti].id].expand : undefined)});
+								tt.tabs[tabs[ti].id] = new TT.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tabs[ti].id] && bgtabs[tabs[ti].id].expand != "") ? bgtabs[tabs[ti].id].expand : undefined)});
 							// } else {
-							// 	tt.tabs[tabs[ti].id] = new TreeTabs.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true)});
+							// 	tt.tabs[tabs[ti].id] = new TT.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true)});
 							// }
 						}
 						
 						// APPEND FOLDERS TO CORRECT PARENTS
-						TreeTabs.Folders.AppendFolders(tt.folders);
+						TT.Folders.AppendFolders(tt.folders);
                         
                         
                         
@@ -133,43 +133,43 @@ function Initialize() {
                         
                         
 						// SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
-						TreeTabs.Groups.SetActiveTabInEachGroup();
-						TreeTabs.Tabs.RearrangeTree(bgtabs, tt.folders, true);
+						TT.Groups.SetActiveTabInEachGroup();
+						TT.Tabs.RearrangeTree(bgtabs, tt.folders, true);
 						
-						TreeTabs.Browser.StartSidebarListeners();
+						TT.Browser.StartSidebarListeners();
 	
-						TreeTabs.DOM.SetEvents();
-						TreeTabs.Manager.SetManagerEvents();
-						TreeTabs.Menu.HideMenus();
+						TT.DOM.SetEvents();
+						TT.Manager.SetManagerEvents();
+						TT.Menu.HideMenus();
 						
 						if (opt.switch_with_scroll) {
-							TreeTabs.DOM.BindTabsSwitchingToMouseWheel("pin_list");
+							TT.DOM.BindTabsSwitchingToMouseWheel("pin_list");
 						}
 						if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
-							TreeTabs.Tabs.RearrangeBrowserTabs();
+							TT.Tabs.RearrangeBrowserTabs();
 						}
 						
-						TreeTabs.Theme.RestorePinListRowSettings();
-						TreeTabs.Manager.StartAutoSaveSession();
+						TT.Theme.RestorePinListRowSettings();
+						TT.Manager.StartAutoSaveSession();
 						
 						if (browserId == "V" || browserId == "O") {
-							TreeTabs.DOM.VivaldiRefreshMediaIcons();
+							TT.DOM.VivaldiRefreshMediaIcons();
 						}
 						
 						setTimeout(function() {
-							TreeTabs.DOM.RefreshExpandStates();
-							TreeTabs.DOM.RefreshCounters();
-							TreeTabs.Groups.SetActiveTabInEachGroup();
+							TT.DOM.RefreshExpandStates();
+							TT.DOM.RefreshCounters();
+							TT.Groups.SetActiveTabInEachGroup();
 							// if (browserId == "F" && opt.skip_load == false && storage.emergency_reload == undefined) {
-								// TreeTabs.Utils.RecheckFirefox();
+								// TT.Utils.RecheckFirefox();
 							// }
 						// console.log(tt.tabs);
 						}, 1000);
 						
-						TreeTabs.Manager.ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
+						TT.Manager.ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
 						
 						setTimeout(function() {
-							TreeTabs.Tabs.SaveTabs();
+							TT.Tabs.SaveTabs();
 							delete DefaultToolbar;
 							delete DefaultTheme;
 							delete DefaultPreferences;

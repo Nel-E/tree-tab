@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.title = "Tree Tabs";
     chrome.storage.local.get(null, function(storage) {
 
-        TreeTabs.Groups.AppendGroupToList("tab_list", labels.ungrouped_group, "", false);
-        TreeTabs.Groups.AppendGroupToList("tab_list2", labels.noname_group, "", false);
+        TT.Groups.AppendGroupToList("tab_list", labels.ungrouped_group, "", false);
+        TT.Groups.AppendGroupToList("tab_list2", labels.noname_group, "", false);
         AppendSampleTabs();
 
         GetCurrentPreferences(storage);
@@ -36,16 +36,16 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         if (storage["current_theme"]) {
             current_theme = storage["current_theme"];
-            TreeTabs.Theme.LoadTheme(storage["current_theme"]);
+            TT.Theme.LoadTheme(storage["current_theme"]);
         }
 
 
         if (storage["unused_buttons"]) {
-            TreeTabs.Toolbar.RecreateToolbarUnusedButtons(storage["unused_buttons"]);
+            TT.Toolbar.RecreateToolbarUnusedButtons(storage["unused_buttons"]);
         }
 
-        TreeTabs.Toolbar.RecreateToolbar(TreeTabs.Theme.GetCurrentToolbar(storage));
-        TreeTabs.Toolbar.SetToolbarEvents(false, false, true, "click", false, true);
+        TT.Toolbar.RecreateToolbar(TT.Theme.GetCurrentToolbar(storage));
+        TT.Toolbar.SetToolbarEvents(false, false, true, "click", false, true);
         AddEditToolbarEditEvents();
 
 
@@ -73,7 +73,7 @@ function SetRegexes() {
             opt.tab_group_regexes.push([regex, groupName]);
         }
     }
-    TreeTabs.Preferences.SavePreferences(opt);
+    TT.Preferences.SavePreferences(opt);
 }
 
 function AddRegexPair() {
@@ -596,8 +596,8 @@ function SetEvents() {
                 FontStyle = "italic";
             }
             SelectedTheme["ColorsSet"][this.id] = FontStyle;
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     });
 
@@ -620,11 +620,11 @@ function SetEvents() {
     document.getElementById("color_picker").oninput = function(event) {
         let ColorPicker = document.getElementById("color_picker");
         SelectedTheme["ColorsSet"][this.getAttribute("PickColor")] = ColorPicker.value;
-        TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-        // TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+        TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+        // TT.Theme.SaveTheme(document.getElementById("theme_list").value);
     }
     document.getElementById("color_picker").onchange = function(event) {
-        TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+        TT.Theme.SaveTheme(document.getElementById("theme_list").value);
     }
 
 
@@ -650,9 +650,9 @@ function SetEvents() {
                         document.getElementById("promote_children_in_first_child").disabled = true;
                     }
                 }
-                TreeTabs.Preferences.SavePreferences(opt);
+                TT.Preferences.SavePreferences(opt);
                 if (this.id == "show_toolbar") {
-                    TreeTabs.Toolbar.SaveToolbar();
+                    TT.Toolbar.SaveToolbar();
                     RefreshFields();
 
 
@@ -689,7 +689,7 @@ function SetEvents() {
             opt[this.id] = this.value;
             RefreshFields();
             setTimeout(function() {
-                TreeTabs.Preferences.SavePreferences(opt);
+                TT.Preferences.SavePreferences(opt);
                 // chrome.runtime.sendMessage({command: "reload_sidebar"});
             }, 50);
         }
@@ -699,7 +699,7 @@ function SetEvents() {
     document.getElementById("max_tree_depth").oninput = function(event) {
         opt.max_tree_depth = parseInt(this.value);
         setTimeout(function() {
-            TreeTabs.Preferences.SavePreferences(opt);
+            TT.Preferences.SavePreferences(opt);
         }, 50);
     }
 
@@ -707,7 +707,7 @@ function SetEvents() {
     // document.getElementById("show_toolbar").onclick = function(event) {if (event.which == 1) {
     // SelectedTheme.ToolbarShow = this.checked ? true : false;
     // RefreshFields();
-    // TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+    // TT.Theme.SaveTheme(document.getElementById("theme_list").value);
     // }}
 
 
@@ -730,7 +730,7 @@ function SetEvents() {
     document.getElementById("options_reset_toolbar_button").onclick = function(event) {
         if (event.which == 1) {
 
-            TreeTabs.Toolbar.SetToolbarEvents(true, false, false, "", false, false);
+            TT.Toolbar.SetToolbarEvents(true, false, false, "", false, false);
             RemoveToolbarEditEvents();
 
 
@@ -739,12 +739,12 @@ function SetEvents() {
                 unused_buttons.removeChild(unused_buttons.firstChild);
             }
 
-            TreeTabs.Toolbar.RemoveToolbar();
-            TreeTabs.Toolbar.RecreateToolbar(DefaultToolbar);
-            TreeTabs.Toolbar.SetToolbarEvents(false, false, true, "click", false, true);
+            TT.Toolbar.RemoveToolbar();
+            TT.Toolbar.RecreateToolbar(DefaultToolbar);
+            TT.Toolbar.SetToolbarEvents(false, false, true, "click", false, true);
             AddEditToolbarEditEvents();
 
-            TreeTabs.Toolbar.SaveToolbar();
+            TT.Toolbar.SaveToolbar();
 
 
         }
@@ -757,29 +757,29 @@ function SetEvents() {
     // add new theme preset button
     document.getElementById("options_add_theme_button").onclick = function(event) {
         if (event.which == 1) {
-            TreeTabs.Theme.AddNewTheme();
+            TT.Theme.AddNewTheme();
         }
     }
 
     // remove theme preset button
     document.getElementById("options_remove_theme_button").onclick = function(event) {
         if (event.which == 1) {
-            TreeTabs.Theme.DeleteSelectedTheme();
+            TT.Theme.DeleteSelectedTheme();
         }
     }
 
     // select theme from list
     document.getElementById("theme_list").onchange = function(event) {
-        TreeTabs.Theme.LoadTheme(this.value, true);
+        TT.Theme.LoadTheme(this.value, true);
         chrome.storage.local.set({ current_theme: this.value });
     }
 
     // import theme preset button
     document.getElementById("options_import_theme_button").onclick = function(event) {
         if (event.which == 1) {
-            let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_theme");
+            let inputFile = TT.File.ShowOpenFileDialog(".tt_theme");
             inputFile.onchange = function(event) {
-                TreeTabs.Theme.ImportTheme();
+                TT.Theme.ImportTheme();
             }
         }
     }
@@ -791,7 +791,7 @@ function SetEvents() {
             if (ThemeList.options.length == 0) {
                 alert(chrome.i18n.getMessage("options_no_theme_to_export"));
             } else {
-                TreeTabs.File.SaveFile(ThemeList.options[ThemeList.selectedIndex].text, "tt_theme", SelectedTheme);
+                TT.File.SaveFile(ThemeList.options[ThemeList.selectedIndex].text, "tt_theme", SelectedTheme);
             }
         }
     }
@@ -799,7 +799,7 @@ function SetEvents() {
     // rename theme preset button
     document.getElementById("options_rename_theme_button").onclick = function(event) {
             if (event.which == 1) {
-                TreeTabs.Theme.RenameSelectedTheme();
+                TT.Theme.RenameSelectedTheme();
             }
         }
         // get themes
@@ -819,8 +819,8 @@ function SetEvents() {
         if (indentation > 0) {
             indentation--;
             SelectedTheme["ColorsSet"]["children_padding_left"] = indentation + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -831,8 +831,8 @@ function SetEvents() {
         if (indentation < 50) {
             indentation++;
             SelectedTheme["ColorsSet"]["children_padding_left"] = indentation + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -846,8 +846,8 @@ function SetEvents() {
         if (border_radius > 0) {
             border_radius--;
             SelectedTheme["ColorsSet"]["tab_header_border_radius"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -858,8 +858,8 @@ function SetEvents() {
         if (border_radius < 25) {
             border_radius++;
             SelectedTheme["ColorsSet"]["tab_header_border_radius"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -876,8 +876,8 @@ function SetEvents() {
             }
         }
         SelectedTheme["TabsMargins"] = size;
-        TreeTabs.Theme.ApplyTabsMargins(size);
-        TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+        TT.Theme.ApplyTabsMargins(size);
+        TT.Theme.SaveTheme(document.getElementById("theme_list").value);
     }
 
 
@@ -885,8 +885,8 @@ function SetEvents() {
     document.getElementById("options_tabs_size_down").onmousedown = function(event) {
         if (SelectedTheme["TabsSizeSetNumber"] > 0) {
             SelectedTheme["TabsSizeSetNumber"]--;
-            TreeTabs.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -894,8 +894,8 @@ function SetEvents() {
     document.getElementById("options_tabs_size_up").onmousedown = function(event) {
         if (SelectedTheme["TabsSizeSetNumber"] < 4) {
             SelectedTheme["TabsSizeSetNumber"]++;
-            TreeTabs.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -909,8 +909,8 @@ function SetEvents() {
         if (border_radius > 0) {
             border_radius--;
             SelectedTheme["ColorsSet"]["scrollbar_width"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -921,8 +921,8 @@ function SetEvents() {
         if (border_radius < 20) {
             border_radius++;
             SelectedTheme["ColorsSet"]["scrollbar_width"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -933,8 +933,8 @@ function SetEvents() {
         if (border_radius > 0) {
             border_radius--;
             SelectedTheme["ColorsSet"]["scrollbar_height"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -945,8 +945,8 @@ function SetEvents() {
         if (border_radius < 20) {
             border_radius++;
             SelectedTheme["ColorsSet"]["scrollbar_height"] = border_radius + "px";
-            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
-            TreeTabs.Theme.SaveTheme(document.getElementById("theme_list").value);
+            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+            TT.Theme.SaveTheme(document.getElementById("theme_list").value);
         }
     }
 
@@ -956,7 +956,7 @@ function SetEvents() {
     document.getElementById("options_export_debug").onclick = function(event) {
         if (event.which == 1) {
             chrome.storage.local.get(null, function(storage) {
-                TreeTabs.File.SaveFile("TreeTabs", "log", storage.debug_log);
+                TT.File.SaveFile("TreeTabs", "log", storage.debug_log);
             });
         }
     }
@@ -964,7 +964,7 @@ function SetEvents() {
     // ----------------------IMPORT DEBUG LOG----------------------------------------------------------------------------	
     document.getElementById("options_print_debug").onclick = function(event) {
         if (event.which == 1) {
-            let inputFile = TreeTabs.File.ShowOpenFileDialog(".log");
+            let inputFile = TT.File.ShowOpenFileDialog(".log");
             inputFile.onchange = function(event) {
                 let file = document.getElementById("file_import");
                 let fr = new FileReader();
@@ -1037,15 +1037,15 @@ function AddEditToolbarEditEvents() {
                 let Index = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
 
                 if (Index <= dragged_buttonIndex) {
-                    TreeTabs.DOM.InsterBeforeNode(dragged_button, this.parentNode);
+                    TT.DOM.InsterBeforeNode(dragged_button, this.parentNode);
                 } else {
-                    TreeTabs.DOM.InsterAfterNode(dragged_button, this.parentNode);
+                    TT.DOM.InsterAfterNode(dragged_button, this.parentNode);
                 }
             }
             // save toolbar
         s.ondragend = function(event) {
             RemoveToolbarEditEvents();
-            TreeTabs.Toolbar.SaveToolbar();
+            TT.Toolbar.SaveToolbar();
             AddEditToolbarEditEvents();
         }
     });
@@ -1119,7 +1119,7 @@ function RefreshFields() {
         if (opt.append_child_tab == "after" && opt.append_orphan_tab == "as_child") {
             opt.append_orphan_tab = "after_active";
             document.getElementById("append_orphan_tab").value = "after_active";
-            TreeTabs.Preferences.SavePreferences(opt);
+            TT.Preferences.SavePreferences(opt);
         }
 
     } else {
@@ -1152,9 +1152,9 @@ function RefreshGUI() {
 
 // function SetActiveTab() {}
 
-// function TreeTabs.DOM.RefreshCounters() {}
+// function TT.DOM.RefreshCounters() {}
 
-// function TreeTabs.DOM.RefreshExpandStates() {}
+// function TT.DOM.RefreshExpandStates() {}
 
 // function Loadi18n() {}
 
@@ -1167,124 +1167,124 @@ function RefreshGUI() {
 function AppendSampleTabs() {
 
     // folders
-    TreeTabs.Folders.AddNewFolder({ folderId: "f_folder1", ParentId: "c_tab_list", Name: labels.noname_group, Index: 0, ExpandState: "o", SkipSetEvents: true, AdditionalClass: "o", SkipFavicon: true });
-    TreeTabs.Folders.AddNewFolder({ folderId: "f_folder2", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", SkipSetEvents: true, AdditionalClass: "c", SkipFavicon: true });
-    TreeTabs.Folders.AddNewFolder({ folderId: "f_folder3", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", SkipSetEvents: true, AdditionalClass: "c", SkipFavicon: true });
+    TT.Folders.AddNewFolder({ folderId: "f_folder1", ParentId: "c_tab_list", Name: labels.noname_group, Index: 0, ExpandState: "o", SkipSetEvents: true, AdditionalClass: "o", SkipFavicon: true });
+    TT.Folders.AddNewFolder({ folderId: "f_folder2", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", SkipSetEvents: true, AdditionalClass: "c", SkipFavicon: true });
+    TT.Folders.AddNewFolder({ folderId: "f_folder3", ParentId: "f_folder1", Name: labels.noname_group, Index: 0, ExpandState: "c", SkipSetEvents: true, AdditionalClass: "c", SkipFavicon: true });
 
 
     // pins
-    tt.tabs["0"] = new TreeTabs.Tabs.ttTab({ tab: { id: 0, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
-    tt.tabs["1"] = new TreeTabs.Tabs.ttTab({ tab: { id: 1, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
-    tt.tabs["10"] = new TreeTabs.Tabs.ttTab({ tab: { id: 10, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["0"] = new TT.Tabs.ttTab({ tab: { id: 0, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["1"] = new TT.Tabs.ttTab({ tab: { id: 1, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["10"] = new TT.Tabs.ttTab({ tab: { id: 10, pinned: true, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
     document.getElementById("10").classList.add("attention");
 
     // regular tabs
-    tt.tabs["2"] = new TreeTabs.Tabs.ttTab({ tab: { id: 2, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, addCounter: true, SkipFavicon: true });
+    tt.tabs["2"] = new TT.Tabs.ttTab({ tab: { id: 2, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, addCounter: true, SkipFavicon: true });
     document.getElementById("tab_title2").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal");
 
-    tt.tabs["11"] = new TreeTabs.Tabs.ttTab({ tab: { id: 11, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["11"] = new TT.Tabs.ttTab({ tab: { id: 11, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
     document.getElementById("tab_title11").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_hover");
     document.getElementById("tab_header11").classList.add("tab_header_hover");
     document.getElementById("tab_header11").classList.add("close_show");
 
-    tt.tabs["12"] = new TreeTabs.Tabs.ttTab({ tab: { id: 12, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
+    tt.tabs["12"] = new TT.Tabs.ttTab({ tab: { id: 12, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
     document.getElementById("tab_title12").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected");
 
-    tt.tabs["13"] = new TreeTabs.Tabs.ttTab({ tab: { id: 13, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
+    tt.tabs["13"] = new TT.Tabs.ttTab({ tab: { id: 13, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
     document.getElementById("tab_title13").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_normal_selected_hover");
     document.getElementById("tab_header13").classList.add("tab_header_hover")
     document.getElementById("tab_header13").classList.add("close_show");
     document.getElementById("close13").classList.add("close_hover");
 
     // regular active tabs
-    tt.tabs["3"] = new TreeTabs.Tabs.ttTab({ tab: { id: 3, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "active_tab", SkipFavicon: true });
+    tt.tabs["3"] = new TT.Tabs.ttTab({ tab: { id: 3, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "active_tab", SkipFavicon: true });
     document.getElementById("tab_title3").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active");
 
-    tt.tabs["15"] = new TreeTabs.Tabs.ttTab({ tab: { id: 15, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "active_tab", SkipFavicon: true });
+    tt.tabs["15"] = new TT.Tabs.ttTab({ tab: { id: 15, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "active_tab", SkipFavicon: true });
     document.getElementById("tab_title15").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_hover");
     document.getElementById("tab_header15").classList.add("tab_header_hover");
 
-    tt.tabs["14"] = new TreeTabs.Tabs.ttTab({ tab: { id: 14, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "c selected active_tab", SkipFavicon: true });
+    tt.tabs["14"] = new TT.Tabs.ttTab({ tab: { id: 14, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "c selected active_tab", SkipFavicon: true });
     document.getElementById("tab_title14").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected");
 
-    tt.tabs["16"] = new TreeTabs.Tabs.ttTab({ tab: { id: 16, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "c selected active_tab", SkipFavicon: true });
+    tt.tabs["16"] = new TT.Tabs.ttTab({ tab: { id: 16, pinned: false, active: false }, ParentId: "2", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "c selected active_tab", SkipFavicon: true });
     document.getElementById("tab_title16").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_active_selected_hover");
     document.getElementById("tab_header16").classList.add("tab_header_hover");
     document.getElementById("exp16").classList.add("hover");
 
     // discarded tabs
-    tt.tabs["5"] = new TreeTabs.Tabs.ttTab({ tab: { id: 5, pinned: false, active: false, discarded: true }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["5"] = new TT.Tabs.ttTab({ tab: { id: 5, pinned: false, active: false, discarded: true }, Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
     document.getElementById("tab_title5").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded");
 
-    tt.tabs["17"] = new TreeTabs.Tabs.ttTab({ tab: { id: 17, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
+    tt.tabs["17"] = new TT.Tabs.ttTab({ tab: { id: 17, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, SkipFavicon: true });
     document.getElementById("tab_title17").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_hover");
     document.getElementById("tab_header17").classList.add("tab_header_hover");
 
-    tt.tabs["19"] = new TreeTabs.Tabs.ttTab({ tab: { id: 19, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected highlighted_drop_target after", SkipFavicon: true });
+    tt.tabs["19"] = new TT.Tabs.ttTab({ tab: { id: 19, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected highlighted_drop_target after", SkipFavicon: true });
     document.getElementById("tab_title19").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected");
 
-    tt.tabs["20"] = new TreeTabs.Tabs.ttTab({ tab: { id: 20, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
+    tt.tabs["20"] = new TT.Tabs.ttTab({ tab: { id: 20, pinned: false, active: false, discarded: true }, ParentId: "5", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected", SkipFavicon: true });
     document.getElementById("tab_title20").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_discarded_selected_hover");
     document.getElementById("tab_header20").classList.add("tab_header_hover");
 
     // search result
-    tt.tabs["6"] = new TreeTabs.Tabs.ttTab({ tab: { id: 6, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered", SkipFavicon: true });
+    tt.tabs["6"] = new TT.Tabs.ttTab({ tab: { id: 6, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered", SkipFavicon: true });
     document.getElementById("tab_title6").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result");
 
-    tt.tabs["21"] = new TreeTabs.Tabs.ttTab({ tab: { id: 21, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered", SkipFavicon: true });
+    tt.tabs["21"] = new TT.Tabs.ttTab({ tab: { id: 21, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered", SkipFavicon: true });
     document.getElementById("tab_title21").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_hover");
     document.getElementById("tab_header21").classList.add("tab_header_hover");
 
-    tt.tabs["22"] = new TreeTabs.Tabs.ttTab({ tab: { id: 22, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered active_tab", SkipFavicon: true });
+    tt.tabs["22"] = new TT.Tabs.ttTab({ tab: { id: 22, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered active_tab", SkipFavicon: true });
     document.getElementById("tab_title22").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_active");
 
-    tt.tabs["23"] = new TreeTabs.Tabs.ttTab({ tab: { id: 23, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered active_tab", SkipFavicon: true });
+    tt.tabs["23"] = new TT.Tabs.ttTab({ tab: { id: 23, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered active_tab", SkipFavicon: true });
     document.getElementById("tab_title23").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_active_hover");
     document.getElementById("tab_header23").classList.add("tab_header_hover");
 
 
     // search result selected
-    tt.tabs["8"] = new TreeTabs.Tabs.ttTab({ tab: { id: 8, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered", SkipFavicon: true });
+    tt.tabs["8"] = new TT.Tabs.ttTab({ tab: { id: 8, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered", SkipFavicon: true });
     document.getElementById("tab_title8").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected");
 
-    tt.tabs["18"] = new TreeTabs.Tabs.ttTab({ tab: { id: 18, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered", SkipFavicon: true });
+    tt.tabs["18"] = new TT.Tabs.ttTab({ tab: { id: 18, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered", SkipFavicon: true });
     document.getElementById("tab_title18").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_hover");
     document.getElementById("tab_header18").classList.add("tab_header_hover");
 
-    tt.tabs["25"] = new TreeTabs.Tabs.ttTab({ tab: { id: 25, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered active_tab", SkipFavicon: true });
+    tt.tabs["25"] = new TT.Tabs.ttTab({ tab: { id: 25, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered active_tab", SkipFavicon: true });
     document.getElementById("tab_title25").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active");
 
 
-    tt.tabs["26"] = new TreeTabs.Tabs.ttTab({ tab: { id: 26, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered active_tab", SkipFavicon: true });
+    tt.tabs["26"] = new TT.Tabs.ttTab({ tab: { id: 26, pinned: false, active: false }, ParentId: "6", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered active_tab", SkipFavicon: true });
     document.getElementById("tab_title26").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_selected_active_hover");
     document.getElementById("tab_header26").classList.add("tab_header_hover");
 
     // search result highlighted
-    tt.tabs["30"] = new TreeTabs.Tabs.ttTab({ tab: { id: 30, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search", SkipFavicon: true });
+    tt.tabs["30"] = new TT.Tabs.ttTab({ tab: { id: 30, pinned: false, active: false }, Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search", SkipFavicon: true });
     document.getElementById("tab_title30").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted");
 
-    tt.tabs["31"] = new TreeTabs.Tabs.ttTab({ tab: { id: 31, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search", SkipFavicon: true });
+    tt.tabs["31"] = new TT.Tabs.ttTab({ tab: { id: 31, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search", SkipFavicon: true });
     document.getElementById("tab_title31").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_hover");
     document.getElementById("tab_header31").classList.add("tab_header_hover");
 
-    tt.tabs["32"] = new TreeTabs.Tabs.ttTab({ tab: { id: 32, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search active_tab", SkipFavicon: true });
+    tt.tabs["32"] = new TT.Tabs.ttTab({ tab: { id: 32, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search active_tab", SkipFavicon: true });
     document.getElementById("tab_title32").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_active");
 
-    tt.tabs["33"] = new TreeTabs.Tabs.ttTab({ tab: { id: 33, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search active_tab", SkipFavicon: true });
+    tt.tabs["33"] = new TT.Tabs.ttTab({ tab: { id: 33, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "filtered highlighted_search active_tab", SkipFavicon: true });
     document.getElementById("tab_title33").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_active_hover");
     document.getElementById("tab_header33").classList.add("tab_header_hover");
 
-    tt.tabs["34"] = new TreeTabs.Tabs.ttTab({ tab: { id: 34, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search", SkipFavicon: true });
+    tt.tabs["34"] = new TT.Tabs.ttTab({ tab: { id: 34, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search", SkipFavicon: true });
     document.getElementById("tab_title34").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected");
 
-    tt.tabs["35"] = new TreeTabs.Tabs.ttTab({ tab: { id: 35, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search", SkipFavicon: true });
+    tt.tabs["35"] = new TT.Tabs.ttTab({ tab: { id: 35, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search", SkipFavicon: true });
     document.getElementById("tab_title35").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_hover");
     document.getElementById("tab_header35").classList.add("tab_header_hover");
 
-    tt.tabs["36"] = new TreeTabs.Tabs.ttTab({ tab: { id: 36, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search active_tab", SkipFavicon: true });
+    tt.tabs["36"] = new TT.Tabs.ttTab({ tab: { id: 36, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search active_tab", SkipFavicon: true });
     document.getElementById("tab_title36").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_active");
 
-    tt.tabs["37"] = new TreeTabs.Tabs.ttTab({ tab: { id: 37, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search active_tab", SkipFavicon: true });
+    tt.tabs["37"] = new TT.Tabs.ttTab({ tab: { id: 37, pinned: false, active: false }, ParentId: "30", Append: true, SkipSetActive: true, SkipSetEvents: true, AdditionalClass: "selected filtered highlighted_search active_tab", SkipFavicon: true });
     document.getElementById("tab_title37").textContent = chrome.i18n.getMessage("options_theme_tabs_sample_text_search_result_highlighted_selected_active_hover");
     document.getElementById("tab_header37").classList.add("tab_header_hover");
 

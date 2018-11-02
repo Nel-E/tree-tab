@@ -5,14 +5,14 @@
 
 // FOLD UP TO LEVEL 3 FOR EASIER USE
 
-var TreeTabs = {
+const TT = {
     Tabs: {
         ttTab: class {
             constructor(p) {
                 this.id = p.tab.id;
                 this.pinned = p.tab.pinned;
                 // this.discarded = p.tab.discarded;
-                this.Node = null;
+                // this.Node = null;
 
                 if (document.getElementById(p.tab.id) != null && tt.tabs[p.tab.id]) {
                     tt.tabs[p.tab.id].GetFaviconAndTitle(p.addCounter);
@@ -31,48 +31,48 @@ var TreeTabs = {
                 if (p.ExpandState) {
                     ClassList += " " + p.ExpandState;
                 }
-                let DIVT = document.createElement("div");                DIVT.className = ClassList;                                                                                        DIVT.id = p.tab.id;
-                let DIVT_header = document.createElement("div");         DIVT_header.className = (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header"; DIVT_header.id = "tab_header" + p.tab.id;  DIVT_header.draggable = !p.SkipSetEvents ? true : false; DIVT.appendChild(DIVT_header);
-                let DIVT_expand = document.createElement("div");         DIVT_expand.className = "expand";                 DIVT_expand.id = "exp" + p.tab.id;                               DIVT_header.appendChild(DIVT_expand);
-                let DIVT_counter = document.createElement("div");        DIVT_counter.className = "tab_counter";           DIVT_counter.id = "tab_counter" + p.tab.id;                      DIVT_header.appendChild(DIVT_counter);
-                let DIVT_counter_number = document.createElement("div"); DIVT_counter_number.className = "counter_number"; DIVT_counter_number.id = "counter_number" + p.tab.id;            DIVT_counter.appendChild(DIVT_counter_number);
-                let DIVT_title = document.createElement("div");          DIVT_title.className = "tab_title";               DIVT_title.id = "tab_title" + p.tab.id;                          DIVT_header.appendChild(DIVT_title);
-                let DIVT_close_button = document.createElement("div");   DIVT_close_button.className = "close";            DIVT_close_button.id = "close" + p.tab.id;                       DIVT_header.appendChild(DIVT_close_button);
-                let DIVT_close_image = document.createElement("div");    DIVT_close_image.className = "close_img";         DIVT_close_image.id = "close_img" + p.tab.id;                    DIVT_close_button.appendChild(DIVT_close_image);
-                if (opt.never_show_close) {
-                    DIVT_close_button.classList.add("hidden"); DIVT_close_image.classList.add("hidden");
-                }
-                let DIVT_audio_indicator = document.createElement("div"); DIVT_audio_indicator.className = "tab_mediaicon"; DIVT_audio_indicator.id = "tab_mediaicon" + p.tab.id;  DIVT_header.appendChild(DIVT_audio_indicator);
-                let DIVT_children = document.createElement("div");        DIVT_children.className = "children";             DIVT_children.id = "°" + p.tab.id;                     DIVT.appendChild(DIVT_children);
-                let DIVT_drop_indicator = document.createElement("div");  DIVT_drop_indicator.className = "drag_indicator"; DIVT_drop_indicator.id = "_drag_indicator" + p.tab.id; DIVT.appendChild(DIVT_drop_indicator);
+                let DIVT = TT.DOM.NewEl({type: "div", id: p.tab.id, classes: ClassList});
+                let DIVT_header = TT.DOM.NewEl({type: "div", id: ("tab_header_" + p.tab.id), classes: (opt.always_show_close && !opt.never_show_close) ? "tab_header close_show" : "tab_header", draggable: (!p.SkipSetEvents ? true : undefined), parent: DIVT});
+                let DIVT_expand = TT.DOM.NewEl({type: "div", id: ("exp_" + p.tab.id), classes: "expand", parent: DIVT_header});
+                let DIVT_counter = TT.DOM.NewEl({type: "div", id: ("tab_counter_" + p.tab.id), classes: "tab_counter", parent: DIVT_header});
+                // let DIVT_counter_number = 
+                TT.DOM.NewEl({type: "div", id: ("counter_number_" + p.tab.id), classes: "counter_number", parent: DIVT_counter});
+                let DIVT_title = TT.DOM.NewEl({type: "div", id: ("tab_title_" + p.tab.id), classes: "tab_title", parent: DIVT_header});
+                let DIVT_close_button = TT.DOM.NewEl({type: "div", id: ("close_" + p.tab.id), classes: (opt.never_show_close ? "close hidden" : "close"), parent: DIVT_header});
+                // let DIVT_close_image = 
+                TT.DOM.NewEl({type: "div", id: ("close_img_" + p.tab.id), classes: (opt.never_show_close ? "close_img hidden" : "close_img"), parent: DIVT_close_button});
+                let DIVT_audio_indicator = TT.DOM.NewEl({type: "div", id: ("tab_mediaicon_" + p.tab.id), classes: "tab_mediaicon", parent: DIVT_header});
+                let DIVT_children = TT.DOM.NewEl({type: "div", id: ("°" + p.tab.id), classes: "children", parent: DIVT});
+                // let DIVT_drop_indicator = 
+                TT.DOM.NewEl({type: "div", id: ("drag_indicator_" + p.tab.id), classes: "drag_indicator", parent: DIVT});
                 if (!p.SkipSetEvents) {
                     DIVT_children.onclick = function(event) {
                         if (event.target == this && event.which == 1) {
-                            TreeTabs.DOM.Deselect();
+                            TT.DOM.Deselect();
                         }
                     }
                     DIVT_children.onmousedown = function(event) {
                         if (event.target == this) {
                             if (event.which == 2 && event.target == this) {
                                 event.stopImmediatePropagation();
-                                TreeTabs.Groups.ActionClickGroup(this.parentNode, opt.midclick_group);
+                                TT.Groups.ActionClickGroup(this.parentNode, opt.midclick_group);
                             }
                             if (event.which == 3) {
-                                TreeTabs.Menu.ShowFGlobalMenu(event);
+                                TT.Menu.ShowFGlobalMenu(event);
                             }
                         }
                     }
                     DIVT_children.ondblclick = function(event) {
                         if (event.target == this) {
-                            TreeTabs.Groups.ActionClickGroup(this.parentNode, opt.dbclick_group);
+                            TT.Groups.ActionClickGroup(this.parentNode, opt.dbclick_group);
                         }
                     }
                     DIVT_expand.onmousedown = function(event) {
-                        if (document.getElementById("main_menu").style.top != "-1000px") {
-                            TreeTabs.Menu.HideMenus();
+                        if (tt.DOMmenu.style.top != "-1000px") {
+                            TT.Menu.HideMenus();
                         }
                         if (event.which == 1 && !event.shiftKey && !event.ctrlKey) {
-                            TreeTabs.DOM.EventExpandBox(this.parentNode.parentNode);
+                            TT.DOM.EventExpandBox(this.parentNode.parentNode);
                         }
                     }
                     DIVT_expand.onmouseenter = function(event) {
@@ -85,7 +85,7 @@ var TreeTabs = {
                         DIVT_close_button.onmousedown = function(event) {
                             event.stopImmediatePropagation();
                             if (event.which != 3) {
-                                TreeTabs.Tabs.CloseTabs([parseInt(this.parentNode.parentNode.id)]);
+                                TT.Tabs.CloseTabs([parseInt(this.parentNode.parentNode.id)]);
                             }
                         }
                         DIVT_close_button.onmouseenter = function(event) {
@@ -97,18 +97,18 @@ var TreeTabs = {
                     }
                     DIVT_header.onclick = function(event) {
                         event.stopImmediatePropagation();
-                        if (document.getElementById("main_menu").style.top != "-1000px") {
-                            TreeTabs.Menu.HideMenus();
+                        if (tt.DOMmenu.style.top != "-1000px") {
+                            TT.Menu.HideMenus();
                         } else {
                             if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("tab_header")) {
-                                TreeTabs.DOM.Deselect();
+                                TT.DOM.Deselect();
                                 chrome.tabs.update(parseInt(this.parentNode.id), {active: true});
                             }
                         }
                     }
                     DIVT_header.ondblclick = function(event) {
                         if (event.target.classList && event.target.classList.contains("tab_header")) {
-                            TreeTabs.Tabs.ActionClickTab(this.parentNode, opt.dbclick_tab);
+                            TT.Tabs.ActionClickTab(this.parentNode, opt.dbclick_tab);
                         }
                     }
                     DIVT_header.onmousedown = function(event) {
@@ -121,14 +121,14 @@ var TreeTabs = {
                         }
                         event.stopImmediatePropagation();
                         if (event.which == 1) {
-                            TreeTabs.DOM.Select(event, this.parentNode);
+                            TT.DOM.Select(event, this.parentNode);
                         }
                         if (event.which == 2) {
                             event.preventDefault();
-                            TreeTabs.Tabs.ActionClickTab(this.parentNode, opt.midclick_tab);
+                            TT.Tabs.ActionClickTab(this.parentNode, opt.midclick_tab);
                         }
                         if (event.which == 3) {
-                            TreeTabs.Menu.ShowTabMenu(this.parentNode, event);
+                            TT.Menu.ShowTabMenu(this.parentNode, event);
                         }
                     }
                     DIVT_header.onmouseover = function(event) {
@@ -148,18 +148,18 @@ var TreeTabs = {
                         event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
                         event.dataTransfer.setData("text", "");
                         event.dataTransfer.setData("SourceWindowId", tt.CurrentWindowId);
-                        TreeTabs.DOM.CleanUpDragAndDrop();
+                        TT.DOM.CleanUpDragAndDrop();
                         tt.Dragging = true;
                         tt.DraggingGroup = false;
                         let Nodes = [];
                         if (this.parentNode.classList.contains("selected")) {
-                            TreeTabs.DOM.FreezeSelection(false);
+                            TT.DOM.FreezeSelection(false);
                         } else {
-                            TreeTabs.DOM.FreezeSelection(true);
+                            TT.DOM.FreezeSelection(true);
                             this.parentNode.classList.add("selected_temporarly");
                             this.parentNode.classList.add("selected");
                         }
-                        TreeTabs.DOM.RemoveHeadersHoverClass();
+                        TT.DOM.RemoveHeadersHoverClass();
                         document.querySelectorAll(".selected, .selected .tab, .selected .folder").forEach(function(s) {
                             s.classList.add("dragged_tree");
                             if (s.classList.contains("pin")) {
@@ -177,7 +177,7 @@ var TreeTabs = {
                         });
                         if (opt.max_tree_drag_drop && opt.max_tree_depth >= 0) {
                             document.querySelectorAll(".dragged_tree .tab, .dragged_tree .folder").forEach(function(s) {
-                                let parents = TreeTabs.DOM.GetParentsByClass(s.parentNode, "dragged_tree");
+                                let parents = TT.DOM.GetParentsByClass(s.parentNode, "dragged_tree");
                                 if (parents.length > tt.DragTreeDepth) {
                                     tt.DragTreeDepth = parents.length;
                                 }
@@ -185,7 +185,7 @@ var TreeTabs = {
                         } else {
                             tt.DragTreeDepth = -1;
                         }
-                        let Parents = TreeTabs.DOM.GetAllParents(this.parentNode);
+                        let Parents = TT.DOM.GetAllParents(this.parentNode);
                         Parents.forEach(function(s) {
                             if (s.classList && (s.classList.contains("tab") || s.classList.contains("folder"))) {
                                 s.classList.add("dragged_parents");
@@ -199,37 +199,37 @@ var TreeTabs = {
                         this.classList.remove("tab_header_hover");
                     }
                     DIVT_header.ondragleave = function(event) {
-                        TreeTabs.DOM.RemoveHighlight();
+                        TT.DOM.RemoveHighlight();
                     }
                     DIVT_header.ondragover = function(event) {
                         if (tt.DraggingGroup == false && (tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder) && this.parentNode.classList.contains("dragged_tree") == false) {
                             if (this.parentNode.classList.contains("pin")) {
                                 if (this.parentNode.classList.contains("before") == false && event.layerX < this.clientWidth / 2) {
-                                    TreeTabs.DOM.RemoveHighlight();
+                                    TT.DOM.RemoveHighlight();
                                     this.parentNode.classList.remove("after"); this.parentNode.classList.add("before"); this.parentNode.classList.add("highlighted_drop_target");
                                 }
                                 if (this.parentNode.classList.contains("after") == false && event.layerX >= this.clientWidth / 2) {
-                                    TreeTabs.DOM.RemoveHighlight();
+                                    TT.DOM.RemoveHighlight();
                                     this.parentNode.classList.remove("before"); this.parentNode.classList.add("after"); this.parentNode.classList.add("highlighted_drop_target");
                                 }
                             }
                             if (this.parentNode.classList.contains("tab")) {
-                                let TabDepth = TreeTabs.Tabs.GetTabDepthInTree(this);
+                                let TabDepth = TT.Tabs.GetTabDepthInTree(this);
                                 let PDepth = TabDepth + tt.DragTreeDepth;
                                 let PIsGroup = this.parentNode.parentNode.parentNode.classList.contains("group");
                                 // let PIsTab = this.parentNode.parentNode.parentNode.classList.contains("tab");
                                 let PIsFolder = this.parentNode.parentNode.parentNode.classList.contains("folder");
                                 let PIsDraggedParents = this.parentNode.classList.contains("dragged_parents");
                                 if ((PIsFolder == tt.DraggingFolder || tt.DraggingFolder == false || PIsGroup == true) && this.parentNode.classList.contains("before") == false && event.layerY < this.clientHeight / 3 && (PDepth <= opt.max_tree_depth + 1 || opt.max_tree_depth < 0 || opt.max_tree_drag_drop == false || PIsDraggedParents == true)) {
-                                    TreeTabs.DOM.RemoveHighlight();
+                                    TT.DOM.RemoveHighlight();
                                     this.parentNode.classList.remove("inside"); this.parentNode.classList.remove("after"); this.parentNode.classList.add("before"); this.parentNode.classList.add("highlighted_drop_target");
                                 }
                                 if (tt.DraggingFolder == false && this.parentNode.classList.contains("inside") == false && event.layerY > this.clientHeight / 3 && event.layerY <= 2 * (this.clientHeight / 3) && (PDepth <= opt.max_tree_depth || opt.max_tree_depth < 0 || opt.max_tree_drag_drop == false || PIsDraggedParents == true)) {
-                                    TreeTabs.DOM.RemoveHighlight();
+                                    TT.DOM.RemoveHighlight();
                                     this.parentNode.classList.remove("before"); this.parentNode.classList.remove("after"); this.parentNode.classList.add("inside"); this.parentNode.classList.add("highlighted_drop_target");
                                 }
                                 if ((PIsFolder == tt.DraggingFolder || tt.DraggingFolder == false || PIsGroup == true) && this.parentNode.classList.contains("after") == false && this.parentNode.classList.contains("o") == false && event.layerY > 2 * (this.clientHeight / 3) && (PDepth <= opt.max_tree_depth + 1 || opt.max_tree_depth < 0 || opt.max_tree_drag_drop == false || PIsDraggedParents == true)) {
-                                    TreeTabs.DOM.RemoveHighlight();
+                                    TT.DOM.RemoveHighlight();
                                     this.parentNode.classList.remove("inside"); this.parentNode.classList.remove("before"); this.parentNode.classList.add("after"); this.parentNode.classList.add("highlighted_drop_target");
                                 }
                             }
@@ -252,7 +252,7 @@ var TreeTabs = {
                             clearTimeout(tt.DragOverTimer);
                             tt.DragOverId = "";
                         }
-                        setTimeout(function() {TreeTabs.DOM.CleanUpDragAndDrop();}, 300);
+                        setTimeout(function() {TT.DOM.CleanUpDragAndDrop();}, 300);
                         setTimeout(function() {chrome.runtime.sendMessage({command: "drag_end"});}, 500);
                     }
                     DIVT_audio_indicator.onmousedown = function(event) {
@@ -271,11 +271,11 @@ var TreeTabs = {
                     parent = document.getElementById("pin_list");
                 } else {
                     if (p.ParentId == false || p.ParentId == undefined || p.ParentId == "pin_list") {
-                        parent = document.getElementById("°" + tt.active_group);
+                        parent = tt.active_group.childNodes[0];
                     } else {
                         parent = document.getElementById(p.ParentId);
                         if (parent == null || parent.classList.contains("pin") || parent.parentNode.classList.contains("pin")) {
-                            parent = document.getElementById("°" + tt.active_group);
+                            parent = tt.active_group.childNodes[0];
                         } else {
                             parent = document.getElementById("°" + p.ParentId);
                             if (parent.children.length == 0) {
@@ -295,7 +295,7 @@ var TreeTabs = {
                     let After = document.getElementById(p.InsertAfterId);
                     if (After != null) {
                         if ((p.tab.pinned && After.classList.contains("pin")) || (p.tab.pinned == false && (After.classList.contains("tab") || After.classList.contains("folder")))) {
-                            TreeTabs.DOM.InsterAfterNode(DIVT, After);
+                            TT.DOM.InsterAfterNode(DIVT, After);
                         } else {
                             parent.appendChild(DIVT);
                         }
@@ -304,6 +304,7 @@ var TreeTabs = {
                     }
                 }
                 this.Node = DIVT;
+                this.title = DIVT_title;
                 if (!p.SkipFavicon) {
                     this.GetFaviconAndTitle(p.addCounter);
                 }
@@ -314,7 +315,7 @@ var TreeTabs = {
                     this.RefreshDiscarded();
                 }
                 if (p.tab.active && !p.SkipSetActive) {
-                    TreeTabs.Tabs.SetActiveTab(p.tab.id);
+                    TT.Tabs.SetActiveTab(p.tab.id);
                 }
                 if (p.Scroll) {
                     this.ScrollToTab();
@@ -338,28 +339,28 @@ var TreeTabs = {
                         if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left < 0) {
                             document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - 2;
                         } else {
-                            if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left > document.getElementById(tt.active_group).getBoundingClientRect().width - document.querySelector(".tab_header").getBoundingClientRect().width) {
+                            if (Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left > tt.active_group.getBoundingClientRect().width - document.querySelector(".tab_header").getBoundingClientRect().width) {
                                 document.getElementById("pin_list").scrollLeft = document.getElementById("pin_list").scrollLeft + Tab.getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().left - document.getElementById("pin_list").getBoundingClientRect().width + document.querySelector(".tab_header").getBoundingClientRect().width + 2;
                             }
                         }
                     }
-                    if (Tab.classList.contains("tab") && document.querySelector("#" + tt.active_group + " [id='" + this.id + "']") != null) {
-                        let Parents = TreeTabs.DOM.GetParentsByClass(Tab, "c");
+                    if (Tab.classList.contains("tab") && document.querySelector("#" + tt.active_group.id + " [id='" + this.id + "']") != null) {
+                        let Parents = TT.DOM.GetParentsByClass(Tab, "c");
                         if (Parents.length > 0) {
                             Parents.forEach(function(s) {s.classList.remove("c"); s.classList.add("o");});
                         }
-                        if (Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top < 0) {
-                            document.getElementById(tt.active_group).scrollTop = document.getElementById(tt.active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top - 2;
+                        if (Tab.getBoundingClientRect().top - tt.active_group.getBoundingClientRect().top < 0) {
+                            tt.active_group.scrollTop = tt.active_group.scrollTop + Tab.getBoundingClientRect().top - tt.active_group.getBoundingClientRect().top - 2;
                         } else {
-                            if (Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top > document.getElementById(tt.active_group).getBoundingClientRect().height - document.querySelector(".tab_header").getBoundingClientRect().height) {
-                                document.getElementById(tt.active_group).scrollTop = document.getElementById(tt.active_group).scrollTop + Tab.getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().top - document.getElementById(tt.active_group).getBoundingClientRect().height + document.querySelector(".tab_header").getBoundingClientRect().height + 10;
+                            if (Tab.getBoundingClientRect().top - tt.active_group.getBoundingClientRect().top > tt.active_group.getBoundingClientRect().height - document.querySelector(".tab_header").getBoundingClientRect().height) {
+                                tt.active_group.scrollTop = tt.active_group.scrollTop + Tab.getBoundingClientRect().top - tt.active_group.getBoundingClientRect().top - tt.active_group.getBoundingClientRect().height + document.querySelector(".tab_header").getBoundingClientRect().height + 10;
                             }
                         }
                     }
                 }
             }
             SetTabClass(pin) {
-                let GroupList = document.getElementById("°" + tt.active_group);
+                let GroupList = tt.active_group.childNodes[0];
                 let Tab = this.Node;
                 if (Tab != null) {
                     if (pin) {
@@ -371,7 +372,7 @@ var TreeTabs = {
                             let tabs = document.querySelectorAll("#°" + Tab.id + " .pin, #°" + Tab.id + " .tab");
                             for (let i = tabs.length - 1; i >= 0; i--) {
                                 tabs[i].classList.remove("tab"); tabs[i].classList.remove("o"); tabs[i].classList.remove("c"); tabs[i].classList.add("pin");
-                                TreeTabs.DOM.InsterAfterNode(tabs[i], Tab);
+                                TT.DOM.InsterAfterNode(tabs[i], Tab);
                                 chrome.tabs.update(parseInt(tabs[i].id), {pinned: true});
                             }
                             let folders = document.querySelectorAll("#°" + Tab.id + " .folder");
@@ -389,10 +390,10 @@ var TreeTabs = {
                             }
                         }
                         Tab.classList.remove("pin"); Tab.classList.remove("attention"); Tab.classList.add("tab");
-                        TreeTabs.DOM.RefreshExpandStates();
+                        TT.DOM.RefreshExpandStates();
                         chrome.tabs.update(parseInt(Tab.id), {pinned: false});
                     }
-                    TreeTabs.DOM.RefreshGUI();
+                    TT.DOM.RefreshGUI();
                 }
             }
             DuplicateTab() {
@@ -405,10 +406,10 @@ var TreeTabs = {
                                 DupTab.classList.remove("tab");
                                 DupTab.classList.add("pin");
                             }
-                            TreeTabs.DOM.InsterAfterNode(DupTab, OriginalTabNode);
-                            TreeTabs.DOM.RefreshExpandStates();
+                            TT.DOM.InsterAfterNode(DupTab, OriginalTabNode);
+                            TT.DOM.RefreshExpandStates();
                             tt.schedule_update_data++;
-                            TreeTabs.DOM.RefreshCounters();
+                            TT.DOM.RefreshCounters();
                             clearInterval(DupRetry);
                         }
                     }, 10);
@@ -421,12 +422,12 @@ var TreeTabs = {
             }
             GetFaviconAndTitle(addCounter) {
                 let t = document.getElementById(this.id);
+                let tTitle = this.title;
                 if (t != null) {
                     chrome.tabs.get(parseInt(t.id), async function(tab) {
                         if (tab) {
                             let title = tab.title ? tab.title : tab.url;
                             let tHeader = t.childNodes[0];
-                            let tTitle = t.childNodes[0].childNodes[2];
                             if (tab.status == "complete" || tab.discarded) {
                                 t.classList.remove("loading");
                                 tTitle.textContent = title;
@@ -437,7 +438,7 @@ var TreeTabs = {
                                 let Img = new Image();
                                 let CachedFavicon = browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : "chrome://favicon/" + tab.url;
                                 let TryCases = [tab.favIconUrl, CachedFavicon, "./theme/icon_empty.svg"];
-                                TreeTabs.Tabs.LoadFavicon(tab.id, Img, TryCases, tHeader, 0);
+                                TT.Tabs.LoadFavicon(tab.id, Img, TryCases, tHeader, 0);
                             }
                             if (tab.status == "loading" && tab.discarded == false) {
                                 title = tab.title ? tab.title : labels.loading;
@@ -449,7 +450,7 @@ var TreeTabs = {
                                 }
                                 tTitle.textContent = labels.loading;
                                 setTimeout(function() {
-                                    if (document.getElementById(tab.id) != null) {
+                                    if (document.getElementById(tab.id) != null && tt.tabs[tab.id]) {
                                         tt.tabs[tab.id].GetFaviconAndTitle(addCounter);
                                     }
                                 }, 1000);
@@ -531,7 +532,7 @@ var TreeTabs = {
                 };
                 Img.onerror = function() {
                     if (i < TryUrls.length) {
-                        TreeTabs.Tabs.LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, (i + 1));
+                        TT.Tabs.LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, (i + 1));
                     }
                 }
             }
@@ -568,7 +569,7 @@ var TreeTabs = {
                     chrome.tabs.query({currentWindow: true}, function(tabs) {
                         let ttTabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s) {return parseInt(s.id);});
                         let tabIds = Array.prototype.map.call(tabs, function(t) {return t.id;});
-                        TreeTabs.Tabs.RearrangeBrowserTabsLoop(ttTabIds, tabIds, ttTabIds.length - 1);
+                        TT.Tabs.RearrangeBrowserTabsLoop(ttTabIds, tabIds, ttTabIds.length - 1);
                     });
                 }
             }, 1000);
@@ -581,11 +582,11 @@ var TreeTabs = {
                 if (ttTabIds[tabIndex] != tabIds[tabIndex]) {
                     chrome.tabs.move(ttTabIds[tabIndex], {index: tabIndex});
                 }
-                setTimeout(function() {TreeTabs.Tabs.RearrangeBrowserTabsLoop(ttTabIds, tabIds, (tabIndex - 1));}, 0);
+                setTimeout(function() {TT.Tabs.RearrangeBrowserTabsLoop(ttTabIds, tabIds, (tabIndex - 1));}, 0);
             }
         },
         RearrangeTree: function(TTtabs, TTfolders, show_finish_in_status) {
-            TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_rearranging_tabs")});
+            TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_rearranging_tabs")});
             document.querySelectorAll(".pin, .tab, .folder").forEach(function(Node) {
                 let Sibling = Node.nextElementSibling;
                 if (Sibling) {
@@ -593,13 +594,13 @@ var TreeTabs = {
                     while (Sibling && NodeIndex) {
                         let SiblingIndex = TTtabs[Sibling.id] ? TTtabs[Sibling.id].index : (TTfolders[Sibling.id] ? TTfolders[Sibling.id].index : 0);
                         if (NodeIndex > SiblingIndex) {
-                            TreeTabs.DOM.InsterAfterNode(Node, Sibling);
+                            TT.DOM.InsterAfterNode(Node, Sibling);
                         }
                         Sibling = Sibling.nextElementSibling ? Sibling.nextElementSibling : false;
                     }
                 }
                 if (show_finish_in_status) {
-                    TreeTabs.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_rearranging_finished"), hideTimeout: 1000});
+                    TT.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_rearranging_finished"), hideTimeout: 1000});
                 }
             });
         },
@@ -638,7 +639,7 @@ var TreeTabs = {
                             let GroupsToDetach = Object.assign({}, g); // if there will be a multi groups selection, below I will need for each group loop
                             GroupsToDetach[Group.id] = Group;
                             chrome.runtime.sendMessage({command: "save_groups", groups: GroupsToDetach, windowId: new_window.id});
-                            setTimeout(function() {TreeTabs.Groups.GroupRemove(Group.id, false);}, 2000);
+                            setTimeout(function() {TT.Groups.GroupRemove(Group.id, false);}, 2000);
                         }
                         chrome.runtime.sendMessage({command: "save_folders", folders: folderNodes, windowId: new_window.id});
                         for (let i = 0; i < Nodes.length; i++) {
@@ -650,7 +651,7 @@ var TreeTabs = {
                                 chrome.runtime.sendMessage({command: "update_tab", tabId: Nodes[i].id, tab: {parent: (Nodes[i].parent).substr(1)}});
                             }
                             if (Nodes[i].NodeClass == "folder") {
-                                TreeTabs.Folders.RemoveFolder(Nodes[i].id);
+                                TT.Folders.RemoveFolder(Nodes[i].id);
                             }
                         }
                         if (TabsIds.length > 1) {
@@ -661,7 +662,7 @@ var TreeTabs = {
                                         chrome.tabs.update(parseInt(Nodes[i].id), {pinned: true});
                                     }
                                     if (Nodes[i].NodeClass == "folder") {
-                                        TreeTabs.Folders.RemoveFolder(Nodes[i].id);
+                                        TT.Folders.RemoveFolder(Nodes[i].id);
                                     }
                                 }
                                 let Stop = 500;
@@ -699,7 +700,7 @@ var TreeTabs = {
             }
             tabsIds.splice(0, 1);
             if (tabsIds.length > 0) {
-                setTimeout(function() {TreeTabs.Tabs.DiscardTabs(tabsIds);}, delay);
+                setTimeout(function() {TT.Tabs.DiscardTabs(tabsIds);}, delay);
             }
         },
         FindTab: function(input) { // find and select tabs
@@ -753,7 +754,7 @@ var TreeTabs = {
         },
         CloseTabs: function(tabsIds) {
             if (opt.debug) {
-                log("f: TreeTabs.Tabs.CloseTabs, tabsIds are: " + JSON.stringify(tabsIds));
+                log("f: TT.Tabs.CloseTabs, tabsIds are: " + JSON.stringify(tabsIds));
             }
             tabsIds.forEach(function(tabId) {
                 let t = document.getElementById(tabId);
@@ -761,9 +762,9 @@ var TreeTabs = {
                     t.classList.add("will_be_closed");
                 }
             });
-            let activeTab = document.querySelector(".pin.active_tab, #" + tt.active_group + " .tab.active_tab");
+            let activeTab = document.querySelector(".pin.active_tab, #" + tt.active_group.id + " .tab.active_tab");
             if (activeTab != null && tabsIds.indexOf(parseInt(activeTab.id)) != -1) {
-                TreeTabs.Tabs.SwitchActiveTabBeforeClose(tt.active_group);
+                TT.Tabs.SwitchActiveTabBeforeClose(tt.active_group);
             }
             setTimeout(function() {
                 tabsIds.forEach(function(tabId) {
@@ -775,7 +776,7 @@ var TreeTabs = {
                     }
                     if (tabId == tabsIds[tabsIds.length - 1]) {
                         setTimeout(function() {chrome.tabs.remove(tabsIds, null);}, 10);
-                        TreeTabs.DOM.RefreshGUI();
+                        TT.DOM.RefreshGUI();
                     }
                 });
             }, 200);
@@ -834,14 +835,14 @@ var TreeTabs = {
         },
         ActionClickTab: function(TabNode, bgOption) {
             if (bgOption == "new_tab") {
-                TreeTabs.Tabs.OpenNewTab(TabNode.classList.contains("pin"), TabNode.id);
+                TT.Tabs.OpenNewTab(TabNode.classList.contains("pin"), TabNode.id);
             }
             if (bgOption == "expand_collapse") {
-                TreeTabs.DOM.EventExpandBox(TabNode);
+                TT.DOM.EventExpandBox(TabNode);
             }
             if (bgOption == "close_tab") {
                 if ((TabNode.classList.contains("pin") && opt.allow_pin_close) || TabNode.classList.contains("tab")) {
-                    TreeTabs.Tabs.CloseTabs([parseInt(TabNode.id)]);
+                    TT.Tabs.CloseTabs([parseInt(TabNode.id)]);
                 }
             }
             if (bgOption == "undo_close_tab") {
@@ -856,14 +857,14 @@ var TreeTabs = {
             }
             if (bgOption == "unload_tab") {
                 if (TabNode.classList.contains("active_tab")) {
-                    TreeTabs.Tabs.SwitchActiveTabBeforeClose(tt.active_group);
-                    setTimeout(function() {TreeTabs.Tabs.DiscardTabs([parseInt(TabNode.id)]);}, 500);
+                    TT.Tabs.SwitchActiveTabBeforeClose(tt.active_group.id);
+                    setTimeout(function() {TT.Tabs.DiscardTabs([parseInt(TabNode.id)]);}, 500);
                 } else {
-                    TreeTabs.Tabs.DiscardTabs([parseInt(TabNode.id)]);
+                    TT.Tabs.DiscardTabs([parseInt(TabNode.id)]);
                 }
             }
             if (bgOption == "activate_previous_active" && TabNode.classList.contains("active_tab")) {
-                let PrevActiveTabId = parseInt(tt.groups[tt.active_group].prev_active_tab);
+                let PrevActiveTabId = parseInt(tt.groups[tt.active_group.id].prev_active_tab);
                 if (isNaN(PrevActiveTabId) == false) {
                     chrome.tabs.update(PrevActiveTabId, {active: true});
                 }
@@ -875,22 +876,22 @@ var TreeTabs = {
             }
             let Tab = document.getElementById(tabId);
             if (Tab != null) {
-                let TabGroup = TreeTabs.DOM.GetParentsByClass(Tab, "group");
+                let TabGroup = TT.DOM.GetParentsByClass(Tab, "group");
                 if (TabGroup.length) {
                     if (Tab.classList.contains("tab")) {
-                        TreeTabs.Groups.SetActiveTabInGroup(TabGroup[0].id, tabId);
+                        TT.Groups.SetActiveTabInGroup(TabGroup[0].id, tabId);
                     }
                     if (switchToGroup) {
-                        TreeTabs.Groups.SetActiveGroup(TabGroup[0].id, false, false); // not going to scroll, because mostly it's going to change to a new active in group AFTER switch, so we are not going to scroll to previous active tab
+                        TT.Groups.SetActiveGroup(TabGroup[0].id, false, false); // not going to scroll, because mostly it's going to change to a new active in group AFTER switch, so we are not going to scroll to previous active tab
                     }
                 }
                 document.querySelectorAll(".selected").forEach(function(s) {
                     s.classList.remove("selected");
                 });
-                document.querySelectorAll(".pin, #" + tt.active_group + " .tab").forEach(function(s) {
+                document.querySelectorAll(".pin, #" + tt.active_group.id + " .tab").forEach(function(s) {
                     s.classList.remove("active_tab"); s.classList.remove("selected"); s.classList.remove("selected_last"); s.classList.remove("selected_frozen"); s.classList.remove("selected_temporarly"); s.classList.remove("tab_header_hover");
                 });
-                TreeTabs.DOM.RemoveHighlight();
+                TT.DOM.RemoveHighlight();
                 Tab.classList.remove("attention"); Tab.classList.add("active_tab");
                 if (tt.tabs[tabId]) {
                     tt.tabs[tabId].ScrollToTab();
@@ -914,24 +915,24 @@ var TreeTabs = {
                     if (opt.after_closing_active_tab == "above" || opt.after_closing_active_tab == "above_seek_in_parent") {
                         if (activeGroup.previousSibling != null) {
                             if (document.querySelectorAll("#" + activeGroup.previousSibling.id + " .tab").length > 0) {
-                                TreeTabs.Groups.SetActiveGroup(activeGroup.previousSibling.id, true, true);
+                                TT.Groups.SetActiveGroup(activeGroup.previousSibling.id, true, true);
                             } else {
-                                TreeTabs.Tabs.SwitchActiveTabBeforeClose(activeGroup.previousSibling.id);
+                                TT.Tabs.SwitchActiveTabBeforeClose(activeGroup.previousSibling.id);
                                 return;
                             }
                         } else {
-                            TreeTabs.Groups.SetActiveGroup("tab_list", true, true);
+                            TT.Groups.SetActiveGroup("tab_list", true, true);
                         }
                     } else {
                         if (activeGroup.nextSibling != null) {
                             if (document.querySelectorAll("#" + activeGroup.nextSibling.id + " .tab").length > 0) {
-                                TreeTabs.Groups.SetActiveGroup(activeGroup.nextSibling.id, true, true);
+                                TT.Groups.SetActiveGroup(activeGroup.nextSibling.id, true, true);
                             } else {
-                                TreeTabs.Tabs.SwitchActiveTabBeforeClose(activeGroup.nextSibling.id);
+                                TT.Tabs.SwitchActiveTabBeforeClose(activeGroup.nextSibling.id);
                                 return;
                             }
                         } else {
-                            TreeTabs.Groups.SetActiveGroup("tab_list", true, true);
+                            TT.Groups.SetActiveGroup("tab_list", true, true);
                         }
                     }
                 }
@@ -940,21 +941,21 @@ var TreeTabs = {
                     log("available tabs in current group, switching option is: " + opt.after_closing_active_tab);
                 }
                 if (opt.after_closing_active_tab == "above") {
-                    TreeTabs.Tabs.ActivatePrevTab(true);
+                    TT.Tabs.ActivatePrevTab(true);
                 }
                 if (opt.after_closing_active_tab == "below") {
-                    TreeTabs.Tabs.ActivateNextTab(true);
+                    TT.Tabs.ActivateNextTab(true);
                 }
                 if (opt.after_closing_active_tab == "above_seek_in_parent") {
-                    TreeTabs.Tabs.ActivatePrevTabSameLevel();
+                    TT.Tabs.ActivatePrevTabSameLevel();
                 }
                 if (opt.after_closing_active_tab == "below_seek_in_parent") {
-                    TreeTabs.Tabs.ActivateNextTabSameLevel();
+                    TT.Tabs.ActivateNextTabSameLevel();
                 }
             }
         },
         ActivateNextTabSameLevel: function() {
-            let activeTab = document.querySelector("#" + tt.active_group + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group + " .tab.active_tab") : document.querySelector(".pin.active_tab");
+            let activeTab = document.querySelector("#" + tt.active_group.id + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group.id + " .tab.active_tab") : document.querySelector(".pin.active_tab");
             if (activeTab == null) {
                 return;
             }
@@ -982,7 +983,7 @@ var TreeTabs = {
                 }
             }
             if (NewActiveId == undefined) {
-                TreeTabs.Tabs.ActivatePrevTab();
+                TT.Tabs.ActivatePrevTab();
             }
             if (NewActiveId != undefined) {
                 let tabId = parseInt(NewActiveId);
@@ -992,7 +993,7 @@ var TreeTabs = {
             }
         },
         ActivatePrevTabSameLevel: function() {
-            let activeTab = document.querySelector("#" + tt.active_group + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group + " .tab.active_tab") : document.querySelector(".pin.active_tab");
+            let activeTab = document.querySelector("#" + tt.active_group.id + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group.id + " .tab.active_tab") : document.querySelector(".pin.active_tab");
             if (activeTab == null) {
                 return;
             }
@@ -1020,7 +1021,7 @@ var TreeTabs = {
                 }
             }
             if (NewActiveId == undefined) {
-                TreeTabs.Tabs.ActivateNextTab();
+                TT.Tabs.ActivateNextTab();
             }
             if (NewActiveId != undefined) {
                 let tabId = parseInt(NewActiveId);
@@ -1030,13 +1031,13 @@ var TreeTabs = {
             }
         },
         ActivateNextTab: function(allow_loop) {
-            let activeTab = document.querySelector("#" + tt.active_group + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group + " .tab.active_tab") : document.querySelector(".pin.active_tab");
+            let activeTab = document.querySelector("#" + tt.active_group.id + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group.id + " .tab.active_tab") : document.querySelector(".pin.active_tab");
             if (activeTab == null) {
                 return;
             }
             let NewActiveId;
             let Node = activeTab;
-            let parents = TreeTabs.DOM.GetAllParents(activeTab);
+            let parents = TT.DOM.GetAllParents(activeTab);
             while (Node != null && Node.classList != undefined) {
                 if (parents.indexOf(Node) == -1 && Node != activeTab && (Node.classList.contains("pin") || Node.classList.contains("tab")) && Node.classList.contains("will_be_closed") == false) {
                     NewActiveId = Node.id;
@@ -1055,7 +1056,7 @@ var TreeTabs = {
             }
             if (allow_loop && NewActiveId == undefined) {
                 let RestartLoopFromPin = document.querySelector(".pin");
-                let RestartLoopFromTab = document.querySelector("#°" + tt.active_group + " .tab");
+                let RestartLoopFromTab = document.querySelector("#°" + tt.active_group.id + " .tab");
                 if (activeTab.classList.contains("pin")) {
                     if (RestartLoopFromTab != null) {
                         NewActiveId = RestartLoopFromTab.id;
@@ -1083,7 +1084,7 @@ var TreeTabs = {
             }
         },
         ActivatePrevTab: function(allow_loop) {
-            let activeTab = document.querySelector("#" + tt.active_group + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group + " .tab.active_tab") : document.querySelector(".pin.active_tab");
+            let activeTab = document.querySelector("#" + tt.active_group.id + " .tab.active_tab") != null ? document.querySelector("#" + tt.active_group.id + " .tab.active_tab") : document.querySelector(".pin.active_tab");
             if (activeTab == null) {
                 return;
             }
@@ -1106,7 +1107,7 @@ var TreeTabs = {
             }
             if (allow_loop && NewActiveId == undefined) {
                 let RestartLoopFromPin = document.querySelector(".pin:last-child");
-                let RestartLoopFromTab = document.querySelectorAll("#°" + tt.active_group + " .tab");
+                let RestartLoopFromTab = document.querySelectorAll("#°" + tt.active_group.id + " .tab");
                 if (activeTab.classList.contains("pin")) {
                     if (RestartLoopFromTab.length > 0) {
                         NewActiveId = RestartLoopFromTab[RestartLoopFromTab.length - 1].id;
@@ -1141,12 +1142,12 @@ var TreeTabs = {
         //     }
         // },
         AddNewFolder: function(p) { // folderId: string, ParentId: string, Name: string, Index: int, ExpandState: ("o","c"), AdditionalClass: string, SetEvents: bool
-            let newId = p.folderId ? p.folderId : TreeTabs.Folders.GenerateNewFolderID();
+            let newId = p.folderId ? p.folderId : TT.Folders.GenerateNewFolderID();
             tt.folders[newId] = {id: newId, parent: (p.ParentId ? p.ParentId : ""), index: (p.Index ? p.Index : 0), name: (p.Name ? p.Name : labels.noname_group), expand: (p.ExpandState ? p.ExpandState : "")};
-            TreeTabs.Folders.AppendFolder({folderId: newId, Name: tt.folders[newId].name, InsertAfterId: p.InsertAfterId, ParentId: p.ParentId, ExpandState: p.ExpandState, SkipSetEvents: p.SkipSetEvents, AdditionalClass: p.AdditionalClass});
-            TreeTabs.Folders.SaveFolders();
-            TreeTabs.DOM.RefreshCounters();
-            TreeTabs.DOM.RefreshExpandStates();
+            TT.Folders.AppendFolder({folderId: newId, Name: tt.folders[newId].name, InsertAfterId: p.InsertAfterId, ParentId: p.ParentId, ExpandState: p.ExpandState, SkipSetEvents: p.SkipSetEvents, AdditionalClass: p.AdditionalClass});
+            TT.Folders.SaveFolders();
+            TT.DOM.RefreshCounters();
+            TT.DOM.RefreshExpandStates();
             return newId;
         },
         AppendFolder: function(p) { // folderId: string, ParentId: string, Name: string, ExpandState: ("o","c"), AdditionalClass: string, SetEvents: bool
@@ -1158,13 +1159,13 @@ var TreeTabs = {
                 ClassList += " " + p.AdditionalClass;
             }
             if (document.getElementById(p.folderId) == null) {
-                let DIVF = document.createElement("div");                        DIVF.className = ClassList;                        DIVF.id = p.folderId;
-                let DIVF_header = document.createElement("div");                 DIVF_header.className = (opt.always_show_close && !opt.never_show_close) ? "folder_header close_show" : "folder_header";  DIVF_header.id = p.folderId + "_folder_header";  DIVF_header.draggable = !p.SkipSetEvents ? true : false;  DIVF.appendChild(DIVF_header);
-                let DIVF_expand = document.createElement("div");                 DIVF_expand.className = "folder_icon";             DIVF_expand.id = p.folderId + "_folder_expand";                        DIVF_header.appendChild(DIVF_expand);
-                let DIVF_counter = document.createElement("div");                DIVF_counter.className = "folder_counter";         DIVF_counter.id = p.folderId + "_folder_counter";                      DIVF_header.appendChild(DIVF_counter);
-                let DIVF_counter_number = document.createElement("div");         DIVF_counter_number.className = "counter_number";  DIVF_counter_number.id = p.folderId + "_folder_counter_number";        DIVF_counter.appendChild(DIVF_counter_number);
-                let DIVF_title = document.createElement("div");                  DIVF_title.className = "folder_title";             DIVF_title.id = p.folderId + "_folder_title";                          DIVF_title.textContent = p.Name;                 DIVF_header.appendChild(DIVF_title);
-                let DIVF_children = document.createElement("div");               DIVF_children.className = "children";              DIVF_children.id = "°" + p.folderId;                                   DIVF.appendChild(DIVF_children);
+                let DIVF = TT.DOM.NewEl({type: "div", id: p.folderId, classes: ClassList});
+                let DIVF_header = TT.DOM.NewEl({type: "div", id: ("folder_header_" + p.folderId), classes: ((opt.always_show_close && !opt.never_show_close) ? "folder_header close_show" : "folder_header"), draggable: (!p.SkipSetEvents ? true : undefined), parent: DIVF});
+                let DIVF_expand = TT.DOM.NewEl({type: "div", id: ("folder_expand_" + p.folderId), classes: "folder_icon", parent: DIVF_header});
+                let DIVF_counter = TT.DOM.NewEl({type: "div", id: ("folder_counter_" + p.folderId), classes: "folder_counter", parent: DIVF_header});
+                let DIVF_counter_number = TT.DOM.NewEl({type: "div", id: ("folder_counter_number_" + p.folderId), classes: "counter_number", parent: DIVF_counter});
+                let DIVF_title = TT.DOM.NewEl({type: "div", id: ("folder_title_" + p.folderId), classes: "folder_title", parent: DIVF_header, textcont: p.Name});
+                let DIVF_children = TT.DOM.NewEl({type: "div", id: ("°" + p.folderId), classes: "children", parent: DIVF});
                 let DIVF_drop_indicator = document.createElement("div");         DIVF_drop_indicator.className = "drag_indicator";  DIVF_drop_indicator.id = p.folderId + "_drag_indicator";               DIVF.appendChild(DIVF_drop_indicator);
                 let DIVF_close_button = document.createElement("div");           DIVF_close_button.className = "close";             DIVF_close_button.id = "close" + p.folderId;                           DIVF_header.appendChild(DIVF_close_button);
                 let DIVF_close_image = document.createElement("div");            DIVF_close_image.className = "close_img";          DIVF_close_image.id = "close_img" + p.folderId;                        DIVF_close_button.appendChild(DIVF_close_image);
@@ -1174,22 +1175,22 @@ var TreeTabs = {
                 if (!p.SkipSetEvents) {
                     DIVF_children.ondblclick = function(event) {
                         if (event.target == this) {
-                            TreeTabs.Groups.ActionClickGroup(this.parentNode, opt.dbclick_group);
+                            TT.Groups.ActionClickGroup(this.parentNode, opt.dbclick_group);
                         }
                     }
                     DIVF_children.onclick = function(event) {
                         if (event.target == this && event.which == 1) {
-                            TreeTabs.DOM.Deselect();
+                            TT.DOM.Deselect();
                         }
                     }
                     DIVF_children.onmousedown = function(event) {
                         event.stopImmediatePropagation();
                         if (event.target == this) {
                             if (event.which == 2 && event.target == this) {
-                                TreeTabs.Groups.ActionClickGroup(this.parentNode, opt.midclick_group);
+                                TT.Groups.ActionClickGroup(this.parentNode, opt.midclick_group);
                             }
                             if (event.which == 3) {
-                                TreeTabs.Menu.ShowFGlobalMenu(event);
+                                TT.Menu.ShowFGlobalMenu(event);
                             }
                         }
                     }
@@ -1197,7 +1198,7 @@ var TreeTabs = {
                         DIVF_close_button.onmousedown = function(event) {
                             event.stopImmediatePropagation();
                             if (event.which != 3) {
-                                TreeTabs.Folders.RemoveFolder(this.parentNode.parentNode.id);
+                                TT.Folders.RemoveFolder(this.parentNode.parentNode.id);
                             }
                         }
                         DIVF_close_button.onmouseenter = function(event) {
@@ -1210,30 +1211,30 @@ var TreeTabs = {
                     DIVF_header.onclick = function(event) {
                         if (event.which == 1 && !event.shiftKey) { // SELECT FOLDER
                             if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("folder_header")) {
-                                TreeTabs.DOM.Deselect();
+                                TT.DOM.Deselect();
                             }
                         }
                     }
                     DIVF_header.onmousedown = function(event) {
                         event.stopImmediatePropagation();
-                        if (document.getElementById("main_menu").style.top != "-1000px") {
-                            TreeTabs.Menu.HideMenus();
+                        if (tt.DOMmenu.style.top != "-1000px") {
+                            TT.Menu.HideMenus();
                         }
                         if (event.which == 1) {
-                            TreeTabs.DOM.Select(event, this.parentNode);
+                            TT.DOM.Select(event, this.parentNode);
                         }
                         if (event.which == 2) {
                             event.preventDefault();
-                            TreeTabs.Folders.ActionClickFolder(this.parentNode, opt.midclick_folder);
+                            TT.Folders.ActionClickFolder(this.parentNode, opt.midclick_folder);
                         }
         
                         if (event.which == 3) { // SHOW FOLDER MENU
-                            TreeTabs.Menu.ShowFolderMenu(this.parentNode, event);
+                            TT.Menu.ShowFolderMenu(this.parentNode, event);
                         }
                     }
                     DIVF_header.ondblclick = function(event) { // edit folder
                         if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("folder_header")) {
-                            TreeTabs.Folders.ActionClickFolder(this.parentNode, opt.dbclick_folder);
+                            TT.Folders.ActionClickFolder(this.parentNode, opt.dbclick_folder);
                         }
                     }
                     DIVF_header.ondragstart = function(event) { // DRAG START
@@ -1241,18 +1242,18 @@ var TreeTabs = {
                         event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
                         event.dataTransfer.setData("text", "");
                         event.dataTransfer.setData("SourceWindowId", tt.CurrentWindowId);
-                        TreeTabs.DOM.CleanUpDragAndDrop();
+                        TT.DOM.CleanUpDragAndDrop();
                         tt.Dragging = true;
                         tt.DraggingGroup = false;
                         tt.DragTreeDepth = -1;
                         let Nodes = [];
                         if (this.parentNode.classList.contains("selected")) {
-                            TreeTabs.DOM.FreezeSelection(false);
+                            TT.DOM.FreezeSelection(false);
                         } else {
-                            TreeTabs.DOM.FreezeSelection(true);
+                            TT.DOM.FreezeSelection(true);
                             this.parentNode.classList.add("selected_temporarly"); this.parentNode.classList.add("selected");
                         }
-                        TreeTabs.DOM.RemoveHeadersHoverClass();
+                        TT.DOM.RemoveHeadersHoverClass();
                         document.querySelectorAll(".selected, .selected .tab, .selected .folder").forEach(function(s) {
                             s.classList.add("dragged_tree");
                             if (s.classList.contains("pin")) {
@@ -1268,7 +1269,7 @@ var TreeTabs = {
                                 Nodes.push({id: s.id, parent: s.parentNode.id, selected: s.classList.contains("selected"), temporary: s.classList.contains("selected_temporarly"), NodeClass: "folder", index: (tt.folders[s.id] ? tt.folders[s.id].index : 0), name: (tt.folders[s.id] ? tt.folders[s.id].name : labels.noname_group), expand: (tt.folders[s.id] ? tt.folders[s.id].expand : "")});
                             }
                         });
-                        let DraggedFolderParents = TreeTabs.DOM.GetParentsByClass(this.parentNode, "folder");
+                        let DraggedFolderParents = TT.DOM.GetParentsByClass(this.parentNode, "folder");
                         DraggedFolderParents.forEach(function(s) {
                             s.classList.add("dragged_parents");
                         });
@@ -1284,7 +1285,7 @@ var TreeTabs = {
                             clearTimeout(tt.DragOverTimer);
                             tt.DragOverId = "";
                         }
-                        setTimeout(function() {TreeTabs.DOM.CleanUpDragAndDrop();}, 300);
+                        setTimeout(function() {TT.DOM.CleanUpDragAndDrop();}, 300);
                         setTimeout(function() {chrome.runtime.sendMessage({command: "drag_end"});}, 500);
                     }
                     DIVF_header.onmouseover = function(event) {
@@ -1300,20 +1301,20 @@ var TreeTabs = {
                         }
                     }
                     DIVF_header.ondragleave = function(event) {
-                        TreeTabs.DOM.RemoveHighlight();
+                        TT.DOM.RemoveHighlight();
                     }
                     DIVF_header.ondragover = function(event) {
                         if (tt.DraggingGroup == false && (tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder) && this.parentNode.classList.contains("dragged_tree") == false) {
                             if (this.parentNode.classList.contains("before") == false && event.layerY < this.clientHeight / 3) {
-                                TreeTabs.DOM.RemoveHighlight();
+                                TT.DOM.RemoveHighlight();
                                 this.parentNode.classList.remove("inside"); this.parentNode.classList.remove("after"); this.parentNode.classList.add("before"); this.parentNode.classList.add("highlighted_drop_target");
                             }
                             if (this.parentNode.classList.contains("inside") == false && event.layerY > this.clientHeight / 3 && event.layerY <= 2 * (this.clientHeight / 3)) {
-                                TreeTabs.DOM.RemoveHighlight();
+                                TT.DOM.RemoveHighlight();
                                 this.parentNode.classList.remove("before"); this.parentNode.classList.remove("after"); this.parentNode.classList.add("inside"); this.parentNode.classList.add("highlighted_drop_target");
                             }
                             if (this.parentNode.classList.contains("after") == false && this.parentNode.classList.contains("o") == false && event.layerY > 2 * (this.clientHeight / 3)) {
-                                TreeTabs.DOM.RemoveHighlight();
+                                TT.DOM.RemoveHighlight();
                                 this.parentNode.classList.remove("inside"); this.parentNode.classList.remove("before"); this.parentNode.classList.add("after"); this.parentNode.classList.add("highlighted_drop_target");
                             }
                         }
@@ -1332,26 +1333,26 @@ var TreeTabs = {
                     }
                     DIVF_expand.onmousedown = function(event) {
                         event.stopPropagation();
-                        if (document.getElementById("main_menu").style.top != "-1000px") {
-                            TreeTabs.Menu.HideMenus();
+                        if (tt.DOMmenu.style.top != "-1000px") {
+                            TT.Menu.HideMenus();
                         }
                         if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target == this) { // EXPAND/COLLAPSE FOLDER
                             event.stopPropagation();
-                            TreeTabs.DOM.EventExpandBox(this.parentNode.parentNode);
-                            TreeTabs.DOM.RefreshExpandStates();
-                            TreeTabs.DOM.RefreshCounters();
+                            TT.DOM.EventExpandBox(this.parentNode.parentNode);
+                            TT.DOM.RefreshExpandStates();
+                            TT.DOM.RefreshCounters();
                         }
                     }
                 }
                 if (p.ParentId == "pin_list" || p.ParentId == "" || p.ParentId == undefined || document.getElementById("°" + p.ParentId) == null) {
-                    document.getElementById("°" + tt.active_group).appendChild(DIVF);
+                    tt.active_group.childNodes[0].appendChild(DIVF);
                 } else {
                     document.getElementById("°" + p.ParentId).appendChild(DIVF);
                 }
                 if (p.InsertAfterId) {
                     let After = document.getElementById(p.InsertAfterId);
                     if (After != null) {
-                        TreeTabs.DOM.InsterAfterNode(DIVF, After);
+                        TT.DOM.InsterAfterNode(DIVF, After);
                     }
                 }
         
@@ -1369,7 +1370,7 @@ var TreeTabs = {
         },
         PreAppendFolders: function(Folders) {
             for (let folderId in Folders) {
-                TreeTabs.Folders.AppendFolder({folderId: folderId, Name: Folders[folderId].name, ParentId: "tab_list", ExpandState: Folders[folderId].expand});
+                TT.Folders.AppendFolder({folderId: folderId, Name: Folders[folderId].name, ParentId: "tab_list", ExpandState: Folders[folderId].expand});
             }
         },
         AppendFolders: function(Folders) {
@@ -1397,11 +1398,11 @@ var TreeTabs = {
             if (folder != null) {
                 if (opt.promote_children == true) {
                     if (opt.promote_children_in_first_child == true && folder.childNodes[1].childNodes.length > 1) {
-                        TreeTabs.DOM.PromoteChildrenToFirstChild(folder);
+                        TT.DOM.PromoteChildrenToFirstChild(folder);
                     } else {
                         let Children = folder.childNodes[1];
                         while (Children.lastChild) {
-                            TreeTabs.DOM.InsterAfterNode(Children.lastChild, folder);
+                            TT.DOM.InsterAfterNode(Children.lastChild, folder);
                         }
                     }
                 } else {
@@ -1414,7 +1415,7 @@ var TreeTabs = {
                 }
                 folder.parentNode.removeChild(folder);
                 delete tt.folders[FolderId];
-                TreeTabs.DOM.RefreshExpandStates();
+                TT.DOM.RefreshExpandStates();
                 chrome.runtime.sendMessage({command: "save_folders", folders: tt.folders, windowId: tt.CurrentWindowId});
             }
         },
@@ -1422,7 +1423,7 @@ var TreeTabs = {
             if (opt.debug) {
                 log("f: ShowRenameFolderDialog, folderId " + FolderId);
             }
-            TreeTabs.DOM.HideRenameDialogs();
+            TT.DOM.HideRenameDialogs();
             if (tt.folders[FolderId]) {
                 let name = document.getElementById("folder_edit_name");
                 name.value = tt.folders[FolderId].name;
@@ -1439,39 +1440,39 @@ var TreeTabs = {
             let FolderId = document.getElementById("folder_edit").getAttribute("FolderId");
             tt.folders[FolderId].name = name.value;
             document.getElementById(FolderId + "_folder_title").textContent = name.value;
-            TreeTabs.DOM.HideRenameDialogs();
+            TT.DOM.HideRenameDialogs();
             if (opt.debug) {
                 log("f: FolderRenameConfirm, folderId " + FolderId + ", name: " + name.value);
             }
             chrome.runtime.sendMessage({command: "save_folders", folders: tt.folders, windowId: tt.CurrentWindowId});
-            TreeTabs.DOM.RefreshCounters();
+            TT.DOM.RefreshCounters();
         },
         ActionClickFolder: function(FolderNode, bgOption) {
             if (opt.debug) {
                 log("f: ActionClickFolder, folderId " + FolderNode.id + ", bgOption: " + bgOption);
             }
             if (bgOption == "rename_folder") {
-                TreeTabs.Folders.ShowRenameFolderDialog(FolderNode.id);
+                TT.Folders.ShowRenameFolderDialog(FolderNode.id);
             }
             if (bgOption == "new_folder") {
-                let FolderId = TreeTabs.Folders.AddNewFolder({ParentId: FolderNode.id});
-                TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                let FolderId = TT.Folders.AddNewFolder({ParentId: FolderNode.id});
+                TT.Folders.ShowRenameFolderDialog(FolderId);
             }
             if (bgOption == "new_tab") {
-                TreeTabs.Tabs.OpenNewTab(false, FolderNode.id);
+                TT.Tabs.OpenNewTab(false, FolderNode.id);
             }
             if (bgOption == "expand_collapse") {
-                TreeTabs.DOM.EventExpandBox(FolderNode);
+                TT.DOM.EventExpandBox(FolderNode);
             }
             if (bgOption == "close_folder") {
-                TreeTabs.Folders.RemoveFolder(FolderNode.id);
+                TT.Folders.RemoveFolder(FolderNode.id);
             }
             if (bgOption == "unload_folder") {
                 let tabsArr = [];
                 document.querySelectorAll("#" + FolderNode.id + " .tab").forEach(function(s) {
                     tabsArr.push(parseInt(s.id));
                 });
-                TreeTabs.Tabs.DiscardTabs(tabsArr);
+                TT.Tabs.DiscardTabs(tabsArr);
             }
         }
     },
@@ -1481,27 +1482,28 @@ var TreeTabs = {
             // }
         // },
         AddNewGroup: function(Name, FontColor) {
-            let newId = TreeTabs.Groups.GenerateNewGroupID();
+            let newId = TT.Groups.GenerateNewGroupID();
             tt.groups[newId] = {id: newId, index: 0, active_tab: 0, prev_active_tab: 0, name: (Name ? Name : labels.noname_group), font: (FontColor ? FontColor : "")};
             if (opt.debug) {
                 log("f: AddNewGroup, groupId: " + newId + ", Name: " + Name + ", FontColor: " + FontColor);
             }
-            TreeTabs.Groups.AppendGroupToList(newId, tt.groups[newId].name, tt.groups[newId].font, true);
-            TreeTabs.Groups.UpdateBgGroupsOrder();
+            TT.Groups.AppendGroupToList(newId, tt.groups[newId].name, tt.groups[newId].font, true);
+            TT.Groups.UpdateBgGroupsOrder();
             return newId;
         },
         SaveGroups: function() {
             chrome.runtime.sendMessage({command: "save_groups", groups: tt.groups, windowId: tt.CurrentWindowId});
         },
         AppendGroups: function(Groups) {
-            TreeTabs.Groups.AppendGroupToList("tab_list", labels.ungrouped_group, "", true);
+            TT.Groups.AppendGroupToList("tab_list", labels.ungrouped_group, "", true);
             for (var group in Groups) {
-                TreeTabs.Groups.AppendGroupToList(Groups[group].id, Groups[group].name, Groups[group].font, true);
+                TT.Groups.AppendGroupToList(Groups[group].id, Groups[group].name, Groups[group].font, true);
                 if (document.querySelectorAll(".group").length == Object.keys(Groups).length) {
-                    TreeTabs.Groups.RearrangeGroupsButtons();
-                    setTimeout(function() {TreeTabs.Groups.RearrangeGroupsLists();}, 50);
+                    TT.Groups.RearrangeGroupsButtons();
+                    setTimeout(function() {TT.Groups.RearrangeGroupsLists();}, 50);
                 }
             }
+            tt.active_group = document.getElementById("tab_list");
         },
         RearrangeGroupsButtons: function(first_loop) {
             document.querySelectorAll(".group_button").forEach(function(s) {
@@ -1510,13 +1512,13 @@ var TreeTabs = {
                     if (s.parentNode.childNodes[tt.groups[groupId].index] != undefined) {
                         let Ind = Array.from(s.parentNode.children).indexOf(s);
                         if (Ind > tt.groups[groupId].index) {
-                            TreeTabs.DOM.InsterBeforeNode(s, s.parentNode.childNodes[tt.groups[groupId].index]);
+                            TT.DOM.InsterBeforeNode(s, s.parentNode.childNodes[tt.groups[groupId].index]);
                         } else {
-                            TreeTabs.DOM.InsterAfterNode(s, s.parentNode.childNodes[tt.groups[groupId].index]);
+                            TT.DOM.InsterAfterNode(s, s.parentNode.childNodes[tt.groups[groupId].index]);
                         }
                         let newInd = Array.from(s.parentNode.children).indexOf(s);
                         if (newInd != tt.groups[groupId].index && first_loop) {
-                            TreeTabs.Groups.RearrangeGroupsButtons(false);
+                            TT.Groups.RearrangeGroupsButtons(false);
                         }
                     }
                 }
@@ -1526,8 +1528,7 @@ var TreeTabs = {
             if (opt.debug) {
                 log("f: RearrangeGroupsLists");
             }
-            let activegroup = document.getElementById(tt.active_group);
-            let scroll = activegroup.scrollTop;
+            let scroll = tt.active_group.scrollTop;
             let groups = document.getElementById("groups");
             document.querySelectorAll(".group_button").forEach(function(s) {
                 let group = document.getElementById((s.id).substr(1));
@@ -1535,7 +1536,7 @@ var TreeTabs = {
                     groups.appendChild(group);
                 }
             });
-            activegroup.scrollTop = scroll;
+            tt.active_group.scrollTop = scroll;
         },
         UpdateBgGroupsOrder: function() {
             document.querySelectorAll(".group_button").forEach(function(s) {
@@ -1543,7 +1544,7 @@ var TreeTabs = {
                     tt.groups[(s.id).substr(1)].index = Array.from(s.parentNode.children).indexOf(s);
                 }
             });
-            TreeTabs.Groups.SaveGroups();
+            TT.Groups.SaveGroups();
         },
         AppendGroupToList: function(groupId, group_name, font_color, SetEvents) {
             if (document.getElementById(groupId) == null) {
@@ -1552,21 +1553,21 @@ var TreeTabs = {
                 if (SetEvents) {
                     grp.onclick = function(event) {
                         if (event.which == 1 && event.target == this && event.clientX < (this.childNodes[0].getBoundingClientRect().width + this.getBoundingClientRect().left)) {
-                            TreeTabs.DOM.Deselect();
+                            TT.DOM.Deselect();
                         }
                     }
                     grp.onmousedown = function(event) {
                         event.stopImmediatePropagation();
                         if (event.which == 1 && event.target == this && event.clientX < (this.childNodes[0].getBoundingClientRect().width + this.getBoundingClientRect().left)) {
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                             return false;
                         }
                         if (event.which == 2) {
                             event.preventDefault();
-                            TreeTabs.Groups.ActionClickGroup(this, opt.midclick_group);
+                            TT.Groups.ActionClickGroup(this, opt.midclick_group);
                         }
                         if (event.which == 3 && event.target.id == this.id) {
-                            TreeTabs.Menu.ShowFGlobalMenu(event);
+                            TT.Menu.ShowFGlobalMenu(event);
                         }
                         if (browserId == "V") {
                             chrome.windows.getCurrent({
@@ -1580,17 +1581,17 @@ var TreeTabs = {
                     }
                     grp.ondragover = function(event) {
                             if (event.target.id == this.id && (tt.DraggingGroup || tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder)) {
-                                TreeTabs.DOM.RemoveHighlight();
+                                TT.DOM.RemoveHighlight();
                                 this.classList.add("highlighted_drop_target");
                             }
                         }
                     grp.ondblclick = function(event) {
                         if (event.target.id == this.id) {
-                            TreeTabs.Groups.ActionClickGroup(this, opt.dbclick_group);
+                            TT.Groups.ActionClickGroup(this, opt.dbclick_group);
                         }
                     }
                     if (opt.switch_with_scroll) {
-                        TreeTabs.DOM.BindTabsSwitchingToMouseWheel(groupId);
+                        TT.DOM.BindTabsSwitchingToMouseWheel(groupId);
                     }
                 }
             }
@@ -1600,16 +1601,16 @@ var TreeTabs = {
                 var di = document.createElement("div");           di.className = "drag_indicator";     di.id = "di" + groupId;                     gbn.appendChild(di);
                 if (SetEvents) {
                     gbn.onclick = function(event) {
-                        TreeTabs.Groups.SetActiveGroup(this.id.substr(1), true, true);
+                        TT.Groups.SetActiveGroup(this.id.substr(1), true, true);
                     }
                     gbn.onmousedown = function(event) {
                         if (event.which == 3) {
-                            TreeTabs.Menu.ShowFGroupMenu(document.getElementById(this.id.substr(1)), event);
+                            TT.Menu.ShowFGroupMenu(document.getElementById(this.id.substr(1)), event);
                         }
                     }
                     gbn.ondblclick = function(event) {
                         if (event.which == 1 && this.id != "_tab_list") {
-                            TreeTabs.Groups.ShowGroupEditWindow((this.id).substr(1));
+                            TT.Groups.ShowGroupEditWindow((this.id).substr(1));
                         }
                     }
                     gbn.ondragstart = function(event) { // DRAG START
@@ -1617,7 +1618,7 @@ var TreeTabs = {
                         event.dataTransfer.setDragImage(document.getElementById("DragImage"), 0, 0);
                         event.dataTransfer.setData("text", "");
                         event.dataTransfer.setData("SourceWindowId", tt.CurrentWindowId);
-                        TreeTabs.DOM.CleanUpDragAndDrop();
+                        TT.DOM.CleanUpDragAndDrop();
                         tt.Dragging = true;
                         tt.DraggingGroup = true;
                         tt.DragTreeDepth = -1;
@@ -1653,14 +1654,14 @@ var TreeTabs = {
                     }
                     gbn.ondragover = function(event) {
                         if (this.classList.contains("inside") == false && tt.DraggingGroup == false && (tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder)) {
-                            TreeTabs.DOM.RemoveHighlight(); this.classList.remove("before"); this.classList.remove("after"); this.classList.add("inside"); this.classList.add("highlighted_drop_target");
+                            TT.DOM.RemoveHighlight(); this.classList.remove("before"); this.classList.remove("after"); this.classList.add("inside"); this.classList.add("highlighted_drop_target");
                         }
             
                         if (this.classList.contains("before") == false && event.layerY < this.clientHeight / 2 && tt.DraggingGroup) {
-                            TreeTabs.DOM.RemoveHighlight(); this.classList.add("before"); this.classList.remove("after"); this.classList.remove("inside"); this.classList.add("highlighted_drop_target");
+                            TT.DOM.RemoveHighlight(); this.classList.add("before"); this.classList.remove("after"); this.classList.remove("inside"); this.classList.add("highlighted_drop_target");
                         }
                         if (this.classList.contains("after") == false && event.layerY > this.clientHeight / 2 && tt.DraggingGroup) {
-                            TreeTabs.DOM.RemoveHighlight(); this.classList.remove("before"); this.classList.add("after"); this.classList.remove("inside"); this.classList.add("highlighted_drop_target");
+                            TT.DOM.RemoveHighlight(); this.classList.remove("before"); this.classList.add("after"); this.classList.remove("inside"); this.classList.add("highlighted_drop_target");
                         }
                     }
                     gbn.ondragenter = function(event) {
@@ -1668,11 +1669,11 @@ var TreeTabs = {
                             if (this.classList.contains("active") == false && (tt.DraggingGroup || tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder)) {
                                 clearTimeout(tt.DragOverTimer);
                                 let This = this;
-                                tt.DragOverTimer = setTimeout(function() {TreeTabs.Groups.SetActiveGroup(This.id.substr(1), false, false);}, 1500);
+                                tt.DragOverTimer = setTimeout(function() {TT.Groups.SetActiveGroup(This.id.substr(1), false, false);}, 1500);
                             }
                         }
                     }
-                    TreeTabs.DOM.RefreshGUI();
+                    TT.DOM.RefreshGUI();
                 }
             }
         },
@@ -1689,9 +1690,9 @@ var TreeTabs = {
         GroupRemove: function(groupId, close_tabs) { // remove group, delete tabs if close_tabs is true
             if (close_tabs) {
                 let tabIds = Array.prototype.map.call(document.querySelectorAll("#" + groupId + " .tab"), function(s) {return parseInt(s.id);});
-                TreeTabs.Tabs.CloseTabs(tabIds);
+                TT.Tabs.CloseTabs(tabIds);
                 document.querySelectorAll("#" + groupId + " .folder").forEach(function(s) {
-                    TreeTabs.Folders.RemoveFolder(s.id);
+                    TT.Folders.RemoveFolder(s.id);
                 });
             } else {
                 let TabList = document.getElementById("°tab_list");
@@ -1701,20 +1702,20 @@ var TreeTabs = {
                         TabList.appendChild(GroupList.firstChild);
                     }
                 }
-                TreeTabs.DOM.RefreshExpandStates();
-                TreeTabs.DOM.RefreshCounters();
+                TT.DOM.RefreshExpandStates();
+                TT.DOM.RefreshCounters();
             }
             if (groupId != "tab_list") {
                 delete tt.groups[groupId];
                 let active_tab_is_pin = document.querySelector(".pin.active_tab");
-                if (groupId == tt.active_group && active_tab_is_pin == null) {
+                if (groupId == tt.active_group.id && active_tab_is_pin == null) {
                     if (document.getElementById("_" + groupId).previousSibling) {
-                        TreeTabs.Groups.SetActiveGroup((document.getElementById("_" + groupId).previousSibling.id).substr(1), true, true);
+                        TT.Groups.SetActiveGroup((document.getElementById("_" + groupId).previousSibling.id).substr(1), true, true);
                     } else {
                         if (document.getElementById("_" + groupId).nextSibling) {
-                            TreeTabs.Groups.SetActiveGroup((document.getElementById("_" + groupId).nextSibling.id).substr(1), true, true);
+                            TT.Groups.SetActiveGroup((document.getElementById("_" + groupId).nextSibling.id).substr(1), true, true);
                         } else {
-                            TreeTabs.Groups.SetActiveGroup("tab_list", true, true);
+                            TT.Groups.SetActiveGroup("tab_list", true, true);
                         }
                     }
                 }
@@ -1727,14 +1728,14 @@ var TreeTabs = {
                     groupButton.parentNode.removeChild(groupButton);
                 }
             }
-            TreeTabs.Groups.SaveGroups();
+            TT.Groups.SaveGroups();
             tt.schedule_update_data++;
         },
         KeepOnlyOneActiveTabInGroup: function() {
-            let active_tabs = document.querySelectorAll("#" + tt.active_group + " .active_tab");
+            let active_tabs = document.querySelectorAll("#" + tt.active_group.id + " .active_tab");
             if (active_tabs.length > 1) {
                 chrome.tabs.query({currentWindow: true, active: true}, function(activeTab) {
-                    TreeTabs.Tabs.SetActiveTab(activeTab[0].id, false);
+                    TT.Tabs.SetActiveTab(activeTab[0].id, false);
                 });
             }
         },
@@ -1744,7 +1745,7 @@ var TreeTabs = {
             }
             let group = document.getElementById(groupId);
             if (group != null) {
-                tt.active_group = groupId;
+                tt.active_group = group;
                 document.querySelectorAll(".group_button").forEach(function(s) {
                     s.classList.remove("active_group");
                 });
@@ -1753,8 +1754,8 @@ var TreeTabs = {
                     s.style.display = "none";
                 });
                 group.style.display = "";
-                TreeTabs.DOM.RefreshGUI();
-                TreeTabs.DOM.HideRenameDialogs()
+                TT.DOM.RefreshGUI();
+                TT.DOM.HideRenameDialogs()
                 let activeTab = document.querySelector("#" + groupId + " .active_tab");
                 if (activeTab != null) {
                     if (switch_to_active_in_group) {
@@ -1763,7 +1764,7 @@ var TreeTabs = {
                     if (scroll_to_active && tt.tabs[activeTab.id]) {
                         tt.tabs[activeTab.id].ScrollToTab();
                     }
-                    TreeTabs.Groups.KeepOnlyOneActiveTabInGroup();
+                    TT.Groups.KeepOnlyOneActiveTabInGroup();
                 }
                 if (groupId == "tab_list") {
                     document.querySelectorAll("#button_remove_group, #button_edit_group").forEach(function(s) {
@@ -1775,8 +1776,8 @@ var TreeTabs = {
                     });
                 }
                 chrome.runtime.sendMessage({command: "set_active_group", active_group: groupId, windowId: tt.CurrentWindowId});
-                TreeTabs.DOM.RefreshExpandStates();
-                TreeTabs.DOM.RefreshCounters();
+                TT.DOM.RefreshExpandStates();
+                TT.DOM.RefreshCounters();
                 if (browserId == "F" && opt.hide_other_groups_tabs_firefox) {
                     let HideTabIds = Array.prototype.map.call(document.querySelectorAll(".group:not([id='" + groupId + "']) .tab"), function(s) {
                         return parseInt(s.id);
@@ -1791,18 +1792,18 @@ var TreeTabs = {
         },
         SetActiveTabInGroup: function(groupId, tabId) {
             if (document.querySelector("#" + groupId + " [id='" + tabId + "']") != null && tt.groups[groupId] != undefined) {
-                if (groupId != tt.active_group) {
-                    TreeTabs.Groups.SetActiveGroup(groupId, false, true);
+                if (groupId != tt.active_group.id) {
+                    TT.Groups.SetActiveGroup(groupId, false, true);
                 }
                 if (tt.groups[groupId]) {
                     tt.groups[groupId].prev_active_tab = tt.groups[groupId].active_tab;
                     tt.groups[groupId].active_tab = parseInt(tabId);
                 }
-                TreeTabs.Groups.SaveGroups();
+                TT.Groups.SaveGroups();
             }
         },
         ShowGroupEditWindow: function(groupId) { // Edit group popup
-            TreeTabs.DOM.HideRenameDialogs();
+            TT.DOM.HideRenameDialogs();
             if (tt.groups[groupId]) {
                 let name = document.getElementById("group_edit_name");
                 name.value = tt.groups[groupId].name;
@@ -1824,14 +1825,14 @@ var TreeTabs = {
                 tt.groups[groupId].name = GroupEditName.value;
                 let GroupEditFont = document.getElementById("group_edit_font");
                 let DefaultGroupButtonFontColor = window.getComputedStyle(document.getElementById("body"), null).getPropertyValue("--group_list_default_font_color");
-                let ThisGroupButtonFontColor = TreeTabs.Utils.RGBtoHex(GroupEditFont.style.backgroundColor);
+                let ThisGroupButtonFontColor = TT.Utils.RGBtoHex(GroupEditFont.style.backgroundColor);
                 if ("#" + ThisGroupButtonFontColor != DefaultGroupButtonFontColor) {
                     tt.groups[groupId].font = ThisGroupButtonFontColor;
                     document.getElementById("_gte" + groupId).style.color = "#" + ThisGroupButtonFontColor;
                 }
-                TreeTabs.DOM.HideRenameDialogs();
-                TreeTabs.DOM.RefreshGUI();
-                TreeTabs.Groups.SaveGroups();
+                TT.DOM.HideRenameDialogs();
+                TT.DOM.RefreshGUI();
+                TT.Groups.SaveGroups();
             }
         },
         RestoreStateOfGroupsToolbar: function() {
@@ -1864,19 +1865,19 @@ var TreeTabs = {
                 toolbarGroups.style.borderRight = "1px solid var(--group_list_borders)";
                 chrome.runtime.sendMessage({command: "set_group_bar", group_bar: true, windowId: tt.CurrentWindowId});
             }
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         ActionClickGroup: function(Node, bgOption) {
             if (bgOption == "new_tab") {
                 if (Node.id == "pin_list") {
-                    TreeTabs.Tabs.OpenNewTab(true, undefined);
+                    TT.Tabs.OpenNewTab(true, undefined);
                 }
                 if (Node.classList.contains("tab") || Node.classList.contains("folder") || Node.classList.contains("group")) {
-                    TreeTabs.Tabs.OpenNewTab(false, Node.id);
+                    TT.Tabs.OpenNewTab(false, Node.id);
                 }
             }
             if (bgOption == "activate_previous_active") {
-                chrome.tabs.update(parseInt(tt.groups[tt.active_group].prev_active_tab), {active: true});
+                chrome.tabs.update(parseInt(tt.groups[tt.active_group.id].prev_active_tab), {active: true});
             }
             if (bgOption == "undo_close_tab") {
                 chrome.sessions.getRecentlyClosed(null, function(sessions) {
@@ -1889,10 +1890,10 @@ var TreeTabs = {
         SetActiveTabInEachGroup: function() { // SET ACTIVE TAB FOR EACH GROUP
             chrome.tabs.query({currentWindow: true, active: true}, function(tabs) {
                 if (tabs.length) {
-                    TreeTabs.Tabs.SetActiveTab(tabs[0].id);
+                    TT.Tabs.SetActiveTab(tabs[0].id);
                     chrome.runtime.sendMessage({command: "get_active_group", windowId: tt.CurrentWindowId}, function(response) {
                         if (response) {
-                            TreeTabs.Groups.SetActiveGroup(response, false, true);
+                            TT.Groups.SetActiveGroup(response, false, true);
                             for (var group in tt.groups) {
                                 let ActiveInGroup = document.querySelector("#" + group + " [id='" + tt.groups[group].active_tab + "']");
                                 if (ActiveInGroup != null) {
@@ -1900,7 +1901,7 @@ var TreeTabs = {
                                 }
                             }
                             if (tabs[0].pinned) {
-                                let ActiveTabinActiveGroup = document.querySelectorAll("#" + tt.active_group + " .active_tab");
+                                let ActiveTabinActiveGroup = document.querySelectorAll("#" + tt.active_group.id + " .active_tab");
                                 if (ActiveTabinActiveGroup != null) {
                                     ActiveTabinActiveGroup.forEach(function(s) {
                                         s.classList.remove("active_tab");
@@ -1908,7 +1909,7 @@ var TreeTabs = {
                                 }
                             }
                         } else {
-                            TreeTabs.Groups.SetActiveGroup("tab_list", false, true);
+                            TT.Groups.SetActiveGroup("tab_list", false, true);
                         }
                     });
                 }
@@ -2003,7 +2004,7 @@ var TreeTabs = {
                         chrome.bookmarks.create({parentId: ToolbarId, title: "TreeTabs"}, function(TreeTabsNew) {
                             TreeTabsId = TreeTabsNew.id;
                         });
-                        TreeTabs.Utils.Bookmark(rootNode);
+                        TT.Utils.Bookmark(rootNode);
                         return;
                     } else {
                         let Tabs = document.querySelectorAll("#°" + rootNode.id + " .tab");
@@ -2117,86 +2118,86 @@ var TreeTabs = {
                 }
             }, false);
             document.body.onresize = function(event) {
-                TreeTabs.DOM.RefreshGUI();
+                TT.DOM.RefreshGUI();
             }
             document.body.onmousedown = function(event) {
                 if (event.which == 2) {
                     event.preventDefault();
                 }
                 if (event.which == 1 && event.target.classList.contains("menu_item") == false) {
-                    TreeTabs.Menu.HideMenus();
+                    TT.Menu.HideMenus();
                 }
                 event.stopImmediatePropagation();
                 if (event.which == 1) {
-                    TreeTabs.DOM.RemoveHeadersHoverClass();
+                    TT.DOM.RemoveHeadersHoverClass();
                 }
             }
             document.getElementById("folder_edit_confirm").onmousedown = function(event) {
                 if (event.which == 1) {
-                    TreeTabs.Folders.FolderRenameConfirm();
+                    TT.Folders.FolderRenameConfirm();
                 }
             }
             document.getElementById("folder_edit_discard").onmousedown = function(event) {
                 if (event.which == 1) {
-                    TreeTabs.DOM.HideRenameDialogs();
+                    TT.DOM.HideRenameDialogs();
                 }
             }
             document.getElementById("group_edit_confirm").onmousedown = function(event) {
                     if (event.which == 1) {
-                        TreeTabs.Groups.GroupEditConfirm();
+                        TT.Groups.GroupEditConfirm();
                     }
                 }
             document.getElementById("group_edit_discard").onmousedown = function(event) {
                 if (event.which == 1) {
-                    TreeTabs.DOM.HideRenameDialogs();
+                    TT.DOM.HideRenameDialogs();
                 }
             }
             document.getElementById("folder_edit_name").onkeydown = function(event) {
                 if (event.keyCode == 13) {
-                    TreeTabs.Folders.FolderRenameConfirm();
+                    TT.Folders.FolderRenameConfirm();
                 }
                 if (event.which == 27) {
-                    TreeTabs.DOM.HideRenameDialogs();
+                    TT.DOM.HideRenameDialogs();
                 }
             }
             document.getElementById("group_edit_name").onkeydown = function(event) {
                 if (event.keyCode == 13) {
-                    TreeTabs.Groups.GroupEditConfirm();
+                    TT.Groups.GroupEditConfirm();
                 }
                 if (event.which == 27) {
-                    TreeTabs.DOM.HideRenameDialogs();
+                    TT.DOM.HideRenameDialogs();
                 }
             }
             PinList.onclick = function(event) {
                 if (event.which == 1 && event.target == this) {
                     if (opt.pin_list_multi_row || (opt.pin_list_multi_row == false && event.clientY < (this.childNodes[0].getBoundingClientRect().height + this.getBoundingClientRect().top))) {
-                        TreeTabs.DOM.Deselect();
+                        TT.DOM.Deselect();
                     }
                 }
             }
             PinList.onmousedown = function(event) {
                 if (event.which == 1 && event.target == this) {
                     if (opt.pin_list_multi_row || (opt.pin_list_multi_row == false && event.clientY < (this.childNodes[0].getBoundingClientRect().height + this.getBoundingClientRect().top))) {
-                        TreeTabs.Menu.HideMenus();
+                        TT.Menu.HideMenus();
                     }
                 }
 
                 if (event.which == 2 && event.target == this) {
-                    TreeTabs.Groups.ActionClickGroup(this, opt.midclick_group);
+                    TT.Groups.ActionClickGroup(this, opt.midclick_group);
                 }
                 if (event.which == 3 && event.target == this) {
-                    TreeTabs.Menu.ShowFGlobalMenu(event);
+                    TT.Menu.ShowFGlobalMenu(event);
                 }
             }
             PinList.ondragover = function(event) {
                 if (event.target.id == "pin_list" && tt.DraggingGroup == false && (tt.DraggingPin || tt.DraggingTab || tt.DraggingFolder) && this.classList.contains("highlighted_drop_target") == false) {
-                    TreeTabs.DOM.RemoveHighlight();
+                    TT.DOM.RemoveHighlight();
                     this.classList.add("highlighted_drop_target");
                 }
             }
             PinList.ondblclick = function(event) {
                 if (event.target == this) {
-                    TreeTabs.Groups.ActionClickGroup(this, opt.dbclick_group);
+                    TT.Groups.ActionClickGroup(this, opt.dbclick_group);
                 }
             }
             document.getElementById("group_edit_font").onclick = function(event) {
@@ -2204,7 +2205,7 @@ var TreeTabs = {
                     event.stopPropagation();
                     let ColorPicker = document.getElementById("color_picker");
                     ColorPicker.setAttribute("PickColor", this.id);
-                    ColorPicker.value = "#" + TreeTabs.Utils.RGBtoHex(this.style.backgroundColor);
+                    ColorPicker.value = "#" + TT.Utils.RGBtoHex(this.style.backgroundColor);
                     ColorPicker.focus();
                     ColorPicker.click();
                 }
@@ -2226,8 +2227,8 @@ var TreeTabs = {
                             s.classList.add("selected");
                         });
                     }
-                    if (document.querySelectorAll("#" + tt.active_group + " .tab>.tab_header_hover, #" + tt.active_group + " .folder>.folder_header_hover").length > 0) {
-                        let rootId = document.querySelectorAll("#" + tt.active_group + " .tab>.tab_header_hover, #" + tt.active_group + " .folder>.folder_header_hover")[0].parentNode.parentNode.parentNode.id;
+                    if (document.querySelectorAll("#" + tt.active_group.id + " .tab>.tab_header_hover, #" + tt.active_group.id + " .folder>.folder_header_hover").length > 0) {
+                        let rootId = document.querySelectorAll("#" + tt.active_group.id + " .tab>.tab_header_hover, #" + tt.active_group.id + " .folder>.folder_header_hover")[0].parentNode.parentNode.parentNode.id;
                         document.querySelectorAll("#°" + rootId + ">.folder, #°" + rootId + ">.tab").forEach(function(s) {
                             s.classList.add("selected");
                         });
@@ -2240,8 +2241,8 @@ var TreeTabs = {
                             s.classList.toggle("selected");
                         });
                     }
-                    if (document.querySelectorAll("#" + tt.active_group + " .tab>.tab_header_hover, #" + tt.active_group + " .folder>.folder_header_hover").length > 0) {
-                        let rootId = document.querySelectorAll("#" + tt.active_group + " .tab>.tab_header_hover, #" + tt.active_group + " .folder>.folder_header_hover")[0].parentNode.parentNode.parentNode.id;
+                    if (document.querySelectorAll("#" + tt.active_group.id + " .tab>.tab_header_hover, #" + tt.active_group.id + " .folder>.folder_header_hover").length > 0) {
+                        let rootId = document.querySelectorAll("#" + tt.active_group.id + " .tab>.tab_header_hover, #" + tt.active_group.id + " .folder>.folder_header_hover")[0].parentNode.parentNode.parentNode.id;
                         document.querySelectorAll("#°" + rootId + ">.folder, #°" + rootId + ">.tab").forEach(function(s) {
                             s.classList.toggle("selected");
                         });
@@ -2249,11 +2250,11 @@ var TreeTabs = {
                 }
                 // esc to unselect tabs and folders
                 if (event.which == 27) {
-                    TreeTabs.DOM.Deselect();
+                    TT.DOM.Deselect();
                 }
                 // alt+g to toggle group bar
                 if (event.altKey && event.which == 71) {
-                    TreeTabs.Groups.GroupsToolbarToggle();
+                    TT.Groups.GroupsToolbarToggle();
                 }
                 // new folder
                 if (event.which == 192 || event.which == 70) {
@@ -2262,11 +2263,11 @@ var TreeTabs = {
                     }
 
                     if (tt.pressed_keys.indexOf(192) != -1 && tt.pressed_keys.indexOf(70) != -1) {
-                        let FolderId = TreeTabs.Folders.AddNewFolder({});
-                        TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                        let FolderId = TT.Folders.AddNewFolder({});
+                        TT.Folders.ShowRenameFolderDialog(FolderId);
                     }
                 }
-                TreeTabs.DOM.RefreshGUI();
+                TT.DOM.RefreshGUI();
             }
 
             document.body.onkeyup = function(event) {
@@ -2290,25 +2291,24 @@ var TreeTabs = {
                 let SourceWindowId = event.dataTransfer.getData("SourceWindowId") ? JSON.parse(event.dataTransfer.getData("SourceWindowId")) : 0;
                 let target = document.querySelector(".highlighted_drop_target");
                 let where = target ? (target.classList.contains("before") ? "before" : (target.classList.contains("after") ? "after" : "inside")) : "";
-                let ActiveGroup = document.getElementById(tt.active_group);
-                let Scroll = ActiveGroup.scrollTop;
+                let CurrentScrollPos = tt.active_group.scrollTop;
                 clearTimeout(tt.DragOverTimer);
                 tt.DragOverId = "";
                 tt.Dragging = false;
                 chrome.runtime.sendMessage({command: "drag_end"});
                 event.preventDefault();
                 if (SourceWindowId == tt.CurrentWindowId) {
-                    TreeTabs.DOM.DropToTarget({NodesTypes: NodesTypes, Nodes: Nodes, TargetNode: target, where: where, Group: Group, Scroll: Scroll});
+                    TT.DOM.DropToTarget({NodesTypes: NodesTypes, Nodes: Nodes, TargetNode: target, where: where, Group: Group, Scroll: CurrentScrollPos});
                 } else {
-                    TreeTabs.DOM.FreezeSelection();
+                    TT.DOM.FreezeSelection();
                     if (NodesTypes.DraggingGroup) {
                         tt.groups[Group.id] = Object.assign({}, Group);
-                        TreeTabs.Groups.AppendGroupToList(Group.id, Group.name, Group.font, true);
+                        TT.Groups.AppendGroupToList(Group.id, Group.name, Group.font, true);
                     }
                     let TabsIds = [];
                     for (let i = 0; i < Nodes.length; i++) {
                         if (Nodes[i].NodeClass == "folder") {
-                            TreeTabs.Folders.AddNewFolder({folderId: Nodes[i].id, ParentId: Nodes[i].parent, Name: Nodes[i].name, Index: Nodes[i].index, ExpandState: Nodes[i].expand});
+                            TT.Folders.AddNewFolder({folderId: Nodes[i].id, ParentId: Nodes[i].parent, Name: Nodes[i].name, Index: Nodes[i].index, ExpandState: Nodes[i].expand});
                             chrome.runtime.sendMessage({command: "remove_folder", folderId: Nodes[i].id});
                         }
                         if (Nodes[i].NodeClass == "pin") {
@@ -2329,7 +2329,7 @@ var TreeTabs = {
                                     all_ok = false;
                                 }
                             }
-                            TreeTabs.DOM.DropToTarget({NodesTypes: NodesTypes, Nodes: Nodes, TargetNode: target, where: where, Group: Group, Scroll: Scroll});
+                            TT.DOM.DropToTarget({NodesTypes: NodesTypes, Nodes: Nodes, TargetNode: target, where: where, Group: Group, Scroll: CurrentScrollPos});
                             if (NodesTypes.DraggingGroup) {
                                 chrome.runtime.sendMessage({command: "remove_group", groupId: Group.id});
                             }
@@ -2344,7 +2344,7 @@ var TreeTabs = {
                 if (opt.debug) {
                     log("global dragleave");
                 }
-                TreeTabs.DOM.RemoveHighlight();
+                TT.DOM.RemoveHighlight();
                 if (opt.open_tree_on_hover) {
                     clearTimeout(tt.DragOverTimer);
                     tt.DragOverId = "";
@@ -2359,9 +2359,9 @@ var TreeTabs = {
                 let Group = event.dataTransfer.getData("Group") ? JSON.parse(event.dataTransfer.getData("Group")) : {};
                 setTimeout(function() {
                     if (tt.Dragging && ((browserId == "F" && ( event.screenX < event.view.mozInnerScreenX || event.screenX > (event.view.mozInnerScreenX + window.innerWidth) || event.screenY < event.view.mozInnerScreenY || event.screenY > (event.view.mozInnerScreenY + window.innerHeight))) || (browserId != "F" && (event.pageX < 0 || event.pageX > window.outerWidth || event.pageY < 0 || event.pageY > window.outerHeight)))) {
-                        TreeTabs.Tabs.Detach(Nodes, NodesTypes, Group);
+                        TT.Tabs.Detach(Nodes, NodesTypes, Group);
                     }
-                    TreeTabs.DOM.CleanUpDragAndDrop();
+                    TT.DOM.CleanUpDragAndDrop();
                     tt.Dragging = false;
                     chrome.runtime.sendMessage({command: "drag_end"});
                 }, 300);
@@ -2379,9 +2379,9 @@ var TreeTabs = {
                 event.preventDefault();
                 let prev = event.deltaY < 0;
                 if (prev) {
-                    TreeTabs.Tabs.ActivatePrevTab(true);
+                    TT.Tabs.ActivatePrevTab(true);
                 } else {
-                    TreeTabs.Tabs.ActivateNextTab(true);
+                    TT.Tabs.ActivateNextTab(true);
                 }
             }
         },
@@ -2391,14 +2391,14 @@ var TreeTabs = {
                     let Node = document.getElementById(p.Nodes[i].id);
                     if (Node != null) {
                         if (p.Nodes[i].selected) {
-                            TreeTabs.DOM.AppendToNode(Node, p.TargetNode);
+                            TT.DOM.AppendToNode(Node, p.TargetNode);
                             Node.classList.add("selected");
                             if (p.Nodes[i].temporary) {
                                 Node.classList.add("selected_temporarly");
                             }
                         } else {
                             if (Node.parentNode.id != p.Nodes[i].parent) {
-                                TreeTabs.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
+                                TT.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
                             }
                         }
                     }
@@ -2409,14 +2409,14 @@ var TreeTabs = {
                     let Node = document.getElementById(p.Nodes[i].id);
                     if (Node != null) {
                         if (p.Nodes[i].selected) {
-                            TreeTabs.DOM.InsterBeforeNode(Node, p.TargetNode);
+                            TT.DOM.InsterBeforeNode(Node, p.TargetNode);
                             Node.classList.add("selected");
                             if (p.Nodes[i].temporary) {
                                 Node.classList.add("selected_temporarly");
                             }
                         } else {
                             if (Node.parentNode.id != p.Nodes[i].parent) {
-                                TreeTabs.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
+                                TT.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
                             }
                         }
                     }
@@ -2428,19 +2428,31 @@ var TreeTabs = {
                     let Node = document.getElementById(p.Nodes[i].id);
                     if (Node != null) {
                         if (p.Nodes[i].selected) {
-                            TreeTabs.DOM.InsterAfterNode(Node, p.TargetNode);
+                            TT.DOM.InsterAfterNode(Node, p.TargetNode);
                             Node.classList.add("selected");
                             if (p.Nodes[i].temporary) {
                                 Node.classList.add("selected_temporarly");
                             }
                         } else {
                             if (Node.parentNode.id != p.Nodes[i].parent) {
-                                TreeTabs.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
+                                TT.DOM.AppendToNode(Node, document.getElementById(p.Nodes[i].parent));
                             }
                         }
                     }
                 }
             }
+        },
+        NewEl: function(p) {
+            let NewElement = document.createElement(p.type);
+            if (p.classes != undefined) {NewElement.className = p.classes;}
+            if (p.id != undefined) {NewElement.id = p.id;}
+            if (p.draggable != undefined) {NewElement.draggable = p.draggable;}
+            if (p.value != undefined) {NewElement.value = p.value;}
+            if (p.title != undefined) {NewElement.title = p.title;}
+            if (p.text != undefined) {NewElement.text = p.text;}
+            if (p.textcont != undefined) {NewElement.textContent = p.textcont;}
+            if (p.parent != undefined) {p.parent.appendChild(NewElement);}
+            return NewElement;
         },
         DropToTarget: function(p) { // Class: ("group", "tab", "folder"), DraggedTabNode: TabId, TargetNode: query node, TabsIdsSelected: arr of selected tabIds, TabsIds: arr of tabIds, TabsIdsParents: arr of parent tabIds, Folders: object with folders objects, FoldersSelected: arr of selected folders ids, Group: groupId, Scroll: bool
             if (p.TargetNode != null) {
@@ -2453,38 +2465,38 @@ var TreeTabs = {
                             pinTabs = true;
                         }
                         if (p.where == "inside") { // PINS NEVER HAVE INSIDE, SO WILL BE IGNORED
-                            TreeTabs.DOM.InsertDropToTarget({TargetNode: p.TargetNode.childNodes[1], AppendToTarget: true, Nodes: p.Nodes});
+                            TT.DOM.InsertDropToTarget({TargetNode: p.TargetNode.childNodes[1], AppendToTarget: true, Nodes: p.Nodes});
                         }
                         if (p.where == "before") {
-                            TreeTabs.DOM.InsertDropToTarget({TargetNode: p.TargetNode, BeforeTarget: true, Nodes: p.Nodes});
+                            TT.DOM.InsertDropToTarget({TargetNode: p.TargetNode, BeforeTarget: true, Nodes: p.Nodes});
                         }
                         if (p.where == "after") {
-                            TreeTabs.DOM.InsertDropToTarget({TargetNode: p.TargetNode, AfterTarget: true, Nodes: p.Nodes});
+                            TT.DOM.InsertDropToTarget({TargetNode: p.TargetNode, AfterTarget: true, Nodes: p.Nodes});
                         }
                     }
                     if (p.TargetNode.id == "pin_list") {
-                        TreeTabs.DOM.InsertDropToTarget({TargetNode: p.TargetNode, AppendToTarget: true, Nodes: p.Nodes});
+                        TT.DOM.InsertDropToTarget({TargetNode: p.TargetNode, AppendToTarget: true, Nodes: p.Nodes});
                         pinTabs = true;
                     }
                     if (p.TargetNode.classList.contains("group")) {
-                        TreeTabs.DOM.InsertDropToTarget({TargetNode: p.TargetNode.childNodes[0], AppendToTarget: true, Nodes: p.Nodes});
+                        TT.DOM.InsertDropToTarget({TargetNode: p.TargetNode.childNodes[0], AppendToTarget: true, Nodes: p.Nodes});
                     }
 
                     if (p.TargetNode.classList.contains("group_button")) {
                         let group = document.getElementById("°" + p.TargetNode.id.substr(1));
-                        TreeTabs.DOM.InsertDropToTarget({TargetNode: group, Nodes: p.Nodes, AppendToTarget: true});
+                        TT.DOM.InsertDropToTarget({TargetNode: group, Nodes: p.Nodes, AppendToTarget: true});
                     }
-                    setTimeout(function() {TreeTabs.Folders.SaveFolders();}, 600);
+                    setTimeout(function() {TT.Folders.SaveFolders();}, 600);
                 }
                 if (p.NodesTypes.DraggingGroup) {
                     if (p.where == "before") {
-                        TreeTabs.DOM.InsterBeforeNode(document.getElementById("_" + p.Group.id), p.TargetNode);
+                        TT.DOM.InsterBeforeNode(document.getElementById("_" + p.Group.idp.id), p.TargetNode);
                     }
                     if (p.where == "after") {
-                        TreeTabs.DOM.InsterAfterNode(document.getElementById("_" + p.Group.id), p.TargetNode);
+                        TT.DOM.InsterAfterNode(document.getElementById("_" + p.Group.id), p.TargetNode);
                     }
-                    TreeTabs.Groups.UpdateBgGroupsOrder();
-                    TreeTabs.Groups.RearrangeGroupsLists();
+                    TT.Groups.UpdateBgGroupsOrder();
+                    TT.Groups.RearrangeGroupsLists();
                 }
                 for (i = 0; i < p.Nodes.length; i++) {
                     if (p.Nodes[i].NodeClass == "pin" || p.Nodes[i].NodeClass == "tab") {
@@ -2505,19 +2517,19 @@ var TreeTabs = {
                     setTimeout(function() {tt.schedule_rearrange_tabs++;}, 500);
                 }
             }
-            TreeTabs.Groups.KeepOnlyOneActiveTabInGroup();
-            TreeTabs.DOM.RefreshExpandStates();
-            TreeTabs.DOM.RefreshCounters();
-            setTimeout(function() {TreeTabs.DOM.RemoveHighlight();}, 100);
+            TT.Groups.KeepOnlyOneActiveTabInGroup();
+            TT.DOM.RefreshExpandStates();
+            TT.DOM.RefreshCounters();
+            setTimeout(function() {TT.DOM.RemoveHighlight();}, 100);
             setTimeout(function() {
                 if (opt.syncro_tabbar_groups_tabs_order) {
                     tt.schedule_rearrange_tabs++;
                 }
-                // TreeTabs.DOM.RefreshExpandStates();
-                // TreeTabs.DOM.RefreshCounters();
+                // TT.DOM.RefreshExpandStates();
+                // TT.DOM.RefreshCounters();
                 tt.schedule_update_data++;
-                TreeTabs.DOM.RefreshGUI();
-                TreeTabs.DOM.CleanUpDragAndDrop();
+                TT.DOM.RefreshGUI();
+                TT.DOM.CleanUpDragAndDrop();
                 if (opt.debug) {
                     log("DropToTarget END");
                 }
@@ -2593,29 +2605,29 @@ var TreeTabs = {
                     chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(Node.id), tab: {expand: "c"}});
                 }
                 if (Node.classList.contains("folder")) {
-                    TreeTabs.Folders.SaveFolders();
+                    TT.Folders.SaveFolders();
                 }
             } else {
                 if (Node.classList.contains("c")) {
                     if (opt.collapse_other_trees) {
-                        let thisTreeTabs = TreeTabs.DOM.GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
-                        let thisTreeFolders = TreeTabs.DOM.GetParentsByClass(Node.childNodes[0], "folder");
-                        document.querySelectorAll("#" + tt.active_group + " .o.tab").forEach(function(s) {
+                        let thisTreeTabs = TT.DOM.GetParentsByClass(Node.childNodes[0], "tab"); // start from tab's first child, instead of tab, important to include clicked tab as well
+                        let thisTreeFolders = TT.DOM.GetParentsByClass(Node.childNodes[0], "folder");
+                        document.querySelectorAll("#" + tt.active_group.id + " .o.tab").forEach(function(s) {
                             s.classList.remove("o"); s.classList.add("c");
                             chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(s.id), tab: {expand: "c"}});
                         });
         
-                        document.querySelectorAll("#" + tt.active_group + " .o.folder").forEach(function(s) {
+                        document.querySelectorAll("#" + tt.active_group.id + " .o.folder").forEach(function(s) {
                             s.classList.remove("o"); s.classList.add("c");
                         });
-                        thisTreeTabs.forEach(function(s) {
+                        thisTT.forEach(function(s) {
                             s.classList.remove("c"); s.classList.add("o");
                             chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(s.id), tab: {expand: "o"}});
                         });
                         thisTreeFolders.forEach(function(s) {
                             s.classList.remove("c"); s.classList.add("o");
                         });
-                        TreeTabs.Folders.SaveFolders();
+                        TT.Folders.SaveFolders();
                         if (Node.classList.contains("tab") && tt.tabs[Node.id]) {
                             tt.tabs[Node.id].ScrollToTab();
                         }
@@ -2625,7 +2637,7 @@ var TreeTabs = {
                             chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(Node.id), tab: {expand: "o"}});
                         }
                         if (Node.classList.contains("folder")) {
-                            TreeTabs.Folders.SaveFolders();
+                            TT.Folders.SaveFolders();
                         }
                     }
                 }
@@ -2633,13 +2645,13 @@ var TreeTabs = {
         },
         Select: function(event, TabNode) {
             if (event.shiftKey) { // SET SELECTION WITH SHIFT
-                let LastSelected = document.querySelector("#" + tt.active_group + " .selected.selected_last");
+                let LastSelected = document.querySelector("#" + tt.active_group.id + " .selected.selected_last");
                 if (LastSelected == null) {
-                    LastSelected = document.querySelector(".pin.active_tab, #" + tt.active_group + " .tab.active_tab");
+                    LastSelected = document.querySelector(".pin.active_tab, #" + tt.active_group.id + " .tab.active_tab");
                 }
                 if (LastSelected != null && TabNode.parentNode.id == LastSelected.parentNode.id) {
                     if (!event.ctrlKey) {
-                        document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                        document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                             s.classList.remove("selected_frozen"); s.classList.remove("selected_temporarly"); s.classList.remove("selected"); s.classList.remove("selected_last");
                         });
                     }
@@ -2672,7 +2684,7 @@ var TreeTabs = {
             document.querySelectorAll("#pin_list .selected").forEach(function(s) {
                 s.classList.remove("selected");
             });
-            document.querySelectorAll("#" + tt.active_group + " .selected").forEach(function(s) {
+            document.querySelectorAll("#" + tt.active_group.id + " .selected").forEach(function(s) {
                 s.classList.remove("selected");
             });
         },
@@ -2682,7 +2694,7 @@ var TreeTabs = {
                     s.classList.add("selected_frozen"); s.classList.remove("selected"); s.classList.remove("selected_last");
                 });
             } else {
-                document.querySelectorAll(".group:not(#" + tt.active_group + ") .selected").forEach(function(s) {
+                document.querySelectorAll(".group:not(#" + tt.active_group.id + ") .selected").forEach(function(s) {
                     s.classList.add("selected_frozen"); s.classList.remove("selected"); s.classList.remove("selected_last");
                 });
             }
@@ -2740,7 +2752,7 @@ var TreeTabs = {
             });
         },
         RefreshExpandStates: async function() { // refresh open closed trees states
-            document.querySelectorAll("#" + tt.active_group + " .folder, #" + tt.active_group + " .tab").forEach(function(s) {
+            document.querySelectorAll("#" + tt.active_group.id + " .folder, #" + tt.active_group.id + " .tab").forEach(function(s) {
                 if (s.childNodes[1].children.length == 0) {
                     s.classList.remove("o"); s.classList.remove("c");
                 } else {
@@ -2755,7 +2767,7 @@ var TreeTabs = {
         },
         RefreshCounters: async function() {
             if (opt.show_counter_tabs || opt.show_counter_tabs_hints) {
-                document.querySelectorAll("#" + tt.active_group + " .o.tab, #" + tt.active_group + " .c.tab").forEach(function(s) {
+                document.querySelectorAll("#" + tt.active_group.id + " .o.tab, #" + tt.active_group.id + " .c.tab").forEach(function(s) {
                     if (opt.show_counter_tabs) {
                         s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
                     }
@@ -2764,7 +2776,7 @@ var TreeTabs = {
                         s.childNodes[0].title = (document.querySelectorAll("[id='" + s.id + "'] .tab").length + " • ") + title;
                     }
                 });
-                document.querySelectorAll("#" + tt.active_group + " .folder").forEach(function(s) {
+                document.querySelectorAll("#" + tt.active_group.id + " .folder").forEach(function(s) {
                     if (opt.show_counter_tabs && tt.folders[s.id]) {
                         s.childNodes[0].childNodes[1].childNodes[0].textContent = document.querySelectorAll("[id='" + s.id + "'] .tab").length;
                     }
@@ -2879,9 +2891,9 @@ var TreeTabs = {
     },
     Manager: {
         OpenManagerWindow: function() {
-            TreeTabs.DOM.HideRenameDialogs();
+            TT.DOM.HideRenameDialogs();
             if (opt.debug) {
-                log("f: TreeTabs.Manager.OpenManagerWindow");
+                log("f: TT.Manager.OpenManagerWindow");
             }
             chrome.storage.local.get(null, function(storage) {
                 let ManagerWindow = document.getElementById("manager_window");
@@ -2899,15 +2911,15 @@ var TreeTabs = {
                 }
                 if (storage.hibernated_groups != undefined) {
                     storage.hibernated_groups.forEach(function(hibernated_group) {
-                        TreeTabs.Manager.AddGroupToManagerList(hibernated_group);
+                        TT.Manager.AddGroupToManagerList(hibernated_group);
                     });
                 }
                 if (storage.saved_sessions != undefined) {
                     (storage.saved_sessions).forEach(function(saved_session) {
-                        TreeTabs.Manager.AddSessionToManagerList(saved_session);
+                        TT.Manager.AddSessionToManagerList(saved_session);
                     });
                 }
-                TreeTabs.Manager.ReAddSessionAutomaticToManagerList(storage);
+                TT.Manager.ReAddSessionAutomaticToManagerList(storage);
             });
         },
         AddGroupToManagerList: function(hibernated_group) {
@@ -2927,7 +2939,7 @@ var TreeTabs = {
                         hibernated_groups.splice(HibernategGroupIndex, 1);
                         chrome.storage.local.set({hibernated_groups: hibernated_groups});
                         hib_group.parentNode.removeChild(hib_group);
-                        TreeTabs.DOM.RefreshGUI();
+                        TT.DOM.RefreshGUI();
                     });
                 }
             }
@@ -2940,7 +2952,7 @@ var TreeTabs = {
                     let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
                     chrome.storage.local.get(null, function(storage) {
                         let filename = storage.hibernated_groups[HibernategGroupIndex].group.name == "" ? labels.noname_group : storage.hibernated_groups[HibernategGroupIndex].group.name;
-                        TreeTabs.File.SaveFile(filename, "tt_group", storage.hibernated_groups[HibernategGroupIndex]);
+                        TT.File.SaveFile(filename, "tt_group", storage.hibernated_groups[HibernategGroupIndex]);
                     });
                 }
             }
@@ -2952,7 +2964,7 @@ var TreeTabs = {
                 if (event.which == 1) {
                     let HibernategGroupIndex = Array.from(this.parentNode.parentNode.children).indexOf(this.parentNode);
                     chrome.storage.local.get(null, function(storage) {
-                        TreeTabs.Manager.RecreateGroup(storage.hibernated_groups[HibernategGroupIndex]);
+                        TT.Manager.RecreateGroup(storage.hibernated_groups[HibernategGroupIndex]);
                     });
                 }
             }
@@ -2979,7 +2991,7 @@ var TreeTabs = {
             tabsCounter.textContent = " - (" + hibernated_group.tabs.length + ")";
             tabsCounter.classList = "manager_window_group_name";
             HibernatedGroupRow.appendChild(tabsCounter);
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         AddSessionToManagerList: function(saved_session) {
             let SessionsList = document.getElementById("manager_window_sessions_list");
@@ -2998,7 +3010,7 @@ var TreeTabs = {
                         S_Sessions.splice(SessionIndex, 1);
                         chrome.storage.local.set({saved_sessions: S_Sessions});
                         saved_session.parentNode.removeChild(saved_session);
-                        TreeTabs.DOM.RefreshGUI();
+                        TT.DOM.RefreshGUI();
                     });
                 }
             }
@@ -3012,7 +3024,7 @@ var TreeTabs = {
                     let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
                     chrome.storage.local.get(null, function(storage) {
                         let filename = storage.saved_sessions[SessionIndex].name == "" ? labels.noname_group : storage.saved_sessions[SessionIndex].name;
-                        TreeTabs.File.SaveFile(filename, "tt_session", storage.saved_sessions[SessionIndex].session);
+                        TT.File.SaveFile(filename, "tt_session", storage.saved_sessions[SessionIndex].session);
                     });
                 }
             }
@@ -3026,7 +3038,7 @@ var TreeTabs = {
                     let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
                     chrome.storage.local.get(null, function(storage) {
                         let S_Sessions = storage.saved_sessions;
-                        TreeTabs.Manager.RecreateSession(S_Sessions[SessionIndex].session);
+                        TT.Manager.RecreateSession(S_Sessions[SessionIndex].session);
                     });
                 }
             }
@@ -3040,7 +3052,7 @@ var TreeTabs = {
                     let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
                     chrome.storage.local.get(null, function(storage) {
                         let S_Sessions = storage.saved_sessions;
-                        TreeTabs.Manager.ImportMergeTabs(S_Sessions[SessionIndex].session);
+                        TT.Manager.ImportMergeTabs(S_Sessions[SessionIndex].session);
                     });
                 }
             }
@@ -3063,7 +3075,7 @@ var TreeTabs = {
                 });
             }
             SavedSessionRow.appendChild(name);
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         ReAddSessionAutomaticToManagerList: function(storage) {
             let SessionsAutomaticList = document.getElementById("manager_window_autosessions_list");
@@ -3072,10 +3084,10 @@ var TreeTabs = {
             }
             if (storage.saved_sessions_automatic != undefined) {
                 (storage.saved_sessions_automatic).forEach(function(saved_sessions_automatic) {
-                    TreeTabs.Manager.AddSessionAutomaticToManagerList(saved_sessions_automatic);
+                    TT.Manager.AddSessionAutomaticToManagerList(saved_sessions_automatic);
                 });
             }
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         AddSessionAutomaticToManagerList: function(saved_session) {
             let SessionsList = document.getElementById("manager_window_autosessions_list");
@@ -3091,7 +3103,7 @@ var TreeTabs = {
                     let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
                     chrome.storage.local.get(null, function(storage) {
                         let S_Sessions = storage.saved_sessions_automatic;
-                        TreeTabs.Manager.RecreateSession(S_Sessions[SessionIndex].session);
+                        TT.Manager.RecreateSession(S_Sessions[SessionIndex].session);
                     });
                 }
             }
@@ -3105,7 +3117,7 @@ var TreeTabs = {
                     let SessionIndex = Array.from(saved_session.parentNode.children).indexOf(saved_session);
                     chrome.storage.local.get(null, function(storage) {
                         let S_Sessions = storage.saved_sessions_automatic;
-                        TreeTabs.Manager.ImportMergeTabs(S_Sessions[SessionIndex].session);
+                        TT.Manager.ImportMergeTabs(S_Sessions[SessionIndex].session);
                     });
                 }
             }
@@ -3114,12 +3126,12 @@ var TreeTabs = {
             name.textContent = saved_session.name;
             name.classList = "manager_window_session_name";
             SavedSessionRow.appendChild(name);
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         SetManagerEvents: function () {
             document.getElementById("manager_window_close").onmousedown = function(event) {
                 if (event.which == 1) {
-                    TreeTabs.DOM.HideRenameDialogs();
+                    TT.DOM.HideRenameDialogs();
                 }
             }
             document.querySelectorAll(".manager_window_toolbar_button").forEach(function(s) {
@@ -3133,40 +3145,40 @@ var TreeTabs = {
                             s.classList.remove("mw_on");
                         });
                         this.classList.add("mw_on");
-                        TreeTabs.DOM.RefreshGUI();
+                        TT.DOM.RefreshGUI();
                     }
                 }
             });
             document.getElementById("manager_window_button_import_group").onmousedown = function(event) {
                 if (event.which == 1) {
-                    let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_group");
+                    let inputFile = TT.File.ShowOpenFileDialog(".tt_group");
                     inputFile.onchange = function(event) {
-                        TreeTabs.Manager.ImportGroup(false, true);
+                        TT.Manager.ImportGroup(false, true);
                     }
                 }
             }
             document.getElementById("manager_window_button_hibernate_group").onmousedown = function(event) {
                 if (event.which == 1) {
-                    TreeTabs.Manager.ExportGroup(tt.active_group, false, true);
+                    TT.Manager.ExportGroup(tt.active_group.id, false, true);
                     setTimeout(function() {
-                        TreeTabs.Groups.GroupRemove(tt.active_group, true);
+                        TT.Groups.GroupRemove(tt.active_group.id, true);
                     }, 100);
                     setTimeout(function() {
-                        TreeTabs.Manager.OpenManagerWindow();
+                        TT.Manager.OpenManagerWindow();
                     }, 150);
                 }
             }
             document.getElementById("manager_window_button_save_current_session").onmousedown = function(event) {
                 if (event.which == 1) {
                     let d = new Date();
-                    TreeTabs.Manager.ExportSession((d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉")), false, true, false);
+                    TT.Manager.ExportSession((d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉")), false, true, false);
                 }
             }
             document.getElementById("manager_window_button_import_session").onmousedown = function(event) {
                 if (event.which == 1) {
-                    let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_session");
+                    let inputFile = TT.File.ShowOpenFileDialog(".tt_session");
                     inputFile.onchange = function(event) {
-                        TreeTabs.Manager.ImportSession(false, true, false);
+                        TT.Manager.ImportSession(false, true, false);
                     }
                 }
             }
@@ -3174,15 +3186,15 @@ var TreeTabs = {
             autosessions_save_max_to_keep.value = opt.autosave_max_to_keep;
             autosessions_save_max_to_keep.oninput = function(event) {
                 opt.autosave_max_to_keep = parseInt(this.value);
-                TreeTabs.Preferences.SavePreferences(opt);
+                TT.Preferences.SavePreferences(opt);
             }
             let autosessions_save_timer = document.getElementById("manager_window_autosessions_save_timer");
             autosessions_save_timer.value = opt.autosave_interval;
             autosessions_save_timer.oninput = function(event) {
                 opt.autosave_interval = parseInt(this.value);
-                TreeTabs.Preferences.SavePreferences(opt);
+                TT.Preferences.SavePreferences(opt);
                 clearInterval(tt.AutoSaveSession);
-                TreeTabs.Manager.StartAutoSaveSession();
+                TT.Manager.StartAutoSaveSession();
             }
         },
         ExportGroup: function(groupId, filename, save_to_manager) {
@@ -3208,10 +3220,10 @@ var TreeTabs = {
                         }
                         if (tab.id == lastId) {
                             if (filename) {
-                                TreeTabs.File.SaveFile(filename, "tt_group", GroupToSave);
+                                TT.File.SaveFile(filename, "tt_group", GroupToSave);
                             }
                             if (save_to_manager) {
-                                TreeTabs.Manager.AddGroupToStorage(GroupToSave, true);
+                                TT.Manager.AddGroupToStorage(GroupToSave, true);
                             }
                             if (opt.debug) {
                                 log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
@@ -3221,10 +3233,10 @@ var TreeTabs = {
                 });
             } else {
                 if (filename) {
-                    TreeTabs.File.SaveFile(filename, "tt_group", GroupToSave);
+                    TT.File.SaveFile(filename, "tt_group", GroupToSave);
                 }
                 if (save_to_manager) {
-                    TreeTabs.Manager.AddGroupToStorage(GroupToSave, true);
+                    TT.Manager.AddGroupToStorage(GroupToSave, true);
                 }
                 if (opt.debug) {
                     log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
@@ -3241,10 +3253,10 @@ var TreeTabs = {
                 let group = JSON.parse(data);
                 file.parentNode.removeChild(file);
                 if (recreate_group) {
-                    TreeTabs.Manager.RecreateGroup(group);
+                    TT.Manager.RecreateGroup(group);
                 }
                 if (save_to_manager) {
-                    TreeTabs.Manager.AddGroupToStorage(group, true);
+                    TT.Manager.AddGroupToStorage(group, true);
                 }
                 if (opt.debug) {
                     log("f: ImportGroup, recreate_group: " + recreate_group + ", save_to_manager: " + save_to_manager);
@@ -3259,11 +3271,11 @@ var TreeTabs = {
             let NewFolders = {};
             let RefTabs = {};
             let NewTabs = [];
-            let NewGroupId = TreeTabs.Groups.AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
+            let NewGroupId = TT.Groups.AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
             for (var folder in LoadedGroup.folders) {
-                let newId = TreeTabs.Folders.AddNewFolder({parent: NewGroupId, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand});
+                let newId = TT.Folders.AddNewFolder({parent: NewGroupId, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand});
                 RefFolders[folder] = newId;
-                NewFolders[newId] = {id: newId, parent: ((LoadedGroup.folders[folder].parent).startsWith("g_") ? NewGroupId : LoadedGroup.folders[folder].parent), index: LoadedGroup.folders[folder].index, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand};
+                NewFolders[newId] = {id: newId, parent: (((LoadedGroup.folders[folder].parent).startsWith("g_") || (LoadedGroup.folders[folder].parent == "tab_list")) ? NewGroupId : LoadedGroup.folders[folder].parent), index: LoadedGroup.folders[folder].index, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand};
             }
             for (var new_folder in NewFolders) {
                 if ((NewFolders[new_folder].parent).startsWith("f_") && RefFolders[NewFolders[new_folder].parent]) {
@@ -3275,13 +3287,15 @@ var TreeTabs = {
                 if (browserId == "F") {
                     params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: true, title: Tab.title};
                 } else {
-                    params = {active: false, windowId: CurrentWindowId, url: Tab.url};
+                    params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url};
                 }
                 chrome.tabs.create(params, function(new_tab) {
-                    browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", Tab.favicon);
+                    if (browserId == "F") {
+                        browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", Tab.favicon);
+                    }
                     RefTabs[Tab.id] = new_tab.id;
                     Tab.id = new_tab.id;
-                    if ((Tab.parent).startsWith("g_")) {
+                    if ((Tab.parent).startsWith("g_") || Tab.parent == "tab_list") {
                         Tab.parent = NewGroupId;
                     }
                     if ((Tab.parent).startsWith("f_") && RefFolders[Tab.parent]) {
@@ -3302,7 +3316,7 @@ var TreeTabs = {
                             GiveUp--;
                             let LastTab = document.getElementById(NewTabs[NewTabs.length - 1].id);
                             if (LastTab != null || GiveUp < 0) {
-                                TreeTabs.Manager.RecreateTreeStructure({}, NewFolders, NewTabs);
+                                TT.Manager.RecreateTreeStructure({}, NewFolders, NewTabs);
                                 clearInterval(RecreateTreeS);
                             }
                         }, 300);
@@ -3317,14 +3331,14 @@ var TreeTabs = {
                     hibernated_groups.push(group);
                     chrome.storage.local.set({hibernated_groups: hibernated_groups});
                     if (add_to_manager) {
-                        TreeTabs.Manager.AddGroupToManagerList(group);
+                        TT.Manager.AddGroupToManagerList(group);
                     }
                 } else {
                     let hibernated_groups = storage["hibernated_groups"];
                     hibernated_groups.push(group);
                     chrome.storage.local.set({hibernated_groups: hibernated_groups});
                     if (add_to_manager) {
-                        TreeTabs.Manager.AddGroupToManagerList(group);
+                        TT.Manager.AddGroupToManagerList(group);
                     }
                 }
                 if (opt.debug) {
@@ -3359,13 +3373,13 @@ var TreeTabs = {
                             }
                         });
                         if (save_to_file) {
-                            TreeTabs.File.SaveFile(name, "tt_session", ExportWindows);
+                            TT.File.SaveFile(name, "tt_session", ExportWindows);
                         }
                         if (save_to_manager) {
-                            TreeTabs.Manager.AddSessionToStorage(ExportWindows, name, true);
+                            TT.Manager.AddSessionToStorage(ExportWindows, name, true);
                         }
                         if (save_to_autosave_manager) {
-                            TreeTabs.Manager.AddAutosaveSessionToStorage(ExportWindows, name)
+                            TT.Manager.AddAutosaveSessionToStorage(ExportWindows, name)
                         }
                     });
                 });
@@ -3381,13 +3395,13 @@ var TreeTabs = {
                 file.parentNode.removeChild(file);
                 let LoadedSession = JSON.parse(data);
                 if (recreate_session) {
-                    TreeTabs.Manager.RecreateSession(LoadedSession);
+                    TT.Manager.RecreateSession(LoadedSession);
                 }
                 if (merge_session) {
-                    TreeTabs.Manager.ImportMergeTabs(LoadedSession);
+                    TT.Manager.ImportMergeTabs(LoadedSession);
                 }
                 if (save_to_manager) {
-                    TreeTabs.Manager.AddSessionToStorage(LoadedSession, (file.files[file.files.length - 1].name).replace(".tt_session", ""), true);
+                    TT.Manager.AddSessionToStorage(LoadedSession, (file.files[file.files.length - 1].name).replace(".tt_session", ""), true);
                 }
             }
         },
@@ -3398,14 +3412,14 @@ var TreeTabs = {
                     saved_sessions.push({name: name, session: session});
                     chrome.storage.local.set({saved_sessions: saved_sessions});
                     if (add_to_manager) {
-                        TreeTabs.Manager.AddSessionToManagerList(saved_sessions[saved_sessions.length - 1]);
+                        TT.Manager.AddSessionToManagerList(saved_sessions[saved_sessions.length - 1]);
                     }
                 } else {
                     let saved_sessions = storage.saved_sessions;
                     saved_sessions.push({name: name, session: session});
                     chrome.storage.local.set({saved_sessions: saved_sessions});
                     if (add_to_manager) {
-                        TreeTabs.Manager.AddSessionToManagerList(saved_sessions[saved_sessions.length - 1]);
+                        TT.Manager.AddSessionToManagerList(saved_sessions[saved_sessions.length - 1]);
                     }
                 }
                 if (opt.debug) {
@@ -3501,7 +3515,7 @@ var TreeTabs = {
             for (let LWI = 0; LWI < LoadedWindows.length; LWI++) { // clear previous window ids
                 LoadedWindows[LWI].id = "";
             }
-            TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_loaded_tree_structure")});
+            TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_loaded_tree_structure")});
             chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(cw) {
                 for (let CWI = 0; CWI < cw.length; CWI++) { // Current Windows
                     for (let LWI = 0; LWI < LoadedWindows.length; LWI++) { // Loaded Windows
@@ -3610,7 +3624,7 @@ var TreeTabs = {
                                 chrome.runtime.sendMessage({command: "save_folders", windowId: w.id, folders: f});
                                 chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: [], windowId: w.id});
                                 if (w.id == tt.CurrentWindowId) {
-                                    TreeTabs.Manager.RecreateTreeStructure(w.groups, w.folders, []);
+                                    TT.Manager.RecreateTreeStructure(w.groups, w.folders, []);
                                 }
                                 (w.tabs).forEach(function(Tab) {
                                     // let LastTabId = w.tabs[w.tabs.length - 1].id;
@@ -3639,7 +3653,7 @@ var TreeTabs = {
                                     }
                                     // if (OriginalTabId == LastTabId) { // loop is on last tab
                                     //     setTimeout(function() {
-                                    //         TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
+                                    //         TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
                                     //         for (let tInd = 0; tInd < NewTabs.length; tInd++) {
                                     //             if (RefTabs[NewTabs[tInd].parent] != undefined) {
                                     //                 NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
@@ -3649,7 +3663,7 @@ var TreeTabs = {
                                     // }
                                 });
                                 setTimeout(function() {
-                                    TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
+                                    TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
                                     for (let tInd = 0; tInd < NewTabs.length; tInd++) {
                                         if (RefTabs[NewTabs[tInd].parent] != undefined) {
                                             NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
@@ -3660,13 +3674,13 @@ var TreeTabs = {
                                     for (let tInd = 0; tInd < NewTabs.length; tInd++) {
                                         chrome.runtime.sendMessage({command: "update_tab", tabId: NewTabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
                                     }
-                                    TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_other_windows")});
+                                    TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_other_windows")});
                                     if (w.id == tt.CurrentWindowId) {
-                                        TreeTabs.Manager.RecreateTreeStructure(w.groups, w.folders, NewTabs);
+                                        TT.Manager.RecreateTreeStructure(w.groups, w.folders, NewTabs);
                                     } else {
                                         chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: NewTabs, windowId: w.id});
                                     }
-                                    TreeTabs.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_all_done"), hideTimeout: 2000});
+                                    TT.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_all_done"), hideTimeout: 2000});
                                 }, 6000);
                             });
                         });
@@ -3682,10 +3696,10 @@ var TreeTabs = {
                     }
                     let d = new Date();
                     let newName = d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉");
-                    TreeTabs.Manager.ExportSession(newName, false, false, true);
-                    TreeTabs.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_autosave") + newName, hideTimeout: 1500});
+                    TT.Manager.ExportSession(newName, false, false, true);
+                    TT.Manager.ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_autosave") + newName, hideTimeout: 1500});
                     if (document.getElementById("manager_window").style.top != "-500px") {
-                        chrome.storage.local.get(null, function(storage) {TreeTabs.Manager.ReAddSessionAutomaticToManagerList(storage);});
+                        chrome.storage.local.get(null, function(storage) {TT.Manager.ReAddSessionAutomaticToManagerList(storage);});
                     }
                 }, opt.autosave_interval * 60000);
             }
@@ -3694,19 +3708,19 @@ var TreeTabs = {
             if (opt.debug) {
                 log("f: RecreateTreeStructure");
             }
-            TreeTabs.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_quick_check_recreate_structure"), hideTimeout: 3000});
+            TT.Manager.ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_quick_check_recreate_structure"), hideTimeout: 3000});
             if (groups && Object.keys(groups).length > 0) {
                 for (var group in groups) {
                     tt.groups[groups[group].id] = Object.assign({}, groups[group]);
                 }
-                TreeTabs.Groups.AppendGroups(tt.groups);
+                TT.Groups.AppendGroups(tt.groups);
             }
             if (folders && Object.keys(folders).length > 0) {
                 for (var folder in folders) {
                     tt.folders[folders[folder].id] = Object.assign({}, folders[folder]);
                 }
-                TreeTabs.Folders.PreAppendFolders(tt.folders);
-                TreeTabs.Folders.AppendFolders(tt.folders);
+                TT.Folders.PreAppendFolders(tt.folders);
+                TT.Folders.AppendFolders(tt.folders);
             }
             let ttTabs = {};
             tabs.forEach(function(Tab) {
@@ -3736,14 +3750,14 @@ var TreeTabs = {
             var SortAttempt = setInterval(function() {
                 SortAttemptNr--;
                 if (SortAttemptNr < 0 || Object.keys(ttTabs).length == tabs.length || tabs.length == 0) {
-                    TreeTabs.Tabs.RearrangeTree(ttTabs, folders, false);
+                    TT.Tabs.RearrangeTree(ttTabs, folders, false);
                     clearInterval(SortAttempt);
-                    TreeTabs.Groups.UpdateBgGroupsOrder();
+                    TT.Groups.UpdateBgGroupsOrder();
                     setTimeout(function() {
-                        TreeTabs.DOM.RefreshExpandStates();
-                        TreeTabs.DOM.RefreshCounters();
+                        TT.DOM.RefreshExpandStates();
+                        TT.DOM.RefreshCounters();
                         tt.schedule_update_data++;
-                        TreeTabs.Folders.SaveFolders();
+                        TT.Folders.SaveFolders();
                     }, 3000);
                }
             }, 500);
@@ -3787,11 +3801,11 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("pin")) {
-                                TreeTabs.Tabs.OpenNewTab(true, tt.menuItemNode.id);
+                                TT.Tabs.OpenNewTab(true, tt.menuItemNode.id);
                             } else {
-                                TreeTabs.Tabs.OpenNewTab(true, undefined);
+                                TT.Tabs.OpenNewTab(true, undefined);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3800,19 +3814,19 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("folder")) {
-                                TreeTabs.Tabs.OpenNewTab(false, tt.menuItemNode.id);
+                                TT.Tabs.OpenNewTab(false, tt.menuItemNode.id);
                             } else {
                                 if (tt.menuItemNode.classList.contains("pin")) {
-                                    TreeTabs.Tabs.OpenNewTab(true, tt.menuItemNode.id);
+                                    TT.Tabs.OpenNewTab(true, tt.menuItemNode.id);
                                 } else {
                                     if (tt.menuItemNode.classList.contains("tab")) {
-                                        TreeTabs.Tabs.OpenNewTab(false, tt.menuItemNode.id);
+                                        TT.Tabs.OpenNewTab(false, tt.menuItemNode.id);
                                     } else {
-                                        TreeTabs.Tabs.OpenNewTab(false, tt.active_group);
+                                        TT.Tabs.OpenNewTab(false, tt.active_group.id);
                                     }
                                 }
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3822,13 +3836,13 @@ var TreeTabs = {
                         event.stopPropagation();
                         if (event.which == 1) {
                             if (tt.menuItemNode.classList.contains("selected")) {
-                                document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {pinned: (tt.menuItemNode.classList.contains("tab"))});
                                 });
                             } else {
                                 chrome.tabs.update(parseInt(tt.menuItemNode.id), {pinned: (tt.menuItemNode.classList.contains("tab"))});
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3838,7 +3852,7 @@ var TreeTabs = {
                         event.stopPropagation();
                         if (event.which == 1) {
                             if (tt.menuItemNode.classList.contains("selected")) {
-                                document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                     tt.tabs[s.id].DuplicateTab();
                                     // DuplicateTab(s);
                                 });
@@ -3846,7 +3860,7 @@ var TreeTabs = {
                                 tt.tabs[tt.menuItemNode.id].DuplicateTab();
                                 // DuplicateTab(tt.menuItemNode);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3855,7 +3869,7 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.DOM.FreezeSelection(false);
+                            TT.DOM.FreezeSelection(false);
                             let Nodes = [];
                             let NodesTypes = {DraggingPin: false, DraggingTab: false, DraggingFolder: false};
                             let query;
@@ -3878,8 +3892,8 @@ var TreeTabs = {
                                     Nodes.push({id: s.id, parent: s.parentNode.id, selected: s.classList.contains("selected"), temporary: s.classList.contains("selected_temporarly"), NodeClass: "folder", index: (tt.folders[s.id] ? tt.folders[s.id].index : 0), name: (tt.folders[s.id] ? tt.folders[s.id].name : labels.noname_group), expand: (tt.folders[s.id] ? tt.folders[s.id].expand : "")});
                                 }
                             });
-                            TreeTabs.Tabs.Detach(Nodes, NodesTypes, {});
-                            TreeTabs.Menu.HideMenus();
+                            TT.Tabs.Detach(Nodes, NodesTypes, {});
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3889,13 +3903,13 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("selected")) {
-                                document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                     chrome.tabs.reload(parseInt(s.id));
                                 });
                             } else {
                                 chrome.tabs.reload(parseInt(tt.menuItemNode.id));
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3907,7 +3921,7 @@ var TreeTabs = {
                             if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
                                 if (tt.menuItemNode.classList.contains("selected")) {
                                     let tabsArr = [];
-                                    document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                    document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                         tabsArr.push(parseInt(s.id));
                                         if (s.childNodes[2].childNodes.length > 0) {
                                             document.querySelectorAll("#" + s.childNodes[2].id + " .tab").forEach(function(t) {
@@ -3915,9 +3929,9 @@ var TreeTabs = {
                                             });
                                         }
                                     });
-                                    TreeTabs.Tabs.DiscardTabs(tabsArr);
+                                    TT.Tabs.DiscardTabs(tabsArr);
                                 } else {
-                                    TreeTabs.Tabs.DiscardTabs([parseInt(tt.menuItemNode.id)]);
+                                    TT.Tabs.DiscardTabs([parseInt(tt.menuItemNode.id)]);
                                 }
                             }
                             if (tt.menuItemNode.classList.contains("folder")) {
@@ -3925,9 +3939,9 @@ var TreeTabs = {
                                 document.querySelectorAll("#" + tt.menuItemNode.id + " .tab").forEach(function(s) {
                                     tabsArr.push(parseInt(s.id));
                                 });
-                                TreeTabs.Tabs.DiscardTabs(tabsArr);
+                                TT.Tabs.DiscardTabs(tabsArr);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3938,7 +3952,7 @@ var TreeTabs = {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("selected")) {
                                 let tabsArr = [];
-                                document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                     tabsArr.push(parseInt(s.id));
                                     if (s.childNodes[2].childNodes.length > 0) {
                                         document.querySelectorAll("#" + s.childNodes[2].id + " .tab").forEach(function(t) {
@@ -3946,11 +3960,11 @@ var TreeTabs = {
                                         });
                                     }
                                 });
-                                TreeTabs.Tabs.CloseTabs(tabsArr);
+                                TT.Tabs.CloseTabs(tabsArr);
                             } else {
-                                TreeTabs.Tabs.CloseTabs([parseInt(tt.menuItemNode.id)]);
+                                TT.Tabs.CloseTabs([parseInt(tt.menuItemNode.id)]);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3961,7 +3975,7 @@ var TreeTabs = {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
                                 if (tt.menuItemNode.classList.contains("selected")) {
-                                    document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                    document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                         chrome.tabs.update(parseInt(s.id), {muted: true});
                                     });
                                 } else {
@@ -3973,7 +3987,7 @@ var TreeTabs = {
                                     chrome.tabs.update(parseInt(s.id), {muted: true});
                                 });
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3985,7 +3999,7 @@ var TreeTabs = {
                             document.querySelectorAll("[id='" + tt.menuItemNode.id + "'], [id='" + tt.menuItemNode.id + "'] .tab").forEach(function(s) {
                                 chrome.tabs.update(parseInt(s.id), {muted: true});
                             });
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -3996,7 +4010,7 @@ var TreeTabs = {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("pin") || tt.menuItemNode.classList.contains("tab")) {
                                 if (tt.menuItemNode.classList.contains("selected")) {
-                                    document.querySelectorAll(".pin.selected, #" + tt.active_group + " .selected").forEach(function(s) {
+                                    document.querySelectorAll(".pin.selected, #" + tt.active_group.id + " .selected").forEach(function(s) {
                                         chrome.tabs.update(parseInt(s.id), {muted: false});
                                     });
                                 } else {
@@ -4008,7 +4022,7 @@ var TreeTabs = {
                                     chrome.tabs.update(parseInt(s.id), {muted: false});
                                 });
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4020,7 +4034,7 @@ var TreeTabs = {
                             document.querySelectorAll("[id='" + tt.menuItemNode.id + "'], [id='" + tt.menuItemNode.id + "'] .tab").forEach(function(s) {
                                 chrome.tabs.update(parseInt(s.id), {muted: false});
                             });
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4031,16 +4045,16 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("selected")) {
-                                document.querySelectorAll(".pin:not(.selected), #" + tt.active_group + " .tab:not(.selected)").forEach(function(s) {
+                                document.querySelectorAll(".pin:not(.selected), #" + tt.active_group.id + " .tab:not(.selected)").forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {muted: true});
                                 });
                             } else {
-                                document.querySelectorAll(".pin:not([id='" + tt.menuItemNode.id + "']), #" + tt.active_group + " .tab:not([id='" + tt.menuItemNode.id + "'])").forEach(function(s) {
+                                document.querySelectorAll(".pin:not([id='" + tt.menuItemNode.id + "']), #" + tt.active_group.id + " .tab:not([id='" + tt.menuItemNode.id + "'])").forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {muted: true});
                                 });
                             }
         
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4051,15 +4065,15 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("selected")) {
-                                document.querySelectorAll(".pin:not(.selected), #" + tt.active_group + " .tab:not(.selected)").forEach(function(s) {
+                                document.querySelectorAll(".pin:not(.selected), #" + tt.active_group.id + " .tab:not(.selected)").forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {muted: false});
                                 });
                             } else {
-                                document.querySelectorAll(".pin:not([id='" + tt.menuItemNode.id + "']), #" + tt.active_group + " .tab:not([id='" + tt.menuItemNode.id + "'])").forEach(function(s) {
+                                document.querySelectorAll(".pin:not([id='" + tt.menuItemNode.id + "']), #" + tt.active_group.id + " .tab:not([id='" + tt.menuItemNode.id + "'])").forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {muted: false});
                                 });
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4073,7 +4087,7 @@ var TreeTabs = {
                                     chrome.sessions.restore(null, function() {});
                                 }
                             });
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4084,18 +4098,18 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("tab")) {
-                                let FolderId = TreeTabs.Folders.AddNewFolder({ParentId: tt.menuItemNode.parentNode.parentNode.id, InsertAfterId: tt.menuItemNode.id});
-                                TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                                let FolderId = TT.Folders.AddNewFolder({ParentId: tt.menuItemNode.parentNode.parentNode.id, InsertAfterId: tt.menuItemNode.id});
+                                TT.Folders.ShowRenameFolderDialog(FolderId);
                             } else {
                                 if (tt.menuItemNode.classList.contains("folder")) {
-                                    let FolderId = TreeTabs.Folders.AddNewFolder({ParentId: tt.menuItemNode.id});
-                                    TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                                    let FolderId = TT.Folders.AddNewFolder({ParentId: tt.menuItemNode.id});
+                                    TT.Folders.ShowRenameFolderDialog(FolderId);
                                 } else {
-                                    let FolderId = TreeTabs.Folders.AddNewFolder({});
-                                    TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                                    let FolderId = TT.Folders.AddNewFolder({});
+                                    TT.Folders.ShowRenameFolderDialog(FolderId);
                                 }
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4111,8 +4125,8 @@ var TreeTabs = {
                             });
         
                             tt.schedule_update_data++;
-                            TreeTabs.Menu.HideMenus();
-                            TreeTabs.Folders.SaveFolders();
+                            TT.Menu.HideMenus();
+                            TT.Folders.SaveFolders();
                         }
                     }
                 }
@@ -4126,8 +4140,8 @@ var TreeTabs = {
                                 s.classList.remove("o");
                             });
                             tt.schedule_update_data++;
-                            TreeTabs.Menu.HideMenus();
-                            TreeTabs.Folders.SaveFolders();
+                            TT.Menu.HideMenus();
+                            TT.Folders.SaveFolders();
                         }
                     }
                 }
@@ -4136,13 +4150,13 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            document.querySelectorAll("#" + tt.active_group + " .folder.c, #" + tt.active_group + " .tab.c").forEach(function(s) {
+                            document.querySelectorAll("#" + tt.active_group.id + " .folder.c, #" + tt.active_group.id + " .tab.c").forEach(function(s) {
                                 s.classList.add("o");
                                 s.classList.remove("c");
                             });
                             tt.schedule_update_data++;
-                            TreeTabs.Menu.HideMenus();
-                            TreeTabs.Folders.SaveFolders();
+                            TT.Menu.HideMenus();
+                            TT.Folders.SaveFolders();
                         }
                     }
                 }
@@ -4151,13 +4165,13 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            document.querySelectorAll("#" + tt.active_group + " .folder.o, #" + tt.active_group + " .tab.o").forEach(function(s) {
+                            document.querySelectorAll("#" + tt.active_group.id + " .folder.o, #" + tt.active_group.id + " .tab.o").forEach(function(s) {
                                 s.classList.add("c");
                                 s.classList.remove("o");
                             });
                             tt.schedule_update_data++;
-                            TreeTabs.Menu.HideMenus();
-                            TreeTabs.Folders.SaveFolders();
+                            TT.Menu.HideMenus();
+                            TT.Folders.SaveFolders();
                         }
                     }
                 }
@@ -4175,8 +4189,8 @@ var TreeTabs = {
                                     });
                                 }
                             });
-                            TreeTabs.Tabs.CloseTabs(tabsArr);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Tabs.CloseTabs(tabsArr);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4185,8 +4199,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Folders.ShowRenameFolderDialog(tt.menuItemNode.id);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Folders.ShowRenameFolderDialog(tt.menuItemNode.id);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4198,12 +4212,12 @@ var TreeTabs = {
                             event.stopPropagation();
                             if (tt.menuItemNode.classList.contains("selected")) {
                                 document.querySelectorAll("#" + tt.menuItemNode.id + "  .selected, #" + tt.menuItemNode.id).forEach(function(s) {
-                                    TreeTabs.Folders.RemoveFolder(s.id);
+                                    TT.Folders.RemoveFolder(s.id);
                                 });
                             } else {
-                                TreeTabs.Folders.RemoveFolder(tt.menuItemNode.id);
+                                TT.Folders.RemoveFolder(tt.menuItemNode.id);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4219,31 +4233,31 @@ var TreeTabs = {
                                     query = ".pin:not(.selected)";
                                 }
                                 if (tt.menuItemNode.classList.contains("tab")) {
-                                    query = "#" + tt.active_group + " .tab:not(.selected)";
+                                    query = "#" + tt.active_group.id + " .tab:not(.selected)";
                                 }
-                                // document.querySelectorAll(".pin:not(.selected), #"+tt.active_group+" .tab:not(.selected)").forEach(function(s) {
+                                // document.querySelectorAll(".pin:not(.selected), #"+tt.active_group.id+" .tab:not(.selected)").forEach(function(s) {
                                 document.querySelectorAll(query).forEach(function(s) {
                                     let children = document.querySelectorAll("[id='" + s.id + "'] .selected");
                                     if (children.length == 0 || opt.promote_children) {
                                         tabsArr.push(parseInt(s.id));
                                     }
                                 });
-                                TreeTabs.Tabs.CloseTabs(tabsArr);
+                                TT.Tabs.CloseTabs(tabsArr);
                             } else {
                                 if (tt.menuItemNode.classList.contains("pin")) {
                                     query = ".pin:not([id='" + tt.menuItemNode.id + "'])";
                                 }
                                 if (tt.menuItemNode.classList.contains("tab")) {
-                                    query = "#°" + tt.active_group + " .tab:not([id='" + tt.menuItemNode.id + "'])";
-                                    document.getElementById("°" + tt.active_group).appendChild(tt.menuItemNode);
+                                    query = "#°" + tt.active_group.id + " .tab:not([id='" + tt.menuItemNode.id + "'])";
+                                    tt.active_group.childNodes[0].appendChild(tt.menuItemNode);
                                 }
                                 document.querySelectorAll(query).forEach(function(s) {
                                     tabsArr.push(parseInt(s.id));
                                 });
         
-                                TreeTabs.Tabs.CloseTabs(tabsArr);
+                                TT.Tabs.CloseTabs(tabsArr);
                             }
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4252,8 +4266,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Utils.Bookmark(tt.menuItemNode);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Utils.Bookmark(tt.menuItemNode);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4263,8 +4277,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Groups.ShowGroupEditWindow(tt.menuItemNode.id);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Groups.ShowGroupEditWindow(tt.menuItemNode.id);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4273,8 +4287,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Groups.GroupRemove(tt.menuItemNode.id, false);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Groups.GroupRemove(tt.menuItemNode.id, false);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4284,8 +4298,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Groups.GroupRemove(tt.menuItemNode.id, true);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Groups.GroupRemove(tt.menuItemNode.id, true);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4299,8 +4313,8 @@ var TreeTabs = {
                             document.querySelectorAll("[id='" + tt.menuItemNode.id + "'] .tab").forEach(function(s) {
                                 tabsArr.push(parseInt(s.id));
                             });
-                            TreeTabs.Tabs.DiscardTabs(tabsArr);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Tabs.DiscardTabs(tabsArr);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4313,8 +4327,8 @@ var TreeTabs = {
                             document.querySelectorAll("[id='" + tt.menuItemNode.id + "'] .tab").forEach(function(s) {
                                 tabsArr.push(parseInt(s.id));
                             });
-                            TreeTabs.Tabs.CloseTabs(tabsArr);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Tabs.CloseTabs(tabsArr);
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4323,8 +4337,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Manager.OpenManagerWindow();
-                            TreeTabs.Menu.HideMenus();
+                            TT.Manager.OpenManagerWindow();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4333,9 +4347,9 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Manager.ExportGroup(tt.menuItemNode.id, false, true);
-                            TreeTabs.Menu.HideMenus();
-                            setTimeout(function() {TreeTabs.Groups.GroupRemove(tt.menuItemNode.id, true);}, 100);
+                            TT.Manager.ExportGroup(tt.menuItemNode.id, false, true);
+                            TT.Menu.HideMenus();
+                            setTimeout(function() {TT.Groups.GroupRemove(tt.menuItemNode.id, true);}, 100);
                         }
                     }
                 }
@@ -4346,7 +4360,7 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             Bookmark(tt.menuItemNode);
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4355,8 +4369,8 @@ var TreeTabs = {
                     this.Menu.onmousedown = function(event) {
                         if (event.which == 1) {
                             event.stopPropagation();
-                            TreeTabs.Groups.AddNewGroup();
-                            TreeTabs.Menu.HideMenus();
+                            TT.Groups.AddNewGroup();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4367,7 +4381,7 @@ var TreeTabs = {
                         if (event.which == 1) {
                             event.stopPropagation();
                             chrome.tabs.create({"url": "options/options.html"});
-                            TreeTabs.Menu.HideMenus();
+                            TT.Menu.HideMenus();
                         }
                     }
                 }
@@ -4417,13 +4431,13 @@ var TreeTabs = {
         ShowTabMenu: function(TabNode, event) {
             tt.menuItemNode = TabNode;
             if (TabNode.classList.contains("pin")) {
-                TreeTabs.Menu.ShowMenu(DefaultMenu.pin, event);
+                TT.Menu.ShowMenu(DefaultMenu.pin, event);
                 if (opt.allow_pin_close) {
                     tt.menu["menu_close"].MenuShow();
                 }
             }
             if (TabNode.classList.contains("tab")) {
-                TreeTabs.Menu.ShowMenu(DefaultMenu.tab, event);
+                TT.Menu.ShowMenu(DefaultMenu.tab, event);
                 if (TabNode.classList.contains("o")) {
                     tt.menu["menu_collapse_tree"].SeparatorShow();
                     tt.menu["menu_collapse_tree"].MenuShow();
@@ -4450,7 +4464,7 @@ var TreeTabs = {
         },
         ShowFolderMenu: function(FolderNode, event) {
             tt.menuItemNode = FolderNode;
-            TreeTabs.Menu.ShowMenu(DefaultMenu.folder, event);
+            TT.Menu.ShowMenu(DefaultMenu.folder, event);
             if (FolderNode.classList.contains("o")) {
                 tt.menu["menu_collapse_tree"].MenuShow();
             }
@@ -4464,11 +4478,11 @@ var TreeTabs = {
         },
         ShowFGlobalMenu: function(event) {
             tt.menuItemNode = event.target;
-            TreeTabs.Menu.ShowMenu(DefaultMenu.global, event);
+            TT.Menu.ShowMenu(DefaultMenu.global, event);
         },
         ShowFGroupMenu: function(GroupNode, event) {
             tt.menuItemNode = GroupNode;
-            TreeTabs.Menu.ShowMenu(DefaultMenu.group, event);
+            TT.Menu.ShowMenu(DefaultMenu.group, event);
             if (tt.menuItemNode.id == "tab_list") {
                 tt.menu["menu_groups_hibernate"].MenuHide();
                 tt.menu["menu_rename_group"].MenuHide();
@@ -4479,7 +4493,7 @@ var TreeTabs = {
         CreateMenu: function() {
             tt.DOMmenu = document.getElementById("main_menu");
             DefaultMenu.all_entries.forEach(function(MenuItem) {
-                tt.menu[MenuItem[1]] = new TreeTabs.Menu.ttMenu(MenuItem);
+                tt.menu[MenuItem[1]] = new TT.Menu.ttMenu(MenuItem);
             });
         }
     },
@@ -4549,7 +4563,7 @@ var TreeTabs = {
                         }
                     });
                 }
-                TreeTabs.DOM.RefreshGUI();
+                TT.DOM.RefreshGUI();
             });
         },
         ShelfToggle: function(mousebutton, button, toolbarId, SendMessage, SidebarRefreshGUI, OptionsRefreshGUI) { // FUNCTION TO TOGGLE SHELFS AND SAVE IT
@@ -4574,7 +4588,7 @@ var TreeTabs = {
                     button.classList.add("on");
                 }
                 if (SidebarRefreshGUI) {
-                    TreeTabs.DOM.RefreshGUI();
+                    TT.DOM.RefreshGUI();
                 }
                 if (OptionsRefreshGUI) {
                     RefreshGUI();
@@ -4632,7 +4646,7 @@ var TreeTabs = {
                 SearchButtons.appendChild(GoPrev);
                 let GoNext = document.getElementById("filter_search_go_next");
                 SearchButtons.appendChild(GoNext);
-                TreeTabs.DOM.Loadi18n();
+                TT.DOM.Loadi18n();
             }
         },
         RecreateToolbarUnusedButtons: function(buttonsIds) { // OPTIONS PAGE
@@ -4680,7 +4694,7 @@ var TreeTabs = {
                 if (BindButtons) {
                     // FILTER ON INPUT
                     FilterBox.oninput = function(event) {
-                            TreeTabs.Tabs.FindTab(this.value);
+                            TT.Tabs.FindTab(this.value);
                         }
                     // CLEAR FILTER BUTTON
                     ClearSearch.onmousedown = function(event) {
@@ -4688,7 +4702,7 @@ var TreeTabs = {
                             this.style.opacity = "0";
                             this.style.opacity = "0";
                             this.setAttribute("title", "");
-                            TreeTabs.Tabs.FindTab("");
+                            TT.Tabs.FindTab("");
                         }
                     }
                 }
@@ -4706,35 +4720,35 @@ var TreeTabs = {
                     if (s.id == "button_search") {
                         s.addEventListener(ToolbarShelfToggleClickType, function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Toolbar.ShelfToggle(event.which, this, "toolbar_search", "search", SidebarRefreshGUI, OptionsRefreshGUI);
+                                TT.Toolbar.ShelfToggle(event.which, this, "toolbar_search", "search", SidebarRefreshGUI, OptionsRefreshGUI);
                             }
                         });
                     }
                     if (s.id == "button_tools") {
                         s.addEventListener(ToolbarShelfToggleClickType, function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_tools", "tools", SidebarRefreshGUI, OptionsRefreshGUI);
+                                TT.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_tools", "tools", SidebarRefreshGUI, OptionsRefreshGUI);
                             }
                         });
                     }
                     if (s.id == "button_groups") {
                         s.addEventListener(ToolbarShelfToggleClickType, function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_groups", "groups", SidebarRefreshGUI, OptionsRefreshGUI);
+                                TT.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_groups", "groups", SidebarRefreshGUI, OptionsRefreshGUI);
                             }
                         });
                     }
                     if (s.id == "button_backup") {
                         s.addEventListener(ToolbarShelfToggleClickType, function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_backup", "backup", SidebarRefreshGUI, OptionsRefreshGUI);
+                                TT.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_backup", "backup", SidebarRefreshGUI, OptionsRefreshGUI);
                             }
                         });
                     }
                     if (s.id == "button_folders") {
                         s.addEventListener(ToolbarShelfToggleClickType, function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_folders", "folders", SidebarRefreshGUI, OptionsRefreshGUI);
+                                TT.Toolbar.ShelfToggle(event.which, this, "toolbar_shelf_folders", "folders", SidebarRefreshGUI, OptionsRefreshGUI);
                             }
                         });
                     }
@@ -4746,10 +4760,10 @@ var TreeTabs = {
                         s.onclick = function(event) {
                             if (event.which == 1) {
                                 if (opt.append_tab_from_toolbar == "group_root") {
-                                    TreeTabs.Tabs.OpenNewTab(false, tt.active_group);
+                                    TT.Tabs.OpenNewTab(false, tt.active_group.id);
                                 }
                                 if (opt.append_tab_from_toolbar == "as_regular_orphan") {
-                                    TreeTabs.Tabs.OpenNewTab(false, (document.querySelectorAll("#" + tt.active_group + " .tab").length == 0 ? tt.active_group : undefined));
+                                    TT.Tabs.OpenNewTab(false, (document.querySelectorAll("#" + tt.active_group.id + " .tab").length == 0 ? tt.active_group.id : undefined));
                                 }
                             }
                         }
@@ -4757,7 +4771,7 @@ var TreeTabs = {
                             // DUPLICATE TAB
                             if (event.which == 2) {
                                 event.preventDefault();
-                                let activeTab = document.querySelector("#" + tt.active_group + " .active_tab") != null ? document.querySelector("#" + tt.active_group + " .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
+                                let activeTab = document.querySelector("#" + tt.active_group.id + " .active_tab") != null ? document.querySelector("#" + tt.active_group.id + " .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
                                 if (activeTab != null && tt.tabs[activeTab.id]) {
                                     tt.tabs[activeTab.id].DuplicateTab();
                                 }
@@ -4773,8 +4787,8 @@ var TreeTabs = {
                                     }
                                     if (activeTab[0].pinned == false) {
                                         let Tab = document.getElementById(activeTab[0].id);
-                                        let groupId = TreeTabs.DOM.GetParentsByClass(Tab, "group")[0].id;
-                                        TreeTabs.Groups.SetActiveGroup(groupId, true, true);
+                                        let groupId = TT.DOM.GetParentsByClass(Tab, "group")[0].id;
+                                        TT.Groups.SetActiveGroup(groupId, true, true);
                                     }
                                 });
                             }
@@ -4784,7 +4798,7 @@ var TreeTabs = {
                     if (s.id == "button_pin") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected, #" + tt.active_group + " .active_tab, #" + tt.active_group + " .selected");
+                                let Tabs = document.querySelectorAll(".pin.active_tab, .pin.selected, #" + tt.active_group.id + " .active_tab, #" + tt.active_group.id + " .selected");
                                 Tabs.forEach(function(s) {
                                     chrome.tabs.update(parseInt(s.id), {pinned: Tabs[0].classList.contains("tab")});
                                 })
@@ -4817,7 +4831,7 @@ var TreeTabs = {
                     if (s.id == "button_detach" || s.id == "button_move") { // move is legacy name of detach button
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                TreeTabs.DOM.FreezeSelection(false);
+                                TT.DOM.FreezeSelection(false);
                                 let Nodes = [];
                                 let NodesTypes = {DraggingPin: false, DraggingTab: false, DraggingFolder: false};
                                 let query;
@@ -4840,7 +4854,7 @@ var TreeTabs = {
                                         Nodes.push({id: s.id, parent: s.parentNode.id, selected: s.classList.contains("selected"), temporary: s.classList.contains("selected_temporarly"), NodeClass: "folder", index: (tt.folders[s.id] ? tt.folders[s.id].index : 0), name: (tt.folders[s.id] ? tt.folders[s.id].name : labels.noname_group), expand: (tt.folders[s.id] ? tt.folders[s.id].expand : "")});
                                     }
                                 });
-                                TreeTabs.Tabs.Detach(Nodes, NodesTypes, {});
+                                TT.Tabs.Detach(Nodes, NodesTypes, {});
                             }
                         }
                     }
@@ -4849,7 +4863,7 @@ var TreeTabs = {
                     if (s.id == "filter_search_go_prev") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let filtered = document.querySelectorAll("#" + tt.active_group + " .tab.filtered");
+                                let filtered = document.querySelectorAll("#" + tt.active_group.id + " .tab.filtered");
                                 if (filtered.length > 0) {
                                     document.querySelectorAll(".highlighted_search").forEach(function(s) {
                                         s.classList.remove("highlighted_search");
@@ -4872,7 +4886,7 @@ var TreeTabs = {
                     if (s.id == "filter_search_go_next") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let filtered = document.querySelectorAll("#" + tt.active_group + " .tab.filtered");
+                                let filtered = document.querySelectorAll("#" + tt.active_group.id + " .tab.filtered");
                                 if (filtered.length > 0) {
                                     document.querySelectorAll(".highlighted_search").forEach(function(s) {
                                         s.classList.remove("highlighted_search");
@@ -4895,7 +4909,7 @@ var TreeTabs = {
                     if (s.id == "button_groups_toolbar_hide") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Groups.GroupsToolbarToggle();
+                                TT.Groups.GroupsToolbarToggle();
                             }
                         }
                     }
@@ -4904,9 +4918,9 @@ var TreeTabs = {
                     if (s.id == "button_manager_window") {
                         s.onmousedown = function(event) {
                             if (event.which == 1 && document.getElementById("manager_window").style.top == "-500px") {
-                                TreeTabs.Manager.OpenManagerWindow();
+                                TT.Manager.OpenManagerWindow();
                             } else {
-                                TreeTabs.DOM.HideRenameDialogs();
+                                TT.DOM.HideRenameDialogs();
                             }
                         }
                     }
@@ -4914,7 +4928,7 @@ var TreeTabs = {
                     if (s.id == "button_new_group") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Groups.AddNewGroup();
+                                TT.Groups.AddNewGroup();
                             }
                         }
                     }
@@ -4923,8 +4937,8 @@ var TreeTabs = {
                     if (s.id == "button_remove_group") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                if (tt.active_group != "tab_list") {
-                                    TreeTabs.Groups.GroupRemove(tt.active_group, event.shiftKey);
+                                if (tt.active_group.id != "tab_list") {
+                                    TT.Groups.GroupRemove(tt.active_group.id, event.shiftKey);
                                 }
                             }
                         }
@@ -4936,8 +4950,8 @@ var TreeTabs = {
                     if (s.id == "button_edit_group") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                if (tt.active_group != "tab_list") {
-                                    TreeTabs.Groups.ShowGroupEditWindow(tt.active_group);
+                                if (tt.active_group.id != "tab_list") {
+                                    TT.Groups.ShowGroupEditWindow(tt.active_group.id);
                                 }
                             }
                         }
@@ -4947,7 +4961,7 @@ var TreeTabs = {
                     if (s.id == "button_export_group") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                TreeTabs.Manager.ExportGroup(tt.active_group, tt.groups[tt.active_group].name, false);
+                                TT.Manager.ExportGroup(tt.active_group.id, tt.groups[tt.active_group.id].name, false);
                             }
                         }
                     }
@@ -4956,9 +4970,9 @@ var TreeTabs = {
                     if (s.id == "button_import_group") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_group");
+                                let inputFile = TT.File.ShowOpenFileDialog(".tt_group");
                                 inputFile.onchange = function(event) {
-                                    TreeTabs.Manager.ImportGroup(true, false);
+                                    TT.Manager.ImportGroup(true, false);
                                 }
                             }
                         }
@@ -4968,8 +4982,8 @@ var TreeTabs = {
                     if (s.id == "button_new_folder") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let FolderId = TreeTabs.Folders.AddNewFolder({});
-                                TreeTabs.Folders.ShowRenameFolderDialog(FolderId);
+                                let FolderId = TT.Folders.AddNewFolder({});
+                                TT.Folders.ShowRenameFolderDialog(FolderId);
                             }
                         }
                     }
@@ -4978,8 +4992,8 @@ var TreeTabs = {
                     if (s.id == "button_edit_folder") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                if (document.querySelectorAll("#" + tt.active_group + " .selected").length > 0) {
-                                    TreeTabs.Folders.ShowRenameFolderDialog(document.querySelectorAll("#" + tt.active_group + " .selected")[0].id);
+                                if (document.querySelectorAll("#" + tt.active_group.id + " .selected").length > 0) {
+                                    TT.Folders.ShowRenameFolderDialog(document.querySelectorAll("#" + tt.active_group.id + " .selected")[0].id);
                                 }
                             }
                         }
@@ -4988,8 +5002,8 @@ var TreeTabs = {
                     if (s.id == "button_remove_folder") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                document.querySelectorAll("#" + tt.active_group + " .selected").forEach(function(s) {
-                                    TreeTabs.Folders.RemoveFolder(s.id);
+                                document.querySelectorAll("#" + tt.active_group.id + " .selected").forEach(function(s) {
+                                    TT.Folders.RemoveFolder(s.id);
                                 });
                             }
                         }
@@ -4998,14 +5012,14 @@ var TreeTabs = {
                     if (s.id == "button_unload" || s.id == "button_discard") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                if (document.querySelectorAll(".pin.selected:not(.active_tab), #" + tt.active_group + " .selected:not(.active_tab)").length > 0) {
-                                    TreeTabs.Tabs.DiscardTabs(
-                                        Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #" + tt.active_group + " .selected:not(.active_tab)"), function(s) {
+                                if (document.querySelectorAll(".pin.selected:not(.active_tab), #" + tt.active_group.id + " .selected:not(.active_tab)").length > 0) {
+                                    TT.Tabs.DiscardTabs(
+                                        Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), #" + tt.active_group.id + " .selected:not(.active_tab)"), function(s) {
                                             return parseInt(s.id);
                                         })
                                     );
                                 } else {
-                                    TreeTabs.Tabs.DiscardTabs(
+                                    TT.Tabs.DiscardTabs(
                                         Array.prototype.map.call(document.querySelectorAll(".pin:not(.active_tab), .tab:not(.active_tab)"), function(s) {
                                             return parseInt(s.id);
                                         })
@@ -5018,9 +5032,9 @@ var TreeTabs = {
                     if (s.id == "button_import_bak") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_session");
+                                let inputFile = TT.File.ShowOpenFileDialog(".tt_session");
                                 inputFile.onchange = function(event) {
-                                    TreeTabs.Manager.ImportSession(true, false, false);
+                                    TT.Manager.ImportSession(true, false, false);
                                 }
                             }
                         }
@@ -5030,7 +5044,7 @@ var TreeTabs = {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
                                 let d = new Date();
-                                TreeTabs.Manager.ExportSession((d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉")), true, false, false);
+                                TT.Manager.ExportSession((d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉")), true, false, false);
                             }
                         }
                     }
@@ -5038,10 +5052,10 @@ var TreeTabs = {
                     if (s.id == "button_import_merge_bak") {
                         s.onmousedown = function(event) {
                             if (event.which == 1) {
-                                let inputFile = TreeTabs.File.ShowOpenFileDialog(".tt_session");
+                                let inputFile = TT.File.ShowOpenFileDialog(".tt_session");
                                 inputFile.onchange = function(event) {
-                                    TreeTabs.Manager.ImportSession(false, false, true);
-                                    // TreeTabs.Manager.ImportMergeTabs();
+                                    TT.Manager.ImportSession(false, false, true);
+                                    // TT.Manager.ImportMergeTabs();
                                 }
                             }
                         }
@@ -5060,7 +5074,7 @@ var TreeTabs = {
                                     this.classList.add("url");
                                     chrome.runtime.sendMessage({command: "set_search_filter", search_filter: "url", windowId: tt.CurrentWindowId});
                                 }
-                                TreeTabs.Tabs.FindTab(document.getElementById("filter_box").value);
+                                TT.Tabs.FindTab(document.getElementById("filter_box").value);
                             }
                         }
                     }
@@ -5088,7 +5102,7 @@ var TreeTabs = {
                     // if (s.id == "repeat_search") {
                     // s.onmousedown = function(event) {
                     // if (event.which == 1) {
-                    // TreeTabs.Tabs.FindTab(document.getElementById("filter_box").value);
+                    // TT.Tabs.FindTab(document.getElementById("filter_box").value);
                     // }
                     // }
                     // }
@@ -5175,22 +5189,26 @@ var TreeTabs = {
                 plist.style.whiteSpace = "";
                 plist.style.overflowX = "";
             }
-            TreeTabs.DOM.RefreshGUI();
+            TT.DOM.RefreshGUI();
         },
         ApplyTheme: function(theme) {
-            TreeTabs.Groups.RestoreStateOfGroupsToolbar();
-            TreeTabs.Theme.ApplySizeSet(theme["TabsSizeSetNumber"]);
-            TreeTabs.Theme.ApplyColorsSet(theme["ColorsSet"]);
-            TreeTabs.Theme.ApplyTabsMargins(theme["TabsMargins"]);
-            TreeTabs.Theme.ApplyBlinking();
-            TreeTabs.DOM.RefreshGUI();
-            for (var groupId in tt.groups) {
+            TT.Groups.RestoreStateOfGroupsToolbar();
+            TT.Theme.ApplySizeSet(theme["TabsSizeSetNumber"]);
+            TT.Theme.ApplyColorsSet(theme["ColorsSet"]);
+            TT.Theme.ApplyTabsMargins(theme["TabsMargins"]);
+            TT.Theme.ApplyBlinking();
+            TT.DOM.RefreshGUI();
+             // for some reason (top) text position is different in chromium !?
+            // if (browserId != "F") {
+            //     document.styleSheets[document.styleSheets.length-1].insertRule(".tab_title, .folder_title { margin-top: 1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
+            // }
+           for (var groupId in tt.groups) {
                 let groupTitle = document.getElementById("_gte" + groupId);
                 if (groupTitle != null && tt.groups[groupId].font == "") {
                     groupTitle.style.color = "";
                 }
             }
-            TreeTabs.DOM.Loadi18n();
+            TT.DOM.Loadi18n();
         },
         // theme colors is an object with css variables (but without --), for example; {"button_background": "#f2f2f2", "filter_box_border": "#cccccc"}
         ApplyColorsSet: function(ThemeColors) {
@@ -5215,14 +5233,6 @@ var TreeTabs = {
                     }
                 }
             }
-            // if (browserId == "F") {
-            // for some reason top position for various things is different in firefox?????
-            // if (size > 1) {
-            // document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: -1px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-            // } else {
-            // document.styleSheets[document.styleSheets.length-1].insertRule(".tab_header>.tab_title { margin-top: 0px; }", document.styleSheets[document.styleSheets.length-1].cssRules.length);
-            // }
-            // }
         },
         ApplyTabsMargins: function(size) {
             for (let si = 0; si < document.styleSheets.length; si++) {
@@ -5263,10 +5273,10 @@ var TreeTabs = {
         GetCurrentTheme: function(storage) {
             if (storage["current_theme"] && storage["themes"] && storage["themes"][storage["current_theme"]]) {
                 let theme = storage["themes"][storage["current_theme"]];
-                let correctedTheme = TreeTabs.Theme.CheckTheme(theme);
+                let correctedTheme = TT.Theme.CheckTheme(theme);
                 if (correctedTheme.theme_version < 4 && storage["preferences"].show_toolbar == undefined) {
                     opt.show_toolbar = correctedTheme.ToolbarShow;
-                    TreeTabs.Preferences.SavePreferences(opt);
+                    TT.Preferences.SavePreferences(opt);
                 }
                 return correctedTheme;
             } else {
@@ -5280,18 +5290,18 @@ var TreeTabs = {
             });
             chrome.storage.local.set({current_theme: ThemeId}, function() {
                 chrome.storage.local.get(null, function(storage) {
-                    SelectedTheme = Object.assign({}, TreeTabs.Theme.GetCurrentTheme(storage));
+                    SelectedTheme = Object.assign({}, TT.Theme.GetCurrentTheme(storage));
                     setTimeout(function() {
                         document.getElementById("new_theme_name").value = SelectedTheme.theme_name;
                         setTimeout(function() {
                             RemoveToolbarEditEvents();
-                            TreeTabs.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
-                            TreeTabs.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
+                            TT.Theme.ApplySizeSet(SelectedTheme["TabsSizeSetNumber"]);
+                            TT.Theme.ApplyColorsSet(SelectedTheme["ColorsSet"]);
                             document.getElementById("_gtetab_list").style.color = "";
                             document.getElementById("_gtetab_list2").style.color = "";
                             if (SelectedTheme["TabsMargins"]) {
                                 document.getElementById("tabs_margin_spacing")[SelectedTheme["TabsMargins"]].checked = true;
-                                TreeTabs.Theme.ApplyTabsMargins(SelectedTheme["TabsMargins"]);
+                                TT.Theme.ApplyTabsMargins(SelectedTheme["TabsMargins"]);
                             } else {
                                 document.getElementById("tabs_margin_spacing")["2"].checked = true;
                             }
@@ -5335,8 +5345,8 @@ var TreeTabs = {
             ThemeNameOption.text = NewName;
             ThemeList.add(ThemeNameOption);
             ThemeList.selectedIndex = ThemeList.options.length - 1;
-            TreeTabs.Theme.SaveTheme(ThemeId);
-            setTimeout(function() {TreeTabs.Theme.LoadTheme(ThemeId, true);}, 50);
+            TT.Theme.SaveTheme(ThemeId);
+            setTimeout(function() {TT.Theme.LoadTheme(ThemeId, true);}, 50);
             chrome.storage.local.set({current_theme: ThemeId});
             RefreshFields();
         },
@@ -5359,7 +5369,7 @@ var TreeTabs = {
                     chrome.storage.local.set({themes: {}});
                     setTimeout(function() {chrome.runtime.sendMessage({command: "reload_theme", themeName: "", theme: SelectedTheme});}, 500);
                 }
-                TreeTabs.Theme.LoadTheme(current_theme, true);
+                TT.Theme.LoadTheme(current_theme, true);
                 RefreshFields();
             });
         },
@@ -5445,7 +5455,7 @@ var TreeTabs = {
                 if (themeObj.theme_version <= DefaultTheme["theme_version"]) {
                     let ThemeList = document.getElementById("theme_list");
                     let ThemeId = GenerateRandomID() + GenerateRandomID();
-                    let correctedTheme = TreeTabs.Theme.CheckTheme(themeObj);
+                    let correctedTheme = TT.Theme.CheckTheme(themeObj);
                     SelectedTheme = Object.assign({}, DefaultTheme);
                     for (var val in correctedTheme.ColorsSet) {
                         SelectedTheme["ColorsSet"][val] = correctedTheme.ColorsSet[val];
@@ -5472,7 +5482,7 @@ var TreeTabs = {
                     // SelectedTheme["theme_name"] = NewName;
                     // }
                     themes.push(ThemeId);
-                    TreeTabs.Theme.SaveTheme(ThemeId);
+                    TT.Theme.SaveTheme(ThemeId);
                     var theme_name = document.createElement("option");
                     theme_name.value = ThemeId;
                     theme_name.text = SelectedTheme["theme_name"];
@@ -5480,7 +5490,7 @@ var TreeTabs = {
                     ThemeList.selectedIndex = ThemeList.options.length - 1;
                     current_theme = ThemeId;
                     document.createElement("new_theme_name").value = ThemeId;
-                    setTimeout(function() {TreeTabs.Theme.LoadTheme(ThemeId, true);}, 500);
+                    setTimeout(function() {TT.Theme.LoadTheme(ThemeId, true);}, 500);
                     RefreshFields();
                     DefaultTheme["ColorsSet"] = {};
                     chrome.storage.local.set({current_theme: ThemeId});
@@ -5554,7 +5564,7 @@ var TreeTabs = {
                                         document.querySelectorAll("#" + s.childNodes[2].id + " .tab").forEach(function(t) {tabsArr.push(parseInt(t.id));});
                                     }
                                 });
-                                TreeTabs.Tabs.CloseTabs(tabsArr);
+                                TT.Tabs.CloseTabs(tabsArr);
                             });
                         }
                     });
@@ -5575,7 +5585,7 @@ var TreeTabs = {
                     if (opt.debug) {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
                     }
-                    TreeTabs.DOM.CleanUpDragAndDrop();
+                    TT.DOM.CleanUpDragAndDrop();
                     tt.DragTreeDepth = message.DragTreeDepth;
                     tt.DraggingGroup = message.DraggingGroup;
                     tt.DraggingPin = message.DraggingPin;
@@ -5588,22 +5598,22 @@ var TreeTabs = {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
                     }
                     tt.Dragging = false;
-                    TreeTabs.DOM.CleanUpDragAndDrop();
-                    TreeTabs.DOM.RemoveHighlight();
+                    TT.DOM.CleanUpDragAndDrop();
+                    TT.DOM.RemoveHighlight();
                     return;
                 }
                 if (message.command == "remove_folder") {
                     if (opt.debug) {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " folderId: " + message.folderId);
                     }
-                    TreeTabs.Folders.RemoveFolder(message.folderId);
+                    TT.Folders.RemoveFolder(message.folderId);
                     return;
                 }
                 if (message.command == "remove_group") {
                     if (opt.debug) {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " groupId: " + message.groupId);
                     }
-                    setTimeout(function() {TreeTabs.Groups.GroupRemove(message.groupId, false);}, 2000);
+                    setTimeout(function() {TT.Groups.GroupRemove(message.groupId, false);}, 2000);
                     return;
                 }
                 if (message.command == "reload_sidebar") {
@@ -5618,7 +5628,7 @@ var TreeTabs = {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
                     }
                     opt = Object.assign({}, message.opt);
-                    setTimeout(function() {TreeTabs.Theme.RestorePinListRowSettings();}, 100);
+                    setTimeout(function() {TT.Theme.RestorePinListRowSettings();}, 100);
                     return;
                 }
                 if (message.command == "reload_toolbar") {
@@ -5628,30 +5638,30 @@ var TreeTabs = {
                     opt = Object.assign({}, message.opt);
 
                     if (opt.show_toolbar) {
-                        TreeTabs.Toolbar.RemoveToolbar();
-                        TreeTabs.Toolbar.RecreateToolbar(message.toolbar);
-                        TreeTabs.Toolbar.SetToolbarEvents(false, true, true, "mousedown", true);
-                        TreeTabs.Toolbar.RestoreToolbarShelf();
-                        TreeTabs.Toolbar.RestoreToolbarSearchFilter();
+                        TT.Toolbar.RemoveToolbar();
+                        TT.Toolbar.RecreateToolbar(message.toolbar);
+                        TT.Toolbar.SetToolbarEvents(false, true, true, "mousedown", true);
+                        TT.Toolbar.RestoreToolbarShelf();
+                        TT.Toolbar.RestoreToolbarSearchFilter();
                     } else {
-                        TreeTabs.Toolbar.RemoveToolbar();
+                        TT.Toolbar.RemoveToolbar();
                     }
-                    TreeTabs.DOM.RefreshGUI();
+                    TT.DOM.RefreshGUI();
                     return;
                 }
                 if (message.command == "reload_theme") {
                     if (opt.debug) {
                         log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
                     }
-                    TreeTabs.Theme.RestorePinListRowSettings();
-                    TreeTabs.Theme.ApplyTheme(message.theme);
+                    TT.Theme.RestorePinListRowSettings();
+                    TT.Theme.ApplyTheme(message.theme);
                     return;
                 }
                 if (message.windowId == tt.CurrentWindowId) {
                     // if (message.command == "append_group") {
                     //     if (tt.groups[message.groupId] == undefined) {
                     //         tt.groups[message.groupId] = {id: message.groupId, index: Object.keys(tt.groups).length, active_tab: 0, prev_active_tab: 0, name: message.group_name, font: message.font_color};
-                    //         TreeTabs.Groups.AppendGroupToList(message.groupId, message.group_name, message.font_color, true);
+                    //         TT.Groups.AppendGroupToList(message.groupId, message.group_name, message.font_color, true);
                     //     }
                     //     return;
                     // }
@@ -5661,21 +5671,21 @@ var TreeTabs = {
                     //     let Tab = document.getElementById(message.tabId);
                     //     if (Group && Tab) {
                     //         Group.appendChild(Tab);
-                    //         TreeTabs.Groups.SetActiveGroup(message.groupId, false, true);
+                    //         TT.Groups.SetActiveGroup(message.groupId, false, true);
                     //     }
                     //     return;
                     // }
 
                     if (message.command == "tab_created") {
-                        if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group + " .tab").length == 0) {
+                        if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group.id + " .tab").length == 0) {
                             message.InsertAfterId = undefined;
-                            message.ParentId = tt.active_group;
+                            message.ParentId = tt.active_group.id;
                         }
-                        tt.tabs[message.tabId] = new TreeTabs.Tabs.ttTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
-                        TreeTabs.DOM.RefreshExpandStates();
+                        tt.tabs[message.tabId] = new TT.Tabs.ttTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
+                        TT.DOM.RefreshExpandStates();
                         setTimeout(function() {
-                            TreeTabs.DOM.RefreshCounters();
-                            TreeTabs.DOM.RefreshGUI();
+                            TT.DOM.RefreshCounters();
+                            TT.DOM.RefreshGUI();
                         }, 50);
 
                         if (opt.syncro_tabbar_tabs_order) {
@@ -5689,8 +5699,8 @@ var TreeTabs = {
                         if (opt.debug) {
                             log("chrome event: " + message.command + ", tabId: " + message.tabId + ", tab is pinned: " + message.tab.pinned + ", ParentId: " + message.ParentId);
                         }
-                        tt.tabs[message.tabId] = new TreeTabs.Tabs.ttTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: false, SkipMediaIcon: false});
-                        TreeTabs.DOM.RefreshGUI();
+                        tt.tabs[message.tabId] = new TT.Tabs.ttTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: false, SkipMediaIcon: false});
+                        TT.DOM.RefreshGUI();
                         return;
                     }
                     if (message.command == "tab_detached") {
@@ -5701,7 +5711,7 @@ var TreeTabs = {
                         if (Tab != null && tt.tabs[message.tabId]) {
                             let ctDetachedParent = Tab.childNodes[1];
                             if (opt.promote_children_in_first_child == true && Tab.childNodes[1].childNodes.length > 1) {
-                                TreeTabs.DOM.PromoteChildrenToFirstChild(Tab);
+                                TT.DOM.PromoteChildrenToFirstChild(Tab);
                             } else {
                                 while (ctDetachedParent.firstChild) {
                                     ctDetachedParent.parentNode.parentNode.insertBefore(ctDetachedParent.firstChild, ctDetachedParent.parentNode);
@@ -5710,7 +5720,7 @@ var TreeTabs = {
                         }
                         tt.tabs[message.tabId].RemoveTab();
                         setTimeout(function() {tt.schedule_update_data++;}, 300);
-                        TreeTabs.DOM.RefreshGUI();
+                        TT.DOM.RefreshGUI();
                         return;
                     }
                     if (message.command == "tab_removed") {
@@ -5725,7 +5735,7 @@ var TreeTabs = {
                             }
                             if (opt.promote_children == true) {
                                 if (opt.promote_children_in_first_child == true && mTab.childNodes[1].childNodes.length > 1) {
-                                    TreeTabs.DOM.PromoteChildrenToFirstChild(mTab);
+                                    TT.DOM.PromoteChildrenToFirstChild(mTab);
                                 } else {
                                     while (ctParent.firstChild) {
                                         ctParent.parentNode.parentNode.insertBefore(ctParent.firstChild, ctParent.parentNode);
@@ -5736,14 +5746,14 @@ var TreeTabs = {
                                     chrome.tabs.remove(parseInt(s.id));
                                 });
                                 document.querySelectorAll("[id='" + message.tabId + "'] .folder").forEach(function(s) {
-                                    TreeTabs.Folders.RemoveFolder(s.id);
+                                    TT.Folders.RemoveFolder(s.id);
                                 });
                             }
                             tt.tabs[message.tabId].RemoveTab();
-                            TreeTabs.DOM.RefreshExpandStates();
+                            TT.DOM.RefreshExpandStates();
                             setTimeout(function() {tt.schedule_update_data++;}, 300);
-                            TreeTabs.DOM.RefreshGUI();
-                            TreeTabs.DOM.RefreshCounters();
+                            TT.DOM.RefreshGUI();
+                            TT.DOM.RefreshCounters();
                         }
                         return;
                     }
@@ -5751,7 +5761,7 @@ var TreeTabs = {
                         if (opt.debug) {
                             log("chrome event: " + message.command + ", tabId: " + message.tabId);
                         }
-                        TreeTabs.Tabs.SetActiveTab(message.tabId, true);
+                        TT.Tabs.SetActiveTab(message.tabId, true);
                         return;
                     }
                     if (message.command == "tab_attention") {
@@ -5805,13 +5815,13 @@ var TreeTabs = {
                                         tt.schedule_update_data++;
                                     }
                                 }
-                                TreeTabs.DOM.RefreshExpandStates();
+                                TT.DOM.RefreshExpandStates();
                             }
                         }
                         return;
                     }
                     // if (message.command == "set_active_group") {
-                    // TreeTabs.Groups.SetActiveGroup(message.groupId, false, false);
+                    // TT.Groups.SetActiveGroup(message.groupId, false, false);
                     // return;
                     // }
                     if (message.command == "remote_update") {
@@ -5819,13 +5829,13 @@ var TreeTabs = {
                             log("chrome event: " + message.command + ", tabId: " + message.tabId);
                             log(message);
                         }
-                        TreeTabs.Manager.RecreateTreeStructure(message.groups, message.folders, message.tabs);
+                        TT.Manager.RecreateTreeStructure(message.groups, message.folders, message.tabs);
                         sendResponse(true);
                         tt.schedule_update_data++;
                         return;
                     }
                     if (message.command == "switch_active_tab") {
-                        TreeTabs.Tabs.SwitchActiveTabBeforeClose(tt.active_group);
+                        TT.Tabs.SwitchActiveTabBeforeClose(tt.active_group.id);
                         return;
                     }
                 }
