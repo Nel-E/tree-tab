@@ -8,7 +8,7 @@
 
 let tt = {
     CurrentWindowId: 0,
-    active_group: null,
+    active_group: "tab_list",
     tabs: {},
     groups: {},
     folders: {},
@@ -33,7 +33,7 @@ let tt = {
     pressed_keys: []
 };
 
-document.addEventListener("DOMContentLoaded", Run(), false);
+D.addEventListener("DOMContentLoaded", Run(), false);
 
 
 function Run() {
@@ -78,59 +78,26 @@ function Initialize() {
 						TT.Folders.PreAppendFolders(tt.folders);					
 						
 						// APPEND TABS TO TABLIST
-						// let ta = [];
 						let ti = 0;
 						let tc = tabs.length;
-					
-						// for (ti = 0; ti < tc; ti++) {
-							// ta.push(AppendTab({  tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: (bgtabs[tabs[ti].id].expand != "" ? bgtabs[tabs[ti].id].expand : undefined)  }));
-						// }
-						
-
 						for (ti = 0; ti < tc; ti++) {
-							// if (bgtabs[tabs[ti].id]){
-								tt.tabs[tabs[ti].id] = new TT.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tabs[ti].id] && bgtabs[tabs[ti].id].expand != "") ? bgtabs[tabs[ti].id].expand : undefined)});
-							// } else {
-							// 	tt.tabs[tabs[ti].id] = new TT.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true)});
-							// }
+							tt.tabs[tabs[ti].id] = new TT.Tabs.ttTab({tab: tabs[ti], Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tabs[ti].id] && bgtabs[tabs[ti].id].expand != "") ? bgtabs[tabs[ti].id].expand : undefined)});
 						}
 						
 						// APPEND FOLDERS TO CORRECT PARENTS
 						TT.Folders.AppendFolders(tt.folders);
-                        
-                        
-                        
 				
 						// APPEND TABS TO CORRECT PARENTS
 						if (opt.skip_load == false) {
 							for (ti = 0; ti < tc; ti++) {
 								if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-									let TabParent = document.getElementById("°"+bgtabs[tabs[ti].id].parent);
-									if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #°"+bgtabs[tabs[ti].id].parent) == null) {
+									let TabParent = D.getElementById("°"+bgtabs[tabs[ti].id].parent);
+									if (TabParent != null && D.querySelector("[id='"+tabs[ti].id+"'] #°"+bgtabs[tabs[ti].id].parent) == null) {
 										TabParent.appendChild(tt.tabs[tabs[ti].id].Node);
 									}
 								}
 							}
 						}
-                        
-                        
-                        
-						// APPEND TABS TO CORRECT PARENTS
-						// if (opt.skip_load == false) {
-							// for (ti = 0; ti < tc; ti++) {
-								// if (bgtabs[tabs[ti].id] && !tabs[ti].pinned) {
-									// let TabParent = document.getElementById("°"+bgtabs[tabs[ti].id].parent);
-									// if (TabParent != null && document.querySelector("[id='"+tabs[ti].id+"'] #°"+bgtabs[tabs[ti].id].parent) == null) {
-										// TabParent.appendChild(ta[ti]);
-									// }
-								// }
-							// }
-						// }
-                        
-                        
-                        
-                        
-                        
                         
 						// SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
 						TT.Groups.SetActiveTabInEachGroup();
@@ -163,7 +130,6 @@ function Initialize() {
 							// if (browserId == "F" && opt.skip_load == false && storage.emergency_reload == undefined) {
 								// TT.Utils.RecheckFirefox();
 							// }
-						// console.log(tt.tabs);
 						}, 1000);
 						
 						TT.Manager.ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
@@ -179,11 +145,10 @@ function Initialize() {
 						}, 5000);
 						
 						if (browserId != "F") {
-							if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
-							if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
-							if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
+							if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && D.getElementById("button_load_bak1") != null) { D.getElementById("button_load_bak1").classList.remove("disabled"); }
+							if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && D.getElementById("button_load_bak2") != null) { D.getElementById("button_load_bak2").classList.remove("disabled"); }
+							if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && D.getElementById("button_load_bak3") != null) { D.getElementById("button_load_bak3").classList.remove("disabled"); }
 						}
-						
 					});
 				});
 			});

@@ -5,7 +5,8 @@
 // BACKGROUND VARIABLES
 let b = {
     debug: [],
-    running: false,
+    bg_started: false,
+    bg_running: false,
     schedule_save: -999,
     windows: {},
     tabs: {},
@@ -20,15 +21,7 @@ let b = {
 
 
 document.addEventListener("DOMContentLoaded", function() {
-    if (browserId == "F") {
-        setTimeout(function() {
-            StartBackgroundListeners();
-            QuantumStart(0);
-        }, 500);
-    } else {
-        StartBackgroundListeners();
-        ChromiumLoadTabs(0);
-    }
+    StartBackgroundListeners();
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -364,7 +357,7 @@ function QuantumLoadTabs(retry) {
 
                                     // will try to find tabs for 3 times
                                     if (opt.skip_load == true || retry > 2 || (tabs_matched > tabs_count * 0.5)) {
-                                        b.running = true;
+                                        b.bg_running = true;
                                         QuantumAutoSaveData();
                                         QuantumStartListeners();
                                         delete DefaultToolbar;
@@ -395,7 +388,7 @@ async function QuantumAutoSaveData() {
         if (b.schedule_save > 1) {
             b.schedule_save = 1;
         }
-        if (b.running && b.schedule_save > 0 && Object.keys(b.tabs).length > 1) {
+        if (b.bg_running && b.schedule_save > 0 && Object.keys(b.tabs).length > 1) {
             chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(w) {
                 let WinCount = w.length;
                 for (let wIndex = 0; wIndex < WinCount; wIndex++) {
@@ -624,7 +617,7 @@ function ChromiumLoadTabs(retry) {
 
             // will loop trying to find tabs
             if (opt.skip_load || retry >= 5 || (tabs_matched > t_count * 0.5)) {
-                b.running = true;
+                b.bg_running = true;
                 ChromiumAutoSaveData(0, 1000);
                 ChromiumAutoSaveData(1, 300000);
                 ChromiumAutoSaveData(2, 600000);
@@ -652,7 +645,7 @@ async function ChromiumAutoSaveData(BAK, LoopTimer) {
         if (b.schedule_save > 1 || BAK > 0) {
             b.schedule_save = 1;
         }
-        if (b.running && b.schedule_save > 0 && Object.keys(b.tabs).length > 1) {
+        if (b.bg_running && b.schedule_save > 0 && Object.keys(b.tabs).length > 1) {
             chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(w) {
                 let WinCount = w.length;
                 let t_count = 0;
@@ -717,6 +710,20 @@ function ChromiumHashURL(tab) {
 
 function StartBackgroundListeners() {
     chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+        if (message.command == "is_bg_ready") {
+            if (!b.bg_started) {
+                b.bg_started = true;
+                if (browserId == "F") {
+                    setTimeout(function() {
+                        QuantumStart(0);
+                    }, 1000);
+                } else {
+                    ChromiumLoadTabs(0);
+                }
+            }
+            sendResponse(b.bg_running);
+            return;
+        }
         if (message.command == "reload") {
             window.location.reload();
             return;
@@ -825,10 +832,6 @@ function StartBackgroundListeners() {
         }
         if (message.command == "get_browser_tabs") {
             sendResponse(b.tabs);
-            return;
-        }
-        if (message.command == "is_bg_ready") {
-            sendResponse(b.running);
             return;
         }
         if (message.command == "update_tab" && browserId == "F") {
@@ -1185,7 +1188,7 @@ function ChromiumStartListeners() { // start all listeners
         b.schedule_save++;
     });
     chrome.runtime.onSuspend.addListener(function() {
-        b.running = false;
+        b.bg_running = false;
     });
 }
 
