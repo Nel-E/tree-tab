@@ -1148,7 +1148,7 @@ const TT = {
             let name = D.getElementById("folder_edit_name");
             let FolderId = D.getElementById("folder_edit").getAttribute("FolderId");
             tt.folders[FolderId].name = name.value;
-            D.getElementById(FolderId + "_folder_title").textContent = name.value;
+            D.getElementById("folder_title_"+FolderId).textContent = name.value;
             TT.DOM.HideRenameDialogs();
             if (opt.debug) TT.Debug.log("f: FolderRenameConfirm, folderId " + FolderId + ", name: " + name.value);
             chrome.runtime.sendMessage({command: "save_folders", folders: tt.folders, windowId: tt.CurrentWindowId});
