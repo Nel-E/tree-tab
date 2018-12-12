@@ -1,4 +1,4 @@
-const english_base = {"extensionName":{"message":"Tree Tabs"},"extDesc":{"message":"Manage your tabs in the sidebar!"},"OpenSidebar":{"message":"Open Tree Tabs"},"button_new":{"message":"Press left mouse button to open new tab. \nPress middle mouse button to clone the active tab. \nPress right mouse button to scroll the list to the active tab."},"button_pin":{"message":"Pin / Unpin current tab"},"button_undo":{"message":"Reopen last closed"},"button_reboot":{"message":"Reload Tree Tabs. Try this in case your tree hierarchy is lost after restart."},"button_detach":{"message":"Detach tab"},"button_move":{"message":"Detach tab"},"button_search":{"message":"Search tabs"},"button_tools":{"message":"Tools"},"button_groups":{"message":"Groups"},"filter_search_go_prev":{"message":"Previous search result"},"filter_search_go_next":{"message":"Next search result"},"button_bookmarks":{"message":"Unsorted bookmarks"},"button_downloads":{"message":"Downloads"},"button_history":{"message":"History"},"button_settings":{"message":"Settings"},"button_options":{"message":"Tree Tabs settings"},"button_extensions":{"message":"Extensions"},
+const english_base = {"extensionName":{"message":"Tree Tabs"},"extDesc":{"message":"Manage your tabs in the sidebar!"},"OpenSidebar":{"message":"Open Tree Tabs"},"button_new":{"message":"Press left mouse button to open new tab. \nPress middle mouse button to clone the active tab. \nPress right mouse button to scroll the list to the active tab."},"button_pin":{"message":"Pin / Unpin current tab"},"button_undo":{"message":"Reopen last closed"},"button_reboot":{"message":"Reload Tree Tabs_ Try this in case your tree hierarchy is lost after restart."},"button_detach":{"message":"Detach tab"},"button_move":{"message":"Detach tab"},"button_search":{"message":"Search tabs"},"button_tools":{"message":"Tools"},"button_groups":{"message":"Groups"},"filter_search_go_prev":{"message":"Previous search result"},"filter_search_go_next":{"message":"Next search result"},"button_bookmarks":{"message":"Unsorted bookmarks"},"button_downloads":{"message":"Downloads"},"button_history":{"message":"History"},"button_settings":{"message":"Settings"},"button_options":{"message":"Tree Tabs settings"},"button_extensions":{"message":"Extensions"},
 "button_unload":{"message":"Unload tabs"},"button_discard":{"message":"Unload tabs"},"button_filter_type":{"message":"Search titles or urls"},"button_groups_toolbar_hide":{"message":"Hide/Show Groups toolbar"},"button_new_group":{"message":"New group"},"button_remove_group":{"message":"Remove group.\nHold shift key to close tabs from this group"},"button_edit_group":{"message":"Rename group"},"button_import_group":{"message":"Import group"},"button_export_group":{"message":"Export group"},"button_backup":{"message":"Session"},"button_import_bak":{"message":"Import session"},"button_import_merge_bak":{"message":"Import and merge session.\nImporter will try to match current tabs with those from saved session, instead of opening a new window."},"button_export_bak":{"message":"Export session"},"button_load_bak1":{"message":"EMERGENCY if lost groupings: Load latest internal backup (autosave is made every 5 minutes)"},"button_load_bak2":{"message":"EMERGENCY if lost groupings: Load previous to latest internal backup (autosave is made every 10 minutes)"},
 "button_load_bak3":{"message":"EMERGENCY if lost groupings: Load oldest internal backup (autosave is made every 30 minutes)"},"button_folders":{"message":"Folders"},"button_new_folder":{"message":"New folder"},"button_remove_folder":{"message":"Remove selected folder/s"},"button_edit_folder":{"message":"Rename folder"},"menu_expand_all":{"message":"Expand all trees"},"menu_collapse_all":{"message":"Collapse all trees"},"menu_expand_tree":{"message":"Expand tree"},"menu_collapse_tree":{"message":"Collapse tree"},"menu_new_tab":{"message":"New tab"},"menu_new_pin":{"message":"New pinned tab"},"menu_duplicate_tab":{"message":"Duplicate"},"menu_detach_tab":{"message":"Detach"},"menu_reload_tab":{"message":"Reload"},"menu_pin_tab":{"message":"Pin"},"menu_mute_tab":{"message":"Mute"},"menu_mute_tree":{"message":"Mute tree"},"menu_unmute_tree":{"message":"Unmute tree"},"menu_unmute_tab":{"message":"Unmute"},"menu_mute_other":{"message":"Mute other"},"menu_unmute_other":{"message":"Unmute other"},"menu_unpin_tab":{"message":"Unpin"},"menu_close_tree":{"message":"Close tree"},"menu_close":{"message":"Close"},
 "menu_close_other":{"message":"Close other"},"menu_undo_close_tab":{"message":"Undo close"},"menu_treetabs_settings":{"message":"Settings"},"menu_unload":{"message":"Unload"},"menu_bookmark_tree":{"message":"Bookmark"},"menu_new_folder":{"message":"New folder"},"menu_rename_folder":{"message":"Rename folder"},"menu_delete_folder":{"message":"Delete"},"menu_new_group":{"message":"New group"},"menu_rename_group":{"message":"Rename"},"menu_delete_group":{"message":"Delete"},"menu_delete_group_tabs_close":{"message":"Delete with tabs"},"menu_groups_unload":{"message":"Unload"},"menu_bookmark_group":{"message":"Bookmark"},"menu_groups_hibernate":{"message":"Hibernate"},"menu_group_tabs_close":{"message":"Close tabs"},"status_bar_rearranging_tabs":{"message":"Rearranging tabs and folders"},"status_bar_rearranging_finished":{"message":"Rearranging: done."},"status_bar_loaded_tree_structure":{"message":"Loaded Tree structure..."},"status_bar_finding_ref_tabs":{"message":"Finding reference tabs..."},"status_bar_finding_other_windows":{"message":"Finding other windows to add tabs..."},
@@ -19,7 +19,7 @@ const english_base = {"extensionName":{"message":"Tree Tabs"},"extDesc":{"messag
 "drag_indicator":{"message":"Drag&Drop indicator"},"close_x":{"message":"x inside the close button"},"close_hover_x":{"message":"x inside the close button, on mouse hover"},"close_hover_border":{"message":"close button border, on mouse hover"},"close_hover_background":{"message":"close button box color, on mouse hover"},"scrollbar_thumb":{"message":"Scrollbar thumb"},"scrollbar_thumb_hover":{"message":"Scrollbar thumb, on mouse hover"},"scrollbar_track":{"message":"Scrollbar track"},"options_example_menu_item":{"message":"menu item"},"options_menu":{"message":" Menu "},"tabs_menu_hover_border":{"message":"menu item border, on mouse hover"},"tabs_menu_hover_background":{"message":"menu item background, on mouse hover"},"tabs_menu_separator":{"message":"menu separator"},"tabs_menu_font":{"message":"menu text color"},"tabs_menu_border":{"message":"menu border"},"tabs_menu_background":{"message":"menu background"},"options_there_is_a_theme_with_this_name":{"message":"Theme with this name already exists, try a new name"},"options_theme_name_cannot_be_empty":{"message":"Theme name cannot be empty, enter some name"},
 "options_no_theme_to_export":{"message":"No theme to export, maybe add a new one :)"},"options_loaded_theme_older_version":{"message":"Looks like loaded theme was saved in older version of the extension, some colors or options might be missing"},"options_loaded_theme_newer_version":{"message":"Looks like loaded theme was saved in a newer version of the extension, can't load!"},"options_vivaldi_copied_url":{"message":"Web Panel Url has been copied to clipboard, add a new Web Panel and paste url."},"options_copied_wallet_address":{"message":"Wallet address has been copied to clipboard"},"options_clear_data":{"message":"Sidebar is not loading? Reset! ATTENTION! All options and saved Themes will be lost!"},"options_development":{"message":"Development"},"options_debug":{"message":"Debug"},"group_edit_button_cancel":{"message":"Cancel"},"group_edit_button_confirm":{"message":"Ok"},"folder_edit_button_cancel":{"message":"Cancel"},"folder_edit_button_confirm":{"message":"Ok"},"manager_window_button_label_import_group":{"message":"Import group"},"manager_window_button_label_import_session":{"message":"Import session"},
 "manager_window_button_label_save_current_session":{"message":"Save current session"},"caption_ungrouped_group":{"message":"Ungrouped"},"caption_noname_group":{"message":"untitled"},"caption_clear_filter":{"message":"Clear search results"},"caption_loading":{"message":"Loading..."},"caption_searchbox":{"message":" Search tabs..."},"manager_window_header_title":{"message":"Manager"},"menu_manager_window":{"message":"Open manager"},"button_manager_window":{"message":"Open manager window"},"manager_window_groups_button":{"message":"Hibernated groups"},"manager_window_sessions_button":{"message":"Saved sessions"},"manager_window_autosave_button":{"message":"Auto saved sessions"},"manager_window_button_label_hibernate_group":{"message":"Hibernate current group"},"manager_window_autosessions_maximum_saves_label":{"message":"Number of autosaves to keep:"},"manager_window_autosessions_save_timer_label":{"message":"Autosave every (minutes):"},"manager_window_delete_icon":{"message":"Remove"},"manager_window_savetofile_icon":{"message":"Save to file"},"manager_window_merge_icon":{"message":"Load and merge"},"manager_window_load_icon":{"message":"Load"},
-"options_Remove_button":{"message":"Remove"},"add_tab_group_regex":{"message":"Add"}};
+"options_Remove_button":{"message":"Remove"},"add_tab_group_regex":{"message":"Add"},"menu_unload_tree":{"message":"Unload tree"}};
 
 
 let translator = {
@@ -32,19 +32,18 @@ let translator = {
     }
     document.getElementById("load_translation").onclick = function(event) {
       if (event.which == 1) {
-        translator.File.OpenFile(); 
+        translator.File_OpenFile(); 
       }
     }
     document.getElementById("export_translation").onclick = function(event) {
       if (event.which == 1) {
-        translator.File.SaveFile(); 
+        translator.File_SaveFile(); 
       }
     }
     
   },
   textBox: class {
     constructor(p) {
-        // this.id = p.tab.id;
 
         let OriginalText = document.createElement("div");
         OriginalText.classList = "original";
@@ -52,25 +51,11 @@ let translator = {
         OriginalText.innerHTML = p.message;
         body.appendChild(OriginalText);
         this.OriginalText = OriginalText;
-
-
-
         let TextBox = document.createElement("textarea");
         TextBox.classList = "translated";
         TextBox.id = p.id;
-
-        
-        // TextBox.type = "text";
         TextBox.style.width = "100%";
-        // TextBox.style.height = "100px";
-        // TextBox.style.padding = "4px";
         TextBox.value = "";
-        // TextBox.overflow = "auto";
-// console.log(TextBox.style)
-// TextBox.style.wordWrap = "auto";
-        // white-space: nowrap;
-        // text-overflow: ellipsis;
-        // overflow: hidden;
         TextBox.style.whiteSpace = "normal";
         TextBox.style.marginBottom = "10px";
         body.appendChild(TextBox);
@@ -89,39 +74,25 @@ let translator = {
         inp.click();
 
         inp.onchange = function(event) {
-          // let file = document.getElementById("file_import");
           let fr = new FileReader();
           if (inp.files[0] == undefined) return;
           fr.readAsText(inp.files[0]);
           fr.onload = function() {
               let data = JSON.parse(fr.result);
-              // let group = JSON.parse(data);
               inp.parentNode.removeChild(inp);
-
-
               for (var Id in data) {
                 if (translator.Nodes[Id]) {
                   translator.Nodes[Id].TextBox.value = data[Id].message;
                 }
               }
-          
-
-                  
           }
         }
-
-
-        // return inp;
-
-
     },
     SaveFile: function() {
-      let data = {};
-      for (var Id in translator.Nodes) {
-        data[Id] = {"message": translator.Nodes[Id].TextBox.value};
-      }
-        console.log(data)
-
+        let data = {};
+        for (var Id in translator.Nodes) {
+           data[Id] = {"message": translator.Nodes[Id].TextBox.value};
+        }
         let file = new File([JSON.stringify(data)], "messages.json", {type: "text/json;charset=utf-8"});
         let body = document.getElementById("body");
         let savelink = document.createElement("a");

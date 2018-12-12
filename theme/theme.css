@@ -1371,9 +1371,9 @@ div {
 	width: var(--close_width);
 	background-color: var(--close_x);
 	-webkit-mask-image: url(../theme/close.svg);
-	-webkit-mask-size: var(--close_height) var(--close_width);
+	-webkit-mask-size: 100% 100%;
 	mask-image: url(../theme/close.svg);
-	mask-size: 100%;
+	mask-size: var(--close_width) var(--close_height);
 	mask-position: center, center;
 }
 

@@ -425,7 +425,7 @@ ul:not(.menu) li {
 /* TAB LIST AND SCROLLBAR */
 #groups {
 	position: absolute;
-	height: 850px;
+	height: calc(100% - var(--pin_height) - 80px);
 	width: calc(771px - var(--scrollbar_width));
 	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	left: 40px;
@@ -434,7 +434,7 @@ ul:not(.menu) li {
 
 #group_scrollbar {
 	position: absolute;
-	height: 850px;
+	height: calc(100% - var(--pin_height) - 80px);
 	width: var(--scrollbar_width);
 	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	left: calc(810px - var(--scrollbar_width));
@@ -602,7 +602,7 @@ ul:not(.menu) li {
 	left: 20px;
 	top: calc(var(--scrollbar_height) + var(--pin_height) + 33px);
 	width: 19px;
-	height: 850px;
+	height: calc(100% - var(--pin_height) - 80px);
 	background-color: var(--group_list_background);
 	border-right: 1px solid var(--group_list_borders);
 	overflow: visible;

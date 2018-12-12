@@ -27,7 +27,7 @@ body {
 
 	--children_padding_left: 5px;
 	--close_top: 1px;
-	--close_right: 0px;
+	--close_right: 1px;
 	--close_height: 12px;
 	--close_width: 12px;
 	
