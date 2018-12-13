@@ -3,7 +3,7 @@
 	"minimum_opera_version": "42",
 	"default_locale": "en",
 	"background": {
-		"scripts": [ "global.js", "background.js" ],
+		"scripts": [ "global.js", "./scripts/preferences.js", "background_firefox.js", "background_opera.js", "background_vivaldi.js", "background.js" ],
 		"persistent": true
 	},
 	"name": "Tree Tabs",

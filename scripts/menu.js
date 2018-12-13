@@ -413,9 +413,12 @@ function Menu_ShowMenu(MenuItems, event, ) {
             tt.menu[DefaultMenu.all_entries[i][1]].SeparatorHide();
         }
     }
-    let x = event.pageX >= (document.body.clientWidth - tt.DOMmenu.getBoundingClientRect().width - 5) ? (document.body.clientWidth - tt.DOMmenu.getBoundingClientRect().width - 5) : (event.pageX - 5);
-    let y = event.pageY >= (document.body.clientHeight - tt.DOMmenu.getBoundingClientRect().height - 16) ? (document.body.clientHeight - tt.DOMmenu.getBoundingClientRect().height - 16) : (event.pageY - 16);
-    DOM_SetStyle(tt.DOMmenu, {display: "block", top: y + "px", left: x + "px"});
+    setTimeout(function() {
+        tt.DOMmenu.style.display = "block";
+        let x = event.pageX >= (document.body.clientWidth - tt.DOMmenu.getBoundingClientRect().width - 5) ? (document.body.clientWidth - tt.DOMmenu.getBoundingClientRect().width - 5) : (event.pageX - 5);
+        let y = event.pageY >= (document.body.clientHeight - tt.DOMmenu.getBoundingClientRect().height - 20) ? (document.body.clientHeight - tt.DOMmenu.getBoundingClientRect().height - 20) : (event.pageY - 20);
+        DOM_SetStyle(tt.DOMmenu, {top: y + "px", left: x + "px"});
+    }, 10);
 }
 
 function Menu_ShowTabMenu(TabNode, event) {
