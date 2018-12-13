@@ -21,7 +21,7 @@ function QuantumStart() {
             setTimeout(function() {
 
                 // LOAD PREFERENCES
-                GetCurrentPreferences(storage);
+                Preferences_GetCurrentPreferences(storage);
 
                 // CACHED COUNTS AND STUFF
                 let tabs_matched = 0;
@@ -86,6 +86,11 @@ function QuantumStart() {
                 if (opt.skip_load == false && tabs_matched < tabs_count*0.5) {
                     b.safe_mode = true;
                     SafeModeCheck();
+                    // SAFE MODE IS DISABLED AFTER 10 MINUTES
+                    setTimeout(function() {
+                        b.safe_mode = false;
+                    }, 600000);
+
                     if (opt.debug) pushlog("started in safe mode");
                 }
                     

@@ -7,7 +7,7 @@ function Preferences_LoadDefaultPreferences() {
     opt = Object.assign({}, DefaultPreferences);
 }
 
-function GetCurrentPreferences(storage) {
+function Preferences_GetCurrentPreferences(storage) {
     opt = Object.assign({}, DefaultPreferences);
     if (storage.preferences) {
         for (let parameter in storage["preferences"]) {

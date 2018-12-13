@@ -3,7 +3,7 @@ function OperaStart() {
     chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(w) {
         chrome.storage.local.get(null, function(storage) {
             // LOAD PREFERENCES
-            GetCurrentPreferences(storage);
+            Preferences_GetCurrentPreferences(storage);
 
             // load tabs and windows from storage
             let refTabs = {};

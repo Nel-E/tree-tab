@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
         Groups_AppendGroupToList("tab_list2", labels.noname_group, "", false);
         AppendSampleTabs();
 
-        GetCurrentPreferences(storage);
+        Preferences_GetCurrentPreferences(storage);
 
         if (storage["themes"]) {
             for (var themeName in storage["themes"]) {

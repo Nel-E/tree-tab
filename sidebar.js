@@ -60,13 +60,13 @@ function StartSidebarListeners() {
             return;
         }
         if (message.command == "backup_available") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             let BAKbutton = document.getElementById("button_load_bak" + message.bak);
             if (BAKbutton != null) BAKbutton.classList.remove("disabled");
             return;
         }
         if (message.command == "drag_start") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             DOM_CleanUpDragAndDrop();
             tt.DragTreeDepth = message.DragTreeDepth;
             tt.DraggingGroup = message.DraggingGroup;
@@ -76,29 +76,29 @@ function StartSidebarListeners() {
             return;
         }
         if (message.command == "drag_end") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             tt.Dragging = false;
             DOM_CleanUpDragAndDrop();
             DOM_RemoveHighlight();
             return;
         }
         if (message.command == "remove_folder") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " folderId: " + message.folderId);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " folderId: " + message.folderId);
             Folders_RemoveFolder(message.folderId);
             return;
         }
         if (message.command == "remove_group") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " groupId: " + message.groupId);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command + " groupId: " + message.groupId);
             setTimeout(function() {Groups_GroupRemove(message.groupId, false);}, 2000);
             return;
         }
         if (message.command == "reload_sidebar") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             window.location.reload();
             return;
         }
         if (message.command == "reload_options") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             opt = Object.assign({}, message.opt);
             setTimeout(function() {
                 Theme_RestorePinListRowSettings();
@@ -106,7 +106,7 @@ function StartSidebarListeners() {
             return;
         }
         if (message.command == "reload_toolbar") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             opt = Object.assign({}, message.opt);
             if (opt.show_toolbar) {
                 Toolbar_RemoveToolbar();
@@ -121,30 +121,12 @@ function StartSidebarListeners() {
             return;
         }
         if (message.command == "reload_theme") {
-            if (opt.debug) Utils.log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
+            if (opt.debug) Utils_log("message to sidebar " + tt.CurrentWindowId + ": message: " + message.command);
             Theme_RestorePinListRowSettings();
             Theme_ApplyTheme(message.theme);
             return;
         }
         if (message.windowId == tt.CurrentWindowId) {
-            // if (message.command == "append_group") {
-            //     if (tt.groups[message.groupId] == undefined) {
-            //         tt.groups[message.groupId] = {id: message.groupId, index: Object.keys(tt.groups).length, active_tab: 0, prev_active_tab: 0, name: message.group_name, font: message.font_color};
-            //         Groups_AppendGroupToList(message.groupId, message.group_name, message.font_color, true);
-            //     }
-            //     return;
-            // }
-
-            // if (message.command == "append_tab_to_group") {
-            //     let Group = document.getElementById("ct" + message.groupId);
-            //     let Tab = document.getElementById(message.tabId);
-            //     if (Group && Tab) {
-            //         Group.appendChild(Tab);
-            //         Groups_SetActiveGroup(message.groupId, false, true);
-            //     }
-            //     return;
-            // }
-
             if (message.command == "tab_created") {
                 if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group + " .tab").length == 0) {
                     message.InsertAfterId = undefined;
@@ -164,13 +146,13 @@ function StartSidebarListeners() {
                 return;
             }
             if (message.command == "tab_attached") {
-                if (opt.debug) Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId + ", tab is pinned: " + message.tab.pinned + ", ParentId: " + message.ParentId);
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId + ", tab is pinned: " + message.tab.pinned + ", ParentId: " + message.ParentId);
                 tt.tabs[message.tabId] = new Tabs_ttTab({tab: message.tab, ParentId: message.ParentId, Append: true, SkipSetActive: false, SkipMediaIcon: false});
                 DOM_RefreshGUI();
                 return;
             }
             if (message.command == "tab_detached") {
-                if (opt.debug) Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 let Tab = document.getElementById(message.tabId);
                 if (Tab != null && tt.tabs[message.tabId]) {
                     let ctDetachedParent = Tab.childNodes[1];
@@ -188,11 +170,11 @@ function StartSidebarListeners() {
                 return;
             }
             if (message.command == "tab_removed") {
-                if (opt.debug) {Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);}
+                if (opt.debug) {Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);}
                 let mTab = document.getElementById(message.tabId);
                 if (mTab != null && tt.tabs[message.tabId]) {
                     let ctParent = mTab.childNodes[1];
-                    if (opt.debug) Utils.log("tab_removed, promote children: " + opt.promote_children);
+                    if (opt.debug) Utils_log("tab_removed, promote children: " + opt.promote_children);
                     if (opt.promote_children == true) {
                         if (opt.promote_children_in_first_child == true && mTab.childNodes[1].childNodes.length > 1) {
                             DOM_PromoteChildrenToFirstChild(mTab);
@@ -204,16 +186,8 @@ function StartSidebarListeners() {
                     } else {
                         let tab_children = document.querySelectorAll("[id='" + message.tabId + "'] .tab");
                         for (let s of tab_children) {
-
-                        // document.querySelectorAll("[id='" + message.tabId + "'] .tab").forEach(function(s) {
                             chrome.tabs.remove(parseInt(s.id));
                         }
-                        // );
-
-                        // let tab_children_folders = document.querySelectorAll("[id='" + message.tabId + "'] .folder");
-                        // for (let s of tab_children_folders) {
-                        //     Folders_RemoveFolder(s.id);
-                        // }
                     }
                     tt.tabs[message.tabId].RemoveTab();
                     DOM_RefreshExpandStates();
@@ -224,17 +198,17 @@ function StartSidebarListeners() {
                 return;
             }
             if (message.command == "tab_activated") {
-                if (opt.debug) Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 Tabs_SetActiveTab(message.tabId, true);
                 return;
             }
             if (message.command == "tab_attention") {
-                if (opt.debug) Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 if (tt.tabs[message.tabId]) tt.tabs[message.tabId].SetAttentionIcon();
                 return;
             }
             if (message.command == "tab_updated") {
-                if (opt.debug) Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 if (tt.tabs[message.tabId]) {
                     if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
                         if (browserId == "F" && (message.changeInfo.favIconUrl == undefined || message.changeInfo.favIconUrl == "")) browser.sessions.setTabValue(message.tabId, "CachedFaviconUrl", "");
@@ -274,8 +248,8 @@ function StartSidebarListeners() {
             // }
             if (message.command == "remote_update") {
                 if (opt.debug) {
-                    Utils.log("chrome event: " + message.command + ", tabId: " + message.tabId);
-                    Utils.log(message);
+                    Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                    Utils_log(message);
                 }
                 Manager_RecreateTreeStructure(message.groups, message.folders, message.tabs);
                 sendResponse(true);
@@ -298,7 +272,7 @@ function Initialize() {
 	chrome.windows.getCurrent({populate: true}, function(window) {
 		tt.CurrentWindowId = window.id;
 		chrome.storage.local.get(null, function(storage) {
-			GetCurrentPreferences(storage);
+			Preferences_GetCurrentPreferences(storage);
 
 			Menu_CreateMenu();
 			Theme_ApplyTheme(Theme_GetCurrentTheme(storage));

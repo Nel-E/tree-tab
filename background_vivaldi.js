@@ -15,7 +15,7 @@ function VivaldiStart() {
     chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(w) {
         chrome.storage.local.get(null, function(storage) {
             // LOAD PREFERENCES
-            GetCurrentPreferences(storage);
+            Preferences_GetCurrentPreferences(storage);
             
             // LEGACY START TO CONVERT DATA
             if ((storage.data_version == undefined && storage.tabs != undefined) || storage.data_version < 2) {
@@ -273,11 +273,19 @@ function VivaldiAddTabData(tab) {
 function VivaldiStartListeners() { // start all listeners
     chrome.tabs.onCreated.addListener(function(tab) {
         // VivaldiAddWindowData(tab.windowId);
+        // let extData = tab.extData.match("ext_id") != null ? JSON.parse(tab.extData).ext_id : false;
+        // if (extData) {
+            // for (let tabId in b.tabs) {
+                // if (extData === b.tabs[tabId].ttid) {
+                    // b.tabs[tab.id] = b.tabs[tabId];
+                    // delete b.tabs[tabId];
+                    // break;
+                // }
+            // }
+        // }
         let prevActiveTabId = b.windows[tab.windowId].activeTabId;
         VivaldiAddTabData(tab);
         OnMessageTabCreated(tab, prevActiveTabId);
-        
-        
     });
     chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
         let SiblingTabs = b.tabs[tabId] ? GetChildren(b.tabs, b.tabs[tabId].parent) : [];
@@ -323,12 +331,6 @@ function VivaldiStartListeners() { // start all listeners
         if (changeInfo.title != undefined && !tab.active) {
             chrome.runtime.sendMessage({ command: "tab_attention", windowId: tab.windowId, tabId: tabId });
         }
-        // VivaldiAddTabData(tab);
-        // setTimeout(function() {
-            // chrome.tabs.get(tabId, function(t) {
-                // VivaldiAddTabData(t);
-            // });
-        // }, 500);
         chrome.runtime.sendMessage({ command: "tab_updated", windowId: tab.windowId, tab: tab, tabId: tabId, changeInfo: changeInfo });
     });
     chrome.tabs.onMoved.addListener(function(tabId, moveInfo) {
@@ -357,15 +359,7 @@ function VivaldiStartListeners() { // start all listeners
             b.windows[activeInfo.windowId].activeTabId = activeInfo.tabId;
         }
         chrome.runtime.sendMessage({ command: "tab_activated", windowId: activeInfo.windowId, tabId: activeInfo.tabId });
-        setTimeout(function() {
-            chrome.tabs.query({windowId: activeInfo.windowId}, function(tabs) {
-                for (let tab of tabs) {
-                    if ((b.tabs[tab.id].ttid).startsWith("_") || tab.id === activeInfo.tabId) {
-                        VivaldiAddTabData(tab);
-                    }
-                }
-            });
-        }, 500);
+        setTimeout(function() {chrome.tabs.query({windowId: activeInfo.windowId}, function(tabs) {for (let tab of tabs) {if ((b.tabs[tab.id].ttid).startsWith("_") || tab.id === activeInfo.tabId) VivaldiAddTabData(tab);}});}, 500);
         b.schedule_save++;
     });
     chrome.windows.onCreated.addListener(function(window) {
@@ -373,7 +367,7 @@ function VivaldiStartListeners() { // start all listeners
         b.schedule_save++;
     });
     chrome.windows.onRemoved.addListener(function(windowId) {
-        // delete b.windows[windowId];
+        delete b.windows[windowId];
         b.schedule_save++;
     });
     chrome.runtime.onSuspend.addListener(function() {

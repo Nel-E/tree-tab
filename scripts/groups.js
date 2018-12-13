@@ -108,7 +108,7 @@ function Groups_AppendGroupToList(groupId, group_name, font_color, SetEvents) {
 function Groups_AddNewGroup(Name, FontColor) {
     let newId = Groups_GenerateNewGroupID();
     tt.groups[newId] = {id: newId, index: 0, active_tab: 0, prev_active_tab: 0, name: (Name ? Name : labels.noname_group), font: (FontColor ? FontColor : "")};
-    if (opt.debug) Utils.log("f: AddNewGroup, groupId: " + newId + ", Name: " + Name + ", FontColor: " + FontColor);
+    if (opt.debug) Utils_log("f: AddNewGroup, groupId: " + newId + ", Name: " + Name + ", FontColor: " + FontColor);
     Groups_AppendGroupToList(newId, tt.groups[newId].name, tt.groups[newId].font, true);
     Groups_UpdateBgGroupsOrder();
     return newId;
@@ -149,7 +149,7 @@ function Groups_RearrangeGroupsButtons(first_loop) {
 }
 
 function Groups_RearrangeGroupsLists() {
-    if (opt.debug) Utils.log("f: RearrangeGroupsLists");
+    if (opt.debug) Utils_log("f: RearrangeGroupsLists");
     let activegroup = document.getElementById(tt.active_group);
     let scroll = activegroup.scrollTop;
     let groups = document.getElementById("groups");
@@ -230,7 +230,7 @@ function Groups_KeepOnlyOneActiveTabInGroup() {
 }
 
 function Groups_SetActiveGroup(groupId, switch_to_active_in_group, scroll_to_active) {
-    if (opt.debug) Utils.log("f: SetActiveGroup, groupId: " + groupId + ", switch_to_active_in_group: " + switch_to_active_in_group + ", scroll_to_active: " + scroll_to_active);
+    if (opt.debug) Utils_log("f: SetActiveGroup, groupId: " + groupId + ", switch_to_active_in_group: " + switch_to_active_in_group + ", scroll_to_active: " + scroll_to_active);
     let group = document.getElementById(groupId);
     if (group != null) {
         tt.active_group = groupId;
@@ -312,7 +312,7 @@ function Groups_GroupEditConfirm() { // when pressed OK in group popup
         tt.groups[groupId].name = GroupEditName.value;
         let GroupEditFont = document.getElementById("group_edit_font");
         let DefaultGroupButtonFontColor = window.getComputedStyle(document.getElementById("body"), null).getPropertyValue("--group_list_default_font_color");
-        let ThisGroupButtonFontColor = Utils.RGBtoHex(GroupEditFont.style.backgroundColor);
+        let ThisGroupButtonFontColor = Utils_RGBtoHex(GroupEditFont.style.backgroundColor);
         if ("#" + ThisGroupButtonFontColor != DefaultGroupButtonFontColor) {
             tt.groups[groupId].font = ThisGroupButtonFontColor;
             document.getElementById("_gte" + groupId).style.color = "#" + ThisGroupButtonFontColor;

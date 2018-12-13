@@ -209,7 +209,7 @@ function Folders_SaveFolders() {
 }
 
 function Folders_RemoveFolder(FolderId) {
-    if (opt.debug) Utils.log("f: RemoveFolder, folderId " + FolderId);
+    if (opt.debug) Utils_log("f: RemoveFolder, folderId " + FolderId);
     let folder = document.getElementById(FolderId);
     if (folder != null) {
         if (opt.promote_children == true) {
@@ -239,7 +239,7 @@ function Folders_RemoveFolder(FolderId) {
 }
 
 function Folders_ShowRenameFolderDialog(FolderId) { // Rename folder popup
-    if (opt.debug) Utils.log("f: ShowRenameFolderDialog, folderId " + FolderId);
+    if (opt.debug) Utils_log("f: ShowRenameFolderDialog, folderId " + FolderId);
     DOM_HideRenameDialogs();
     if (tt.folders[FolderId]) {
         let name = document.getElementById("folder_edit_name");
@@ -257,13 +257,13 @@ function Folders_FolderRenameConfirm() { // when pressed OK in folder popup
     tt.folders[FolderId].name = name.value;
     document.getElementById("folder_title_"+FolderId).textContent = name.value;
     DOM_HideRenameDialogs();
-    if (opt.debug) Utils.log("f: FolderRenameConfirm, folderId " + FolderId + ", name: " + name.value);
+    if (opt.debug) Utils_log("f: FolderRenameConfirm, folderId " + FolderId + ", name: " + name.value);
     chrome.runtime.sendMessage({command: "save_folders", folders: tt.folders, windowId: tt.CurrentWindowId});
     DOM_RefreshCounters();
 }
 
 function Folders_ActionClickFolder(FolderNode, bgOption) {
-    if (opt.debug) Utils.log("f: ActionClickFolder, folderId " + FolderNode.id + ", bgOption: " + bgOption);
+    if (opt.debug) Utils_log("f: ActionClickFolder, folderId " + FolderNode.id + ", bgOption: " + bgOption);
     if (bgOption == "rename_folder") Folders_ShowRenameFolderDialog(FolderNode.id);
     if (bgOption == "new_folder") {
         let FolderId = Folders_AddNewFolder({ParentId: FolderNode.id});

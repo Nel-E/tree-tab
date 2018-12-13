@@ -289,23 +289,6 @@ function StartBackgroundListeners() {
                 }
                 b.schedule_save++;
             }
-                // else {
-                // chrome.tabs.get(parseInt(message.tabId), function(t) {
-                    // if (browserId == "F") {
-                        // QuantumAppendTabTTId(t);
-                    // }
-                    // if (browserId == "O") {
-                        // OperaHashURL(t);
-                    // }
-                    // if (browserId == "V") {
-                        // VivaldiAddTabData(t);
-                    // }
-                    // b.tabs[message.tabId].parent = message.tab.parent;
-                    // b.tabs[message.tabId].expand = message.tab.expand;
-                    // b.tabs[message.tabId].index = message.tab.index;
-                    // b.schedule_save++;
-                // });
-            // }
             return;
         }
         if (message.command == "update_all_tabs") {
@@ -315,23 +298,6 @@ function StartBackgroundListeners() {
                     b.tabs[pin.id].expand = "";
                     b.tabs[pin.id].index = pin.index;
                 }
-                // else {
-                    // chrome.tabs.get(parseInt(pin.id), function(t) {
-                        // if (browserId == "F") {
-                            // QuantumAppendTabTTId(t);
-                        // }
-                        // if (browserId == "O") {
-                            // OperaHashURL(t);
-                        // }
-                        // if (browserId == "V") {
-                            // VivaldiAddTabData(t);
-                        // }
-                        // b.tabs[pin.id].parent = "pin_list";
-                        // b.tabs[pin.id].expand = "";
-                        // b.tabs[pin.id].index = pin.index;
-                        // b.schedule_save++;
-                    // });
-                // }
             }
             for (let tab of message.tabs) {
                 if (b.tabs[tab.id]) {
@@ -339,23 +305,6 @@ function StartBackgroundListeners() {
                     b.tabs[tab.id].expand = tab.expand;
                     b.tabs[tab.id].index = tab.index;
                 }
-                // else {
-                    // chrome.tabs.get(parseInt(tab.id), function(t) {
-                        // if (browserId == "F") {
-                            // QuantumAppendTabTTId(t);
-                        // }
-                        // if (browserId == "O") {
-                            // OperaHashURL(t);
-                        // }
-                        // if (browserId == "V") {
-                            // VivaldiAddTabData(t);
-                        // }
-                        // b.tabs[tab.id].parent = tab.parent;
-                        // b.tabs[tab.id].expand = tab.expand;
-                        // b.tabs[tab.id].index = tab.index;
-                        // b.schedule_save++;
-                    // });
-                // }
             }
             b.schedule_save++;
             return;
@@ -585,12 +534,14 @@ function SafeModeCheck() {
         if (b.safe_mode) {
             if (browserId == "F") {
                 chrome.windows.getAll({ windowTypes: ["normal"], populate: true }, function(w) {
-                    Promise.resolve(browser.sessions.getWindowValue(w[0].id, "TTdata")).then(function(WindowData) {
-                        if (WindowData != undefined) {
-                            chrome.runtime.sendMessage({command: "reload_sidebar"});
-                            window.location.reload();
-                        }
-                    });
+                    for (win of w) {
+                        Promise.resolve(browser.sessions.getWindowValue(win.id, "TTdata")).then(function(WindowData) {
+                            if (WindowData != undefined) {
+                                chrome.runtime.sendMessage({command: "reload_sidebar"});
+                                window.location.reload();
+                            }
+                        });
+                    }
                 });
             }
             if (browserId == "O") {

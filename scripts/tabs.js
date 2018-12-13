@@ -285,7 +285,7 @@ class Tabs_ttTab {
         if (p.Scroll) this.ScrollToTab();
     }
     RemoveTab() {
-        if (opt.debug) Utils.log("f: RemoveTab, tabId: " + this.id);
+        if (opt.debug) Utils_log("f: RemoveTab, tabId: " + this.id);
         if (this.Node != null) {
             this.Node.parentNode.removeChild(this.Node);
             if (tt.tabs[this.id]) delete tt.tabs[this.id];
@@ -493,7 +493,7 @@ async function Tabs_RearrangeBrowserTabs() {
     setInterval(function() {
         if (tt.schedule_rearrange_tabs > 0) {
             tt.schedule_rearrange_tabs--;
-            if (opt.debug) Utils.log("f: RearrangeBrowserTabs");
+            if (opt.debug) Utils_log("f: RearrangeBrowserTabs");
             chrome.tabs.query({currentWindow: true}, function(tabs) {
                 let ttTabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s) {return parseInt(s.id);});
                 let tabIds = Array.prototype.map.call(tabs, function(t) {return t.id;});
@@ -504,7 +504,7 @@ async function Tabs_RearrangeBrowserTabs() {
 }
 
 async function Tabs_RearrangeBrowserTabsLoop(ttTabIds, tabIds, tabIndex) {
-    if (opt.debug) Utils.log("f: RearrangeBrowserTabsLoop");
+    if (opt.debug) Utils_log("f: RearrangeBrowserTabsLoop");
     if (tabIndex >= 0 && tt.schedule_rearrange_tabs == 0) {
         if (ttTabIds[tabIndex] != tabIds[tabIndex]) chrome.tabs.move(ttTabIds[tabIndex], {index: tabIndex});
         setTimeout(function() {
@@ -531,7 +531,7 @@ function Tabs_RearrangeTree(TTtabs, TTfolders, show_finish_in_status) {
 }
 
 function Tabs_Detach(Nodes, NodesTypes, Group) {
-    if (opt.debug) Utils.log("f: Detach");
+    if (opt.debug) Utils_log("f: Detach");
     let folderNodes = {};
     let TabsIds = [];
     for (let Node of Nodes) {
@@ -542,7 +542,7 @@ function Tabs_Detach(Nodes, NodesTypes, Group) {
     chrome.windows.get(tt.CurrentWindowId, {populate : true}, function(window) {
         if (window.tabs.length == 1) return;
         if (TabsIds.length == window.tabs.length) {
-            if (opt.debug) Utils.log("You are trying to detach all tabs! Skipping!");
+            if (opt.debug) Utils_log("You are trying to detach all tabs! Skipping!");
             return;
         }
         let params = TabsIds.length > 0 ? {tabId: TabsIds[0], state: window.state} : {state: window.state};
@@ -649,7 +649,7 @@ function Tabs_FindTab(input) { // find and select tabs
 }
 
 function Tabs_CloseTabs(tabsIds) {
-    if (opt.debug) Utils.log("f: Tabs_CloseTabs, tabsIds are: " + JSON.stringify(tabsIds));
+    if (opt.debug) Utils_log("f: Tabs_CloseTabs, tabsIds are: " + JSON.stringify(tabsIds));
     for (let tabId of tabsIds) {
         let t = document.getElementById(tabId);
         if (t != null) t.classList.add("will_be_closed");
@@ -758,7 +758,7 @@ function Tabs_ActionClickTab(TabNode, bgOption) {
 }
 
 function Tabs_SetActiveTab(tabId, switchToGroup) {
-    if (opt.debug) Utils.log("f: SetActiveTab, tabId: " + tabId);
+    if (opt.debug) Utils_log("f: SetActiveTab, tabId: " + tabId);
     let Tab = document.getElementById(tabId);
     if (Tab != null) {
         let TabGroup = DOM_GetParentsByClass(Tab, "group");
@@ -787,12 +787,12 @@ function Tabs_SetActiveTab(tabId, switchToGroup) {
 }
 
 function Tabs_SwitchActiveTabBeforeClose(ActiveGroupId) {
-    if (opt.debug) Utils.log("f: SwitchActiveTabBeforeClose");
+    if (opt.debug) Utils_log("f: SwitchActiveTabBeforeClose");
     let activeGroup = document.getElementById(ActiveGroupId);
     if (document.querySelectorAll("#" + ActiveGroupId + " .tab:not(.will_be_closed)").length <= 1 && document.querySelector(".pin.active_tab") == null) { // CHECK IF CLOSING LAST TAB IN ACTIVE GROUP
         let pins = document.querySelectorAll(".pin");
         if (pins.length > 0) { // IF THERE ARE ANY PINNED TABS, ACTIVATE IT
-            if (opt.debug) Utils.log("available pin, switching to: " + pins[pins.length - 1].id);
+            if (opt.debug) Utils_log("available pin, switching to: " + pins[pins.length - 1].id);
             chrome.tabs.update(parseInt(pins[pins.length - 1].id), {active: true});
             return;
         } else { // NO OTHER CHOICE BUT TO SEEK IN ANOTHER GROUP
@@ -821,7 +821,7 @@ function Tabs_SwitchActiveTabBeforeClose(ActiveGroupId) {
             }
         }
     } else {
-        if (opt.debug) Utils.log("available tabs in current group, switching option is: " + opt.after_closing_active_tab);
+        if (opt.debug) Utils_log("available tabs in current group, switching option is: " + opt.after_closing_active_tab);
         if (opt.after_closing_active_tab == "above") Tabs_ActivatePrevTab(true);
         if (opt.after_closing_active_tab == "below") Tabs_ActivateNextTab(true);
         if (opt.after_closing_active_tab == "above_seek_in_parent") Tabs_ActivatePrevTabSameLevel();

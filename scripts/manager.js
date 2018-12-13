@@ -1,6 +1,6 @@
 function Manager_OpenManagerWindow() {
     DOM_HideRenameDialogs();
-    if (opt.debug) Utils.log("f: Manager_OpenManagerWindow");
+    if (opt.debug) Utils_log("f: Manager_OpenManagerWindow");
     chrome.storage.local.get(null, function(storage) {
         DOM_SetStyle(document.getElementById("manager_window"), {display: "block", top: "", left: ""});
         let GroupList = document.getElementById("manager_window_groups_list");
@@ -210,7 +210,7 @@ function Manager_SetManagerEvents() {
     document.getElementById("manager_window_button_import_group").onmousedown = function(event) {
         if (event.which == 1) {
             let inputFile = File_ShowOpenFileDialog(".tt_group");
-            inputFile_onchange = function(event) {
+            inputFile.onchange = function(event) {
                 Manager_ImportGroup(false, true);
             }
         }
@@ -231,7 +231,7 @@ function Manager_SetManagerEvents() {
     document.getElementById("manager_window_button_import_session").onmousedown = function(event) {
         if (event.which == 1) {
             let inputFile = File_ShowOpenFileDialog(".tt_session");
-            inputFile_onchange = function(event) {
+            inputFile.onchange = function(event) {
                 Manager_ImportSession(false, true, false);
             }
         }
@@ -275,14 +275,14 @@ function Manager_ExportGroup(groupId, filename, save_to_manager) {
                 if (tab.id == lastId) {
                     if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
                     if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
-                    if (opt.debug) Utils.log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
+                    if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
                 }
             });
         }
     } else {
         if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
         if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
-        if (opt.debug) Utils.log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
+        if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
     }
 }
 
@@ -297,12 +297,12 @@ function Manager_ImportGroup(recreate_group, save_to_manager) {
         file.parentNode.removeChild(file);
         if (recreate_group) Manager_RecreateGroup(group);
         if (save_to_manager) Manager_AddGroupToStorage(group, true);
-        if (opt.debug) Utils.log("f: ImportGroup, recreate_group: " + recreate_group + ", save_to_manager: " + save_to_manager);
+        if (opt.debug) Utils_log("f: ImportGroup, recreate_group: " + recreate_group + ", save_to_manager: " + save_to_manager);
     }
 }
 
 function Manager_RecreateGroup(LoadedGroup) {
-    if (opt.debug) Utils.log("f: RecreateGroup");
+    if (opt.debug) Utils_log("f: RecreateGroup");
     let RefFolders = {};
     let NewFolders = {};
     let RefTabs = {};
@@ -362,7 +362,7 @@ function Manager_AddGroupToStorage(group, add_to_manager) {
             chrome.storage.local.set({hibernated_groups: hibernated_groups});
             if (add_to_manager) Manager_AddGroupToManagerList(group);
         }
-        if (opt.debug) Utils.log("f: AddGroupToStorage, add_to_manager: " + add_to_manager);
+        if (opt.debug) Utils_log("f: AddGroupToStorage, add_to_manager: " + add_to_manager);
     });
 }
 
@@ -428,7 +428,7 @@ function Manager_AddSessionToStorage(session, name, add_to_manager) {
             chrome.storage.local.set({saved_sessions: saved_sessions});
             if (add_to_manager) Manager_AddSessionToManagerList(saved_sessions[saved_sessions.length - 1]);
         }
-        if (opt.debug) Utils.log("f: AddSessionToStorage, name: " + name + ", add_to_manager: " + add_to_manager);
+        if (opt.debug) Utils_log("f: AddSessionToStorage, name: " + name + ", add_to_manager: " + add_to_manager);
     });
 }
 
@@ -444,12 +444,12 @@ function Manager_AddAutosaveSessionToStorage(session, name) {
             if (s[opt.autosave_max_to_keep]) s.splice(opt.autosave_max_to_keep, (s.length - opt.autosave_max_to_keep));
             chrome.storage.local.set({saved_sessions_automatic: s});
         }
-        if (opt.debug) Utils.log("f: AddAutosaveSessionToStorage, name: " + name);
+        if (opt.debug) Utils_log("f: AddAutosaveSessionToStorage, name: " + name);
     });
 }
 
 function Manager_RecreateSession(LoadedWindows) {
-    if (opt.debug) Utils.log("f: RecreateSession");
+    if (opt.debug) Utils_log("f: RecreateSession");
     let RefTabs = {};
     LoadedWindows.forEach(function(LWin) {
         let NewTabs = [];
@@ -495,7 +495,7 @@ function Manager_RecreateSession(LoadedWindows) {
 }
 
 function Manager_ImportMergeTabs(LoadedWindows) {
-    if (opt.debug) Utils.log("f: ImportMergeTabs");
+    if (opt.debug) Utils_log("f: ImportMergeTabs");
     let RefTabs = {};
     for (let LWI = 0; LWI < LoadedWindows.length; LWI++) { // clear previous window ids
         LoadedWindows[LWI].id = "";
@@ -517,7 +517,7 @@ function Manager_ImportMergeTabs(LoadedWindows) {
                             }
                         }
                     }
-                    if (opt.debug) Utils.log("f: ImportMergeTabs, tabsMatch: " + tabsMatch);
+                    if (opt.debug) Utils_log("f: ImportMergeTabs, tabsMatch: " + tabsMatch);
                     if (tabsMatch > LoadedWindows[LWI].tabs.length * 0.6) {
                         LoadedWindows[LWI].id = cw[CWI].id;
                         break;
@@ -527,7 +527,7 @@ function Manager_ImportMergeTabs(LoadedWindows) {
         }
         LoadedWindows.forEach(function(w) {
             if (w.id == "") { // missing window, lets make one
-                if (opt.debug) Utils.log("f: ImportMergeTabs, missing window");
+                if (opt.debug) Utils_log("f: ImportMergeTabs, missing window");
                 let NewTabs = [];
                 let urls = [];
                 (w.tabs).forEach(function(Tab) {
@@ -656,7 +656,7 @@ function Manager_ImportMergeTabs(LoadedWindows) {
 function Manager_StartAutoSaveSession() {
     if (opt.autosave_interval > 0 && opt.autosave_max_to_keep > 0) {
         tt.AutoSaveSession = setInterval(function() {
-            if (opt.debug) Utils.log("f: AutoSaveSession, loop time is: " + opt.autosave_interval);
+            if (opt.debug) Utils_log("f: AutoSaveSession, loop time is: " + opt.autosave_interval);
             let d = new Date();
             let newName = d.toLocaleString().replace(/\//g, ".").replace(/:/g, "꞉");
             Manager_ExportSession(newName, false, false, true);
@@ -667,7 +667,7 @@ function Manager_StartAutoSaveSession() {
 }
 
 function Manager_RecreateTreeStructure(groups, folders, tabs) { // groups and folders are in object, just like tt.groups and tt.folders, but tabs are in array of treetabs objects
-    if (opt.debug) Utils.log("f: RecreateTreeStructure");
+    if (opt.debug) Utils_log("f: RecreateTreeStructure");
     Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_quick_check_recreate_structure"), hideTimeout: 3000});
     if (groups && Object.keys(groups).length > 0) {
         for (var group in groups) {

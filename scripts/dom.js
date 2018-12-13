@@ -1,5 +1,5 @@
 function DOM_SetEvents() {
-    if (opt.debug) Utils.log("f: SetEvents, adding global events.");
+    if (opt.debug) Utils_log("f: SetEvents, adding global events.");
     let PinList = document.getElementById("pin_list");
     if (!opt.switch_with_scroll) {
         PinList.onmousewheel = function(event) {
@@ -89,7 +89,7 @@ function DOM_SetEvents() {
             event.stopPropagation();
             let ColorPicker = document.getElementById("color_picker");
             ColorPicker.setAttribute("PickColor", this.id);
-            ColorPicker.value = "#" + Utils.RGBtoHex(this.style.backgroundColor);
+            ColorPicker.value = "#" + Utils_RGBtoHex(this.style.backgroundColor);
             ColorPicker.focus();
             ColorPicker.click();
         }
@@ -150,11 +150,11 @@ function DOM_SetEvents() {
         if (tt.pressed_keys.indexOf(event.which) != -1) tt.pressed_keys.splice(tt.pressed_keys.indexOf(event.which), 1);
     }
     document.body.ondragover = function(event) {
-        if (opt.debug) Utils.log("drag over: " + event.target.id);
+        if (opt.debug) Utils_log("drag over: " + event.target.id);
         event.preventDefault();
     }
     document.ondrop = function(event) {
-        if (opt.debug) Utils.log("dropped on window: " + tt.CurrentWindowId);
+        if (opt.debug) Utils_log("dropped on window: " + tt.CurrentWindowId);
         let Nodes = event.dataTransfer.getData("Nodes") ? JSON.parse(event.dataTransfer.getData("Nodes")) : [];
         let NodesTypes = event.dataTransfer.getData("NodesTypes") ? JSON.parse(event.dataTransfer.getData("NodesTypes")) : {DraggingGroup: false, DraggingPin: false, DraggingTab: false, DraggingFolder: false};
         let Group = event.dataTransfer.getData("Group") ? JSON.parse(event.dataTransfer.getData("Group")) : {};
@@ -208,7 +208,7 @@ function DOM_SetEvents() {
         }
     }
     document.ondragleave = function(event) {
-        if (opt.debug) Utils.log("global dragleave");
+        if (opt.debug) Utils_log("global dragleave");
         DOM_RemoveHighlight();
         if (opt.open_tree_on_hover) {
             clearTimeout(tt.DragOverTimer);
@@ -216,7 +216,7 @@ function DOM_SetEvents() {
         }
     }
     document.ondragend = function(event) {
-        if (opt.debug) Utils.log("drag_end");
+        if (opt.debug) Utils_log("drag_end");
         let Nodes = event.dataTransfer.getData("Nodes") ? JSON.parse(event.dataTransfer.getData("Nodes")) : [];
         let NodesTypes = event.dataTransfer.getData("NodesTypes") ? JSON.parse(event.dataTransfer.getData("NodesTypes")) : {DraggingGroup: false, DraggingPin: false, DraggingTab: false, DraggingFolder: false};
         let Group = event.dataTransfer.getData("Group") ? JSON.parse(event.dataTransfer.getData("Group")) : {};
@@ -234,7 +234,7 @@ function DOM_SetEvents() {
 }
 
 function DOM_BindTabsSwitchingToMouseWheel(Id) {
-    if (opt.debug) Utils.log("f: BindTabsSwitchingToMouseWheel, binding tabs switch to group: " + Id);
+    if (opt.debug) Utils_log("f: BindTabsSwitchingToMouseWheel, binding tabs switch to group: " + Id);
     document.getElementById(Id).onwheel = function(event) {
         event.preventDefault();
         let prev = event.deltaY < 0;
@@ -382,7 +382,7 @@ function DOM_DropToTarget(p) { // Class: ("group", "tab", "folder"), DraggedTabN
         tt.schedule_update_data++;
         DOM_RefreshGUI();
         DOM_CleanUpDragAndDrop();
-        if (opt.debug) Utils.log("DropToTarget END");
+        if (opt.debug) Utils_log("DropToTarget END");
     }, 500);
 }
 
@@ -549,7 +549,7 @@ function DOM_FreezeSelection(all) {
 }
 
 function DOM_CleanUpDragAndDrop() {
-    if (opt.debug) Utils.log("f: CleanUpDragAndDrop, unfreezing and removing temporary classes...");
+    if (opt.debug) Utils_log("f: CleanUpDragAndDrop, unfreezing and removing temporary classes...");
     let query = document.querySelectorAll(".selected_frozen");
     for (let s of query) {
         DOM_SetClasses(s, ["selected"], ["selected_frozen"], []);
@@ -574,7 +574,7 @@ function DOM_CleanUpDragAndDrop() {
     for (let s of query) {
         s.classList.remove("dragged_parents");
     }
-    if (opt.debug) Utils.log("f: removing DraggingParams...");
+    if (opt.debug) Utils_log("f: removing DraggingParams...");
     tt.DragTreeDepth = 0;
     tt.DraggingGroup = false;
     tt.DraggingTab = false;

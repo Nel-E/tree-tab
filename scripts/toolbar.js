@@ -386,7 +386,7 @@ function Toolbar_SetToolbarEvents(CleanPreviousBindings, BindButtons, BindToolba
                 s.onmousedown = function(event) {
                     if (event.which == 1) {
                         let inputFile = File_ShowOpenFileDialog(".tt_group");
-                        inputFile_onchange = function(event) {
+                        inputFile.onchange = function(event) {
                             Manager_ImportGroup(true, false);
                         }
                     }
@@ -441,7 +441,7 @@ function Toolbar_SetToolbarEvents(CleanPreviousBindings, BindButtons, BindToolba
                 s.onmousedown = function(event) {
                     if (event.which == 1) {
                         let inputFile = File_ShowOpenFileDialog(".tt_session");
-                        inputFile_onchange = function(event) {
+                        inputFile.onchange = function(event) {
                             Manager_ImportSession(true, false, false);
                         }
                     }
@@ -459,7 +459,7 @@ function Toolbar_SetToolbarEvents(CleanPreviousBindings, BindButtons, BindToolba
                 s.onmousedown = function(event) {
                     if (event.which == 1) {
                         let inputFile = File_ShowOpenFileDialog(".tt_session");
-                        inputFile_onchange = function(event) {
+                        inputFile.onchange = function(event) {
                             Manager_ImportSession(false, false, true);
                             // Manager_ImportMergeTabs();
                         }
