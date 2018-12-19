@@ -1078,11 +1078,12 @@ function RefreshFields() {
     } else {
         document.getElementById("field_theme").style.height = "";
     }
-    if (browserId == "F") {
-        document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s) {
-            s.style.display = "none";
-        });
-    } else {
+    // if (browserId == "F") {
+    if (browserId != "F") {
+        // document.querySelectorAll("#scrollbar_size_indicator, #scrollbar_thumb, #scrollbar_thumb_hover, #scrollbar_track").forEach(function(s) {
+            // s.style.display = "none";
+        // });
+    // } else {
         document.querySelectorAll("#firefox_option_hide_other_groups_tabs_firefox").forEach(function(s) {
             s.style.display = "none";
         });

@@ -30,6 +30,16 @@
 }
 
 
+
+.scroller {
+	width: var(--scrollbar_width);
+	height: var(--scrollbar_height);
+    scrollbar-color: var(--scrollbar_thumb) var(--scrollbar_track);
+    scrollbar-width: thin;
+    overflow-y: scroll;
+}
+
+
 div {
 	background-repeat: no-repeat;
 	-webkit-mask-repeat:no-repeat;

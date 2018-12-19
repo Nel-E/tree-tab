@@ -1,4 +1,4 @@
-function Folders_AddNewFolder(p) { // folderId: string, ParentId: string, Name: string, Index: int, ExpandState: ("o","c"), AdditionalClass: string, SetEvents: bool
+function Folders_AddNewFolder(p) { // folderId: string, ParentId: string, InsertAfterId: tabId or folderId, Name: string, Index: int, ExpandState: ("o","c"), AdditionalClass: string, SkipSetEvents: bool
     let newId = p.folderId ? p.folderId : Folders_GenerateNewFolderID();
     tt.folders[newId] = {id: newId, parent: (p.ParentId ? p.ParentId : ""), index: (p.Index ? p.Index : 0), name: (p.Name ? p.Name : labels.noname_group), expand: (p.ExpandState ? p.ExpandState : "")};
     Folders_AppendFolder({folderId: newId, Name: tt.folders[newId].name, InsertAfterId: p.InsertAfterId, ParentId: p.ParentId, ExpandState: p.ExpandState, SkipSetEvents: p.SkipSetEvents, AdditionalClass: p.AdditionalClass});

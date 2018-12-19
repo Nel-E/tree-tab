@@ -16,9 +16,8 @@ function VivaldiStart() {
         chrome.storage.local.get(null, function(storage) {
             // LOAD PREFERENCES
             Preferences_GetCurrentPreferences(storage);
-            
             // LEGACY START TO CONVERT DATA
-            if ((storage.data_version == undefined && storage.tabs != undefined) || storage.data_version < 2) {
+            if ((storage.data_version == undefined && storage.tabs != undefined && storage.tabs.length) || (storage.data_version != undefined && storage.data_version < 2)) {
                 b.safe_mode = true;
                 let refTabs = {};
                 let refWins = {};
@@ -241,7 +240,7 @@ async function VivaldiAutoSaveData(BAK, LoopTimer) {
                         }
                     }
                 }
-                chrome.storage.local.set((BAK == 0 ? { windows: Windows, tabs: Tabs } : (BAK == 1 ? { windows_BAK1: Windows, tabs_BAK1: Tabs } : (BAK == 2 ? { windows_BAK2: Windows, tabs_BAK2: Tabs } : { windows_BAK3: Windows, tabs_BAK3: Tabs }))));
+                chrome.storage.local.set((BAK == 0 ? { data_version: 2, windows: Windows, tabs: Tabs } : (BAK == 1 ? { windows_BAK1: Windows, tabs_BAK1: Tabs } : (BAK == 2 ? { windows_BAK2: Windows, tabs_BAK2: Tabs } : { windows_BAK3: Windows, tabs_BAK3: Tabs }))));
                 b.schedule_save--;
             });
         }

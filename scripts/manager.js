@@ -270,7 +270,7 @@ function Manager_ExportGroup(groupId, filename, save_to_manager) {
                         GroupToSave.favicons.push(favicon);
                         favicon_index = GroupToSave.favicons.length;
                     }
-                    (GroupToSave.tabs).push({id: tab.id,parent: s.parentNode.parentNode.id,index: Array.from(s.parentNode.children).indexOf(s), expand: (s.classList.contains("c") ? "c" : (s.classList.contains("o") ? "o" : "")), url: tab.url, title: tab.title, favicon: favicon_index});
+                    (GroupToSave.tabs).push({id: tab.id, parent: s.parentNode.parentNode.id, index: Array.from(s.parentNode.children).indexOf(s), expand: (s.classList.contains("c") ? "c" : (s.classList.contains("o") ? "o" : "")), url: tab.url, title: tab.title, favicon: favicon_index});
                 }
                 if (tab.id == lastId) {
                     if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
@@ -308,45 +308,50 @@ function Manager_RecreateGroup(LoadedGroup) {
     let RefTabs = {};
     let NewTabs = [];
     let NewGroupId = Groups_AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
+    let FailedTabs = 0;
     for (var folder in LoadedGroup.folders) {
-        let newId = Folders_AddNewFolder({parent: NewGroupId, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand});
+        let newId = Folders_AddNewFolder({ParentId: NewGroupId, Name: LoadedGroup.folders[folder].name, ExpandState: LoadedGroup.folders[folder].expand});
         RefFolders[folder] = newId;
         NewFolders[newId] = {id: newId, parent: (((LoadedGroup.folders[folder].parent).startsWith("g_") || (LoadedGroup.folders[folder].parent == "tab_list")) ? NewGroupId : LoadedGroup.folders[folder].parent), index: LoadedGroup.folders[folder].index, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand};
     }
     for (var new_folder in NewFolders) {
         if ((NewFolders[new_folder].parent).startsWith("f_") && RefFolders[NewFolders[new_folder].parent]) NewFolders[new_folder].parent = RefFolders[NewFolders[new_folder].parent];
     }
-    (LoadedGroup.tabs).forEach(function(Tab) {
+    for (let Tab of LoadedGroup.tabs) {
         let params;
         if (browserId == "F") {
-            params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: true, title: Tab.title};
+            params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: ((Tab.url).startsWith("about") ? false : true), title: Tab.title};
         } else {
             params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url};
         }
         chrome.tabs.create(params, function(new_tab) {
-            if (browserId == "F") browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", Tab.favicon);
-            RefTabs[Tab.id] = new_tab.id;
-            Tab.id = new_tab.id;
-            if ((Tab.parent).startsWith("g_") || Tab.parent == "tab_list") Tab.parent = NewGroupId;
-            if ((Tab.parent).startsWith("f_") && RefFolders[Tab.parent]) Tab.parent = RefFolders[Tab.parent];
-            NewTabs.push(Tab);
-            if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
-            if (NewTabs.length == LoadedGroup.tabs.length - 1) {
-                NewTabs.forEach(function(LTab) {
-                    if (RefTabs[LTab.parent]) LTab.parent = RefTabs[LTab.parent];
-                });
-                let GiveUp = 3000; // gives up after: 300*3000/1000/60 = 15 minutes
-                let RecreateTreeS = setInterval(function() {
-                    GiveUp--;
-                    let LastTab = document.getElementById(NewTabs[NewTabs.length - 1].id);
-                    if (LastTab != null || GiveUp < 0) {
-                        Manager_RecreateTreeStructure({}, NewFolders, NewTabs);
-                        clearInterval(RecreateTreeS);
-                    }
-                }, 300);
+            if (new_tab) {
+                if (browserId == "F") browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LoadedGroup.favicons[Tab.favicon]);
+                RefTabs[Tab.id] = new_tab.id;
+                Tab.id = new_tab.id;
+                if ((Tab.parent).startsWith("g_") || Tab.parent == "tab_list") Tab.parent = NewGroupId;
+                if ((Tab.parent).startsWith("f_") && RefFolders[Tab.parent]) Tab.parent = RefFolders[Tab.parent];
+                NewTabs.push(Tab);
+                if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
+            } else {
+                FailedTabs++;
             }
         });
-    });
+    }
+    let GiveUp = 3000; // gives up after: 300*3000/1000/60 = 15 minutes
+    let RecreateTreeS = setInterval(function() {
+        GiveUp--;
+        if (NewTabs.length == (LoadedGroup.tabs.length-FailedTabs) || GiveUp < 0) {
+            let LastTab = document.getElementById(NewTabs[NewTabs.length-1].id);
+            if (LastTab) {
+                Manager_RecreateTreeStructure({}, NewFolders, NewTabs);
+                clearInterval(RecreateTreeS);
+                setTimeout(function() {
+                    DOM_RefreshGUI();
+                }, 1000);
+            }
+        }
+    }, 100);
 }
 
 function Manager_AddGroupToStorage(group, add_to_manager) {
@@ -644,7 +649,9 @@ function Manager_ImportMergeTabs(LoadedWindows) {
                             } else {
                                 chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: NewTabs, windowId: w.id});
                             }
-                            Manager_ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_all_done"), hideTimeout: 2000});
+                            setTimeout(function() {
+                                Manager_ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_all_done"), hideTimeout: 2000});
+                            }, 3000);
                         }, 6000);
                     });
                 });
@@ -704,7 +711,7 @@ function Manager_RecreateTreeStructure(groups, folders, tabs) { // groups and fo
     var SortAttempt = setInterval(function() {
         SortAttemptNr--;
         if (SortAttemptNr < 0 || Object.keys(ttTabs).length == tabs.length || tabs.length == 0) {
-            Tabs_RearrangeTree(ttTabs, folders, false);
+            Tabs_RearrangeTree(ttTabs, folders, true);
             clearInterval(SortAttempt);
             Groups_UpdateBgGroupsOrder();
             setTimeout(function() {

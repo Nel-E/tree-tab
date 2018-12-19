@@ -41,12 +41,12 @@
 	"applications": {
 		"gecko": {
 			"id": "TreeTabs@jagiello.it",
-			"strict_min_version": "57.0"
+			"strict_min_version": "63.0"
 		}
 	},
 	"options_ui": {
 		"page": "options/options.html",
 		"open_in_tab": true
 	},
-	"version": "1.8.5"
+	"version": "1.8.9"
 }
