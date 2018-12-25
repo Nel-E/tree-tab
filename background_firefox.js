@@ -36,7 +36,6 @@ function QuantumStart() {
 
                 if (opt.debug == true) {
                     if (storage.debug_log != undefined) b.debug = storage.debug_log;
-                    // if (retry == 0) pushlog("TreeTabs background start");
                 }
 
                 for (let win of w) {
@@ -53,12 +52,6 @@ function QuantumStart() {
                         if (opt.skip_load == false && tabs_data[tab.id] != undefined) {
                             b.tabs[tab.id] = Object.assign({}, tabs_data[tab.id]);
                             tabs_matched++;
-
-                            if (tabs_data[tab.id].parent_ttid != undefined && tabs_data[tab.id].parent_ttid != "") { // legacy
-                                b.tabs[tab.id].parent = tabs_data[tab.id].parent_ttid; // legacy
-                                delete b.tabs[tab.id].parent_ttid; // legacy
-                            } // legacy
-
                         } else {
                             QuantumAppendTabTTId(tab);
                         }

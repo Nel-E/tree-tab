@@ -15,6 +15,10 @@
 		"16": "icons/16.png"
 	},
 	"permissions": [ "tabs", "sessions", "<all_urls>", "storage", "unlimitedStorage", "bookmarks" ],
+	"browser_action": {
+		"default_icon": "icons/24.png",
+		"default_popup": "sidebar.html"
+	},
 	"options_ui": {
 		"page": "options/options.html",
 		"open_in_tab": false
@@ -25,5 +29,5 @@
 			"description": "close tree"
 		}
 	},
-	"version": "1.8.9"
+	"version": "1.9.0"
 }

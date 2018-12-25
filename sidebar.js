@@ -56,7 +56,7 @@ function StartSidebarListeners() {
     });
     chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         if (message.command == "bg_started") {
-            window.location.reload();
+            sendResponse();
             return;
         }
         if (message.command == "backup_available") {
@@ -127,6 +127,10 @@ function StartSidebarListeners() {
             return;
         }
         if (message.windowId == tt.CurrentWindowId) {
+            if (message.command == "sidebar_started") {
+                sendResponse(true);
+                return;
+            }
             if (message.command == "tab_created") {
                 if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group + " .tab").length == 0) {
                     message.InsertAfterId = undefined;

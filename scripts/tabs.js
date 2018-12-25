@@ -470,6 +470,7 @@ async function Tabs_LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
 
 async function Tabs_SaveTabs() {
     setInterval(function() {
+    if (opt.debug) Utils_log("f: Tabs_SaveTabs");
         if (tt.schedule_update_data > 1) tt.schedule_update_data = 1;
         if (tt.schedule_update_data > 0) {
             let pins_data = [];
@@ -490,6 +491,7 @@ async function Tabs_SaveTabs() {
 }
 
 async function Tabs_RearrangeBrowserTabs() {
+    if (opt.debug) Utils_log("f: Tabs_RearrangeBrowserTabs");
     setInterval(function() {
         if (tt.schedule_rearrange_tabs > 0) {
             tt.schedule_rearrange_tabs--;
@@ -514,6 +516,7 @@ async function Tabs_RearrangeBrowserTabsLoop(ttTabIds, tabIds, tabIndex) {
 }
 
 function Tabs_RearrangeTree(TTtabs, TTfolders, show_finish_in_status) {
+    if (opt.debug) Utils_log("f: Tabs_RearrangeTree");
     Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_rearranging_tabs")});
     let Nodes = document.querySelectorAll(".pin, .tab, .folder");
     for (let Node of Nodes) {

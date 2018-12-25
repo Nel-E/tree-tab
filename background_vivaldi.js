@@ -16,6 +16,7 @@ function VivaldiStart() {
         chrome.storage.local.get(null, function(storage) {
             // LOAD PREFERENCES
             Preferences_GetCurrentPreferences(storage);
+            
             // LEGACY START TO CONVERT DATA
             if ((storage.data_version == undefined && storage.tabs != undefined && storage.tabs.length) || (storage.data_version != undefined && storage.data_version < 2)) {
                 b.safe_mode = true;
@@ -188,7 +189,7 @@ function VivaldiStart() {
                         chrome.storage.local.remove("recovered_BAK");
                     }
 
-                    if (opt.debug) pushlog("VivaldiStart, Current windows count is: " + w.length + "Saved windows count is: " + LoadedWindows.length + "Loaded tabs count is: " + LoadedTabs.length + "Matching tabs: " + tabs_matched);
+                    if (opt.debug) pushlog("VivaldiStart, Current windows count is: " + w.length + ", Saved windows count is: " + Object.keys(LoadedWindows).length + ", Loaded tabs count is: " + Object.keys(LoadedTabs).length + ", Matching tabs: " + tabs_matched);
             
                 }
             }

@@ -330,6 +330,9 @@ function StartBackgroundListeners() {
             return;
         }
     });
+    
+    
+    // WebChromeClient.onConsoleMessage(ConsoleMessage consoleMessage)
 }
 
 // NEW TAB

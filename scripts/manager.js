@@ -252,40 +252,6 @@ function Manager_SetManagerEvents() {
     }
 }
 
-function Manager_ExportGroup(groupId, filename, save_to_manager) {
-    let GroupToSave = {group: tt.groups[groupId], folders: {}, tabs: [], favicons: []};
-    let query = document.querySelectorAll("#" + groupId + " .folder");
-    for (let s of query) {
-        if (tt.folders[s.id]) GroupToSave.folders[s.id] = tt.folders[s.id];
-    }
-    let Tabs = document.querySelectorAll("#" + groupId + " .tab");
-    if (Tabs.length > 0) {
-        let lastId = parseInt(Tabs[Tabs.length - 1].id);
-        for (let s of Tabs) {
-            chrome.tabs.get(parseInt(s.id), async function(tab) {
-                if ((tab.url).startsWith("www") || (tab.url).startsWith("http") || (tab.url).startsWith("ftp") || (tab.url).startsWith("file")) {
-                    let favicon = (browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : tab.favIconUrl);
-                    let favicon_index = GroupToSave.favicons.indexOf(favicon);
-                    if (favicon_index == -1) {
-                        GroupToSave.favicons.push(favicon);
-                        favicon_index = GroupToSave.favicons.length;
-                    }
-                    (GroupToSave.tabs).push({id: tab.id, parent: s.parentNode.parentNode.id, index: Array.from(s.parentNode.children).indexOf(s), expand: (s.classList.contains("c") ? "c" : (s.classList.contains("o") ? "o" : "")), url: tab.url, title: tab.title, favicon: favicon_index});
-                }
-                if (tab.id == lastId) {
-                    if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
-                    if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
-                    if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
-                }
-            });
-        }
-    } else {
-        if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
-        if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
-        if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
-    }
-}
-
 function Manager_ImportGroup(recreate_group, save_to_manager) {
     let file = document.getElementById("file_import");
     let fr = new FileReader();
@@ -299,59 +265,6 @@ function Manager_ImportGroup(recreate_group, save_to_manager) {
         if (save_to_manager) Manager_AddGroupToStorage(group, true);
         if (opt.debug) Utils_log("f: ImportGroup, recreate_group: " + recreate_group + ", save_to_manager: " + save_to_manager);
     }
-}
-
-function Manager_RecreateGroup(LoadedGroup) {
-    if (opt.debug) Utils_log("f: RecreateGroup");
-    let RefFolders = {};
-    let NewFolders = {};
-    let RefTabs = {};
-    let NewTabs = [];
-    let NewGroupId = Groups_AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
-    let FailedTabs = 0;
-    for (var folder in LoadedGroup.folders) {
-        let newId = Folders_AddNewFolder({ParentId: NewGroupId, Name: LoadedGroup.folders[folder].name, ExpandState: LoadedGroup.folders[folder].expand});
-        RefFolders[folder] = newId;
-        NewFolders[newId] = {id: newId, parent: (((LoadedGroup.folders[folder].parent).startsWith("g_") || (LoadedGroup.folders[folder].parent == "tab_list")) ? NewGroupId : LoadedGroup.folders[folder].parent), index: LoadedGroup.folders[folder].index, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand};
-    }
-    for (var new_folder in NewFolders) {
-        if ((NewFolders[new_folder].parent).startsWith("f_") && RefFolders[NewFolders[new_folder].parent]) NewFolders[new_folder].parent = RefFolders[NewFolders[new_folder].parent];
-    }
-    for (let Tab of LoadedGroup.tabs) {
-        let params;
-        if (browserId == "F") {
-            params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: ((Tab.url).startsWith("about") ? false : true), title: Tab.title};
-        } else {
-            params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url};
-        }
-        chrome.tabs.create(params, function(new_tab) {
-            if (new_tab) {
-                if (browserId == "F") browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LoadedGroup.favicons[Tab.favicon]);
-                RefTabs[Tab.id] = new_tab.id;
-                Tab.id = new_tab.id;
-                if ((Tab.parent).startsWith("g_") || Tab.parent == "tab_list") Tab.parent = NewGroupId;
-                if ((Tab.parent).startsWith("f_") && RefFolders[Tab.parent]) Tab.parent = RefFolders[Tab.parent];
-                NewTabs.push(Tab);
-                if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
-            } else {
-                FailedTabs++;
-            }
-        });
-    }
-    let GiveUp = 3000; // gives up after: 300*3000/1000/60 = 15 minutes
-    let RecreateTreeS = setInterval(function() {
-        GiveUp--;
-        if (NewTabs.length == (LoadedGroup.tabs.length-FailedTabs) || GiveUp < 0) {
-            let LastTab = document.getElementById(NewTabs[NewTabs.length-1].id);
-            if (LastTab) {
-                Manager_RecreateTreeStructure({}, NewFolders, NewTabs);
-                clearInterval(RecreateTreeS);
-                setTimeout(function() {
-                    DOM_RefreshGUI();
-                }, 1000);
-            }
-        }
-    }, 100);
 }
 
 function Manager_AddGroupToStorage(group, add_to_manager) {
@@ -368,40 +281,6 @@ function Manager_AddGroupToStorage(group, add_to_manager) {
             if (add_to_manager) Manager_AddGroupToManagerList(group);
         }
         if (opt.debug) Utils_log("f: AddGroupToStorage, add_to_manager: " + add_to_manager);
-    });
-}
-
-function Manager_ExportSession(name, save_to_file, save_to_manager, save_to_autosave_manager) {
-    chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(win) {
-        chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(t) {
-            let tabs = Object.assign({}, t);
-            chrome.runtime.sendMessage({command: "get_windows"}, function(w) {
-                let windows = Object.assign({}, w);
-                let ExportWindows = [];
-                win.forEach(function(CWin) {
-                    if (CWin.tabs.length > 0) {
-                        windows[CWin.id]["id"] = CWin.id;
-                        windows[CWin.id]["tabs"] = [];
-                        windows[CWin.id]["favicons"] = [];
-                        CWin.tabs.forEach(async function(CTab) {
-                            if ((CTab.url).startsWith("www") || (CTab.url).startsWith("http") || (CTab.url).startsWith("ftp")) {
-                                let favicon = (browserId == "F" ? await browser.sessions.getTabValue(CTab.id, "CachedFaviconUrl") : CTab.favIconUrl);
-                                let favicon_index = windows[CWin.id].favicons.indexOf(favicon);
-                                if (favicon_index == -1) {
-                                    windows[CWin.id].favicons.push(favicon);
-                                    favicon_index = windows[CWin.id].favicons.length;
-                                }
-                                windows[CWin.id]["tabs"].push({id: CTab.id, url: CTab.url, parent: tabs[CTab.id].parent, index: tabs[CTab.id].index, expand: tabs[CTab.id].expand, title: CTab.title, favicon: favicon_index});
-                            }
-                        });
-                        ExportWindows.push(windows[CWin.id]);
-                    }
-                });
-                if (save_to_file) File_SaveFile(name, "tt_session", ExportWindows);
-                if (save_to_manager) Manager_AddSessionToStorage(ExportWindows, name, true);
-                if (save_to_autosave_manager) Manager_AddAutosaveSessionToStorage(ExportWindows, name);
-            });
-        });
     });
 }
 
@@ -453,213 +332,6 @@ function Manager_AddAutosaveSessionToStorage(session, name) {
     });
 }
 
-function Manager_RecreateSession(LoadedWindows) {
-    if (opt.debug) Utils_log("f: RecreateSession");
-    let RefTabs = {};
-    LoadedWindows.forEach(function(LWin) {
-        let NewTabs = [];
-        let urls = [];
-        for (let Tab of LWin.tabs) {
-            urls.push(Tab.url);
-            NewTabs.push(Tab);
-        }
-        chrome.windows.create({url: urls[0]}, function(new_window) {
-            chrome.runtime.sendMessage({command: "save_groups", windowId: new_window.id, groups: LWin.groups});
-            chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: LWin.folders});
-            (LWin.tabs).forEach(function(Tab) {
-                if (Tab.id != LWin.tabs[0].id) { // skip first tab
-                    let params;
-                    if (browserId == "F") {
-                        params = {active: false, windowId: new_window.id, url: Tab.url, discarded: true, title: Tab.title};
-                    } else {
-                        params = {active: false, windowId: new_window.id, url: Tab.url};
-                    }
-                    chrome.tabs.create(params, function(new_tab) {
-                        if (browserId == "F") browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LWin.favicons[Tab.favicon]);
-                        if (Tab.id == LWin.tabs[LWin.tabs.length - 1].id) { // last tab
-                            chrome.windows.get(new_window.id, {populate: true}, function(new_window_with_new_tabs) {
-                                for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                    RefTabs[NewTabs[tInd].id] = new_window_with_new_tabs.tabs[tInd].id;
-                                    NewTabs[tInd].id = new_window_with_new_tabs.tabs[tInd].id;
-                                }
-                                for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                    if (RefTabs[NewTabs[tInd].parent] != undefined) NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
-                                }
-                                for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                    if (NewTabs[tInd].parent == "pin_list") chrome.tabs.update(new_window_with_new_tabs.tabs[tInd].id, {pinned: true});
-                                    chrome.runtime.sendMessage({command: "update_tab", tabId: new_window_with_new_tabs.tabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
-                                    if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_window_with_new_tabs.tabs[tInd].id});
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    });
-}
-
-function Manager_ImportMergeTabs(LoadedWindows) {
-    if (opt.debug) Utils_log("f: ImportMergeTabs");
-    let RefTabs = {};
-    for (let LWI = 0; LWI < LoadedWindows.length; LWI++) { // clear previous window ids
-        LoadedWindows[LWI].id = "";
-    }
-    Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_loaded_tree_structure")});
-    chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(cw) {
-        for (let CWI = 0; CWI < cw.length; CWI++) { // Current Windows
-            for (let LWI = 0; LWI < LoadedWindows.length; LWI++) { // Loaded Windows
-                if (LoadedWindows[LWI].id == "") {
-                    let tabsMatch = 0;
-                    for (let CTI = 0; CTI < cw[CWI].tabs.length; CTI++) { // loop Tabs of CWI Window
-                        for (let LTI = 0; LTI < LoadedWindows[LWI].tabs.length; LTI++) { // loop Tabs of Loaded Window
-                            if (cw[CWI].tabs[CTI].url == LoadedWindows[LWI].tabs[LTI].url) {
-                                RefTabs[LoadedWindows[LWI].tabs[LTI].id] = cw[CWI].tabs[CTI].id;
-                                LoadedWindows[LWI].tabs[LTI].id = cw[CWI].tabs[CTI].id;
-                                LoadedWindows[LWI].tabs[LTI].url = "";
-                                tabsMatch++;
-                                break;
-                            }
-                        }
-                    }
-                    if (opt.debug) Utils_log("f: ImportMergeTabs, tabsMatch: " + tabsMatch);
-                    if (tabsMatch > LoadedWindows[LWI].tabs.length * 0.6) {
-                        LoadedWindows[LWI].id = cw[CWI].id;
-                        break;
-                    }
-                }
-            }
-        }
-        LoadedWindows.forEach(function(w) {
-            if (w.id == "") { // missing window, lets make one
-                if (opt.debug) Utils_log("f: ImportMergeTabs, missing window");
-                let NewTabs = [];
-                let urls = [];
-                (w.tabs).forEach(function(Tab) {
-                    urls.push(Tab.url);
-                    NewTabs.push(Tab);
-                });
-                chrome.windows.create({url: urls[0]}, function(new_window) {
-                    chrome.runtime.sendMessage({command: "save_groups", windowId: new_window.id, groups: LWin.groups});
-                    chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: LWin.folders});
-                    (w.tabs).forEach(function(Tab) {
-                        if (Tab.id != LWin.tabs[0].id) { // skip first tab
-                            let params;
-                            if (browserId == "F") {
-                                params = {active: false, windowId: new_window.id, url: Tab.url, discarded: true, title: Tab.title};
-                            } else {
-                                params = {active: false, windowId: new_window.id, url: Tab.url};
-                            }
-                            chrome.tabs.create(params, function(new_tab) {
-                                if (browserId == "F") browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", w.favicons[Tab.favicon]);
-                                if (Tab.id == LWin.tabs[LWin.tabs.length - 1].id) { // last tab
-                                    chrome.windows.get(new_window.id, {populate: true}, function(new_window_with_new_tabs) {
-                                        for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                            RefTabs[NewTabs[tInd].id] = new_window_with_new_tabs.tabs[tInd].id;
-                                            NewTabs[tInd].id = new_window_with_new_tabs.tabs[tInd].id;
-                                        }
-                                        for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                            if (RefTabs[NewTabs[tInd].parent] != undefined) NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
-                                        }
-                                        for (let tInd = 0; tInd < new_window_with_new_tabs.tabs.length; tInd++) {
-                                            if (NewTabs[tInd].parent == "pin_list") chrome.tabs.update(new_window_with_new_tabs.tabs[tInd].id, {pinned: true});
-                                            chrome.runtime.sendMessage({command: "update_tab", tabId: new_window_with_new_tabs.tabs[tInd].id, tab: {index: NewTabs[tInd].index, expand: NewTabs[tInd].expand, parent: NewTabs[tInd].parent}});
-                                            if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_window_with_new_tabs.tabs[tInd].id});
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                });
-            } else { // window exists, lets add missing tabs
-                let NewTabs = [];
-                let RefTabs = {};
-                chrome.runtime.sendMessage({command: "get_folders", windowId: w.id}, function(f) {
-                    chrome.runtime.sendMessage({command: "get_groups", windowId: w.id}, function(g) {
-                        if (Object.keys(w.groups).length > 0) {
-                            for (var group in w.groups) {
-                                if (group != "" && group != "undefined" && w.groups[group] != undefined) g[w.groups[group].id] = Object.assign({}, w.groups[group]);
-                            }
-                        }
-                        if (Object.keys(w.folders).length > 0) {
-                            for (var folder in w.folders) {
-                                if (folder != "" && folder != "undefined" && w.folders[folder] != undefined) w.folders[w.folders[folder].id] = Object.assign({}, w.folders[folder]);
-                            }
-                        }
-                        if (Object.keys(g).length > 0) {
-                            for (var groupId in g) {
-                                w.groups[groupId] = Object.assign({}, g[groupId]);
-                            }
-                        }
-                        if (Object.keys(f).length > 0) {
-                            for (var folderId in f) {
-                                w.folders[folderId] = Object.assign({}, f[folderId]);
-                            }
-                        }
-                        chrome.runtime.sendMessage({command: "save_groups", windowId: w.id, groups: g});
-                        chrome.runtime.sendMessage({command: "save_folders", windowId: w.id, folders: f});
-                        chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: [], windowId: w.id});
-                        if (w.id == tt.CurrentWindowId) Manager_RecreateTreeStructure(w.groups, w.folders, []);
-                        (w.tabs).forEach(function(Tab) {
-                            // let LastTabId = w.tabs[w.tabs.length - 1].id;
-                            // let OriginalTabId = Tab.id;
-                            if (Tab.url != "") { // missing tab, lets make one
-                                let params;
-                                if (browserId == "F") {
-                                    params = {active: false, windowId: w.id, url: Tab.url, discarded: true, title: Tab.title};
-                                } else {
-                                    params = {active: false, windowId: w.id, url: Tab.url};
-                                }
-                                chrome.tabs.create(params, function(tab) {
-                                    if (browserId == "F") browser.sessions.setTabValue(tab.id, "CachedFaviconUrl", w.favicons[Tab.favicon]);
-                                    if (Tab.parent == "pin_list") chrome.tabs.update(tab.id, {pinned: true});
-                                    RefTabs[Tab.id] = tab.id;
-                                    Tab.id = tab.id;
-                                    NewTabs.push(Tab);
-                                    chrome.runtime.sendMessage({command: "update_tab", tabId: tab.id, tab: {index: Tab.index, expand: Tab.expand, parent: Tab.parent}});
-                                });
-                            } else {
-                                NewTabs.push(Tab);
-                            }
-                            // if (OriginalTabId == LastTabId) { // loop is on last tab
-                            //     setTimeout(function() {
-                            //         Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
-                            //         for (let tInd = 0; tInd < NewTabs.length; tInd++) {
-                            //             if (RefTabs[NewTabs[tInd].parent] != undefined) {
-                            //                 NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
-                            //             }
-                            //         }
-                            //     }, 1000);
-                            // }
-                        });
-                        setTimeout(function() {
-                            Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_ref_tabs")});
-                            for (let tInd = 0; tInd < NewTabs.length; tInd++) {
-                                if (RefTabs[NewTabs[tInd].parent] != undefined) NewTabs[tInd].parent = RefTabs[NewTabs[tInd].parent];
-                            }
-                        }, 2000);
-                        setTimeout(function() {
-                            for (let NewTab of NewTabs) {
-                                chrome.runtime.sendMessage({command: "update_tab", tabId: NewTab.id, tab: {index: NewTab.index, expand: NewTab.expand, parent: NewTab.parent}});
-                            }
-                            Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_finding_other_windows")});
-                            if (w.id == tt.CurrentWindowId) {
-                                Manager_RecreateTreeStructure(w.groups, w.folders, NewTabs);
-                            } else {
-                                chrome.runtime.sendMessage({command: "remote_update", groups: w.groups, folders: w.folders, tabs: NewTabs, windowId: w.id});
-                            }
-                            setTimeout(function() {
-                                Manager_ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_all_done"), hideTimeout: 2000});
-                            }, 3000);
-                        }, 6000);
-                    });
-                });
-            }
-        });
-    });
-}
-
 function Manager_StartAutoSaveSession() {
     if (opt.autosave_interval > 0 && opt.autosave_max_to_keep > 0) {
         tt.AutoSaveSession = setInterval(function() {
@@ -671,57 +343,6 @@ function Manager_StartAutoSaveSession() {
             if (document.getElementById("manager_window").style.top != "-500px") chrome.storage.local.get(null, function(storage) {Manager_ReAddSessionAutomaticToManagerList(storage);});
         }, opt.autosave_interval * 60000);
     }
-}
-
-function Manager_RecreateTreeStructure(groups, folders, tabs) { // groups and folders are in object, just like tt.groups and tt.folders, but tabs are in array of treetabs objects
-    if (opt.debug) Utils_log("f: RecreateTreeStructure");
-    Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_quick_check_recreate_structure"), hideTimeout: 3000});
-    if (groups && Object.keys(groups).length > 0) {
-        for (var group in groups) {
-            tt.groups[groups[group].id] = Object.assign({}, groups[group]);
-        }
-        Groups_AppendGroups(tt.groups);
-    }
-    if (folders && Object.keys(folders).length > 0) {
-        for (var folder in folders) {
-            tt.folders[folders[folder].id] = Object.assign({}, folders[folder]);
-        }
-        Folders_PreAppendFolders(tt.folders);
-        Folders_AppendFolders(tt.folders);
-    }
-    let ttTabs = {};
-    tabs.forEach(function(Tab) {
-        if (Tab.parent == "pin_list") chrome.tabs.update(Tab.id, {pinned: true});
-        if (Tab.parent != "") {
-            let AttemptNr = 20;
-            var Attempt = setInterval(function() {
-                AttemptNr--;
-                let tb = document.getElementById(Tab.id);
-                let tbp = document.getElementById("°" + Tab.parent);
-                if (tb != null && tbp != null) {
-                    tbp.appendChild(tb);
-                    if (Tab.expand != "") tb.classList.add(Tab.expand);
-                    ttTabs[Tab.id] = {index: Tab.index, parent: Tab.parent, expand: Tab.expand};
-                }
-                if (AttemptNr < 0 || (tb != null && tbp != null)) clearInterval(Attempt);
-            }, 500);
-        }
-    });
-    let SortAttemptNr = 20;
-    var SortAttempt = setInterval(function() {
-        SortAttemptNr--;
-        if (SortAttemptNr < 0 || Object.keys(ttTabs).length == tabs.length || tabs.length == 0) {
-            Tabs_RearrangeTree(ttTabs, folders, true);
-            clearInterval(SortAttempt);
-            Groups_UpdateBgGroupsOrder();
-            setTimeout(function() {
-                DOM_RefreshExpandStates();
-                DOM_RefreshCounters();
-                tt.schedule_update_data++;
-                Folders_SaveFolders();
-            }, 3000);
-       }
-    }, 500);
 }
 
 function Manager_ShowStatusBar(p) { // show, spinner, message
@@ -749,3 +370,445 @@ function Manager_ShowStatusBar(p) { // show, spinner, message
         }, p.hideTimeout);
     }
 }
+
+function Manager_ImportMergeTabs(LoadedWindows) {
+    if (opt.debug) Utils_log("f: Manager_ImportMergeTabs");
+    Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_loaded_tree_structure")});
+    chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(CurrentWindows) {
+        let TotalTabsCount = 0;
+        let tabsMade = 0;
+        let New = {};
+        for (let CurrentWindow of CurrentWindows) { // Current Windows
+            for (let LoadedWindow of LoadedWindows) { // Loaded Windows
+                if (New[LoadedWindow.id] == undefined) { // No window added yet
+                    let tabsMatch = 0;
+                    let LoadedTabs = {};
+                    for (let CurrentTab of CurrentWindow.tabs) { // Current Window.tabs
+                        for (let LoadedTab of LoadedWindow.tabs) { // Loaded Window.tabs
+                            if (LoadedTabs[LoadedTab.id] == undefined && CurrentTab.url == LoadedTab.url) {
+                                LoadedTabs[LoadedTab.id] = Object.assign({}, LoadedTab);
+                                LoadedTabs[LoadedTab.id].oldId = LoadedTabs[LoadedTab.id].id; // store previous id for parents
+                                LoadedTabs[LoadedTab.id].id = CurrentTab.id; // replace to a new id
+                                tabsMatch++;
+                            }
+                        }
+                    }
+                    if (tabsMatch > CurrentWindow.tabs.length * 0.6) { // matched more than half of tabs
+                        for (let CurrentTab of CurrentWindow.tabs) { // Current Window.tabs
+                            for (let LoadedTab of LoadedWindow.tabs) { // Loaded Window.tabs
+                                if (LoadedTabs[LoadedTab.id] == undefined) { // add rest of missing tabs without new id as oldId, so they can be recognized as missing
+                                    LoadedTabs[LoadedTab.id] = Object.assign({}, LoadedTab);
+                                }
+                            }
+                        }
+                        New[LoadedWindow.id] = Object.assign({}, LoadedWindow);
+                        New[LoadedWindow.id].oldId = New[LoadedWindow.id].id;
+                        New[LoadedWindow.id].id = CurrentWindow.id;
+                        New[LoadedWindow.id].tabs = Object.assign({}, LoadedTabs);
+                    }
+                }
+            }
+        }
+        for (let LoadedWindow of LoadedWindows) { // CONVERT ARRAY TABS TO OBJECTS, FOR MISSING WINDOWS
+            TotalTabsCount += LoadedWindow.tabs.length;
+            if (New[LoadedWindow.id] == undefined) {
+                New[LoadedWindow.id] = Object.assign({}, LoadedWindow);
+                let NewTabs = {};
+                for (let Tab of LoadedWindow.tabs) {
+                    NewTabs[Tab.id] = Object.assign({}, Tab);
+                }
+                New[LoadedWindow.id].tabs = Object.assign({}, NewTabs);
+            }
+        }
+        for (let windowId in New) { // Loaded Windows
+            if (New[windowId].oldId == undefined) { // missing window, lets make one
+                let FirstTabId = Object.keys(New[windowId].tabs)[0];
+                let tabsMade = 0;
+                let window_params;
+                if (browserId == "F") {
+                    if ((New[windowId].tabs[FirstTabId].url).startsWith("about")) {
+                       window_params = {};
+                    } else {
+                        window_params = {url: New[windowId].tabs[FirstTabId].url};
+                    }
+                } else {
+                    window_params = {url: New[windowId].tabs[FirstTabId].url};
+                }
+                chrome.windows.create(window_params, function(new_window) {
+                    chrome.runtime.sendMessage({command: "save_groups", windowId: new_window.id, groups: New[windowId].groups});
+                    chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: New[windowId].folders});
+                    
+                    New[windowId].oldId = New[windowId].id;
+                    New[windowId].id = new_window.id;
+                    
+
+                    
+                    if (new_window.tabs[0]) {
+                        tabsMade++;
+                        New[windowId].tabs[FirstTabId].oldId = New[windowId].tabs[FirstTabId].id;
+                        New[windowId].tabs[FirstTabId].id = new_window.tabs[0].id;
+                        if (New[windowId].tabs[FirstTabId].parent == "pin_list") chrome.tabs.update(new_window.tabs[0].id, {pinned: true});
+                    }
+                    for (let Tab in New[windowId].tabs) {
+                        if (Tab != FirstTabId) { // skip first tab that was made with window
+                            let params;
+                            if (browserId == "F") {
+                                if ((New[windowId].tabs[Tab].url).startsWith("about")) {
+                                    params = {active: false, windowId: new_window.id};
+                                } else {
+                                    params = {active: false, windowId: new_window.id, url: New[windowId].tabs[Tab].url, discarded: true, title: New[windowId].tabs[Tab].title};
+                                }
+                            } else {
+                                params = {active: false, windowId: new_window.id, url: New[windowId].tabs[Tab].url};
+                            }
+                            chrome.tabs.create(params, function(new_tab) {
+                                tabsMade++;
+                                if (new_tab) {
+                                    New[windowId].tabs[Tab].oldId = New[windowId].tabs[Tab].id;
+                                    New[windowId].tabs[Tab].id = new_tab.id;
+                                    if (New[windowId].tabs[Tab].parent == "pin_list") chrome.tabs.update(new_tab.id, {pinned: true});
+
+                                    if (browserId == "F" && New[windowId].tabs[Tab].favicon > 0) browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", New[windowId].favicons[New[windowId].tabs[Tab].favicon]);
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                chrome.runtime.sendMessage({command: "get_folders", windowId: New[windowId].id}, function(f) {
+                    chrome.runtime.sendMessage({command: "get_groups", windowId: New[windowId].id}, function(g) {
+                        if (Object.keys(g).length > 0) {
+                            for (var group in g) {
+                                if (group != "" && group != "undefined" && New[windowId].groups[g[group].id] == undefined) New[windowId].groups[g[group].id] = Object.assign({}, g[group]);
+                            }
+                        }
+                        if (Object.keys(f).length > 0) {
+                            for (var folder in f) {
+                                if (folder != "" && folder != "undefined" && New[windowId].folders[f[folder].id] == undefined) New[windowId].folders[f[folder].id] = Object.assign({}, f[folder]);
+                            }
+                        }
+                        chrome.runtime.sendMessage({command: "save_groups", windowId: New[windowId].id, groups: New[windowId].groups});
+                        chrome.runtime.sendMessage({command: "save_folders", windowId: New[windowId].id, folders: New[windowId].folders});
+                        chrome.runtime.sendMessage({command: "remote_update", groups: New[windowId].groups, folders: New[windowId].folders, tabs: {}, windowId: New[windowId].id});
+                        for (let Tab in New[windowId].tabs) {
+                            if (New[windowId].tabs[Tab].oldId == undefined) {
+                                let params;
+                                if (browserId == "F") {
+                                    if ((New[windowId].tabs[Tab].url).startsWith("about")) {
+                                        params = {active: false, windowId: New[windowId].id};
+                                    } else {
+                                        params = {active: false, windowId: New[windowId].id, url: New[windowId].tabs[Tab].url, discarded: true, title: New[windowId].tabs[Tab].title};
+                                    }
+                                } else {
+                                    params = {active: false, windowId: New[windowId].id, url: New[windowId].tabs[Tab].url};
+                                }
+                                chrome.tabs.create(params, function(new_tab) {
+                                    tabsMade++;
+                                    if (new_tab) {
+                                        New[windowId].tabs[Tab].oldId = New[windowId].tabs[Tab].id;
+                                        New[windowId].tabs[Tab].id = new_tab.id;
+                                        if (New[windowId].tabs[Tab].parent == "pin_list") chrome.tabs.update(new_tab.id, {pinned: true});
+
+                                        if (browserId == "F" && New[windowId].tabs[Tab].favicon > 0) browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", New[windowId].favicons[New[windowId].tabs[Tab].favicon]);
+                                    }
+                                });
+                            } else {
+                                tabsMade++;
+                            }
+                        }
+                    });
+                });
+            }
+        }
+        let STOP = 0;
+        let WaitForFinish = setInterval(function() {
+            if (STOP > 10) clearInterval(WaitForFinish); STOP++;
+            if (tabsMade == TotalTabsCount) {
+                setTimeout(function() {
+                    for (let windowId in New) {
+                        for (let Tab in New[windowId].tabs) {
+                            if (New[windowId].tabs[New[windowId].tabs[Tab].parent]) {
+                                New[windowId].tabs[Tab].parent = New[windowId].tabs[New[windowId].tabs[Tab].parent].id;
+                            }
+                        }
+                        for (let Tab in New[windowId].tabs) {
+                            chrome.runtime.sendMessage({command: "update_tab", tabId: New[windowId].tabs[Tab].id, tab: {index: New[windowId].tabs[Tab].index, expand: New[windowId].tabs[Tab].expand, parent: New[windowId].tabs[Tab].parent}});
+                            if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: New[windowId].tabs[Tab].id});
+                        }
+                       if (New[windowId].id == tt.CurrentWindowId) {
+                            Manager_RecreateTreeStructure(New[windowId].groups, New[windowId].folders, New[windowId].tabs);
+                        } else {
+                            chrome.runtime.sendMessage({command: "remote_update", groups: New[windowId].groups, folders: New[windowId].folders, tabs: New[windowId].tabs, windowId: New[windowId].id});
+                        }
+                    }
+                }, 3000);
+                STOP = 11;
+            }
+        }, 3000);
+    });
+}
+
+function Manager_RecreateSession(LoadedWindows) {
+    if (opt.debug) Utils_log("f: Manager_RecreateSession");
+    for (let LoadedWindow of LoadedWindows) {
+        let NewTabs = {};
+        let window_params;
+        if (browserId == "F") {
+            if ((LoadedWindow.tabs[0].url).startsWith("about")) {
+               window_params = {};
+            } else {
+                window_params = {url: LoadedWindow.tabs[0].url};
+            }
+        } else {
+            window_params = {url: LoadedWindow.tabs[0].url};
+        }
+        chrome.windows.create(window_params, function(new_window) {
+            chrome.runtime.sendMessage({command: "save_groups", windowId: new_window.id, groups: LoadedWindow.groups});
+            chrome.runtime.sendMessage({command: "save_folders", windowId: new_window.id, folders: LoadedWindow.folders});
+            NewTabs[LoadedWindow.tabs[0].id] = {id: LoadedWindow.tabs[0].id, newId: new_window.tabs[0].id, expand: LoadedWindow.tabs[0].expand, favicon: LoadedWindow.tabs[0].favicon, index: LoadedWindow.tabs[0].index, parent: LoadedWindow.tabs[0].parent, title: LoadedWindow.tabs[0].title};
+            if (browserId == "F" && LoadedWindow.tabs[0].favicon > 0) browser.sessions.setTabValue(new_window.tabs[0].id, "CachedFaviconUrl", LoadedWindow.favicons[LoadedWindow.tabs[0].favicon]);
+            for (let Tab of LoadedWindow.tabs) {
+                if (Tab.id != LoadedWindow.tabs[0].id) { // skip first tab
+                    let params;
+                    if (browserId == "F") {
+                        if ((Tab.url).startsWith("about")) {
+                            params = {active: false, windowId: tt.CurrentWindowId};
+                        } else {
+                            params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: true, title: Tab.title};
+                        }
+                    } else {
+                        params = {active: false, windowId: new_window.id, url: Tab.url};
+                    }
+                    chrome.tabs.create(params, function(new_tab) {
+                        NewTabs[Tab.id] = {id: Tab.id, newId: 0, favicon: Tab.favicon, index: Tab.index, parent: Tab.parent, title: Tab.title, expand: Tab.expand};
+                        if (new_tab) {
+                            NewTabs[Tab.id].newId = new_tab.id;
+                            if (browserId == "F" && Tab.favicon > 0) browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LoadedWindow.favicons[Tab.favicon]);
+                        }
+                    });
+                }
+            }
+            let STOP = 0;
+            let WaitForFinish = setInterval(function() {
+                if (STOP > 10) clearInterval(WaitForFinish); STOP++;
+                if (Object.keys(NewTabs).length == LoadedWindow.tabs.length) {
+                    for (let tabId in NewTabs) {
+                        if (NewTabs[NewTabs[tabId].parent] != undefined) NewTabs[tabId].parent = NewTabs[NewTabs[tabId].parent].newId;
+                        if (NewTabs[tabId].parent == "pin_list") chrome.tabs.update(parseInt(NewTabs[tabId].newId), {pinned: true});
+                        if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: parseInt(NewTabs[tabId].newId)});
+                    }
+                    for (let tabId in NewTabs) {
+                        chrome.runtime.sendMessage({command: "update_tab", tabId: parseInt(NewTabs[tabId].newId), tab: {index: NewTabs[tabId].index, expand: NewTabs[tabId].expand, parent: NewTabs[tabId].parent}});
+                    }
+                    chrome.runtime.sendMessage({command: "sidebar_started", windowId: new_window.id}, function(response) {
+                        if (response) {
+                            chrome.runtime.sendMessage({command: "remote_update", groups: LoadedWindow.groups, folders: LoadedWindow.folders, tabs: NewTabs, windowId: new_window.id});
+                            STOP = 11;
+                        }
+                    });
+                    STOP = 7;
+                }
+            }, 5000);
+        });
+    }
+}
+
+
+
+function Manager_RecreateGroup(LoadedGroup) {
+    if (opt.debug) Utils_log("f: Manager_RecreateGroup");
+    let NewGroupId = Groups_AddNewGroup(LoadedGroup.group.name, LoadedGroup.group.font);
+    let NewFolders = {};
+    let RefTabs = {};
+    let NewTabs = {};
+    let LastTabId = "NO_TAB_YET";
+    if (Object.keys(LoadedGroup.folders).length > 0) {
+        for (var folder in LoadedGroup.folders) {
+            let newId = Folders_AddNewFolder({ParentId: NewGroupId, Name: LoadedGroup.folders[folder].name, ExpandState: LoadedGroup.folders[folder].expand});
+            LoadedGroup.folders[folder].newId = newId;
+            NewFolders[newId] = {id: newId, parent: LoadedGroup.folders[folder].parent, index: LoadedGroup.folders[folder].index, name: LoadedGroup.folders[folder].name, expand: LoadedGroup.folders[folder].expand};
+        }
+        for (var new_folder in NewFolders) {
+            if ((NewFolders[new_folder].parent).startsWith("f_") && LoadedGroup.folders[NewFolders[new_folder].parent]) {
+                NewFolders[new_folder].parent = LoadedGroup.folders[NewFolders[new_folder].parent].newId;
+            } else {
+                if ((LoadedGroup.folders[folder].parent).startsWith("g_") || LoadedGroup.folders[folder].parent == "tab_list") {
+                    NewFolders[new_folder].parent = NewGroupId;
+                }
+            }
+        }
+    }
+    if (LoadedGroup.tabs.length > 0) {
+        for (let Tab of LoadedGroup.tabs) {
+            let params;
+            if (browserId == "F") {
+                if ((Tab.url).startsWith("about")) {
+                    params = {active: false, windowId: tt.CurrentWindowId};
+                } else {
+                    params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url, discarded: true, title: Tab.title};
+                }
+            } else {
+                params = {active: false, windowId: tt.CurrentWindowId, url: Tab.url};
+            }
+            chrome.tabs.create(params, function(new_tab) {
+                if (new_tab) {
+                    if (browserId == "F" && Tab.favicon > 0) browser.sessions.setTabValue(new_tab.id, "CachedFaviconUrl", LoadedGroup.favicons[Tab.favicon]);
+                    NewTabs[new_tab.id] = {id: new_tab.id, favicon: Tab.favicon, index: Tab.index, parent: Tab.parent, title: Tab.title, expand: Tab.expand};
+                    RefTabs[Tab.id] = new_tab.id;
+                    if (browserId != "O" && browserId != "F") chrome.runtime.sendMessage({command: "discard_tab", tabId: new_tab.id});
+                    LastTabId = new_tab.id;
+                } else {
+                    RefTabs[Tab.id] = "failed: "+Tab.id;
+                }
+            });
+        }
+    }
+    let STOP = 0;
+    let WaitForFinish = setInterval(function() {
+        if (STOP > 600) clearInterval(WaitForFinish); STOP++;// just stop after 10 minutes
+        if (document.getElementById("°" + NewGroupId) != null) {
+            if (Object.keys(LoadedGroup.folders).length > 0 && LoadedGroup.tabs.length == 0) {
+                Manager_RecreateTreeStructure({}, NewFolders, {});
+                STOP = 601;
+            }
+            if (LoadedGroup.tabs.length > 0 && Object.keys(RefTabs).length == LoadedGroup.tabs.length && document.getElementById(LastTabId) != null) {
+                for (let tabId in NewTabs) {
+                    if (RefTabs[NewTabs[tabId].parent] != undefined) {
+                        NewTabs[tabId].parent = RefTabs[NewTabs[tabId].parent];
+                    } else {
+                        if ((NewTabs[tabId].parent).startsWith("f_") && LoadedGroup.folders[NewTabs[tabId].parent]) {
+                            NewTabs[tabId].parent = LoadedGroup.folders[NewTabs[tabId].parent].newId;
+                        } else {
+                            if ((NewTabs[tabId].parent).startsWith("g_") || NewTabs[tabId].parent == "tab_list") {
+                                NewTabs[tabId].parent = NewGroupId;
+                            }
+                        }
+                    }
+                }
+                Manager_RecreateTreeStructure({}, NewFolders, NewTabs);
+                STOP = 601;
+            }
+        }
+    }, 1000);
+}
+
+function Manager_RecreateTreeStructure(groups, folders, tabs) { // groups, folders and tabs, just like tt.groups, tt.folders and tt.tabs
+    if (opt.debug) Utils_log("f: Manager_RecreateTreeStructure");
+    Manager_ShowStatusBar({show: true, spinner: true, message: chrome.i18n.getMessage("status_bar_quick_check_recreate_structure"), hideTimeout: 3000});
+    if (groups && Object.keys(groups).length > 0) {
+        for (var group in groups) {
+            tt.groups[groups[group].id] = {id: groups[group].id, index: groups[group].index, active_tab: groups[group].active_tab, prev_active_tab: groups[group].prev_active_tab, name: groups[group].name};
+        }
+        Groups_AppendGroups(tt.groups);
+        Groups_UpdateBgGroupsOrder();
+    }
+    if (folders && Object.keys(folders).length > 0) {
+        for (var folder in folders) {
+            tt.folders[folders[folder].id] = {id: folders[folder].id, parent: folders[folder].parent, index: folders[folder].index, name: folders[folder].name, expand: folders[folder].expand};
+        }
+        Folders_PreAppendFolders(tt.folders);
+        Folders_AppendFolders(tt.folders);
+    }
+    if (tabs && Object.keys(tabs).length > 0) {
+        for (let tab in tabs) {
+            if (tabs[tab].parent == "pin_list") {
+                chrome.tabs.update(tabs[tab].id, {pinned: true});
+            } else {
+                if (tabs[tab].parent != "") {
+                    let tb = document.getElementById(tabs[tab].id);
+                    let tbp = document.getElementById("°" + tabs[tab].parent);
+                    if (tb != null && tbp != null && tb != undefined && tbp != undefined) {
+                        tbp.appendChild(tb);
+                        if (tabs[tab].expand != "") tb.classList.add(tabs[tab].expand);
+                    }
+                    if (tb.classList.contains("pin")) chrome.tabs.update(tabs[tab].id, {pinned: false});
+                }
+            }
+        }
+    }
+    setTimeout(function() {
+        DOM_RefreshExpandStates();
+        DOM_RefreshCounters();
+        setTimeout(function() {
+            Tabs_RearrangeTree(tabs, folders, true);
+        }, 1000);
+        tt.schedule_update_data++;
+        Folders_SaveFolders();
+        DOM_RefreshGUI();
+    }, 3000);
+}
+
+
+
+function Manager_ExportGroup(groupId, filename, save_to_manager) {
+    if (opt.debug) Utils_log("f: Manager_ExportGroup");
+    let GroupToSave = {group: tt.groups[groupId], folders: {}, tabs: [], favicons: []};
+    let query = document.querySelectorAll("#" + groupId + " .folder");
+    for (let s of query) {
+        if (tt.folders[s.id]) GroupToSave.folders[s.id] = tt.folders[s.id];
+    }
+    let Tabs = document.querySelectorAll("#" + groupId + " .tab");
+    if (Tabs.length > 0) {
+        for (let s of Tabs) {
+            chrome.tabs.get(parseInt(s.id), async function(tab) { // must be async for await!
+                let favicon = (browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : tab.favIconUrl);
+                let favicon_index = GroupToSave.favicons.indexOf(favicon);
+                if (favicon_index == -1) {
+                    GroupToSave.favicons.push(favicon);
+                    favicon_index = GroupToSave.favicons.length;
+                }
+                (GroupToSave.tabs).push({id: tab.id, parent: s.parentNode.parentNode.id, index: Array.from(s.parentNode.children).indexOf(s), expand: (s.classList.contains("c") ? "c" : (s.classList.contains("o") ? "o" : "")), url: tab.url, title: tab.title, favicon: favicon_index});
+                if (GroupToSave.tabs.length == Tabs.length) {
+                    if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
+                    if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
+                    if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
+                }
+            });
+        }
+    } else {
+        if (filename) File_SaveFile(filename, "tt_group", GroupToSave);
+        if (save_to_manager) Manager_AddGroupToStorage(GroupToSave, true);
+        if (opt.debug) Utils_log("f: ExportGroup, filename: " + filename + ", groupId: " + groupId + ", save_to_manager: " + save_to_manager);
+    }
+}
+
+
+function Manager_ExportSession(name, save_to_file, save_to_manager, save_to_autosave_manager) {
+    if (opt.debug) Utils_log("f: Manager_ExportSession");
+    chrome.windows.getAll({windowTypes: ['normal'], populate: true}, function(AllWindows) {
+        chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(t) {
+            let tabs = Object.assign({}, t);
+            chrome.runtime.sendMessage({command: "get_windows"}, function(w) {
+                let windows = Object.assign({}, w);
+                let ExportWindows = [];
+                for (let window of AllWindows) {
+                    if (window.tabs.length > 0) {
+                        windows[window.id]["id"] = window.id;
+                        windows[window.id]["tabs"] = [];
+                        windows[window.id]["favicons"] = [];
+                        window.tabs.forEach(async function(tab) { // must be async for await!
+                            let favicon = (browserId == "F" ? await browser.sessions.getTabValue(tab.id, "CachedFaviconUrl") : tab.favIconUrl);
+                            let favicon_index = windows[window.id].favicons.indexOf(favicon);
+                            if (favicon_index == -1) {
+                                windows[window.id].favicons.push(favicon);
+                                favicon_index = windows[window.id].favicons.length;
+                            }
+                            windows[window.id]["tabs"].push({id: tab.id, url: tab.url, parent: tabs[tab.id].parent, index: tabs[tab.id].index, expand: tabs[tab.id].expand, title: tab.title, favicon: favicon_index});
+                            if (windows[window.id].tabs.length == window.tabs.length) {
+                                ExportWindows.push(windows[window.id]);
+                                if (ExportWindows.length == AllWindows.length) {
+                                    setTimeout(function() {
+                                        if (save_to_file) File_SaveFile(name, "tt_session", ExportWindows);
+                                        if (save_to_manager) Manager_AddSessionToStorage(ExportWindows, name, true);
+                                        if (save_to_autosave_manager) Manager_AddAutosaveSessionToStorage(ExportWindows, name);
+                                    }, 500);
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+}
+
