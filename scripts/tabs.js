@@ -470,9 +470,9 @@ async function Tabs_LoadFavicon(tabId, Img, TryUrls, TabHeaderNode, i) {
 
 async function Tabs_SaveTabs() {
     setInterval(function() {
-    if (opt.debug) Utils_log("f: Tabs_SaveTabs");
         if (tt.schedule_update_data > 1) tt.schedule_update_data = 1;
         if (tt.schedule_update_data > 0) {
+            if (opt.debug) Utils_log("f: Tabs_SaveTabs");
             let pins_data = [];
             let tabs_data = [];
             for (let tabId in tt.tabs) {

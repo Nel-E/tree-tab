@@ -182,6 +182,10 @@ function StartBackgroundListeners() {
             sendResponse(b.bg_running);
             return;
         }
+        if (message.command == "is_bg_safe_mode") {
+            sendResponse(b.safe_mode);
+            return;
+        }
         if (message.command == "reload") {
             window.location.reload();
             return;
@@ -307,6 +311,32 @@ function StartBackgroundListeners() {
                 }
             }
             b.schedule_save++;
+            return;
+        }
+        if (message.command == "all_tabs_exist") {
+            let yes = true;
+            for (let Win in message.windows) {
+                for (let Tab in message.windows[Win].tabs) {
+                    if (b.tabs[message.windows[Win].tabs[Tab].id] == undefined) {
+                        yes = false;
+                    }
+                }
+            }
+            sendResponse(yes);
+            return;
+        }
+        if (message.command == "does_tabs_match") {
+            let match = true;
+            for (let Win in message.windows) {
+                for (let Tab in message.windows[Win].tabs) {
+                    if (b.tabs[message.windows[Win].tabs[Tab].id] != undefined) {
+                        if (message.windows[Win].tabs[Tab].parent !== b.tabs[message.windows[Win].tabs[Tab].id].parent) {
+                            match = false;
+                        }
+                    }
+                }
+            }
+            sendResponse(match);
             return;
         }
         if (message.command == "discard_tab") {
@@ -546,14 +576,6 @@ function SafeModeCheck() {
                         });
                     }
                 });
-            }
-            if (browserId == "O") {
-                chrome.runtime.sendMessage({command: "reload_sidebar"});
-                window.location.reload();
-            }
-            if (browserId == "V") {
-                chrome.runtime.sendMessage({command: "reload_sidebar"});
-                window.location.reload();
             }
         }
     }, 2000);

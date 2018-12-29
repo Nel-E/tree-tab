@@ -174,7 +174,7 @@ function StartSidebarListeners() {
                 return;
             }
             if (message.command == "tab_removed") {
-                if (opt.debug) {Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);}
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 let mTab = document.getElementById(message.tabId);
                 if (mTab != null && tt.tabs[message.tabId]) {
                     let ctParent = mTab.childNodes[1];
@@ -214,17 +214,18 @@ function StartSidebarListeners() {
             if (message.command == "tab_updated") {
                 if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
                 if (tt.tabs[message.tabId]) {
-                    if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
+                    // if (message.changeInfo.favIconUrl != undefined || message.changeInfo.url != undefined) {
+                    if (message.changeInfo.favIconUrl != undefined || message.changeInfo.title != undefined) {
                         if (browserId == "F" && (message.changeInfo.favIconUrl == undefined || message.changeInfo.favIconUrl == "")) browser.sessions.setTabValue(message.tabId, "CachedFaviconUrl", "");
                         setTimeout(function() {
                             if (tt.tabs[message.tabId]) tt.tabs[message.tabId].GetFaviconAndTitle(true);
                         }, 100);
                     }
-                    if (message.changeInfo.title != undefined) {
-                        setTimeout(function() {
-                            if (tt.tabs[message.tabId]) tt.tabs[message.tabId].GetFaviconAndTitle(true);
-                        }, 1000);
-                    }
+                    // if (message.changeInfo.title != undefined) {
+                        // setTimeout(function() {
+                            // if (tt.tabs[message.tabId]) tt.tabs[message.tabId].GetFaviconAndTitle(true);
+                        // }, 1000);
+                    // }
                     if (message.changeInfo.audible != undefined || message.changeInfo.mutedInfo != undefined) tt.tabs[message.tabId].RefreshMediaIcon();
                     if (message.changeInfo.discarded != undefined) tt.tabs[message.tabId].RefreshDiscarded();
                     if (message.changeInfo.pinned != undefined) {
@@ -287,89 +288,90 @@ function Initialize() {
 				Toolbar_RestoreToolbarShelf();
 				Toolbar_RestoreToolbarSearchFilter();
 			}
-			
-			chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(bgtabs) {
-				chrome.runtime.sendMessage({command: "get_folders", windowId: tt.CurrentWindowId}, function(f) {
-					tt.folders = Object.assign({}, f);
-					chrome.runtime.sendMessage({command: "get_groups", windowId: tt.CurrentWindowId}, function(g) {
-						tt.groups = Object.assign({}, g);
-						// APPEND GROUPS
-						Groups_AppendGroups(tt.groups);
+            chrome.runtime.sendMessage({command: "is_bg_safe_mode"}, function(safe_mode) {
+                if (safe_mode) {
+                    SafeModeMessage();
+                }
+                chrome.runtime.sendMessage({command: "get_browser_tabs"}, function(bgtabs) {
+                    chrome.runtime.sendMessage({command: "get_folders", windowId: tt.CurrentWindowId}, function(f) {
+                        tt.folders = Object.assign({}, f);
+                        chrome.runtime.sendMessage({command: "get_groups", windowId: tt.CurrentWindowId}, function(g) {
+                            tt.groups = Object.assign({}, g);
+                            // APPEND GROUPS
+                            Groups_AppendGroups(tt.groups);
 
-						// APPEND FOLDERS TO TABLIST
-						Folders_PreAppendFolders(tt.folders);					
+                            // APPEND FOLDERS TO TABLIST
+                            Folders_PreAppendFolders(tt.folders);					
 
-						// APPEND TABS TO TABLIST
-						for (const tab of window.tabs) {
-							tt.tabs[tab.id] = new Tabs_ttTab({tab: tab, Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tab.id] && bgtabs[tab.id].expand != "") ? bgtabs[tab.id].expand : undefined)});
-						}
-						
-						// APPEND FOLDERS TO CORRECT PARENTS
-						Folders_AppendFolders(tt.folders);
-				
-						// APPEND TABS TO CORRECT PARENTS
-						if (opt.skip_load == false) {
-							for (const tab of window.tabs) {
-								if (bgtabs[tab.id] && !tab.pinned) {
-									let TabParent = document.getElementById("°"+bgtabs[tab.id].parent);
-									if (TabParent != null && document.querySelector("[id='"+tab.id+"'] #°"+bgtabs[tab.id].parent) == null) {
-										TabParent.appendChild(tt.tabs[tab.id].Node);
-									}
-								}
-							}
-						}
-                        
-						// SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
-						Groups_SetActiveTabInEachGroup();
-						Tabs_RearrangeTree(bgtabs, tt.folders, true);
-						
-						StartSidebarListeners();
-	
-						DOM_SetEvents();
-						Manager_SetManagerEvents();
-						Menu_HideMenus();
-						
-						if (opt.switch_with_scroll) {
-							DOM_BindTabsSwitchingToMouseWheel("pin_list");
-						}
-						if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
-							Tabs_RearrangeBrowserTabs();
-						}
-						
-						Theme_RestorePinListRowSettings();
-						Manager_StartAutoSaveSession();
-						
-						if (browserId == "O") {
-							DOM_AutoRefreshMediaIcons();
-						}
-						
-						setTimeout(function() {
-							DOM_RefreshExpandStates();
-							DOM_RefreshCounters();
-							Groups_SetActiveTabInEachGroup();
-						}, 1000);
-						
-						Manager_ShowStatusBar({show: true, spinner: false, message: "Ready.", hideTimeout: 2000});
-						
-						setTimeout(function() {
-							Tabs_SaveTabs();
-							delete DefaultToolbar;
-							delete DefaultTheme;
-							delete DefaultPreferences;
-							if (storage.emergency_reload != undefined) {
-								chrome.storage.local.remove("emergency_reload");
-							}
-						}, 5000);
-						
-						if (browserId != "F") {
-							if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
-							if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
-							if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
-						}
-					});
-				});
-			});
-		});
+                            // APPEND TABS TO TABLIST
+                            for (const tab of window.tabs) {
+                                tt.tabs[tab.id] = new Tabs_ttTab({tab: tab, Append: true, SkipSetActive: true, AdditionalClass: ((bgtabs[tab.id] && bgtabs[tab.id].expand != "") ? bgtabs[tab.id].expand : undefined)});
+                            }
+                            
+                            // APPEND FOLDERS TO CORRECT PARENTS
+                            Folders_AppendFolders(tt.folders);
+                    
+                            // APPEND TABS TO CORRECT PARENTS
+                            if (opt.skip_load == false) {
+                                for (const tab of window.tabs) {
+                                    if (bgtabs[tab.id] && !tab.pinned) {
+                                        let TabParent = document.getElementById("°"+bgtabs[tab.id].parent);
+                                        if (TabParent != null && document.querySelector("[id='"+tab.id+"'] #°"+bgtabs[tab.id].parent) == null) {
+                                            TabParent.appendChild(tt.tabs[tab.id].Node);
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // SET ACTIVE TAB FOR EACH GROUP, REARRENGE EVERYTHING AND START BROWSER LISTENERS
+                            Groups_SetActiveTabInEachGroup();
+                            Tabs_RearrangeTree(bgtabs, tt.folders, true);
+                            
+                            StartSidebarListeners();
+        
+                            DOM_SetEvents();
+                            Manager_SetManagerEvents();
+                            Menu_HideMenus();
+                            
+                            if (opt.switch_with_scroll) {
+                                DOM_BindTabsSwitchingToMouseWheel("pin_list");
+                            }
+                            if (opt.syncro_tabbar_tabs_order || opt.syncro_tabbar_groups_tabs_order) {
+                                Tabs_RearrangeBrowserTabs();
+                            }
+                            
+                            Theme_RestorePinListRowSettings();
+                            Manager_StartAutoSaveSession();
+                            
+                            if (browserId == "O") {
+                                DOM_AutoRefreshMediaIcons();
+                            }
+                            
+                            setTimeout(function() {
+                                DOM_RefreshExpandStates();
+                                DOM_RefreshCounters();
+                                Groups_SetActiveTabInEachGroup();
+                            }, 1000);
+                            
+                            Manager_ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_ready"), hideTimeout: 2000});
+                            
+                            setTimeout(function() {
+                                Tabs_SaveTabs();
+                                delete DefaultToolbar;
+                                delete DefaultTheme;
+                                delete DefaultPreferences;
+                            }, 5000);
+                            
+                            if (browserId != "F") {
+                                if (storage.windows_BAK1 && Object.keys(storage["windows_BAK1"]).length > 0 && document.getElementById("button_load_bak1") != null) { document.getElementById("button_load_bak1").classList.remove("disabled"); }
+                                if (storage.windows_BAK2 && Object.keys(storage["windows_BAK2"]).length > 0 && document.getElementById("button_load_bak2") != null) { document.getElementById("button_load_bak2").classList.remove("disabled"); }
+                                if (storage.windows_BAK3 && Object.keys(storage["windows_BAK3"]).length > 0 && document.getElementById("button_load_bak3") != null) { document.getElementById("button_load_bak3").classList.remove("disabled"); }
+                            }
+                        });
+                    });
+                });
+            });
+        });
 	});
 }
 
@@ -384,6 +386,22 @@ function Run() {
 			},100);
 		}
 	});
+}
+
+function SafeModeMessage() {
+    let StatusBar = document.getElementById("status_bar");
+    if (StatusBar) {
+        StatusBar.onclick = function(event) {
+            if (event.which == 1) {
+                chrome.runtime.sendMessage({command: "reload"});
+                chrome.runtime.sendMessage({command: "reload_sidebar"});
+                location.reload();
+            }
+        }
+        setInterval(function() {
+            Manager_ShowStatusBar({show: true, spinner: false, message: chrome.i18n.getMessage("status_bar_running_in_safe_mode")});
+        }, 30);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", Run(), false);

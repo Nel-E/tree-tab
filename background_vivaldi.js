@@ -1,113 +1,9 @@
 // VIVALDI
-function VivaldiLegacyAddWindowData(win) {
-    b.windows[win.id] = { activeTabId: 0, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: { tab_list: { id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: labels.ungrouped_group, font: "" } }, folders: {} };
-}
-function VivaldiLegacyHashURL(tab) {
-    if (b.tabs[tab.id] == undefined) { b.tabs[tab.id] = { hash: 0, parent: tab.pinned ? "pin_list" : (b.windows[tab.windowId] ? b.windows[tab.windowId].active_group : "tab_list"), index: (Object.keys(b.tabs).length + 1), expand: "n" }; }
-    let hash = 0;
-    for (let charIndex = 0; charIndex < tab.url.length; charIndex++) {
-        hash += tab.url.charCodeAt(charIndex);
-    }
-    b.tabs[tab.id].hash = hash;
-}
-
 function VivaldiStart() {
     chrome.windows.getAll({ windowTypes: ['normal'], populate: true }, function(w) {
         chrome.storage.local.get(null, function(storage) {
             // LOAD PREFERENCES
             Preferences_GetCurrentPreferences(storage);
-            
-            // LEGACY START TO CONVERT DATA
-            if ((storage.data_version == undefined && storage.tabs != undefined && storage.tabs.length) || (storage.data_version != undefined && storage.data_version < 2)) {
-                b.safe_mode = true;
-                let refTabs = {};
-                let refWins = {};
-                let tabs_matched = 0;
-                let LoadedWindows = storage.windows ? storage.windows : [];
-                let LoadedTabs = storage.tabs ? storage.tabs : [];
-                let CurrentTabsCount = 0;
-                for (let win of w) {
-                    CurrentTabsCount += win.tabs.length;
-                }
-                for (let win of w) {
-                    let url1 = win.tabs[0].url;
-                    let url2 = win.tabs[win.tabs.length - 1].url;
-                    VivaldiLegacyAddWindowData(win);
-                    if (opt.skip_load == false) {
-                        for (let loadedWin of LoadedWindows) {
-                            if ((loadedWin.url1 == url1 || loadedWin.url2 == url2) && refWins[loadedWin.id] == undefined) {
-                                refWins[loadedWin.id] = win.id;
-                                if (loadedWin.group_bar) b.windows[win.id].group_bar = loadedWin.group_bar;
-                                if (loadedWin.search_filter) b.windows[win.id].search_filter = loadedWin.search_filter;
-                                if (loadedWin.active_shelf) b.windows[win.id].active_shelf = loadedWin.active_shelf;
-                                if (loadedWin.active_group) b.windows[win.id].active_group = loadedWin.active_group;
-                                if (Object.keys(loadedWin.groups).length > 0) b.windows[win.id].groups = Object.assign({}, loadedWin.groups);
-                                if (Object.keys(loadedWin.folders).length > 0) b.windows[win.id].folders = Object.assign({}, loadedWin.folders);
-                                break;
-                            }
-                        }
-                    }
-                }
-                for (let win of w) {
-                    for (let tab of win.tabs) {
-                        VivaldiLegacyHashURL(tab);
-                        if (tab.active) b.windows[win.id].activeTabId = tab.id;
-                    }
-                }
-                if (opt.skip_load == false && LoadedTabs.length > 0) {
-                    for (let win of w) {
-                        for (tab of win.tabs) {
-                            for (let loadedTab of LoadedTabs) {
-                                if (loadedTab.hash == b.tabs[tab.id].hash && refTabs[loadedTab.id] == undefined) {
-                                    refTabs[loadedTab.id] = tab.id;
-                                    if (loadedTab.parent) b.tabs[tab.id].parent = loadedTab.parent;
-                                    if (loadedTab.index) b.tabs[tab.id].index = loadedTab.index;
-                                    if (loadedTab.expand) b.tabs[tab.id].expand = loadedTab.expand;
-                                    tabs_matched++;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    for (let tabId in b.tabs) {
-                        if (refTabs[b.tabs[tabId].parent] != undefined) b.tabs[tabId].parent = refTabs[b.tabs[tabId].parent];
-                    }
-                    for (let windowId in b.windows) {
-                        for (let group in b.windows[windowId].groups) {
-                            if (refTabs[b.windows[windowId].groups[group].active_tab]) b.windows[windowId].groups[group].active_tab = refTabs[b.windows[windowId].groups[group].active_tab];
-                            if (refTabs[b.windows[windowId].groups[group].prev_active_tab]) b.windows[windowId].groups[group].prev_active_tab = refTabs[b.windows[windowId].groups[group].prev_active_tab];
-                        }
-                    }
-                }
-                for (let win of w) {
-                    if (b.windows[win.id]) b.windows[win.id].ttid = JSON.parse(win.extData).ext_id;
-                    for (let tab of win.tabs) {
-                        if (b.tabs[tab.id]) b.tabs[tab.id].ttid = JSON.parse(tab.extData).ext_id;
-                    }
-                }
-                let Windows = {};
-                let Tabs = {};
-                for (let win of w) {
-                    if (b.windows[win.id] != undefined && b.windows[win.id].ttid != undefined && b.windows[win.id].group_bar != undefined && b.windows[win.id].search_filter != undefined && b.windows[win.id].active_shelf != undefined && b.windows[win.id].active_group != undefined && b.windows[win.id].groups != undefined && b.windows[win.id].folders != undefined) {
-                        Windows[b.windows[win.id].ttid] = { ttid: b.windows[win.id].ttid, group_bar: b.windows[win.id].group_bar, search_filter: b.windows[win.id].search_filter, active_shelf: b.windows[win.id].active_shelf, active_group: b.windows[win.id].active_group, groups: b.windows[win.id].groups, folders: b.windows[win.id].folders };
-                        for (let groupId in b.windows[win.id].groups) {
-                            if (b.tabs[b.windows[win.id].groups[groupId].active_tab]) Windows[b.windows[win.id].ttid].groups[groupId].active_tab = b.tabs[b.windows[win.id].groups[groupId].active_tab].ttid;
-                            if (b.tabs[b.windows[win.id].groups[groupId].prev_active_tab]) Windows[b.windows[win.id].ttid].groups[groupId].prev_active_tab = b.tabs[b.windows[win.id].groups[groupId].prev_active_tab].ttid;
-                        }
-                    }
-                    for (let tab of win.tabs) {
-                        if (b.tabs[tab.id] != undefined && b.tabs[tab.id].ttid != undefined && b.tabs[tab.id].parent != undefined && b.tabs[tab.id].index != undefined && b.tabs[tab.id].expand != undefined) {
-                            Tabs[b.tabs[tab.id].ttid] = { ttid: b.tabs[tab.id].ttid, parent: (b.tabs[b.tabs[tab.id].parent] ? b.tabs[b.tabs[tab.id].parent].ttid : b.tabs[tab.id].parent), index: b.tabs[tab.id].index, expand: b.tabs[tab.id].expand };
-                        }
-                    }
-                }
-                chrome.storage.local.set({ data_version: 2, windows: Windows, tabs: Tabs });
-                chrome.storage.local.remove("t_count");
-                chrome.storage.local.remove("w_count");
-                chrome.runtime.sendMessage({command: "reload_sidebar"});
-                window.location.reload();
-            }
-            
             if (storage.data_version == undefined || storage.data_version == 2) {
                 // load tabs and windows from storage
                 let refTabs = {};
@@ -251,8 +147,18 @@ async function VivaldiAutoSaveData(BAK, LoopTimer) {
 
 
 function VivaldiAddWindowData(win) {
-    let extData =  JSON.parse(win.extData);
-    if (b.windows[win.id] == undefined) b.windows[win.id] = { ttid: (win.extData.match("ext_id") != null ? JSON.parse(win.extData).ext_id : win.index), activeTabId: 0, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: { tab_list: { id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: labels.ungrouped_group, font: "" } }, folders: {} };
+    let extData = win.extData.match("ext_id") != null ? JSON.parse(win.extData).ext_id : win.index;
+    if (b.windows[win.id] == undefined) b.windows[win.id] = { ttid: extData, activeTabId: 0, group_bar: opt.groups_toolbar_default, search_filter: "url", active_shelf: "", active_group: "tab_list", groups: { tab_list: { id: "tab_list", index: 0, active_tab: 0, prev_active_tab: 0, name: labels.ungrouped_group, font: "" } }, folders: {} };
+    if (extData == win.index) {
+        let retry = setInterval(function() {
+            chrome.windows.get(win.id, {populate: false}, function(retry_win) {
+                if (retry_win.extData.match("ext_id") != null) {
+                    b.windows[retry_win.id].ttid = JSON.parse(retry_win.extData).ext_id;
+                    clearInterval(retry);
+                }
+            });
+        }, 2000);
+    }
     return b.windows[win.id].ttid;
 }
 
