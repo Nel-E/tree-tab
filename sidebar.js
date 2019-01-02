@@ -132,21 +132,24 @@ function StartSidebarListeners() {
                 return;
             }
             if (message.command == "tab_created") {
-                if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group + " .tab").length == 0) {
-                    message.InsertAfterId = undefined;
-                    message.ParentId = tt.active_group;
+                if (opt.debug) Utils_log("chrome event: " + message.command + ", tabId: " + message.tabId);
+                if (tt.tabs[message.tabId] == undefined) {
+                    if (message.InsertAfterId && document.querySelectorAll("#" + tt.active_group + " .tab").length == 0) {
+                        message.InsertAfterId = undefined;
+                        message.ParentId = tt.active_group;
+                    }
+                    tt.tabs[message.tabId] = new Tabs_ttTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
+                    DOM_RefreshExpandStates();
+                    setTimeout(function() {
+                        DOM_RefreshCounters();
+                        DOM_RefreshGUI();
+                    }, 50);
+                    if (opt.syncro_tabbar_tabs_order) {
+                        let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s) {return parseInt(s.id);});
+                        chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
+                    }
+                    setTimeout(function() {tt.schedule_update_data++;}, 2000);
                 }
-                tt.tabs[message.tabId] = new Tabs_ttTab({tab: message.tab, ParentId: message.ParentId, InsertAfterId: message.InsertAfterId, Append: message.Append, Scroll: true});
-                DOM_RefreshExpandStates();
-                setTimeout(function() {
-                    DOM_RefreshCounters();
-                    DOM_RefreshGUI();
-                }, 50);
-                if (opt.syncro_tabbar_tabs_order) {
-                    let tabIds = Array.prototype.map.call(document.querySelectorAll(".pin, .tab"), function(s) {return parseInt(s.id);});
-                    chrome.tabs.move(message.tab.id, {index: tabIds.indexOf(message.tab.id)});
-                }
-                setTimeout(function() {tt.schedule_update_data++;}, 2000);
                 return;
             }
             if (message.command == "tab_attached") {
@@ -316,7 +319,7 @@ function Initialize() {
                                 for (const tab of window.tabs) {
                                     if (bgtabs[tab.id] && !tab.pinned) {
                                         let TabParent = document.getElementById("°"+bgtabs[tab.id].parent);
-                                        if (TabParent != null && document.querySelector("[id='"+tab.id+"'] #°"+bgtabs[tab.id].parent) == null) {
+                                        if (TabParent != null && document.querySelector("[id='"+tab.id+"'] #°"+bgtabs[tab.id].parent) == null && (TabParent.parentNode.classList.contains("tab") || TabParent.parentNode.classList.contains("folder") || TabParent.parentNode.classList.contains("group"))) {
                                             TabParent.appendChild(tt.tabs[tab.id].Node);
                                         }
                                     }

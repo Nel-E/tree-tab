@@ -223,8 +223,54 @@ function Toolbar_SetToolbarEvents(CleanPreviousBindings, BindButtons, BindToolba
             if (s.id == "button_new") { // NEW TAB
                 s.onclick = function(event) {
                     if (event.which == 1) {
-                        if (opt.append_tab_from_toolbar == "group_root") Tabs_OpenNewTab(false, undefined, document.getElementById("°"+tt.active_group));
-                        if (opt.append_tab_from_toolbar == "as_regular_orphan") Tabs_OpenNewTab(false, undefined, undefined);
+                        if (opt.append_tab_from_toolbar === "as_regular_orphan") {
+                            if (opt.append_orphan_tab === "top" || opt.append_orphan_tab === "bottom") Tabs_OpenNewTab(false, undefined, tt.active_group, (opt.append_orphan_tab === "bottom" ? true : false));
+                            if (opt.append_orphan_tab === "after_active") {
+                                let activeTab = document.querySelector("#" + tt.active_group + " .active_tab");
+                                if (activeTab != null) {
+                                    Tabs_OpenNewTab(false, activeTab.id, undefined, undefined);
+                                } else {
+                                    activeTab = document.querySelector(".pin.active_tab");
+                                    if (activeTab != null) {
+                                        Tabs_OpenNewTab(true, activeTab.id, undefined, undefined);
+                                    } else {
+                                        Tabs_OpenNewTab(false, undefined, tt.active_group, true);
+                                    }
+                                }
+                            }     
+                            if (opt.append_orphan_tab === "active_parent_top" || opt.append_orphan_tab === "active_parent_bottom") {
+                                let activeTab = document.querySelector("#" + tt.active_group + " .active_tab") != null ? document.querySelector("#" + tt.active_group + " .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
+                                if (activeTab != null) {
+                                    Tabs_OpenNewTab(false, undefined, activeTab.parentNode.parentNode.id, (opt.append_orphan_tab === "active_parent_bottom" ? true : false));
+                                } else {
+                                    Tabs_OpenNewTab(false, undefined, tt.active_group, true);
+                                }
+                            }
+                        }
+                        if (opt.append_tab_from_toolbar === "as_regular_child" || (opt.append_tab_from_toolbar === "as_regular_orphan" && opt.append_orphan_tab === "as_child")) {
+                            if (opt.append_child_tab === "top" || opt.append_child_tab === "bottom") {
+                                let activeTab = document.querySelector("#" + tt.active_group + " .active_tab");
+                                if (activeTab != null) {
+                                    Tabs_OpenNewTab(false, undefined, activeTab.id, ((opt.append_child_tab === "bottom" || opt.append_child_tab === "after") ? true : false));
+                                } else {
+                                    activeTab = document.querySelector(".pin.active_tab");
+                                    if (activeTab != null) {
+                                        Tabs_OpenNewTab(true, activeTab.id, undefined, undefined);
+                                    } else {
+                                        Tabs_OpenNewTab(false, undefined, tt.active_group, true);
+                                    }
+                                }
+                            }
+                            if (opt.append_child_tab === "after") {
+                                let activeTab = document.querySelector("#" + tt.active_group + " .active_tab") != null ? document.querySelector("#" + tt.active_group + " .active_tab") : document.querySelector(".pin.active_tab") != null ? document.querySelector(".pin.active_tab") : null;
+                                if (activeTab != null) {
+                                    Tabs_OpenNewTab(false, activeTab.id, undefined, undefined);
+                                } else {
+                                    Tabs_OpenNewTab(false, undefined, tt.active_group, true);
+                                }
+                            }
+                        }
+                        if (opt.append_tab_from_toolbar === "group_root") Tabs_OpenNewTab(false, undefined, tt.active_group, true);
                     }
                 }
                 s.onmousedown = function(event) {

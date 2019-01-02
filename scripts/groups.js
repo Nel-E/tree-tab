@@ -121,7 +121,9 @@ function Groups_SaveGroups() {
 function Groups_AppendGroups(groups) {
     Groups_AppendGroupToList("tab_list", labels.ungrouped_group, "", true);
     for (var group in groups) {
-        Groups_AppendGroupToList(groups[group].id, groups[group].name, groups[group].font, true);
+        if (groups[group].id) {
+            Groups_AppendGroupToList(groups[group].id, groups[group].name, groups[group].font, true);
+        }
         if (document.querySelectorAll(".group").length == Object.keys(groups).length) {
             Groups_RearrangeGroupsButtons();
             setTimeout(function() {Groups_RearrangeGroupsLists();}, 50);
@@ -351,10 +353,8 @@ function Groups_GroupsToolbarToggle() {
 
 function Groups_ActionClickGroup(Node, bgOption) {
     if (bgOption == "new_tab") {
-        if (Node.id == "pin_list") Tabs_OpenNewTab(true, undefined, undefined);
-        if (Node.classList.contains("tab")) Tabs_OpenNewTab(false, Node);
-        if (Node.classList.contains("folder")) Tabs_OpenNewTab(false, undefined, Node.childNodes[1]);
-        if (Node.classList.contains("group")) Tabs_OpenNewTab(false, undefined, Node.childNodes[0]);
+        if (Node.id == "pin_list") Tabs_OpenNewTab(true, undefined, undefined, true);
+        if (Node.classList.contains("group")) Tabs_OpenNewTab(false, undefined, Node.id, true);
     }
     if (bgOption == "activate_previous_active") {
         chrome.tabs.update(parseInt(tt.groups[tt.active_group].prev_active_tab), {active: true});

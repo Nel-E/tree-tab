@@ -491,7 +491,6 @@ function OnMessageTabCreated(NewTab, activeTabId) {
 
 
                 if (opt.append_orphan_tab == "after_active" || opt.append_orphan_tab == "active_parent_top" || opt.append_orphan_tab == "active_parent_bottom") {
-
                     if (b.windows[NewTab.windowId] && b.windows[NewTab.windowId].activeTabId) {
                         if (b.tabs[activeTabId]) {
                             let ActiveTabSiblings = GetChildren(b.tabs, b.tabs[activeTabId].parent);

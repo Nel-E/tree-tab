@@ -9,22 +9,22 @@ class Menu_ttMenu {
         if (this.id == "menu_new_pin") { this.Menu.onmousedown = function(event) { if (event.which == 1) {
             if (tt.menuItemNode.classList.contains("pin")) {
                 console.log(tt.menuItemNode)
-                Tabs_OpenNewTab(true, tt.menuItemNode, undefined);
+                Tabs_OpenNewTab(true, tt.menuItemNode.id, undefined, undefined);
             } else {
-                Tabs_OpenNewTab(true, undefined, undefined);
+                Tabs_OpenNewTab(true, undefined, undefined, (opt.append_orphan_tab === "top" ? false : true));
             }
         }}}
         if (this.id == "menu_new_tab") { this.Menu.onmousedown = function(event) { if (event.which == 1) {
             if (tt.menuItemNode.classList.contains("folder")) {
-                Tabs_OpenNewTab(false, undefined, tt.menuItemNode.childNodes[1]);
+                Tabs_OpenNewTab(false, undefined, tt.menuItemNode.id, (opt.append_orphan_tab === "top" ? false : true));
             } else {
                 if (tt.menuItemNode.classList.contains("pin")) {
-                    Tabs_OpenNewTab(true, tt.menuItemNode, undefined);
+                    Tabs_OpenNewTab(true, tt.menuItemNode.id, undefined, undefined);
                 } else {
                     if (tt.menuItemNode.classList.contains("tab")) {
-                        Tabs_OpenNewTab(false, tt.menuItemNode, undefined);
+                        Tabs_OpenNewTab(false, tt.menuItemNode.id, undefined, undefined);
                     } else {
-                        Tabs_OpenNewTab(false, undefined, document.getElementById("°"+tt.active_group));
+                        Tabs_OpenNewTab(false, undefined, tt.active_group, (opt.append_orphan_tab === "top" ? false : true));
                     }
                 }
             }

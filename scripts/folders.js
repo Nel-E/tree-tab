@@ -269,7 +269,7 @@ function Folders_ActionClickFolder(FolderNode, bgOption) {
         let FolderId = Folders_AddNewFolder({ParentId: FolderNode.id});
         Folders_ShowRenameFolderDialog(FolderId);
     }
-    if (bgOption == "new_tab") Tabs_OpenNewTab(false, undefined, FolderNode.childNodes[1]);
+    if (bgOption == "new_tab") Tabs_OpenNewTab(false, undefined, FolderNode.id,  (opt.append_child_tab === "bottom" ? true : false));
     if (bgOption == "expand_collapse") DOM_EventExpandBox(FolderNode);
     if (bgOption == "close_folder") Folders_RemoveFolder(FolderNode.id);
     if (bgOption == "unload_folder") {

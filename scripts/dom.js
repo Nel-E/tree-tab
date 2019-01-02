@@ -386,8 +386,18 @@ function DOM_DropToTarget(p) { // Class: ("group", "tab", "folder"), DraggedTabN
     }, 500);
 }
 
-function DOM_AppendToNode(Node, AppendNode) {
-    if (Node != null && AppendNode != null) AppendNode.appendChild(Node);
+function DOM_PreppendToNode(Node, PreppendToNode) {
+    if (Node != null && PreppendToNode != null) {
+        if (PreppendToNode.childNodes.length > 0) {
+           PreppendToNode.parentNode.insertBefore(Node, PreppendToNode.childNodes[0]);
+        } else {
+            PreppendToNode.appendChild(Node);
+        }
+    }
+}
+
+function DOM_AppendToNode(Node, AppendToNode) {
+    if (Node != null && AppendToNode != null) AppendToNode.appendChild(Node);
 }
 
 function DOM_InsterBeforeNode(Node, BeforeNode) {

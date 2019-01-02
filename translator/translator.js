@@ -112,7 +112,8 @@ const english_base = {
     "options_midclick_tab":"",
     "options_dbclick_tab":"",
     "options_action_tab_none":"",
-    "options_action_tab_new":"",
+    "options_action_tab_new_sibling":"",
+    "options_action_tab_new_child":"",
     "options_action_tab_expand_collapse":"",
     "options_action_tab_close":"",
     "options_action_tab_reload":"",
@@ -186,6 +187,7 @@ const english_base = {
     "options_export_debug":"",
     "options_print_debug":"",
     "options_toolbar_look":"",
+    "options_toolbar_new_tab_as_regular_child":"",
     "hint_orphan_tab":"",
     "hint_ctrl_t":"",
     "hint_from_pin":"",
@@ -193,7 +195,6 @@ const english_base = {
     "hint_from_external_link":"",
     "hint_from_popup":"",
     "hint_explained_new_tab_settings":"",
-    "hint_explained_orphan_after_active_settings":"",
     "button_background":"",
     "button_hover_background":"",
     "button_on_background":"",
@@ -356,7 +357,7 @@ let translator = {
         let OriginalText = document.createElement("div");
         OriginalText.classList = "original";
         OriginalText.id = p.id;
-        OriginalText.innerHTML = textValue;
+        OriginalText.innerHTML = '"'+p.id+'" - '+textValue;
         body.appendChild(OriginalText);
         this.OriginalText = OriginalText;
         let TextBox = document.createElement("textarea");

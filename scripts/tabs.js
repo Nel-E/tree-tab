@@ -28,15 +28,15 @@ class Tabs_ttTab {
             }
             DIV_children.onmousedown = function(event) {
                 if (event.target == this) {
-                    if (event.which == 2 && event.target == this) {
+                   if (event.which == 2 && event.target == this && opt.midclick_tab !== "close_tab") {
                         event.stopImmediatePropagation();
-                        Groups_ActionClickGroup(this.parentNode, opt.midclick_group);
+                        Tabs_ActionClickTab(this.parentNode, opt.midclick_tab);
                     }
                     if (event.which == 3) Menu_ShowFGlobalMenu(event);
                 }
             }
             DIV_children.ondblclick = function(event) {
-                if (event.target == this) Groups_ActionClickGroup(this.parentNode, opt.dbclick_group);
+                if (event.target == this) Tabs_ActionClickTab(this.parentNode, opt.dbclick_tab);
             }
             DIV_expand.onmousedown = function(event) {
                 if (tt.DOMmenu.style.top != "-1000px") Menu_HideMenus();
@@ -74,17 +74,9 @@ class Tabs_ttTab {
                     if (tt.DOMmenu.style.top != "-1000px") {
                         Menu_HideMenus();
                     } else {
-                        
                         if (event.shiftKey || event.ctrlKey) {
                             DOM_Select(event, this.parentNode);
                         }
-                        
-                        // let tabId = parseInt(this.parentNode.id);
-                        // setTimeout(function() {
-                            // if (tt.Dragging == false && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("tab_header") && event.target.parentNode.classList.contains("selected") == false) {
-                                // chrome.tabs.update(tabId, {active: true});
-                            // }
-                        // }, 90);
                     }
                 }
                 if (event.which == 2) {
@@ -93,35 +85,14 @@ class Tabs_ttTab {
                 }
                 if (event.which == 3) Menu_ShowTabMenu(this.parentNode, event);
             }
-            
             DIV_header.onclick = function(event) {
                 if (!event.shiftKey && !event.ctrlKey) {
                     DOM_Deselect();
-                    
-                    // let tabId = parseInt(this.parentNode.id);
-                    
                     if (event.target.classList.contains("tab_header")) {
                         chrome.tabs.update(parseInt(this.parentNode.id), {active: true});
-                        // , function(tab) {
-                            // if (was_selected) tt.tab[tab.id].Node.classList.add("selected");
-                        // });
                     }
                 }
             }
-            
-            
-            
-            // DIV_header.onmouseup = function(event) {
-                // event.stopImmediatePropagation();
-                // if (tt.DOMmenu.style.top != "-1000px") {
-                    // Menu_HideMenus();
-                // } else {
-                    // if (event.which == 1 && !event.shiftKey && !event.ctrlKey && event.target.classList.contains("tab_header")) {
-                        // DOM_Deselect();
-                        // chrome.tabs.update(parseInt(this.parentNode.id), {active: true});
-                    // }
-                // }
-            // }
             DIV_header.onmouseover = function(event) {
                 this.classList.add("tab_header_hover");
                 if (opt.never_show_close == false && opt.always_show_close == false) this.classList.add("close_show");
@@ -263,7 +234,7 @@ class Tabs_ttTab {
             }
         }
         if (p.Append == true && parent) parent.appendChild(DIV_Tab);
-        if ((p.Append == false || p.Append == undefined) && parent) {parent.prepend(DIV_Tab);}
+        if ((p.Append == false || p.Append == undefined) && parent) parent.prepend(DIV_Tab);
         if (p.InsertAfterId) {
             let After = document.getElementById(p.InsertAfterId);
             if (After != null) {
@@ -675,43 +646,13 @@ function Tabs_CloseTabs(tabsIds) {
     }, 200);
 }
 
-function Tabs_OpenNewTab(pin, InsertAfterNode, AppendToNode) {
-    // if (pin) {
-        chrome.tabs.create({pinned: pin}, function(tab) {
-            // console.log(tt.tabs[tab.id])
-
-            let Retry = setInterval(function() {
-                if (tt.tabs[tab.id]) {
-                    if (InsertAfterNode) {
-                        DOM_InsterAfterNode(tt.tabs[tab.id].Node, InsertAfterNode);
-                    }
-                    if (AppendToNode) {
-                        DOM_AppendToNode(tt.tabs[tab.id].Node, AppendToNode);
-                    }
-                    tt.schedule_update_data++;
-                    clearInterval(Retry);
-                }
-            }, 10);
-            setTimeout(function() {
-                if (Retry) clearInterval(Retry);
-            }, 500);
-            if (!pin && opt.move_tabs_on_url_change == "from_empty") chrome.runtime.sendMessage({command: "remove_tab_from_empty_tabs", tabId: tab.id});
-
-
-            // if (InsertAfterNode && tt.tabs[tab.id]) {
-                // let parent = document.getElementById("#pin_list");
-                // if (parent != null && tt.tabs[tab.id]) parent.appendChild(tt.tabs[tab.id].Node);
-            // }
-        });
-    // } else {
-    //     chrome.tabs.create({}, function(tab) {
-    //         if (parentId) {
-    //             let parent = document.getElementById("#°"+parentId);
-    //             if (parent != null && tt.tabs[tab.id]) parent.appendChild(tt.tabs[tab.id].Node);
-    //             tt.schedule_update_data++;
-    //         }
-    //     });
-    // }
+function Tabs_OpenNewTab(pin, InsertAfterTabId, ParentId, Append) {
+    chrome.tabs.create({pinned: pin}, function(tab) {
+        tt.tabs[tab.id] = new Tabs_ttTab({tab: tab, ParentId: ParentId, InsertAfterId: InsertAfterTabId, Append: Append, Scroll: true});
+        if (!pin && opt.move_tabs_on_url_change == "from_empty") chrome.runtime.sendMessage({command: "remove_tab_from_empty_tabs", tabId: tab.id});
+        DOM_RefreshGUI();
+        tt.schedule_update_data++;
+    });
 }
 
 function Tabs_GetTabDepthInTree(Node) {
@@ -735,7 +676,14 @@ function Tabs_GetTabDepthInTree(Node) {
 }
 
 function Tabs_ActionClickTab(TabNode, bgOption) {
-    if (bgOption == "new_tab") Tabs_OpenNewTab(TabNode.classList.contains("pin"), TabNode);
+    if (bgOption == "new_tab") {
+        let pin = TabNode.classList.contains("pin");
+        Tabs_OpenNewTab(pin, TabNode.id, undefined, undefined);
+    }
+    if (bgOption == "new_child_tab") {
+        let pin = TabNode.classList.contains("pin");
+        Tabs_OpenNewTab(pin, (pin ? TabNode.id : undefined), (pin ? undefined : TabNode.id), ((opt.append_child_tab === "bottom" || opt.append_child_tab === "after") ? true : false));
+    }
     if (bgOption == "expand_collapse") DOM_EventExpandBox(TabNode);
     if (bgOption == "close_tab") {
         if ((TabNode.classList.contains("pin") && opt.allow_pin_close) || TabNode.classList.contains("tab")) Tabs_CloseTabs([parseInt(TabNode.id)]);
@@ -769,16 +717,6 @@ function Tabs_SetActiveTab(tabId, switchToGroup) {
             if (Tab.classList.contains("tab")) Groups_SetActiveTabInGroup(TabGroup[0].id, tabId);
             if (switchToGroup) Groups_SetActiveGroup(TabGroup[0].id, false, false); // not going to scroll, because mostly it's going to change to a new active in group AFTER switch, so we are not going to scroll to previous active tab
         }
-        // let selected = document.querySelectorAll(".selected");
-        // for (let s of selected) {
-            // s.classList.remove("selected");
-        // }
-        // let selected_not_in_group = document.querySelectorAll(".pin, #" + tt.active_group + " .tab");
-        // for (let s of selected_not_in_group) {
-            // DOM_SetClasses(s, [], ["active_tab", "selected", "selected_last", "selected_frozen", "selected_temporarly", "tab_header_hover"], []);
-        // }
-        
-        
         let active_tabs = document.querySelectorAll(".pin.active_tab, #" + tt.active_group + " .active_tab");
         for (let s of active_tabs) {
             DOM_SetClasses(s, [], ["active_tab"], []);
