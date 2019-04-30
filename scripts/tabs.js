@@ -366,7 +366,7 @@ class Tabs_ttTab {
                         if (tab.cookieStoreId != "firefox-default") { // Check if tab belongs to a container
                           try {
                             let container = await browser.contextualIdentities.get(tab.cookieStoreId);
-                            t.style["border-left"] = "3px solid " + container.colorCode;
+                            tHeader.style["border-left"] = "3px solid " + container.colorCode;
                           } catch(e) {
                             this.warnUser(e);
                           }
